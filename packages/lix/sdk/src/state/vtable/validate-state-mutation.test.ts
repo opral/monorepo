@@ -264,6 +264,70 @@ test("throws when primary key violates uniqueness constraint", async () => {
 	).toThrowError("Primary key constraint violation");
 });
 
+test("primary key validation ignores inherited entities", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "pk_local_only",
+		"x-lix-primary-key": ["/key"],
+		properties: {
+			key: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["key", "value"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const parentVersion = await createVersion({ lix, id: "parent-version" });
+	const childVersion = await createVersion({
+		lix,
+		id: "child-version",
+		inheritsFrom: { id: parentVersion.id },
+	});
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "entity-to-override",
+			schema_key: schema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			version_id: parentVersion.id,
+			snapshot_content: {
+				key: "entity-to-override",
+				value: "parent-value",
+			},
+			schema_version: schema["x-lix-version"],
+			untracked: false,
+		})
+		.execute();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: {
+				key: "entity-to-override",
+				value: "child-value",
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).not.toThrow();
+});
+
 test("immutable schemas reject repeated inserts", async () => {
 	const lix = await openLix({});
 
@@ -3854,7 +3918,6 @@ test("rejects mutating inherited_from_version_id", async () => {
 			operation: "update",
 			entity_id: "local-entity",
 			version_id: activeVersion.version_id,
-			// @ts-expect-error inherited_from_version_id is read-only; simulate attempted mutation
 			inherited_from_version_id: "global",
 		})
 	).toThrow(/inherited_from_version_id/i);

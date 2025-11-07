@@ -107,11 +107,13 @@ export function validateStateMutation(args: {
 	entity_id?: string;
 	version_id: string;
 	untracked?: boolean;
+	inherited_from_version_id?: string | null;
 }): void {
-	const attemptedInheritedOverride = (
-		args as { inherited_from_version_id?: unknown }
-	).inherited_from_version_id;
-	if (attemptedInheritedOverride !== undefined) {
+	const attemptedInheritedOverride = args.inherited_from_version_id;
+	if (
+		attemptedInheritedOverride !== undefined &&
+		attemptedInheritedOverride !== null
+	) {
 		throw new Error(
 			"`inherited_from_version_id` is read-only and cannot be mutated."
 		);
@@ -385,6 +387,10 @@ function validatePrimaryKeyConstraints(args: {
 
 	// Constrain by version – lix_internal_state_vtable exposes child version_id directly
 	query = query.where("version_id", "=", args.version_id);
+
+	// Ignore inherited entities so that primary key validation only considers
+	// rows that are local to the active version context.
+	query = query.where("inherited_from_version_id", "is", null);
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
 

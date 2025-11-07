@@ -1,6 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
+import { schemaKeyToCacheTableName } from "./create-schema-cache-table.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
@@ -385,6 +386,160 @@ test("handles inheritance chain deletions with tombstones", async () => {
 
 	// Subchild should show NO entity (inherits deletion from child)
 	expect(subchildStateAll).toHaveLength(0);
+});
+
+test("deleting a parent cache row removes inherited copies", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+
+	await ensureCacheSchemas(lix, ["lix_test"]);
+
+	const parentVersion = "parent-version";
+	const childVersion = "child-version";
+	const baseTimestamp = await getTimestamp({ lix });
+	const parentCommitId = "parent-commit";
+	const deleteCommitId = "delete-commit";
+	const testEntity = "parent-entity";
+
+	const parentChange: MaterializedState = {
+		id: "change-parent",
+		entity_id: testEntity,
+		schema_key: "lix_test",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "test_plugin",
+		snapshot_content: JSON.stringify({
+			id: testEntity,
+			value: "parent-data",
+		}),
+		created_at: baseTimestamp,
+		lixcol_version_id: parentVersion,
+		lixcol_commit_id: parentCommitId,
+	};
+
+	updateStateCache({
+		engine: lix.engine!,
+		changes: [parentChange],
+	});
+
+	const tableName = schemaKeyToCacheTableName("lix_test");
+
+	// Manually insert a cached inherited copy for the child version to mirror version copy logic.
+	lix.engine!.executeSync({
+		sql: `INSERT INTO ${tableName} (
+			entity_id,
+			schema_key,
+			file_id,
+			version_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at,
+			inherited_from_version_id,
+			is_tombstone,
+			change_id,
+			commit_id
+		) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, 0, ?, ?);`,
+		parameters: [
+			testEntity,
+			"lix_test",
+			"lix",
+			childVersion,
+			"test_plugin",
+			parentChange.snapshot_content,
+			"1.0",
+			baseTimestamp,
+			baseTimestamp,
+			parentVersion,
+			"child-inherit-change",
+			parentCommitId,
+		],
+	});
+
+	// Ensure parent row exists and child row points at parent.
+	const readCacheRows = () => {
+		const result = lix.engine!.executeSync({
+			sql: `SELECT entity_id, version_id, inherited_from_version_id, is_tombstone, change_id, commit_id, json(snapshot_content) AS snapshot_content
+				FROM ${tableName}
+				WHERE entity_id = ?
+				ORDER BY version_id`,
+			parameters: [testEntity],
+		}).rows as Array<{
+			entity_id: string;
+			version_id: string;
+			inherited_from_version_id: string | null;
+			is_tombstone: number;
+			change_id: string | null;
+			commit_id: string | null;
+			snapshot_content: string | null;
+		}>;
+
+		return result.map((row) => ({
+			...row,
+			snapshot_content: row.snapshot_content
+				? (JSON.parse(row.snapshot_content) as Record<string, unknown>)
+				: null,
+		}));
+	};
+
+	const initialRows = readCacheRows();
+	expect(initialRows).toHaveLength(2);
+	const parentRowBeforeDelete = initialRows.find(
+		(row) => row.version_id === parentVersion
+	);
+	const childRowBeforeDelete = initialRows.find(
+		(row) => row.version_id === childVersion
+	);
+
+	expect(parentRowBeforeDelete).toMatchObject({
+		inherited_from_version_id: null,
+		is_tombstone: 0,
+		snapshot_content: { id: testEntity, value: "parent-data" },
+	});
+	expect(childRowBeforeDelete).toMatchObject({
+		inherited_from_version_id: parentVersion,
+		is_tombstone: 0,
+		snapshot_content: { id: testEntity, value: "parent-data" },
+	});
+
+	// Delete the parent version entity via cache update.
+	const deleteChange: MaterializedState = {
+		id: "change-delete",
+		entity_id: testEntity,
+		schema_key: "lix_test",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "test_plugin",
+		snapshot_content: null,
+		created_at: baseTimestamp,
+		lixcol_version_id: parentVersion,
+		lixcol_commit_id: deleteCommitId,
+	};
+
+	updateStateCache({
+		engine: lix.engine!,
+		changes: [deleteChange],
+	});
+
+	const rowsAfterDelete = readCacheRows();
+
+	expect(rowsAfterDelete).toHaveLength(1);
+	const parentRowAfterDelete = rowsAfterDelete[0]!;
+	expect(parentRowAfterDelete).toMatchObject({
+		version_id: parentVersion,
+		inherited_from_version_id: null,
+		is_tombstone: 1,
+		snapshot_content: null,
+		change_id: "change-delete",
+		commit_id: deleteCommitId,
+	});
 });
 
 test("handles duplicate entity updates - last change wins", async () => {

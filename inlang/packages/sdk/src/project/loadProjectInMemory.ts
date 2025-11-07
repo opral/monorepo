@@ -1,4 +1,4 @@
-import { openLix, type LixKeyValue, type NewState } from "@lix-js/sdk";
+import { openLix, type LixKeyValue, type NewStateByVersion } from "@lix-js/sdk";
 import { loadProject } from "./loadProject.js";
 
 /**
@@ -7,7 +7,7 @@ import { loadProject } from "./loadProject.js";
 export async function loadProjectInMemory(
 	args: {
 		blob: Blob;
-		lixKeyValues?: NewState<LixKeyValue>[];
+		lixKeyValues?: NewStateByVersion<LixKeyValue>[];
 	} & Omit<Parameters<typeof loadProject>[0], "lix">
 ) {
 	const lix = await openLix({

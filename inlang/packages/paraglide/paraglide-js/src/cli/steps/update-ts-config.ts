@@ -21,18 +21,18 @@ export const maybeUpdateTsConfig: CliStep<
  * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
  */
 export const maybeUpdateTsConfigAllowJs: CliStep<
-        { fs: typeof import("node:fs/promises"); logger: Logger },
-        unknown
+	{ fs: typeof import("node:fs/promises"); logger: Logger },
+	unknown
 > = async (ctx) => {
-        if ((await pathExists("./tsconfig.json", ctx.fs)) === false) {
-                return ctx;
-        }
-        if (await hasAllowJsEnabled("./tsconfig.json", ctx.fs)) {
-                // all clear, allowJs is already set to true
-                return ctx;
-        }
+	if ((await pathExists("./tsconfig.json", ctx.fs)) === false) {
+		return ctx;
+	}
+	if (await hasAllowJsEnabled("./tsconfig.json", ctx.fs)) {
+		// all clear, allowJs is already set to true
+		return ctx;
+	}
 
-        ctx.logger.info(
+	ctx.logger.info(
 		`The option \`compilerOptions.allowJs\` needs to be set to \`true\` in the \`tsconfig.json\` file:
 
 \`{
@@ -41,10 +41,10 @@ export const maybeUpdateTsConfigAllowJs: CliStep<
   }
 }\``
 	);
-        let isValid = false;
-        while (isValid === false) {
-                const response = await prompt(
-                        `Is \`compilerOptions.allowJs\` set to \`true\`?`,
+	let isValid = false;
+	while (isValid === false) {
+		const response = await prompt(
+			`Is \`compilerOptions.allowJs\` set to \`true\`?`,
 			{
 				type: "confirm",
 				initial: true,
@@ -54,19 +54,19 @@ export const maybeUpdateTsConfigAllowJs: CliStep<
 			ctx.logger.warn(
 				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
 			);
-                        return ctx;
-                }
+			return ctx;
+		}
 
-                if (await hasAllowJsEnabled("./tsconfig.json", ctx.fs)) {
-                        isValid = true;
-                        return ctx;
-                } else {
-                        ctx.logger.error(
-                                "The compiler options has not been adjusted. Please sets `compilerOptions.allowJs` to `true`."
-                        );
-                }
-        }
-        return ctx;
+		if (await hasAllowJsEnabled("./tsconfig.json", ctx.fs)) {
+			isValid = true;
+			return ctx;
+		} else {
+			ctx.logger.error(
+				"The compiler options has not been adjusted. Please sets `compilerOptions.allowJs` to `true`."
+			);
+		}
+	}
+	return ctx;
 };
 
 /**
@@ -82,144 +82,144 @@ export const maybeUpdateTsConfigAllowJs: CliStep<
  * ```
  */
 export const hasAllowJsEnabled = async (
-        tsconfigPath: string,
-        fs: typeof import("node:fs/promises"),
-        visited: Set<string> = new Set()
+	tsconfigPath: string,
+	fs: typeof import("node:fs/promises"),
+	visited: Set<string> = new Set()
 ): Promise<boolean> => {
-        const normalizedPath = normalizeConfigPath(tsconfigPath);
+	const normalizedPath = normalizeConfigPath(tsconfigPath);
 
-        if (visited.has(normalizedPath)) {
-                return false;
-        }
+	if (visited.has(normalizedPath)) {
+		return false;
+	}
 
-        visited.add(normalizedPath);
+	visited.add(normalizedPath);
 
-        const file = await fs.readFile(normalizedPath, { encoding: "utf-8" });
-        const tsconfig = JSON5.parse(file);
+	const file = await fs.readFile(normalizedPath, { encoding: "utf-8" });
+	const tsconfig = JSON5.parse(file);
 
-        if (tsconfig?.compilerOptions?.allowJs === true) {
-                return true;
-        }
+	if (tsconfig?.compilerOptions?.allowJs === true) {
+		return true;
+	}
 
-        const baseDir = nodePath.dirname(normalizedPath);
+	const baseDir = nodePath.dirname(normalizedPath);
 
-        const extendCandidates = Array.isArray(tsconfig?.extends)
-                ? tsconfig.extends
-                : tsconfig?.extends
-                ? [tsconfig.extends]
-                : [];
+	const extendCandidates = Array.isArray(tsconfig?.extends)
+		? tsconfig.extends
+		: tsconfig?.extends
+			? [tsconfig.extends]
+			: [];
 
-        for (const candidate of extendCandidates) {
-                if (typeof candidate !== "string") continue;
-                const resolved = await resolveExtendedConfig(candidate, baseDir, fs);
-                if (resolved && (await hasAllowJsEnabled(resolved, fs, visited))) {
-                        return true;
-                }
-        }
+	for (const candidate of extendCandidates) {
+		if (typeof candidate !== "string") continue;
+		const resolved = await resolveExtendedConfig(candidate, baseDir, fs);
+		if (resolved && (await hasAllowJsEnabled(resolved, fs, visited))) {
+			return true;
+		}
+	}
 
-        if (Array.isArray(tsconfig?.references)) {
-                for (const reference of tsconfig.references) {
-                        const referencePath = reference?.path;
-                        if (typeof referencePath !== "string") continue;
-                        const resolved = await resolveReferenceConfig(referencePath, baseDir, fs);
-                        if (resolved && (await hasAllowJsEnabled(resolved, fs, visited))) {
-                                return true;
-                        }
-                }
-        }
+	if (Array.isArray(tsconfig?.references)) {
+		for (const reference of tsconfig.references) {
+			const referencePath = reference?.path;
+			if (typeof referencePath !== "string") continue;
+			const resolved = await resolveReferenceConfig(referencePath, baseDir, fs);
+			if (resolved && (await hasAllowJsEnabled(resolved, fs, visited))) {
+				return true;
+			}
+		}
+	}
 
-        return false;
+	return false;
 };
 
 /**
  * Normalizes a tsconfig path to an absolute path.
  */
 const normalizeConfigPath = (configPath: string): string => {
-        return nodePath.isAbsolute(configPath)
-                ? configPath
-                : nodePath.resolve(process.cwd(), configPath);
+	return nodePath.isAbsolute(configPath)
+		? configPath
+		: nodePath.resolve(process.cwd(), configPath);
 };
 
 /**
  * Resolves the extended tsconfig path relative to the base config.
  */
 const resolveExtendedConfig = async (
-        extendsSpecifier: string,
-        baseDir: string,
-        fs: typeof import("node:fs/promises")
+	extendsSpecifier: string,
+	baseDir: string,
+	fs: typeof import("node:fs/promises")
 ): Promise<string | undefined> => {
-        const candidates = new Set<string>();
-        const resolvedBase = nodePath.isAbsolute(extendsSpecifier)
-                ? extendsSpecifier
-                : nodePath.resolve(baseDir, extendsSpecifier);
-        candidates.add(resolvedBase);
+	const candidates = new Set<string>();
+	const resolvedBase = nodePath.isAbsolute(extendsSpecifier)
+		? extendsSpecifier
+		: nodePath.resolve(baseDir, extendsSpecifier);
+	candidates.add(resolvedBase);
 
-        if (nodePath.extname(resolvedBase) === "") {
-                candidates.add(`${resolvedBase}.json`);
-                candidates.add(nodePath.join(resolvedBase, "tsconfig.json"));
-        }
+	if (nodePath.extname(resolvedBase) === "") {
+		candidates.add(`${resolvedBase}.json`);
+		candidates.add(nodePath.join(resolvedBase, "tsconfig.json"));
+	}
 
-        for (const candidate of candidates) {
-                if (await pathExists(candidate, fs)) {
-                        return candidate;
-                }
-        }
+	for (const candidate of candidates) {
+		if (await pathExists(candidate, fs)) {
+			return candidate;
+		}
+	}
 
-        try {
-                return require.resolve(extendsSpecifier, { paths: [baseDir] });
-        } catch {
-                if (extendsSpecifier.endsWith(".json") === false) {
-                        try {
-                                return require.resolve(`${extendsSpecifier}.json`, {
-                                        paths: [baseDir],
-                                });
-                        } catch {
-                                return undefined;
-                        }
-                }
-        }
+	try {
+		return require.resolve(extendsSpecifier, { paths: [baseDir] });
+	} catch {
+		if (extendsSpecifier.endsWith(".json") === false) {
+			try {
+				return require.resolve(`${extendsSpecifier}.json`, {
+					paths: [baseDir],
+				});
+			} catch {
+				return undefined;
+			}
+		}
+	}
 
-        return undefined;
+	return undefined;
 };
 
 /**
  * Resolves the tsconfig referenced through the `references` property.
  */
 const resolveReferenceConfig = async (
-        referenceSpecifier: string,
-        baseDir: string,
-        fs: typeof import("node:fs/promises")
+	referenceSpecifier: string,
+	baseDir: string,
+	fs: typeof import("node:fs/promises")
 ): Promise<string | undefined> => {
-        const candidates = new Set<string>();
-        const resolvedBase = nodePath.isAbsolute(referenceSpecifier)
-                ? referenceSpecifier
-                : nodePath.resolve(baseDir, referenceSpecifier);
-        candidates.add(resolvedBase);
+	const candidates = new Set<string>();
+	const resolvedBase = nodePath.isAbsolute(referenceSpecifier)
+		? referenceSpecifier
+		: nodePath.resolve(baseDir, referenceSpecifier);
+	candidates.add(resolvedBase);
 
-        if (nodePath.extname(resolvedBase) === "") {
-                candidates.add(`${resolvedBase}.json`);
-                candidates.add(nodePath.join(resolvedBase, "tsconfig.json"));
-        }
+	if (nodePath.extname(resolvedBase) === "") {
+		candidates.add(`${resolvedBase}.json`);
+		candidates.add(nodePath.join(resolvedBase, "tsconfig.json"));
+	}
 
-        for (const candidate of candidates) {
-                if (await pathExists(candidate, fs)) {
-                        try {
-                                const stats = await fs.stat(candidate);
-                                if (stats.isDirectory()) {
-                                        const directoryConfig = nodePath.join(candidate, "tsconfig.json");
-                                        if (await pathExists(directoryConfig, fs)) {
-                                                return directoryConfig;
-                                        }
-                                        continue;
-                                }
-                        } catch {
-                                // ignore, we'll continue checking other candidates
-                        }
-                        return candidate;
-                }
-        }
+	for (const candidate of candidates) {
+		if (await pathExists(candidate, fs)) {
+			try {
+				const stats = await fs.stat(candidate);
+				if (stats.isDirectory()) {
+					const directoryConfig = nodePath.join(candidate, "tsconfig.json");
+					if (await pathExists(directoryConfig, fs)) {
+						return directoryConfig;
+					}
+					continue;
+				}
+			} catch {
+				// ignore, we'll continue checking other candidates
+			}
+			return candidate;
+		}
+	}
 
-        return undefined;
+	return undefined;
 };
 
 // /**

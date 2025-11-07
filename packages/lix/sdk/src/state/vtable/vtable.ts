@@ -609,6 +609,10 @@ export function applyStateVTable(
 						baseIndex + columnOffset("metadata") < args.length
 							? valueFor("metadata")
 							: null;
+					const inheritedFromValue =
+						baseIndex + columnOffset("inherited_from_version_id") < args.length
+							? valueFor("inherited_from_version_id")
+							: null;
 
 					const requiredFieldValues: Array<[string, unknown]> = [
 						["entity_id", entity_id],
@@ -658,6 +662,9 @@ export function applyStateVTable(
 						entity_id: String(entity_id),
 						version_id: String(version_id),
 						untracked: Boolean(untracked),
+						...(inheritedFromValue !== null && inheritedFromValue !== undefined
+							? { inherited_from_version_id: String(inheritedFromValue) }
+							: {}),
 					});
 
 					const metadataJson =

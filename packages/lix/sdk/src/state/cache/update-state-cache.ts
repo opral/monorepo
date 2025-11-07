@@ -371,6 +371,15 @@ function batchDeleteDirectFromTable(args: {
 			});
 		}
 
+		// Remove any cached rows copied from this version so inheritance stays in sync.
+		engine.executeSync({
+			sql: `DELETE FROM ${tableName}
+			      WHERE entity_id = ?
+			        AND file_id = ?
+			        AND inherited_from_version_id = ?`,
+			parameters: [change.entity_id, change.file_id, resolvedVersionId],
+		});
+
 		// Insert tombstone with UPSERT to handle existing entries
 		engine.executeSync({
 			sql: `INSERT INTO ${tableName} (

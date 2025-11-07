@@ -1,6 +1,8 @@
-import { expect } from "vitest";
+import { expect, test } from "vitest";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { simulationTest } from "../../test-utilities/simulation-test/simulation-test.js";
+
+test("discovery", () => {});
 
 simulationTest(
 	"state version_id defaults active version",
@@ -61,17 +63,7 @@ simulationTest(
 
 		expect(insertedEntity).toHaveLength(1);
 
-		const sanitizedInsertedEntity = insertedEntity.map(
-			({
-				change_id: _ignoredChangeId,
-				commit_id: _ignoredCommitId,
-				created_at: _ignoredCreatedAt,
-				updated_at: _ignoredUpdatedAt,
-				...rest
-			}) => rest
-		);
-
-		expectDeterministic(sanitizedInsertedEntity[0]).toMatchObject({
+		expectDeterministic(insertedEntity[0]).toMatchObject({
 			entity_id: "entity0",
 			file_id: "f0",
 			schema_key: "mock_schema",
@@ -204,17 +196,7 @@ simulationTest(
 		// state view shows active version entities + inherited from global
 		expect(entitiesBeforeDelete).toHaveLength(4);
 
-		const sanitizedEntitiesBeforeDelete = entitiesBeforeDelete.map(
-			({
-				change_id: _ignoredChangeId,
-				commit_id: _ignoredCommitId,
-				created_at: _ignoredCreatedAt,
-				updated_at: _ignoredUpdatedAt,
-				...rest
-			}) => rest
-		);
-
-		expectDeterministic(sanitizedEntitiesBeforeDelete).toEqual(
+		expectDeterministic(entitiesBeforeDelete).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
 					entity_id: "test-key-active",
@@ -251,14 +233,16 @@ simulationTest(
 			])
 		);
 
-		// Delete all key_value entities
-		// this is the reproduction of the infinite loop issue
+		// Delete only entities that are local to the active version.
+		// Inherited rows (from global) must be filtered out now that inheritance is immutable.
 		await lix.db
 			.deleteFrom("state")
 			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "like", "test-key-%")
+			.where("inherited_from_version_id", "is", null)
 			.execute();
 
-		// Verify all entities are deleted
+		// Verify the local entities are deleted while inherited ones remain.
 		const keyValueAfterDelete = await lix.db
 			.selectFrom("state")
 			.where("schema_key", "=", "lix_key_value")
@@ -267,6 +251,29 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expectDeterministic(keyValueAfterDelete).toHaveLength(0);
+		expectDeterministic(keyValueAfterDelete).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					entity_id: "test-key-global",
+					inherited_from_version_id: "global",
+					snapshot_content: {
+						key: "test-key-global",
+						value: "global-tracked-value",
+					},
+					untracked: 0,
+				}),
+				expect.objectContaining({
+					entity_id: "test-key-global-untracked",
+					inherited_from_version_id: "global",
+					snapshot_content: {
+						key: "test-key-global-untracked",
+						value: "global-untracked-value",
+					},
+					untracked: 1,
+				}),
+			])
+		);
+
+		expectDeterministic(keyValueAfterDelete).toHaveLength(2);
 	}
 );

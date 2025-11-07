@@ -924,7 +924,7 @@ test("file views expose writer_key for descriptor rows", async () => {
 	expect(fileAllRow.lixcol_writer_key).toBe(writerKey);
 });
 
-test("file writer_key inherits across versions", async () => {
+test("file writer_key stays local to the version that wrote it", async () => {
 	const lix = await openLix({ providePlugins: [mockJsonPlugin] });
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 	const writerKey = "writer:file#inherit";
@@ -949,6 +949,11 @@ test("file writer_key inherits across versions", async () => {
 
 	expect(mainRow.lixcol_writer_key).toBe(writerKey);
 
+	const mainVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	const branch = await createVersion({ lix, name: "writer-branch" });
 	await switchVersion({ lix, to: branch });
 
@@ -958,7 +963,10 @@ test("file writer_key inherits across versions", async () => {
 		.select(["id", "lixcol_writer_key"])
 		.executeTakeFirstOrThrow();
 
-	expect(branchRow.lixcol_writer_key).toBe(writerKey);
+	// Writer keys are untracked metadata and only exist on the version
+	// that performed the write. Branches inherit the file content but not
+	// the writer attribution.
+	expect(branchRow.lixcol_writer_key).toBeNull();
 
 	const fileAllRows = await lix.db
 		.selectFrom("file_by_version")
@@ -966,9 +974,12 @@ test("file writer_key inherits across versions", async () => {
 		.select(["lixcol_version_id", "lixcol_writer_key"])
 		.execute();
 
-	expect(fileAllRows.every((row) => row.lixcol_writer_key === writerKey)).toBe(
-		true
+	const versionWriterMap = new Map(
+		fileAllRows.map((row) => [row.lixcol_version_id, row.lixcol_writer_key])
 	);
+
+	expect(versionWriterMap.get(mainVersion.version_id)).toBe(writerKey);
+	expect(versionWriterMap.get(branch.id)).toBeNull();
 });
 
 test("file data updates create new change_id", async () => {
