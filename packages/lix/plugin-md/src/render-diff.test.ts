@@ -35,5 +35,48 @@ describe("renderPluginDiff", () => {
 		expect(html).toContain("brave new");
 		expect(html).toContain("world.");
 	});
+
+	test("ignores diffs with non-markdown schema keys", async () => {
+		const args: RenderDiffArgs = {
+			diffs: [
+				{
+					entity_id: "meta",
+					plugin_key: "plugin_md",
+					schema_key: "lix_file_descriptor",
+					before_snapshot_content: null,
+					after_snapshot_content: {
+						id: "meta",
+						directory_id: null,
+						name: "welcome",
+						extension: "md",
+						metadata: null,
+						hidden: false,
+					} as any,
+				},
+				{
+					plugin_key: "plugin_md",
+					schema_key: "markdown_wc_paragraph",
+					entity_id: "p1",
+					before_snapshot_content: {
+						type: "paragraph",
+						data: { id: "p1" },
+						children: [{ type: "text", value: "Hello world." }],
+					} as AstSchemas.ParagraphNode,
+					after_snapshot_content: {
+						type: "paragraph",
+						data: { id: "p1" },
+						children: [
+							{ type: "text", value: "Hello world." },
+							{ type: "text", value: " Again!" },
+						],
+					} as AstSchemas.ParagraphNode,
+				},
+			],
+		};
+
+		const html = await renderDiff(args);
+		expect(html).toContain("Again!");
+		expect(html).not.toContain("welcome");
+	});
 	// Additional cases (add/remove-only, ordering) can be covered once the API stabilises.
 });
