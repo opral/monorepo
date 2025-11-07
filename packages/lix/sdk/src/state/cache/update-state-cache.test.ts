@@ -1,13 +1,15 @@
-import { test, expect } from "vitest";
+import { expect, test, vi } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { updateStateCache } from "./update-state-cache.js";
-import { schemaKeyToCacheTableName } from "./create-schema-cache-table.js";
+import * as cacheTableModule from "./create-schema-cache-table.js";
 import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
 import type { InternalStateCacheRow } from "./schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+
+const { schemaKeyToCacheTableName } = cacheTableModule;
 
 function simpleCacheSchema(key: string): LixSchemaDefinition {
 	return {
@@ -540,6 +542,73 @@ test("deleting a parent cache row removes inherited copies", async () => {
 		change_id: "change-delete",
 		commit_id: deleteCommitId,
 	});
+});
+
+test("reuses known cache tables without recreating them", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+
+	await ensureCacheSchemas(lix, ["lix_test"]);
+
+	const createSpy = vi.spyOn(cacheTableModule, "createSchemaCacheTable");
+
+	try {
+		const firstTimestamp = await getTimestamp({ lix });
+		const firstChange: MaterializedState = {
+			id: "cache-table-create",
+			entity_id: "cache-table-entity",
+			schema_key: "lix_test",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "cache-table-entity",
+			}),
+			created_at: firstTimestamp,
+			lixcol_version_id: "global",
+			lixcol_commit_id: "commit-initial",
+		};
+
+		updateStateCache({
+			engine: lix.engine!,
+			changes: [firstChange],
+		});
+
+		expect(createSpy).toHaveBeenCalledTimes(1);
+		createSpy.mockClear();
+
+		const secondTimestamp = await getTimestamp({ lix });
+		const secondChange: MaterializedState = {
+			id: "cache-table-upsert",
+			entity_id: "cache-table-entity",
+			schema_key: "lix_test",
+			schema_version: "1.0",
+			file_id: "lix",
+			plugin_key: "test_plugin",
+			snapshot_content: JSON.stringify({
+				id: "cache-table-entity",
+				value: "updated",
+			}),
+			created_at: secondTimestamp,
+			lixcol_version_id: "global",
+			lixcol_commit_id: "commit-updated",
+		};
+
+		updateStateCache({
+			engine: lix.engine!,
+			changes: [secondChange],
+		});
+
+		expect(createSpy).not.toHaveBeenCalled();
+	} finally {
+		createSpy.mockRestore();
+	}
 });
 
 test("handles duplicate entity updates - last change wins", async () => {

@@ -3,6 +3,7 @@ import type { LixChangeRaw } from "../../change/schema-definition.js";
 import type { MaterializedState as MaterializedChange } from "../vtable/generate-commit.js";
 import { getStateCacheTables } from "./schema.js";
 import {
+	cacheTableNameToSchemaKey,
 	createSchemaCacheTable,
 	schemaKeyToCacheTableName,
 } from "./create-schema-cache-table.js";
@@ -227,6 +228,21 @@ function ensureTableExists(args: {
 	schemaKey: string;
 }): string {
 	const { engine, schemaKey } = args;
+	const tableCache = getStateCacheTables({ engine });
+	const sanitizedName = schemaKeyToCacheTableName(schemaKey);
+
+	const cachedTableName = findCachedTableName({
+		tableCache,
+		schemaKey,
+		sanitizedName,
+	});
+	if (cachedTableName) {
+		if (!tableCache.has(sanitizedName)) {
+			tableCache.add(sanitizedName);
+		}
+		return cachedTableName;
+	}
+
 	const schemaDefinition = resolveCacheSchemaDefinition({
 		engine,
 		schemaKey,
@@ -238,15 +254,30 @@ function ensureTableExists(args: {
 		engine,
 		schema: schemaDefinition,
 	});
-	const tableCache = getStateCacheTables({ engine });
 	if (!tableCache.has(tableName)) {
 		tableCache.add(tableName);
 	}
-	const sanitized = schemaKeyToCacheTableName(schemaKey);
-	if (!tableCache.has(sanitized)) {
-		tableCache.add(sanitized);
+	if (!tableCache.has(sanitizedName)) {
+		tableCache.add(sanitizedName);
 	}
 	return tableName;
+}
+
+function findCachedTableName(args: {
+	tableCache: Set<string>;
+	schemaKey: string;
+	sanitizedName: string;
+}): string | null {
+	if (args.tableCache.has(args.sanitizedName)) {
+		return args.sanitizedName;
+	}
+
+	for (const tableName of args.tableCache) {
+		if (cacheTableNameToSchemaKey(tableName) === args.schemaKey) {
+			return tableName;
+		}
+	}
+	return null;
 }
 
 function batchInsertDirectToTable(args: {
