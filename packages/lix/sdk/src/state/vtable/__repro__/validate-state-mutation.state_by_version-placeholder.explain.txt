@@ -46,37 +46,6 @@ WHERE t.untracked = 0) AS change
 WHERE change.id = lix_internal_state_vtable.change_id) AS metadata
 FROM (
 WITH
-  version_descriptor_base AS (
-    SELECT
-      json_extract(desc.snapshot_content, '$.id') AS version_id,
-      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-    FROM "lix_internal_state_cache_v1_lix_version_descriptor" desc
-    WHERE desc.is_tombstone = 0
-      AND desc.snapshot_content IS NOT NULL
-  ),
-  version_inheritance(version_id, ancestor_version_id) AS (
-    SELECT
-      vdb.version_id,
-      vdb.inherits_from_version_id
-    FROM version_descriptor_base vdb
-    WHERE vdb.inherits_from_version_id IS NOT NULL
-
-    UNION ALL
-
-    SELECT
-      vi.version_id,
-      vdb.inherits_from_version_id
-    FROM version_inheritance vi
-    JOIN version_descriptor_base vdb ON vdb.version_id = vi.ancestor_version_id
-    WHERE vdb.inherits_from_version_id IS NOT NULL
-  ),
-  version_parent AS (
-    SELECT
-      vdb.version_id,
-      vdb.inherits_from_version_id AS parent_version_id
-    FROM version_descriptor_base vdb
-    WHERE vdb.inherits_from_version_id IS NOT NULL
-  ),
   candidates AS (
      SELECT
        unt.entity_id AS entity_id,
@@ -97,30 +66,6 @@ WITH
        2 AS priority
      FROM lix_internal_state_all_untracked unt
      WHERE unt.schema_key IN ('validate_state_mutation_repro')
-
-         UNION ALL
-
-     SELECT
-       unt.entity_id AS entity_id,
-       unt.schema_key AS schema_key,
-       unt.file_id AS file_id,
-       unt.plugin_key AS plugin_key,
-       json(unt.snapshot_content) AS snapshot_content,
-       unt.schema_version AS schema_version,
-       vi.version_id AS version_id,
-       unt.created_at AS created_at,
-       unt.updated_at AS updated_at,
-       unt.version_id AS inherited_from_version_id,
-       'untracked' AS change_id,
-       1 AS untracked,
-       'untracked' AS commit_id,
-       NULL AS metadata,
-       NULL AS writer_key,
-       5 AS priority
-     FROM version_inheritance vi
-     JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-     WHERE unt.is_tombstone = 0
-       AND unt.snapshot_content IS NOT NULL AND unt.schema_key IN ('validate_state_mutation_repro')
   ),
   ranked AS (
      SELECT
@@ -197,114 +142,30 @@ WHERE "schema_key" = ?1 AND json_extract(snapshot_content, '$.id') = ?2 AND "ver
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-14)"
+    "detail": "CO-ROUTINE (subquery-9)"
   },
   {
-    "id": 7,
+    "id": 12,
     "parent": 5,
-    "notused": 0,
-    "detail": "CO-ROUTINE candidates"
-  },
-  {
-    "id": 8,
-    "parent": 7,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 9,
-    "parent": 8,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 15,
-    "parent": 9,
-    "notused": 61,
-    "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
-  },
-  {
-    "id": 43,
-    "parent": 8,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 45,
-    "parent": 43,
-    "notused": 0,
-    "detail": "CO-ROUTINE version_inheritance"
-  },
-  {
-    "id": 48,
-    "parent": 45,
-    "notused": 0,
-    "detail": "SETUP"
-  },
-  {
-    "id": 51,
-    "parent": 48,
-    "notused": 24,
-    "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
-  },
-  {
-    "id": 77,
-    "parent": 45,
-    "notused": 0,
-    "detail": "RECURSIVE STEP"
-  },
-  {
-    "id": 80,
-    "parent": 77,
     "notused": 62,
-    "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
+    "detail": "SEARCH unt USING INDEX ix_unt_v_f_s_e (version_id=?)"
   },
   {
-    "id": 89,
-    "parent": 77,
-    "notused": 216,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 108,
-    "parent": 43,
-    "notused": 216,
-    "detail": "SCAN unt"
-  },
-  {
-    "id": 118,
-    "parent": 43,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON vi (version_id=?)"
-  },
-  {
-    "id": 135,
-    "parent": 43,
-    "notused": 54,
-    "detail": "SEARCH vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
-  },
-  {
-    "id": 166,
-    "parent": 5,
-    "notused": 239,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 207,
+    "id": 72,
     "parent": 5,
     "notused": 0,
-    "detail": "USE TEMP B-TREE FOR ORDER BY"
+    "detail": "USE TEMP B-TREE FOR LAST 9 TERMS OF ORDER BY"
   },
   {
-    "id": 247,
+    "id": 116,
     "parent": 2,
-    "notused": 219,
-    "detail": "SCAN (subquery-14)"
+    "notused": 48,
+    "detail": "SCAN (subquery-9)"
   },
   {
-    "id": 329,
+    "id": 198,
     "parent": 0,
-    "notused": 219,
+    "notused": 48,
     "detail": "SCAN w"
   }
 ]

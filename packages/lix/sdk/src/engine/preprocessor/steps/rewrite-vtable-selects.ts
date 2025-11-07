@@ -79,6 +79,11 @@ type InlineRewriteMetadata = {
 	pruneInheritance: boolean;
 };
 
+type SubqueryPredicateMetadata = {
+	schemaKeys: readonly string[];
+	pruneInheritance: boolean;
+};
+
 /**
  * Rewrites internal state vtable references into inline union subqueries.
  *
@@ -140,13 +145,15 @@ function rewriteSegmentedStatement(
 function rewriteSelectStatement(
 	select: SelectStatementNode,
 	context: PreprocessorStepContext,
-	inheritedSchemaKeys: readonly string[] = []
+	pushdownSchemaKeys: readonly string[] = [],
+	pushdownPruneInheritance = false
 ): SelectStatementNode {
 	const parameters = context.parameters ?? [];
-	const subquerySchemaKeyMap = collectSubquerySchemaKeyMap(
+	const subqueryPredicateMap = collectSubqueryPredicateMap(
 		select,
 		parameters,
-		inheritedSchemaKeys
+		pushdownSchemaKeys,
+		pushdownPruneInheritance
 	);
 	const withRewrittenSubqueries = visitSelectStatement(select, {
 		subquery(node, visitContext) {
@@ -155,14 +162,28 @@ function rewriteSelectStatement(
 			const normalizedAlias = aliasValue
 				? normalizeIdentifierValue(aliasValue)
 				: DEFAULT_ALIAS_KEY;
-			const nextInherited =
+			const predicateMetadata =
 				parentKind === "from_clause" || parentKind === "join_clause"
-					? (subquerySchemaKeyMap.get(normalizedAlias) ?? inheritedSchemaKeys)
-					: inheritedSchemaKeys;
+					? subqueryPredicateMap.get(normalizedAlias)
+					: undefined;
+			const nextSchemaKeys =
+				predicateMetadata?.schemaKeys ?? pushdownSchemaKeys;
+			const nextPrune =
+				predicateMetadata?.pruneInheritance ?? pushdownPruneInheritance;
 			const rewrittenStatement =
 				node.statement.node_kind === "compound_select"
-					? rewriteCompoundSelect(node.statement, context, nextInherited)
-					: rewriteSelectStatement(node.statement, context, nextInherited);
+					? rewriteCompoundSelect(
+							node.statement,
+							context,
+							nextSchemaKeys,
+							nextPrune
+						)
+					: rewriteSelectStatement(
+							node.statement,
+							context,
+							nextSchemaKeys,
+							nextPrune
+						);
 			if (rewrittenStatement !== node.statement) {
 				return {
 					...node,
@@ -196,7 +217,7 @@ function rewriteSelectStatement(
 		parameters
 	);
 	const mergedSchemaKeys = mergeSchemaKeyLiterals(
-		inheritedSchemaKeys,
+		pushdownSchemaKeys,
 		schemaSummary.literals
 	);
 	const schemaSummaryForTrace: SchemaKeyPredicateSummary = {
@@ -217,7 +238,8 @@ function rewriteSelectStatement(
 		withRewrittenSubqueries,
 		references,
 		parameters,
-		inheritedSchemaKeys
+		pushdownSchemaKeys,
+		pushdownPruneInheritance
 	);
 
 	const rewritten = visitSelectStatement(
@@ -241,13 +263,15 @@ function rewriteSelectStatement(
 function rewriteCompoundSelect(
 	compound: CompoundSelectNode,
 	context: PreprocessorStepContext,
-	inheritedSchemaKeys: readonly string[] = []
+	pushdownSchemaKeys: readonly string[] = [],
+	pushdownPruneInheritance = false
 ): CompoundSelectNode {
 	let changed = false;
 	const first = rewriteSelectStatement(
 		compound.first,
 		context,
-		inheritedSchemaKeys
+		pushdownSchemaKeys,
+		pushdownPruneInheritance
 	);
 	if (first !== compound.first) {
 		changed = true;
@@ -257,7 +281,8 @@ function rewriteCompoundSelect(
 		const rewritten = rewriteSelectStatement(
 			branch.select,
 			context,
-			inheritedSchemaKeys
+			pushdownSchemaKeys,
+			pushdownPruneInheritance
 		);
 		if (rewritten !== branch.select) {
 			changed = true;
@@ -321,12 +346,13 @@ function normalizeAlias(alias: IdentifierNode | null): string | null {
 	return value ? normalizeIdentifierValue(value) : null;
 }
 
-function collectSubquerySchemaKeyMap(
+function collectSubqueryPredicateMap(
 	select: SelectStatementNode,
 	parameters: ReadonlyArray<unknown>,
-	inheritedSchemaKeys: readonly string[]
-): Map<string, readonly string[]> {
-	const map = new Map<string, readonly string[]>();
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean
+): Map<string, SubqueryPredicateMetadata> {
+	const map = new Map<string, SubqueryPredicateMetadata>();
 	const register = (
 		relation: RelationNode,
 		joinFilter: ExpressionNode | RawFragmentNode | null
@@ -359,14 +385,34 @@ function collectSubquerySchemaKeyMap(
 			whereSummary.literals,
 			joinSummary.literals
 		);
-		const existing = map.get(normalizedAlias) ?? [];
+		const existing = map.get(normalizedAlias);
 		const merged = mergeSchemaKeyLiterals(
-			existing,
-			inheritedSchemaKeys,
+			existing?.schemaKeys ?? [],
+			pushdownSchemaKeys,
 			localKeys
 		);
-		if (merged.length > 0) {
-			map.set(normalizedAlias, merged);
+		const pruneFromWhere = requiresNullPredicateForColumn(
+			select.where_clause,
+			tableNames,
+			parameters,
+			true
+		);
+		const pruneFromJoin = requiresNullPredicateForColumn(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const combinedPrune =
+			(existing?.pruneInheritance ?? false) ||
+			pushdownPruneInheritance ||
+			pruneFromWhere ||
+			pruneFromJoin;
+		if (merged.length > 0 || combinedPrune) {
+			map.set(normalizedAlias, {
+				schemaKeys: merged,
+				pruneInheritance: combinedPrune,
+			});
 		}
 	};
 
@@ -384,7 +430,8 @@ function buildInlineMetadata(
 	select: SelectStatementNode,
 	references: readonly TableReferenceInfo[],
 	parameters: ReadonlyArray<unknown>,
-	inheritedSchemaKeys: readonly string[]
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -403,15 +450,13 @@ function buildInlineMetadata(
 			parameters
 		);
 		const schemaKeys = mergeSchemaKeyLiterals(
-			inheritedSchemaKeys,
+			pushdownSchemaKeys,
 			summary.literals
 		);
 		const columnSummary = collectSelectedColumns(select, tableNames);
-		const pruneInheritance = shouldPruneInheritance(
-			select.where_clause,
-			tableNames,
-			parameters
-		);
+		const pruneInheritance =
+			pushdownPruneInheritance ||
+			shouldPruneInheritance(select.where_clause, tableNames, parameters);
 		metadata.set(aliasKey, {
 			schemaKeys,
 			selectedColumns: columnSummary.selectedColumns,
@@ -428,16 +473,30 @@ function shouldPruneInheritance(
 	tableNames: Set<string>,
 	parameters: ReadonlyArray<unknown>
 ): boolean {
-	if (!whereClause) {
+	return requiresNullPredicateForColumn(
+		whereClause,
+		tableNames,
+		parameters,
+		true
+	);
+}
+
+function requiresNullPredicateForColumn(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): boolean {
+	if (!expression) {
 		return false;
 	}
 	const context: PredicateVisitContext = {
 		tableNames,
 		parameters,
-		allowUnqualified: true,
+		allowUnqualified,
 	};
 	return expressionRequiresNullForColumn(
-		whereClause,
+		expression,
 		"inherited_from_version_id",
 		context
 	);

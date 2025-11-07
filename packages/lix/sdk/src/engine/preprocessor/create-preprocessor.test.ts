@@ -191,3 +191,27 @@ test("rewrites inner joins on views", async () => {
 
 	await lix.close();
 });
+
+test("state filter on inherited_from_version_id=NULL prunes inheritance rewrites", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const query = `
+		SELECT st.entity_id
+		FROM state AS st
+		WHERE st.file_id = ?
+		  AND st.inherited_from_version_id IS NULL
+	`;
+
+	const result = preprocess({
+		sql: query,
+		parameters: ["file-1"],
+	});
+
+	const upper = result.sql.toUpperCase();
+	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE");
+	expect(upper).not.toContain("VERSION_INHERITANCE");
+	expect(upper).not.toContain("VERSION_DESCRIPTOR_BASE");
+
+	await lix.close();
+});
