@@ -50,8 +50,6 @@ test.each([1, 2, 3, 4, 5, 6])(
 		}
 
 		const html = await serializeToHtml(ast, { diffHints: true })
-		expect(html).toContain(
-			`<h${depth} data-id="H${depth}" data-diff-mode="words">`,
-		)
-	},
+		expect(html).toContain(`<h${depth} data-id="H${depth}" data-diff-mode="words">`)
+	}
 )
