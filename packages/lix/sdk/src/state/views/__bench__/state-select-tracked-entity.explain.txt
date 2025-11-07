@@ -536,7 +536,7 @@ WHERE schema_key = ? AND entity_id = ?
   {
     "id": 49,
     "parent": 44,
-    "notused": 32,
+    "notused": 56,
     "detail": "SEARCH cache USING PRIMARY KEY (entity_id=?)"
   },
   {
@@ -582,230 +582,224 @@ WHERE schema_key = ? AND entity_id = ?
     "detail": "SCAN vi"
   },
   {
-    "id": 145,
-    "parent": 76,
-    "notused": 32,
-    "detail": "SEARCH cache USING PRIMARY KEY (entity_id=?)"
-  },
-  {
-    "id": 159,
+    "id": 148,
     "parent": 76,
     "notused": 247,
     "detail": "SCAN vi"
   },
   {
-    "id": 184,
+    "id": 150,
+    "parent": 76,
+    "notused": 27,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_version_id (version_id=? AND entity_id=?)"
+  },
+  {
+    "id": 188,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 192,
-    "parent": 184,
+    "id": 196,
+    "parent": 188,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
   },
   {
-    "id": 206,
-    "parent": 184,
+    "id": 210,
+    "parent": 188,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 233,
+    "id": 237,
     "parent": 5,
-    "notused": 255,
+    "notused": 248,
     "detail": "SCAN c"
   },
   {
-    "id": 274,
+    "id": 278,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 314,
+    "id": 318,
     "parent": 2,
-    "notused": 235,
+    "notused": 228,
     "detail": "SCAN (subquery-33)"
   },
   {
-    "id": 396,
+    "id": 400,
     "parent": 0,
-    "notused": 235,
+    "notused": 228,
     "detail": "SCAN w"
   },
   {
-    "id": 410,
+    "id": 414,
     "parent": 0,
     "notused": 0,
     "detail": "LIST SUBQUERY 30"
   },
   {
-    "id": 414,
-    "parent": 410,
+    "id": 418,
+    "parent": 414,
     "notused": 0,
     "detail": "MATERIALIZE ranked"
   },
   {
-    "id": 417,
-    "parent": 414,
+    "id": 421,
+    "parent": 418,
     "notused": 0,
     "detail": "CO-ROUTINE (subquery-34)"
   },
   {
-    "id": 420,
-    "parent": 417,
+    "id": 424,
+    "parent": 421,
     "notused": 0,
     "detail": "MATERIALIZE candidates"
   },
   {
-    "id": 422,
-    "parent": 420,
+    "id": 426,
+    "parent": 424,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 423,
-    "parent": 422,
+    "id": 427,
+    "parent": 426,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 425,
-    "parent": 423,
+    "id": 429,
+    "parent": 427,
     "notused": 216,
     "detail": "SCAN unt"
   },
   {
-    "id": 451,
-    "parent": 422,
+    "id": 455,
+    "parent": 426,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 453,
-    "parent": 451,
-    "notused": 76,
+    "id": 457,
+    "parent": 455,
+    "notused": 216,
     "detail": "SCAN cache"
   },
   {
-    "id": 479,
-    "parent": 422,
+    "id": 483,
+    "parent": 426,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 482,
-    "parent": 479,
+    "id": 486,
+    "parent": 483,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 486,
-    "parent": 482,
+    "id": 490,
+    "parent": 486,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 489,
-    "parent": 486,
+    "id": 493,
+    "parent": 490,
     "notused": 24,
     "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
   },
   {
-    "id": 517,
-    "parent": 482,
+    "id": 521,
+    "parent": 486,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 520,
-    "parent": 517,
+    "id": 524,
+    "parent": 521,
     "notused": 62,
     "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
   },
   {
-    "id": 529,
-    "parent": 517,
+    "id": 533,
+    "parent": 521,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 547,
-    "parent": 479,
+    "id": 552,
+    "parent": 483,
     "notused": 295,
     "detail": "SCAN vi"
   },
   {
-    "id": 551,
-    "parent": 479,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON cache (is_tombstone=?)"
+    "id": 554,
+    "parent": 483,
+    "notused": 27,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_live_vfe (version_id=?)"
   },
   {
-    "id": 577,
-    "parent": 479,
-    "notused": 47,
-    "detail": "SEARCH cache USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
-  },
-  {
-    "id": 612,
-    "parent": 422,
+    "id": 589,
+    "parent": 426,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 616,
-    "parent": 612,
+    "id": 593,
+    "parent": 589,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 620,
-    "parent": 612,
+    "id": 597,
+    "parent": 589,
     "notused": 0,
     "detail": "BLOOM FILTER ON unt (is_tombstone=?)"
   },
   {
-    "id": 645,
-    "parent": 612,
+    "id": 622,
+    "parent": 589,
     "notused": 53,
     "detail": "SEARCH unt USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
   },
   {
-    "id": 684,
-    "parent": 417,
-    "notused": 338,
+    "id": 661,
+    "parent": 421,
+    "notused": 335,
     "detail": "SCAN c"
   },
   {
-    "id": 720,
-    "parent": 417,
+    "id": 697,
+    "parent": 421,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 761,
-    "parent": 414,
+    "id": 738,
+    "parent": 418,
     "notused": 336,
     "detail": "SCAN (subquery-34)"
   },
   {
-    "id": 849,
-    "parent": 410,
+    "id": 826,
+    "parent": 414,
     "notused": 0,
     "detail": "BLOOM FILTER ON w (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 873,
-    "parent": 410,
+    "id": 850,
+    "parent": 414,
     "notused": 57,
     "detail": "SEARCH w USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 888,
-    "parent": 410,
+    "id": 865,
+    "parent": 414,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   }

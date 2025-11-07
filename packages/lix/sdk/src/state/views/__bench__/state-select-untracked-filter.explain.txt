@@ -536,7 +536,7 @@ LIMIT 1
   {
     "id": 42,
     "parent": 37,
-    "notused": 76,
+    "notused": 216,
     "detail": "SCAN cache"
   },
   {
@@ -582,236 +582,224 @@ LIMIT 1
     "detail": "SCAN vi"
   },
   {
-    "id": 136,
+    "id": 137,
     "parent": 65,
     "notused": 247,
     "detail": "SCAN vi"
   },
   {
-    "id": 140,
+    "id": 139,
     "parent": 65,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON cache (is_tombstone=? AND schema_key=?)"
+    "notused": 27,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_live_vfe (version_id=?)"
   },
   {
-    "id": 168,
-    "parent": 65,
-    "notused": 47,
-    "detail": "SEARCH cache USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=? AND schema_key=?)"
-  },
-  {
-    "id": 201,
+    "id": 171,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 209,
-    "parent": 201,
+    "id": 179,
+    "parent": 171,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 211,
-    "parent": 201,
+    "id": 181,
+    "parent": 171,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 246,
+    "id": 216,
     "parent": 5,
-    "notused": 291,
+    "notused": 250,
     "detail": "SCAN c"
   },
   {
-    "id": 285,
+    "id": 255,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 325,
+    "id": 295,
     "parent": 2,
-    "notused": 271,
+    "notused": 230,
     "detail": "SCAN (subquery-33)"
   },
   {
-    "id": 408,
+    "id": 378,
     "parent": 0,
-    "notused": 271,
+    "notused": 230,
     "detail": "SCAN w"
   },
   {
-    "id": 422,
+    "id": 392,
     "parent": 0,
     "notused": 0,
     "detail": "LIST SUBQUERY 30"
   },
   {
-    "id": 426,
-    "parent": 422,
+    "id": 396,
+    "parent": 392,
     "notused": 0,
     "detail": "MATERIALIZE ranked"
   },
   {
-    "id": 429,
-    "parent": 426,
+    "id": 399,
+    "parent": 396,
     "notused": 0,
     "detail": "CO-ROUTINE (subquery-34)"
   },
   {
-    "id": 432,
-    "parent": 429,
+    "id": 402,
+    "parent": 399,
     "notused": 0,
     "detail": "MATERIALIZE candidates"
   },
   {
-    "id": 434,
-    "parent": 432,
+    "id": 404,
+    "parent": 402,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 435,
-    "parent": 434,
+    "id": 405,
+    "parent": 404,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 437,
-    "parent": 435,
+    "id": 407,
+    "parent": 405,
     "notused": 216,
     "detail": "SCAN unt"
   },
   {
-    "id": 463,
-    "parent": 434,
+    "id": 433,
+    "parent": 404,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 465,
-    "parent": 463,
-    "notused": 76,
+    "id": 435,
+    "parent": 433,
+    "notused": 216,
     "detail": "SCAN cache"
   },
   {
-    "id": 491,
-    "parent": 434,
+    "id": 461,
+    "parent": 404,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 494,
-    "parent": 491,
+    "id": 464,
+    "parent": 461,
     "notused": 0,
     "detail": "MATERIALIZE version_inheritance"
   },
   {
-    "id": 498,
-    "parent": 494,
+    "id": 468,
+    "parent": 464,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 501,
-    "parent": 498,
+    "id": 471,
+    "parent": 468,
     "notused": 24,
     "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
   },
   {
-    "id": 529,
-    "parent": 494,
+    "id": 499,
+    "parent": 464,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 532,
-    "parent": 529,
+    "id": 502,
+    "parent": 499,
     "notused": 62,
     "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
   },
   {
-    "id": 541,
-    "parent": 529,
+    "id": 511,
+    "parent": 499,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 559,
-    "parent": 491,
+    "id": 530,
+    "parent": 461,
     "notused": 295,
     "detail": "SCAN vi"
   },
   {
-    "id": 563,
-    "parent": 491,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON cache (is_tombstone=?)"
+    "id": 532,
+    "parent": 461,
+    "notused": 27,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_live_vfe (version_id=?)"
   },
   {
-    "id": 589,
-    "parent": 491,
-    "notused": 47,
-    "detail": "SEARCH cache USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
-  },
-  {
-    "id": 624,
-    "parent": 434,
+    "id": 567,
+    "parent": 404,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 628,
-    "parent": 624,
+    "id": 571,
+    "parent": 567,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 632,
-    "parent": 624,
+    "id": 575,
+    "parent": 567,
     "notused": 0,
     "detail": "BLOOM FILTER ON unt (is_tombstone=?)"
   },
   {
-    "id": 657,
-    "parent": 624,
+    "id": 600,
+    "parent": 567,
     "notused": 53,
     "detail": "SEARCH unt USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
   },
   {
-    "id": 696,
-    "parent": 429,
-    "notused": 338,
+    "id": 639,
+    "parent": 399,
+    "notused": 335,
     "detail": "SCAN c"
   },
   {
-    "id": 732,
-    "parent": 429,
+    "id": 675,
+    "parent": 399,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 773,
-    "parent": 426,
+    "id": 716,
+    "parent": 396,
     "notused": 336,
     "detail": "SCAN (subquery-34)"
   },
   {
-    "id": 861,
-    "parent": 422,
+    "id": 804,
+    "parent": 392,
     "notused": 0,
     "detail": "BLOOM FILTER ON w (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 885,
-    "parent": 422,
+    "id": 828,
+    "parent": 392,
     "notused": 57,
     "detail": "SEARCH w USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 900,
-    "parent": 422,
+    "id": 843,
+    "parent": 392,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   }
