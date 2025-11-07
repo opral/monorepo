@@ -87,7 +87,7 @@ export async function loadProjectFromDirectory(
 		providePlugins: providePluginsWithLocalPlugins,
 		lixKeyValues: inlangId
 			? // reversing the id to have distinguishable lix ids from inlang ids
-				[{ key: "lix_id", value: inlangId }]
+				[{ key: "lix_id", value: inlangId, lixcol_version_id: "global" }]
 			: undefined,
 		blob: await tempLix.toBlob(),
 	});

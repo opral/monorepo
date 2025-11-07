@@ -33,9 +33,9 @@ export function generateOutput(
 		// create fresh bundle file
 		output[filename] = compiledBundle.bundle.code;
 
-                const needsFallback: string[] = [];
+		const needsFallback: string[] = [];
 
-                const messages: string[] = [];
+		const messages: string[] = [];
 
 		// messages
 		for (const locale of settings.locales) {
@@ -53,54 +53,54 @@ export function generateOutput(
 
 		// add the fallbacks (needs to be done after the messages to avoid referencing
 		// the message before they are defined)
-                const needsFallbackSet = new Set(needsFallback);
-                const emittedFallbacks = new Set<string>();
-                const emittingFallbacks = new Set<string>();
+		const needsFallbackSet = new Set(needsFallback);
+		const emittedFallbacks = new Set<string>();
+		const emittingFallbacks = new Set<string>();
 
-                /**
-                 * Emits the fallback definition for a locale ensuring that dependent fallbacks
-                 * are declared beforehand.
-                 *
-                 * @example
-                 * emitFallback("fr-ca");
-                 */
-                const emitFallback = (locale: string) => {
-                        if (emittedFallbacks.has(locale)) return;
-                        if (emittingFallbacks.has(locale)) return;
+		/**
+		 * Emits the fallback definition for a locale ensuring that dependent fallbacks
+		 * are declared beforehand.
+		 *
+		 * @example
+		 * emitFallback("fr-ca");
+		 */
+		const emitFallback = (locale: string) => {
+			if (emittedFallbacks.has(locale)) return;
+			if (emittingFallbacks.has(locale)) return;
 
-                        emittingFallbacks.add(locale);
+			emittingFallbacks.add(locale);
 
-                        const safeLocale = toSafeModuleId(locale);
-                        const fallbackLocale = fallbackMap[locale];
+			const safeLocale = toSafeModuleId(locale);
+			const fallbackLocale = fallbackMap[locale];
 
-                        if (
-                                fallbackLocale &&
-                                needsFallbackSet.has(fallbackLocale) &&
-                                !compiledBundle.messages[fallbackLocale]
-                        ) {
-                                emitFallback(fallbackLocale);
-                        }
+			if (
+				fallbackLocale &&
+				needsFallbackSet.has(fallbackLocale) &&
+				!compiledBundle.messages[fallbackLocale]
+			) {
+				emitFallback(fallbackLocale);
+			}
 
-                        if (fallbackLocale) {
-                                const safeFallbackLocale = toSafeModuleId(fallbackLocale);
-                                messages.push(
-                                        `/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = ${safeFallbackLocale}_${safeModuleId};`
-                                );
-                        } else {
-                                messages.push(
-                                        `/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = () => '${escapeForSingleQuoteString(
-                                                bundleId
-                                        )}'`
-                                );
-                        }
+			if (fallbackLocale) {
+				const safeFallbackLocale = toSafeModuleId(fallbackLocale);
+				messages.push(
+					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = ${safeFallbackLocale}_${safeModuleId};`
+				);
+			} else {
+				messages.push(
+					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = () => '${escapeForSingleQuoteString(
+						bundleId
+					)}'`
+				);
+			}
 
-                        emittingFallbacks.delete(locale);
-                        emittedFallbacks.add(locale);
-                };
+			emittingFallbacks.delete(locale);
+			emittedFallbacks.add(locale);
+		};
 
-                for (const locale of needsFallback) {
-                        emitFallback(locale);
-                }
+		for (const locale of needsFallback) {
+			emitFallback(locale);
+		}
 
 		output[filename] = messages.join("\n\n") + "\n\n" + output[filename];
 
