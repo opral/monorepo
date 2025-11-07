@@ -1,0 +1,38 @@
+.tabBar {
+	position: relative;
+	padding-bottom: 4px;
+}
+
+.indicatorTrack {
+	position: absolute;
+	top: 0;
+	left: 8px;
+	right: 8px;
+	height: 2px;
+	pointer-events: none;
+}
+
+.indicatorThumb {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	border-radius: 999px;
+	background: rgba(148, 163, 184, 0.8);
+	opacity: 0;
+}
+
+.scrollContainer {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: 4px;
+	padding: 12px 8px 4px;
+	overflow-x: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+	display: none;
+}

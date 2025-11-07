@@ -1,30 +1,20 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
 import "./index.css";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, OpfsSahEnvironment, type Lix } from "@lix-js/sdk";
 import { initLixInspector } from "@lix-js/inspector";
-import { KeyValueProvider } from "./key-value/use-key-value";
-import { KEY_VALUE_DEFINITIONS } from "./key-value/schema";
+import { KeyValueProvider } from "./hooks/key-value/use-key-value";
+import { KEY_VALUE_DEFINITIONS } from "./hooks/key-value/schema";
 import mdPlugin from "@lix-js/plugin-md?raw";
 import { ErrorFallback } from "./main.error";
 import { insertMarkdownSchemas } from "./lib/insert-markdown-schemas";
-
-const router = createRouter({
-	routeTree,
-});
-
-declare module "@tanstack/react-router" {
-	interface Register {
-		router: typeof router;
-	}
-}
+import { V2LayoutShell } from "./app/layout-shell";
+import { ensureAgentsFile, createSeededLixBlob } from "./seed";
 
 // Error UI moved to ./main.error.tsx
 
-function AppRoot() {
+export const AppRoot = () => {
 	const [lix, setLix] = useState<Lix | null>(null);
 	const [error, setError] = useState<unknown>(null);
 
@@ -34,6 +24,11 @@ function AppRoot() {
 		let current: Lix | undefined;
 		(async () => {
 			try {
+				if (!(await env.exists())) {
+					const seededBlob = await createSeededLixBlob();
+					await env.create({ blob: await seededBlob.arrayBuffer() });
+				}
+
 				const instance = await openLix({
 					providePluginsRaw: [mdPlugin],
 					environment: env,
@@ -45,6 +40,7 @@ function AppRoot() {
 				}
 				current = instance;
 				await initLixInspector({ lix: instance, show: false });
+				await ensureAgentsFile(instance);
 				if (!cancelled) setLix(instance);
 			} catch (e) {
 				if (!cancelled) setError(e);
@@ -83,11 +79,11 @@ function AppRoot() {
 	return (
 		<LixProvider lix={lix}>
 			<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
-				<RouterProvider router={router} />
+				<V2LayoutShell />
 			</KeyValueProvider>
 		</LixProvider>
 	);
-}
+};
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
@@ -95,6 +91,7 @@ createRoot(document.getElementById("root")!).render(
 	</StrictMode>,
 );
 
+// Register the offline shell in production and force new workers to activate immediately.
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
 		navigator.serviceWorker

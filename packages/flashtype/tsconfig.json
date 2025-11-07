@@ -18,5 +18,5 @@
 		"jsx": "react-jsx",
 		"types": ["vite/client"]
 	},
-	"include": ["src"]
+	"include": ["src", "setup-tests.ts"]
 }

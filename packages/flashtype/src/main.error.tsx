@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { OpfsSahEnvironment } from "@lix-js/sdk";
-import { RotateCcw, Bug } from "lucide-react";
+import { RotateCcw, Bug, AlertTriangle } from "lucide-react";
 
 function formatError(err: unknown): string {
 	const asAny = err as any;
@@ -23,6 +23,38 @@ function formatError(err: unknown): string {
 	} catch {
 		return String(err);
 	}
+}
+
+function containsOpfsHandleConflict(err: unknown): boolean {
+	const visited = new Set<unknown>();
+
+	function walk(node: unknown): boolean {
+		if (!node || visited.has(node)) return false;
+		visited.add(node);
+		if (typeof node === "object") {
+			const anyNode = node as any;
+			const name = anyNode?.name;
+			const message =
+				typeof anyNode?.message === "string" ? anyNode.message : "";
+			if (
+				(name === "NoModificationAllowedError" ||
+					message.includes("NoModificationAllowedError")) &&
+				message.includes("createSyncAccessHandle")
+			) {
+				return true;
+			}
+			if (walk(anyNode?.cause)) return true;
+			const errors = anyNode?.errors;
+			if (Array.isArray(errors)) {
+				for (const inner of errors) {
+					if (walk(inner)) return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	return walk(err);
 }
 
 /**
@@ -57,6 +89,40 @@ export function ErrorFallback(props: { error: unknown }) {
 			setBusy(false);
 			alert("Failed to reset OPFS. See console for details.");
 		}
+	}
+
+	if (containsOpfsHandleConflict(props.error)) {
+		return (
+			<div className="min-h-dvh w-full flex items-center justify-center p-6">
+				<div className="max-w-lg w-full border rounded-lg p-6 bg-card text-card-foreground">
+					<div className="flex items-center gap-2 text-amber-600 mb-3">
+						<AlertTriangle className="h-5 w-5" />
+						<h1 className="text-lg font-semibold">Flashtype is already open</h1>
+					</div>
+					<p className="text-sm text-muted-foreground mb-4">
+						Flashtype can only be open in one tab at a time. Close other tabs
+						where Flashtype is running, then reload this page. If the issue
+						persists, please report a bug.
+					</p>
+					<div className="flex items-center gap-3">
+						<button
+							onClick={() => window.location.reload()}
+							className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+						>
+							<RotateCcw className="h-4 w-4" /> Reload this tab
+						</button>
+						<a
+							href="https://github.com/opral/flashtype.ai/issues"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+						>
+							<Bug className="h-4 w-4" /> Report bug
+						</a>
+					</div>
+				</div>
+			</div>
+		);
 	}
 
 	return (
