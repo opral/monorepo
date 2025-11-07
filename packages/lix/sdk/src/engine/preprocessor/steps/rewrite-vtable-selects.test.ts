@@ -160,6 +160,20 @@ test("propagates schema filters into derived vtable subqueries", () => {
 	expect(sql).toContain(`"${cacheTable}"`);
 });
 
+test("prunes inheritance segments when inherited rows are filtered out", () => {
+	const rewritten = rewrite(
+		`
+		SELECT *
+		FROM lix_internal_state_vtable
+		WHERE inherited_from_version_id IS NULL
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	expect(sql).not.toContain("version_inheritance");
+});
+
 test("resolves cache rows across recursive version inheritance chains", async () => {
 	const lix = await openLix({});
 	const schemaKey = "recursive_entity_schema";

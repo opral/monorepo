@@ -76,6 +76,7 @@ type InlineRewriteMetadata = {
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
+	pruneInheritance: boolean;
 };
 
 /**
@@ -406,14 +407,40 @@ function buildInlineMetadata(
 			summary.literals
 		);
 		const columnSummary = collectSelectedColumns(select, tableNames);
+		const pruneInheritance = shouldPruneInheritance(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
 		metadata.set(aliasKey, {
 			schemaKeys,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
 			supportColumns: new Set(columnSummary.supportColumns),
+			pruneInheritance,
 		});
 	}
 	return metadata;
+}
+
+function shouldPruneInheritance(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>
+): boolean {
+	if (!whereClause) {
+		return false;
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified: true,
+	};
+	return expressionRequiresNullForColumn(
+		whereClause,
+		"inherited_from_version_id",
+		context
+	);
 }
 
 function createInlineVisitor(
@@ -444,6 +471,7 @@ function createInlineVisitor(
 				hiddenColumns: metadataEntry.hiddenColumns,
 				supportColumns: metadataEntry.supportColumns,
 				hasOpenTransaction: context.hasOpenTransaction!(),
+				pruneInheritance: metadataEntry.pruneInheritance,
 			}).trimEnd();
 			const fragment: RawFragmentNode = {
 				node_kind: "raw_fragment",
@@ -488,6 +516,76 @@ function collectSchemaKeyPredicatesFromExpression(
 		allowUnqualified,
 	};
 	return visitExpression(expression, context);
+}
+
+function expressionRequiresNullForColumn(
+	expression: ExpressionNode | RawFragmentNode,
+	columnName: string,
+	context: PredicateVisitContext
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "grouped_expression":
+			return expressionRequiresNullForColumn(
+				expression.expression,
+				columnName,
+				context
+			);
+		case "binary_expression":
+			if (expression.operator === "and") {
+				return (
+					expressionRequiresNullForColumn(
+						expression.left,
+						columnName,
+						context
+					) ||
+					expressionRequiresNullForColumn(
+						expression.right,
+						columnName,
+						context
+					)
+				);
+			}
+			if (expression.operator === "or") {
+				return (
+					expressionRequiresNullForColumn(
+						expression.left,
+						columnName,
+						context
+					) &&
+					expressionRequiresNullForColumn(
+						expression.right,
+						columnName,
+						context
+					)
+				);
+			}
+			if (expression.operator === "is") {
+				const leftMatches = isColumnReference(
+					expression.left,
+					context,
+					columnName
+				);
+				const rightMatches = isColumnReference(
+					expression.right,
+					context,
+					columnName
+				);
+				if (
+					(leftMatches &&
+						isNullLiteralExpression(expression.right, context.parameters)) ||
+					(rightMatches &&
+						isNullLiteralExpression(expression.left, context.parameters))
+				) {
+					return true;
+				}
+			}
+			return false;
+		default:
+			return false;
+	}
 }
 
 function visitExpression(
@@ -610,16 +708,40 @@ function incrementSummaryWithOperand(
 	return next;
 }
 
+function isNullLiteralExpression(
+	expression: ExpressionNode | RawFragmentNode,
+	parameters: ReadonlyArray<unknown>
+): boolean {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return false;
+	}
+	if (node.node_kind === "literal") {
+		return node.value === null;
+	}
+	if (node.node_kind === "parameter") {
+		return resolveParameterValue(node, parameters) === null;
+	}
+	return false;
+}
+
 function resolveParameterSchemaLiteral(
 	parameter: ParameterExpressionNode,
 	parameters: ReadonlyArray<unknown>
 ): string | null {
+	const value = resolveParameterValue(parameter, parameters);
+	return typeof value === "string" ? value : null;
+}
+
+function resolveParameterValue(
+	parameter: ParameterExpressionNode,
+	parameters: ReadonlyArray<unknown>
+): unknown {
 	const index = parameter.position;
 	if (typeof index === "number" && index >= 0 && index < parameters.length) {
-		const value = parameters[index];
-		return typeof value === "string" ? value : null;
+		return parameters[index];
 	}
-	return null;
+	return undefined;
 }
 
 function unwrapExpression(
@@ -638,6 +760,14 @@ function isSchemaKeyReference(
 	expression: ExpressionNode | RawFragmentNode,
 	context: PredicateVisitContext
 ): boolean {
+	return isColumnReference(expression, context, "schema_key");
+}
+
+function isColumnReference(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext,
+	expectedColumn: string
+): boolean {
 	if ("sql_text" in expression) {
 		return false;
 	}
@@ -645,15 +775,15 @@ function isSchemaKeyReference(
 		const qualifier = getColumnQualifier(expression);
 		const columnName = getColumnName(expression);
 		if (qualifier && context.tableNames.has(qualifier)) {
-			return columnName === "schema_key";
+			return columnName === expectedColumn;
 		}
 		if (!qualifier && context.allowUnqualified) {
-			return columnName === "schema_key";
+			return columnName === expectedColumn;
 		}
 		return false;
 	}
 	if (expression.node_kind === "grouped_expression") {
-		return isSchemaKeyReference(expression.expression, context);
+		return isColumnReference(expression.expression, context, expectedColumn);
 	}
 	return false;
 }
@@ -933,6 +1063,7 @@ function buildVtableSelectRewrite(options: {
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
 	hasOpenTransaction: boolean;
+	pruneInheritance: boolean;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
@@ -981,26 +1112,29 @@ function buildVtableSelectRewrite(options: {
 	if (cacheSegment) {
 		segments.push(cacheSegment);
 	}
-	const inheritedSegments: string[] = [];
-	if (cacheSegment) {
-		const inheritedCache = buildInheritedCacheSegment(
-			cacheSource,
-			schemaFilter,
-			candidateColumns
-		);
-		if (inheritedCache) {
-			inheritedSegments.push(inheritedCache);
+	let allSegments = segments;
+	if (!options.pruneInheritance) {
+		const inheritedSegments: string[] = [];
+		if (cacheSegment) {
+			const inheritedCache = buildInheritedCacheSegment(
+				cacheSource,
+				schemaFilter,
+				candidateColumns
+			);
+			if (inheritedCache) {
+				inheritedSegments.push(inheritedCache);
+			}
 		}
-	}
-	inheritedSegments.push(
-		buildInheritedUntrackedSegment(schemaFilter, candidateColumns)
-	);
-	if (options.hasOpenTransaction !== false) {
 		inheritedSegments.push(
-			buildInheritedTransactionSegment(schemaFilter, candidateColumns)
+			buildInheritedUntrackedSegment(schemaFilter, candidateColumns)
 		);
+		if (options.hasOpenTransaction !== false) {
+			inheritedSegments.push(
+				buildInheritedTransactionSegment(schemaFilter, candidateColumns)
+			);
+		}
+		allSegments = segments.concat(inheritedSegments);
 	}
-	const allSegments = segments.concat(inheritedSegments);
 	const candidates = allSegments.join(`\n\n    UNION ALL\n\n`);
 
 	const writerJoinSql = needsWriterJoin
@@ -1027,7 +1161,7 @@ LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
 			: "";
 	const rankedSql = buildRankedSegment(rankedColumns, rankingOrder);
 	const withClauses: string[] = [];
-	if (allSegments.length > 0) {
+	if (!options.pruneInheritance) {
 		withClauses.push(buildVersionDescriptorCte());
 		withClauses.push(buildVersionInheritanceCte());
 		withClauses.push(buildVersionParentCte());
