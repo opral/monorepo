@@ -16,32 +16,6 @@ services:
     domains:
       - opral.com
 
-  - name: lix-host
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: starter
-    branch: main
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host production
-    autoDeploy: true
-    envVars:
-      - fromGroup: production
-      - key: PORT
-        value: 3005
-      - key: NODE_VERSION
-        value: 22.11.0
-    buildFilter:
-      paths:
-        - packages/lix/host/**
-        - packages/lix/sdk/**
-        - packages/lix/file-manager/**
-        - packages/csv-app/**
-        - packages/md-app/**
-    domains:
-      - lix.host
-
   - name: fink2
     type: web
     runtime: static
@@ -56,19 +30,6 @@ services:
     buildFilter:
       paths:
         - inlang/packages/fink2/**
-    envVars:
-      - fromGroup: production
-
-  - name: csv
-    type: web
-    runtime: static
-    autoDeploy: true
-    branch: main
-    staticPublishPath: ./packages/csv-app/dist
-    buildCommand: pnpm install && pnpm run --filter csv-app... build
-    buildFilter:
-      paths:
-        - packages/csv-app/**
     envVars:
       - fromGroup: production
 
@@ -139,44 +100,6 @@ services:
     domains:
       - fink.inlang.com
 
-  - name: telemetry-proxy
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: starter
-    branch: inlang-v1
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy production
-    autoDeploy: true
-    envVars:
-      - key: PORT
-        value: 4005
-    buildFilter:
-      paths:
-        - inlang/packages/telemetry-proxy/**
-    domains:
-      - tm.inlang.com
-
-  - name: telemetry-proxy-parrot
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: starter
-    branch: inlang-v1
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy-parrot build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy-parrot production
-    autoDeploy: true
-    envVars:
-      - key: PORT
-        value: 4006
-    buildFilter:
-      paths:
-        - inlang/packages/telemetry-proxy-parrot/**
-    domains:
-      - telemetry.inlang.com
-
   - name: markdown-wc-website
     type: web
     runtime: static
@@ -188,32 +111,6 @@ services:
         - ./packages/markdown-wc/**
     domains:
       - markdown-wc.opral.com
-
-  - name: parrot-figma
-    type: web
-    runtime: static
-    autoDeploy: true
-    # TODO replace with main when we deploy parrot-figma in prod
-    branch: main
-    staticPublishPath: ./inlang/packages/parrot-figma/dist
-    # buildCommand: pnpm install && pnpm run --filter csv-app... build
-    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build
-    buildFilter:
-      paths:
-        - ./inlang/packages/parrot-figma/**
-    envVars:
-      - fromGroup: production
-    headers:
-      # add headers for cors
-      - path: "/*"
-        name: Access-Control-Allow-Origin
-        value: "*"
-      - path: "/*"
-        name: Access-Control-Allow-Methods
-        value: GET, OPTIONS
-      - path: "/*"
-        name: Access-Control-Allow-Headers
-        value: Content-Type
 
   - name: lix-docs
     type: web
