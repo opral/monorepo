@@ -36,6 +36,10 @@ import {
 	cacheTableNameToSchemaKey,
 	schemaKeyToCacheTableName,
 } from "../../../state/cache/create-schema-cache-table.js";
+import type {
+	VersionInheritanceMap,
+	VersionInheritanceNode,
+} from "../inheritance/version-inheritance-cache.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
@@ -74,6 +78,7 @@ type TableReferenceInfo = {
 type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
+	versionIds: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
@@ -83,6 +88,7 @@ type InlineRewriteMetadata = {
 type SubqueryPredicateMetadata = {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
+	versionIds: readonly string[];
 	pruneInheritance: boolean;
 };
 
@@ -149,7 +155,8 @@ function rewriteSelectStatement(
 	context: PreprocessorStepContext,
 	pushdownSchemaKeys: readonly string[] = [],
 	pushdownPruneInheritance = false,
-	pushdownFileIds: readonly string[] = []
+	pushdownFileIds: readonly string[] = [],
+	pushdownVersionIds: readonly string[] = []
 ): SelectStatementNode {
 	const parameters = context.parameters ?? [];
 	const subqueryPredicateMap = collectSubqueryPredicateMap(
@@ -157,7 +164,8 @@ function rewriteSelectStatement(
 		parameters,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
-		pushdownFileIds
+		pushdownFileIds,
+		pushdownVersionIds
 	);
 	const withRewrittenSubqueries = visitSelectStatement(select, {
 		subquery(node, visitContext) {
@@ -175,6 +183,8 @@ function rewriteSelectStatement(
 			const nextPrune =
 				predicateMetadata?.pruneInheritance ?? pushdownPruneInheritance;
 			const nextFileIds = predicateMetadata?.fileIds ?? pushdownFileIds;
+			const nextVersionIds =
+				predicateMetadata?.versionIds ?? pushdownVersionIds;
 			const rewrittenStatement =
 				node.statement.node_kind === "compound_select"
 					? rewriteCompoundSelect(
@@ -182,14 +192,16 @@ function rewriteSelectStatement(
 							context,
 							nextSchemaKeys,
 							nextPrune,
-							nextFileIds
+							nextFileIds,
+							nextVersionIds
 						)
 					: rewriteSelectStatement(
 							node.statement,
 							context,
 							nextSchemaKeys,
 							nextPrune,
-							nextFileIds
+							nextFileIds,
+							nextVersionIds
 						);
 			if (rewrittenStatement !== node.statement) {
 				return {
@@ -247,7 +259,8 @@ function rewriteSelectStatement(
 		parameters,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
-		pushdownFileIds
+		pushdownFileIds,
+		pushdownVersionIds
 	);
 
 	const rewritten = visitSelectStatement(
@@ -273,7 +286,8 @@ function rewriteCompoundSelect(
 	context: PreprocessorStepContext,
 	pushdownSchemaKeys: readonly string[] = [],
 	pushdownPruneInheritance = false,
-	pushdownFileIds: readonly string[] = []
+	pushdownFileIds: readonly string[] = [],
+	pushdownVersionIds: readonly string[] = []
 ): CompoundSelectNode {
 	let changed = false;
 	const first = rewriteSelectStatement(
@@ -281,7 +295,8 @@ function rewriteCompoundSelect(
 		context,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
-		pushdownFileIds
+		pushdownFileIds,
+		pushdownVersionIds
 	);
 	if (first !== compound.first) {
 		changed = true;
@@ -293,7 +308,8 @@ function rewriteCompoundSelect(
 			context,
 			pushdownSchemaKeys,
 			pushdownPruneInheritance,
-			pushdownFileIds
+			pushdownFileIds,
+			pushdownVersionIds
 		);
 		if (rewritten !== branch.select) {
 			changed = true;
@@ -362,7 +378,8 @@ function collectSubqueryPredicateMap(
 	parameters: ReadonlyArray<unknown>,
 	pushdownSchemaKeys: readonly string[],
 	pushdownPruneInheritance: boolean,
-	pushdownFileIds: readonly string[]
+	pushdownFileIds: readonly string[],
+	pushdownVersionIds: readonly string[]
 ): Map<string, SubqueryPredicateMetadata> {
 	const map = new Map<string, SubqueryPredicateMetadata>();
 	const register = (
@@ -413,6 +430,22 @@ function collectSubqueryPredicateMap(
 			fileJoinSummary.literals
 		);
 
+		const versionWhereSummary = collectVersionIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const versionJoinSummary = collectVersionIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localVersionIds = mergeStringLiterals(
+			versionWhereSummary.literals,
+			versionJoinSummary.literals
+		);
+
 		const existing = map.get(normalizedAlias);
 		const merged = mergeStringLiterals(
 			existing?.schemaKeys ?? [],
@@ -423,6 +456,11 @@ function collectSubqueryPredicateMap(
 			existing?.fileIds ?? [],
 			pushdownFileIds,
 			localFileIds
+		);
+		const mergedVersionIds = mergeStringLiterals(
+			existing?.versionIds ?? [],
+			pushdownVersionIds,
+			localVersionIds
 		);
 		const pruneFromWhere = requiresNullPredicateForColumn(
 			select.where_clause,
@@ -444,10 +482,16 @@ function collectSubqueryPredicateMap(
 		const finalFileIds = shouldPushFileFilter(merged, mergedFileIds)
 			? mergedFileIds
 			: [];
-		if (merged.length > 0 || finalFileIds.length > 0 || combinedPrune) {
+		if (
+			merged.length > 0 ||
+			finalFileIds.length > 0 ||
+			mergedVersionIds.length > 0 ||
+			combinedPrune
+		) {
 			map.set(normalizedAlias, {
 				schemaKeys: merged,
 				fileIds: finalFileIds,
+				versionIds: mergedVersionIds,
 				pruneInheritance: combinedPrune,
 			});
 		}
@@ -469,7 +513,8 @@ function buildInlineMetadata(
 	parameters: ReadonlyArray<unknown>,
 	pushdownSchemaKeys: readonly string[],
 	pushdownPruneInheritance: boolean,
-	pushdownFileIds: readonly string[]
+	pushdownFileIds: readonly string[],
+	pushdownVersionIds: readonly string[]
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -500,6 +545,15 @@ function buildInlineMetadata(
 			pushdownFileIds,
 			fileSummary.literals
 		);
+		const versionSummary = collectVersionIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedVersionIds = mergeStringLiterals(
+			pushdownVersionIds,
+			versionSummary.literals
+		);
 		const fileIds = shouldPushFileFilter(schemaKeys, mergedFileIds)
 			? mergedFileIds
 			: [];
@@ -510,6 +564,7 @@ function buildInlineMetadata(
 		metadata.set(aliasKey, {
 			schemaKeys,
 			fileIds,
+			versionIds: mergedVersionIds,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
 			supportColumns: new Set(columnSummary.supportColumns),
@@ -577,12 +632,16 @@ function createInlineVisitor(
 			const inlineSql = buildVtableSelectRewrite({
 				schemaKeys: metadataEntry.schemaKeys,
 				fileIds: metadataEntry.fileIds,
+				versionIds: metadataEntry.versionIds,
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
 				hiddenColumns: metadataEntry.hiddenColumns,
 				supportColumns: metadataEntry.supportColumns,
 				hasOpenTransaction: context.hasOpenTransaction!(),
 				pruneInheritance: metadataEntry.pruneInheritance,
+				versionInheritance: context.getVersionInheritance
+					? context.getVersionInheritance()
+					: undefined,
 			}).trimEnd();
 			const fragment: RawFragmentNode = {
 				node_kind: "raw_fragment",
@@ -649,6 +708,36 @@ function collectFileIdPredicatesFromExpression(
 		tableNames,
 		parameters,
 		"file_id",
+		allowUnqualified
+	);
+}
+
+function collectVersionIdPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
+		tableNames,
+		parameters,
+		"version_id",
+		allowUnqualified
+	);
+}
+
+function collectVersionIdPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"version_id",
 		allowUnqualified
 	);
 }
@@ -1219,12 +1308,14 @@ function buildTraceEntry(args: {
 function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
+	versionIds: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
 	hasOpenTransaction: boolean;
 	pruneInheritance: boolean;
+	versionInheritance?: VersionInheritanceMap;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
@@ -1234,12 +1325,18 @@ function buildVtableSelectRewrite(options: {
 	);
 	candidateColumns.add("priority");
 	rankedColumns.add("priority");
+	const inheritancePlan = determineInheritancePlan({
+		requestedVersionIds: options.versionIds,
+		versionInheritance: options.versionInheritance,
+		forcedPrune: options.pruneInheritance,
+	});
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
 	const fileFilter =
 		options.fileIds && options.fileIds.length > 0
 			? buildFileFilter(options.fileIds)
 			: null;
-	const txnFilter = combineFilters(schemaFilter, fileFilter);
+	const versionFilter = buildVersionFilter(inheritancePlan.versionFilterIds);
+	const txnFilter = combineFilters(schemaFilter, fileFilter, versionFilter);
 	const cacheSource = buildCacheSource(
 		schemaFilterList,
 		options.cacheTables,
@@ -1278,25 +1375,43 @@ function buildVtableSelectRewrite(options: {
 	if (cacheSegment) {
 		segments.push(cacheSegment);
 	}
+	const shouldPruneInheritance = inheritancePlan.mode === "pruned";
+	let inheritanceJoinSource = "version_inheritance vi";
+	let parentJoinSource = "version_parent vi";
+	if (inheritancePlan.mode === "inline") {
+		inheritanceJoinSource = buildInlineInheritanceSource(
+			inheritancePlan.versionAncestorPairs
+		);
+		parentJoinSource = buildInlineParentSource(inheritancePlan.parentPairs);
+	}
 	let allSegments = segments;
-	if (!options.pruneInheritance) {
+	if (!shouldPruneInheritance) {
 		const inheritedSegments: string[] = [];
 		if (cacheSegment) {
 			const inheritedCache = buildInheritedCacheSegment(
 				cacheSource,
 				txnFilter,
-				candidateColumns
+				candidateColumns,
+				inheritanceJoinSource
 			);
 			if (inheritedCache) {
 				inheritedSegments.push(inheritedCache);
 			}
 		}
 		inheritedSegments.push(
-			buildInheritedUntrackedSegment(txnFilter, candidateColumns)
+			buildInheritedUntrackedSegment(
+				txnFilter,
+				candidateColumns,
+				inheritanceJoinSource
+			)
 		);
 		if (options.hasOpenTransaction !== false) {
 			inheritedSegments.push(
-				buildInheritedTransactionSegment(txnFilter, candidateColumns)
+				buildInheritedTransactionSegment(
+					txnFilter,
+					candidateColumns,
+					parentJoinSource
+				)
 			);
 		}
 		allSegments = segments.concat(inheritedSegments);
@@ -1325,31 +1440,29 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id`
 			? `
 LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
 			: "";
-	const rankedSql = buildRankedSegment(rankedColumns, rankingOrder);
+	const rankedSql = buildRankedSegment({
+		projectionColumns: rankedColumns,
+		rankingOrder,
+		candidatesSql: candidates,
+	});
 	const withClauses: string[] = [];
-	if (!options.pruneInheritance) {
+	if (inheritancePlan.mode === "recursive") {
 		withClauses.push(buildVersionDescriptorCte());
 		withClauses.push(buildVersionInheritanceCte());
 		withClauses.push(buildVersionParentCte());
 	}
-	withClauses.push(
-		stripIndent(`
-	candidates AS (
-${indent(candidates, 4)}
-	)`).trim()
-	);
-	withClauses.push(
-		stripIndent(`
-	ranked AS (
-${indent(rankedSql, 4)}
-	)`).trim()
-	);
-
-	const body = `WITH
+	const withPrefix =
+		withClauses.length > 0
+			? `WITH
 ${withClauses.map((clause) => indent(clause, 2)).join(",\n")}
-SELECT
+`
+			: "";
+
+	const body = `${withPrefix}SELECT
 ${indent(projectionSql, 2)}
-FROM ranked w
+FROM (
+${indent(rankedSql, 2)}
+) AS w
 ${writerJoinSql}
 ${changeJoinSql}
 ${transactionJoinSql}
@@ -1779,7 +1892,8 @@ function buildVersionParentCte(): string {
 function buildInheritedCacheSegment(
 	cacheSource: string | null,
 	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	projectionColumns: Set<string>,
+	inheritanceJoin: string
 ): string | null {
 	if (!cacheSource) {
 		return null;
@@ -1821,7 +1935,7 @@ function buildInheritedCacheSegment(
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM version_inheritance vi
+		FROM ${inheritanceJoin}
 		JOIN ${sourceSql} cache ON cache.version_id = vi.ancestor_version_id
 		WHERE cache.is_tombstone = 0
 		  AND cache.snapshot_content IS NOT NULL${
@@ -1844,7 +1958,8 @@ ${indent(columnSql, 4)}
  */
 function buildInheritedUntrackedSegment(
 	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	projectionColumns: Set<string>,
+	inheritanceJoin: string
 ): string {
 	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "unt");
 	const columns: Array<[string, string]> = [
@@ -1879,7 +1994,7 @@ function buildInheritedUntrackedSegment(
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM version_inheritance vi
+		FROM ${inheritanceJoin}
 		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
 		WHERE unt.is_tombstone = 0
 		  AND unt.snapshot_content IS NOT NULL${
@@ -1903,7 +2018,8 @@ ${indent(columnSql, 4)}
  */
 function buildInheritedTransactionSegment(
 	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	projectionColumns: Set<string>,
+	parentJoinSource: string
 ): string {
 	const columns: Array<[string, string]> = [
 		[
@@ -1938,7 +2054,7 @@ function buildInheritedTransactionSegment(
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM version_parent vi
+		FROM ${parentJoinSource}
 		JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id
 		WHERE vi.parent_version_id IS NOT NULL
 		  AND txn.snapshot_content IS NOT NULL${
@@ -1947,23 +2063,28 @@ ${indent(columnSql, 4)}
 	`).trimEnd();
 }
 
-function buildRankedSegment(
-	projectionColumns: Set<string>,
-	rankingOrder: string[]
-): string {
+function buildRankedSegment(options: {
+	projectionColumns: Set<string>;
+	rankingOrder: string[];
+	candidatesSql: string;
+}): string {
 	const columns = ALL_SEGMENT_COLUMNS.filter((column) =>
-		projectionColumns.has(column)
+		options.projectionColumns.has(column)
 	).map((column) => `c.${column} AS ${column}`);
-	const orderClause = rankingOrder.join(", ");
+	const orderClause = options.rankingOrder.join(", ");
+	const selectEntries = [
+		...columns,
+		`ROW_NUMBER() OVER (
+        PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+        ORDER BY ${orderClause}
+      ) AS rn`,
+	];
 	return stripIndent(`
 		SELECT
-${indent(columns.join(",\n"), 4)}${
-		columns.length > 0 ? ",\n" : ""
-	}  ROW_NUMBER() OVER (
-		    PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-		    ORDER BY ${orderClause}
-		  ) AS rn
-		FROM candidates c
+${indent(selectEntries.join(",\n"), 4)}
+		FROM (
+${indent(options.candidatesSql, 6)}
+		) AS c
 	`).trimEnd();
 }
 
@@ -1983,6 +2104,16 @@ function buildFileFilter(fileIds: readonly string[]): string | null {
 		.map((fileId) => `'${escapeSqlLiteral(fileId)}'`)
 		.join(", ");
 	return `txn.file_id IN (${values})`;
+}
+
+function buildVersionFilter(versionIds: readonly string[]): string | null {
+	if (!versionIds || versionIds.length === 0) {
+		return null;
+	}
+	const values = versionIds
+		.map((versionId) => `'${escapeSqlLiteral(versionId)}'`)
+		.join(",");
+	return `txn.version_id IN (${values})`;
 }
 
 function buildCacheSource(
@@ -2127,4 +2258,124 @@ function rewriteFilterForAlias(
 
 function escapeSqlLiteral(value: string): string {
 	return value.replace(/'/g, "''");
+}
+
+type InheritancePlan =
+	| { mode: "pruned"; versionFilterIds: readonly string[] }
+	| { mode: "recursive"; versionFilterIds: readonly string[] }
+	| {
+			mode: "inline";
+			versionAncestorPairs: Array<{ versionId: string; ancestorId: string }>;
+			parentPairs: Array<{ versionId: string; parentId: string }>;
+			versionFilterIds: readonly string[];
+	  };
+
+function determineInheritancePlan(args: {
+	requestedVersionIds: readonly string[];
+	versionInheritance?: VersionInheritanceMap;
+	forcedPrune: boolean;
+}): InheritancePlan {
+	const requested = Array.from(new Set(args.requestedVersionIds ?? []));
+
+	if (args.forcedPrune) {
+		return { mode: "pruned", versionFilterIds: requested };
+	}
+
+	if (requested.length === 0) {
+		return args.versionInheritance
+			? { mode: "recursive", versionFilterIds: [] }
+			: { mode: "pruned", versionFilterIds: [] };
+	}
+
+	if (!args.versionInheritance || args.versionInheritance.size === 0) {
+		return { mode: "pruned", versionFilterIds: requested };
+	}
+
+	const ancestorPairs: Array<{ versionId: string; ancestorId: string }> = [];
+	const parentPairs: Array<{ versionId: string; parentId: string }> = [];
+	const ancestorSeen = new Set<string>();
+	const parentSeen = new Set<string>();
+	const versionFilterSet = new Set(requested);
+
+	for (const versionId of requested) {
+		let current = versionId;
+		const chainVisited = new Set<string>([current]);
+		while (true) {
+			const node = args.versionInheritance.get(current);
+			if (!node) {
+				return {
+					mode: "recursive",
+					versionFilterIds: Array.from(versionFilterSet),
+				};
+			}
+			const parentId = node.inheritsFromVersionId;
+			if (!parentId) {
+				break;
+			}
+			if (chainVisited.has(parentId)) {
+				return {
+					mode: "recursive",
+					versionFilterIds: Array.from(versionFilterSet),
+				};
+			}
+			chainVisited.add(parentId);
+			versionFilterSet.add(parentId);
+
+			const ancestorKey = `${versionId}::${parentId}`;
+			if (!ancestorSeen.has(ancestorKey)) {
+				ancestorSeen.add(ancestorKey);
+				ancestorPairs.push({ versionId, ancestorId: parentId });
+			}
+
+			const parentKey = `${current}::${parentId}`;
+			if (!parentSeen.has(parentKey)) {
+				parentSeen.add(parentKey);
+				parentPairs.push({ versionId: current, parentId });
+			}
+
+			current = parentId;
+		}
+	}
+
+	if (ancestorPairs.length === 0) {
+		return { mode: "pruned", versionFilterIds: requested };
+	}
+
+	return {
+		mode: "inline",
+		versionAncestorPairs: ancestorPairs,
+		parentPairs,
+		versionFilterIds: Array.from(versionFilterSet),
+	};
+}
+
+function buildInlineInheritanceSource(
+	pairs: Array<{ versionId: string; ancestorId: string }>
+): string {
+	return buildInlineValueSource(
+		pairs.map(({ versionId, ancestorId }) => [versionId, ancestorId]),
+		["version_id", "ancestor_version_id"]
+	);
+}
+
+function buildInlineParentSource(
+	pairs: Array<{ versionId: string; parentId: string }>
+): string {
+	return buildInlineValueSource(
+		pairs.map(({ versionId, parentId }) => [versionId, parentId]),
+		["version_id", "parent_version_id"]
+	);
+}
+
+function buildInlineValueSource(
+	rows: Array<[string, string]>,
+	columns: [string, string]
+): string {
+	const selects = rows
+		.map(
+			([left, right]) =>
+				`SELECT '${escapeSqlLiteral(left)}' AS ${columns[0]}, '${escapeSqlLiteral(right)}' AS ${columns[1]}`
+		)
+		.join("\nUNION ALL\n");
+	return `(\n${selects}\n) AS vi`;
 }

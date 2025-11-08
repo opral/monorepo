@@ -1,6 +1,7 @@
 import type { SegmentedStatementNode } from "./sql-parser/nodes.js";
 import type { LixEngine } from "../boot.js";
 import type { CelEnvironment } from "../cel-environment/cel-environment.js";
+import type { VersionInheritanceMap } from "./inheritance/version-inheritance-cache.js";
 
 /**
  * Controls which subset of preprocessing stages to execute.
@@ -44,6 +45,7 @@ export type PreprocessorContext = {
 	readonly hasOpenTransaction?: () => boolean;
 	readonly getCelEnvironment?: () => CelEnvironment;
 	readonly getEngine?: () => LixEngine;
+	readonly getVersionInheritance?: () => VersionInheritanceMap;
 	readonly trace?: PreprocessorTrace;
 };
 

@@ -24,6 +24,7 @@ import { getEntityViewSqlDefinitions } from "./entity-views/select.js";
 import { rewriteEntityViewInsert } from "./entity-views/insert.js";
 import { rewriteEntityViewUpdate } from "./entity-views/update.js";
 import { rewriteEntityViewDelete } from "./entity-views/delete.js";
+import { getVersionInheritanceSnapshot } from "./inheritance/version-inheritance-cache.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -95,6 +96,7 @@ export function createPreprocessor(args: {
 					hasOpenTransaction: context.hasOpenTransaction,
 					getCelEnvironment: context.getCelEnvironment,
 					getEngine: context.getEngine,
+					getVersionInheritance: context.getVersionInheritance,
 					trace: context.trace,
 				}),
 			statements
@@ -177,6 +179,7 @@ function buildContext(
 			return celEnvironment ?? null;
 		},
 		getEngine: () => engine,
+		getVersionInheritance: () => getVersionInheritanceSnapshot({ engine }),
 		...(trace ? { trace } : {}),
 	} as PreprocessorContext;
 

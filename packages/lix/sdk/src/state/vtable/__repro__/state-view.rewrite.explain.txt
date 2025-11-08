@@ -94,75 +94,6 @@ WITH
       vdb.inherits_from_version_id AS parent_version_id
     FROM version_descriptor_base vdb
     WHERE vdb.inherits_from_version_id IS NOT NULL
-  ),
-  candidates AS (
-     SELECT
-       unt.entity_id AS entity_id,
-       unt.schema_key AS schema_key,
-       unt.file_id AS file_id,
-       unt.plugin_key AS plugin_key,
-       json(unt.snapshot_content) AS snapshot_content,
-       unt.schema_version AS schema_version,
-       unt.version_id AS version_id,
-       unt.created_at AS created_at,
-       unt.updated_at AS updated_at,
-       NULL AS inherited_from_version_id,
-       'untracked' AS change_id,
-       1 AS untracked,
-       'untracked' AS commit_id,
-       NULL AS metadata,
-       NULL AS writer_key,
-       2 AS priority
-     FROM lix_internal_state_all_untracked unt
-     WHERE unt.schema_key IN ('validate_state_mutation_repro')
-
-         UNION ALL
-
-     SELECT
-       unt.entity_id AS entity_id,
-       unt.schema_key AS schema_key,
-       unt.file_id AS file_id,
-       unt.plugin_key AS plugin_key,
-       json(unt.snapshot_content) AS snapshot_content,
-       unt.schema_version AS schema_version,
-       vi.version_id AS version_id,
-       unt.created_at AS created_at,
-       unt.updated_at AS updated_at,
-       unt.version_id AS inherited_from_version_id,
-       'untracked' AS change_id,
-       1 AS untracked,
-       'untracked' AS commit_id,
-       NULL AS metadata,
-       NULL AS writer_key,
-       5 AS priority
-     FROM version_inheritance vi
-     JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-     WHERE unt.is_tombstone = 0
-       AND unt.snapshot_content IS NOT NULL AND unt.schema_key IN ('validate_state_mutation_repro')
-  ),
-  ranked AS (
-     SELECT
-       c.entity_id AS entity_id,
-       c.schema_key AS schema_key,
-       c.file_id AS file_id,
-       c.plugin_key AS plugin_key,
-       c.snapshot_content AS snapshot_content,
-       c.schema_version AS schema_version,
-       c.version_id AS version_id,
-       c.created_at AS created_at,
-       c.updated_at AS updated_at,
-       c.inherited_from_version_id AS inherited_from_version_id,
-       c.change_id AS change_id,
-       c.untracked AS untracked,
-       c.commit_id AS commit_id,
-       c.metadata AS metadata,
-       c.writer_key AS writer_key,
-       c.priority AS priority,
-     ROW_NUMBER() OVER (
-         PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-         ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
-       ) AS rn
-     FROM candidates c
   )
 SELECT
   w."entity_id" AS "entity_id",
@@ -180,7 +111,74 @@ SELECT
   w."commit_id" AS "commit_id",
   w."metadata" AS "metadata",
   COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
-FROM ranked w
+FROM (
+  SELECT
+    c.entity_id AS entity_id,
+    c.schema_key AS schema_key,
+    c.file_id AS file_id,
+    c.plugin_key AS plugin_key,
+    c.snapshot_content AS snapshot_content,
+    c.schema_version AS schema_version,
+    c.version_id AS version_id,
+    c.created_at AS created_at,
+    c.updated_at AS updated_at,
+    c.inherited_from_version_id AS inherited_from_version_id,
+    c.change_id AS change_id,
+    c.untracked AS untracked,
+    c.commit_id AS commit_id,
+    c.metadata AS metadata,
+    c.writer_key AS writer_key,
+    c.priority AS priority,
+    ROW_NUMBER() OVER (
+            PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+            ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
+          ) AS rn
+  FROM (
+      SELECT
+        unt.entity_id AS entity_id,
+        unt.schema_key AS schema_key,
+        unt.file_id AS file_id,
+        unt.plugin_key AS plugin_key,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.schema_version AS schema_version,
+        unt.version_id AS version_id,
+        unt.created_at AS created_at,
+        unt.updated_at AS updated_at,
+        NULL AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        NULL AS writer_key,
+        2 AS priority
+      FROM lix_internal_state_all_untracked unt
+      WHERE unt.schema_key IN ('validate_state_mutation_repro')
+
+          UNION ALL
+
+      SELECT
+        unt.entity_id AS entity_id,
+        unt.schema_key AS schema_key,
+        unt.file_id AS file_id,
+        unt.plugin_key AS plugin_key,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.schema_version AS schema_version,
+        vi.version_id AS version_id,
+        unt.created_at AS created_at,
+        unt.updated_at AS updated_at,
+        unt.version_id AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        NULL AS writer_key,
+        5 AS priority
+      FROM version_inheritance vi
+      JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+      WHERE unt.is_tombstone = 0
+        AND unt.snapshot_content IS NOT NULL AND unt.schema_key IN ('validate_state_mutation_repro')
+  ) AS c
+) AS w
 
 LEFT JOIN lix_internal_state_writer ws_dst ON
   ws_dst.file_id = w.file_id AND
@@ -255,107 +253,6 @@ FROM lix_internal_transaction_state AS t
 WHERE t.untracked = 0) AS change
 WHERE change.id = lix_internal_state_vtable.change_id) AS metadata
 FROM (
-WITH
-  version_descriptor_base AS (
-    SELECT
-      json_extract(desc.snapshot_content, '$.id') AS version_id,
-      json_extract(desc.snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id
-    FROM "lix_internal_state_cache_v1_lix_version_descriptor" desc
-    WHERE desc.is_tombstone = 0
-      AND desc.snapshot_content IS NOT NULL
-  ),
-  version_inheritance(version_id, ancestor_version_id) AS (
-    SELECT
-      vdb.version_id,
-      vdb.inherits_from_version_id
-    FROM version_descriptor_base vdb
-    WHERE vdb.inherits_from_version_id IS NOT NULL
-
-    UNION ALL
-
-    SELECT
-      vi.version_id,
-      vdb.inherits_from_version_id
-    FROM version_inheritance vi
-    JOIN version_descriptor_base vdb ON vdb.version_id = vi.ancestor_version_id
-    WHERE vdb.inherits_from_version_id IS NOT NULL
-  ),
-  version_parent AS (
-    SELECT
-      vdb.version_id,
-      vdb.inherits_from_version_id AS parent_version_id
-    FROM version_descriptor_base vdb
-    WHERE vdb.inherits_from_version_id IS NOT NULL
-  ),
-  candidates AS (
-     SELECT
-       unt.entity_id AS entity_id,
-       unt.schema_key AS schema_key,
-       unt.file_id AS file_id,
-       unt.plugin_key AS plugin_key,
-       json(unt.snapshot_content) AS snapshot_content,
-       unt.schema_version AS schema_version,
-       unt.version_id AS version_id,
-       unt.created_at AS created_at,
-       unt.updated_at AS updated_at,
-       NULL AS inherited_from_version_id,
-       'untracked' AS change_id,
-       1 AS untracked,
-       'untracked' AS commit_id,
-       NULL AS metadata,
-       NULL AS writer_key,
-       2 AS priority
-     FROM lix_internal_state_all_untracked unt
-     WHERE unt.schema_key IN ('validate_state_mutation_repro', 'lix_active_version')
-
-         UNION ALL
-
-     SELECT
-       unt.entity_id AS entity_id,
-       unt.schema_key AS schema_key,
-       unt.file_id AS file_id,
-       unt.plugin_key AS plugin_key,
-       json(unt.snapshot_content) AS snapshot_content,
-       unt.schema_version AS schema_version,
-       vi.version_id AS version_id,
-       unt.created_at AS created_at,
-       unt.updated_at AS updated_at,
-       unt.version_id AS inherited_from_version_id,
-       'untracked' AS change_id,
-       1 AS untracked,
-       'untracked' AS commit_id,
-       NULL AS metadata,
-       NULL AS writer_key,
-       5 AS priority
-     FROM version_inheritance vi
-     JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
-     WHERE unt.is_tombstone = 0
-       AND unt.snapshot_content IS NOT NULL AND unt.schema_key IN ('validate_state_mutation_repro', 'lix_active_version')
-  ),
-  ranked AS (
-     SELECT
-       c.entity_id AS entity_id,
-       c.schema_key AS schema_key,
-       c.file_id AS file_id,
-       c.plugin_key AS plugin_key,
-       c.snapshot_content AS snapshot_content,
-       c.schema_version AS schema_version,
-       c.version_id AS version_id,
-       c.created_at AS created_at,
-       c.updated_at AS updated_at,
-       c.inherited_from_version_id AS inherited_from_version_id,
-       c.change_id AS change_id,
-       c.untracked AS untracked,
-       c.commit_id AS commit_id,
-       c.metadata AS metadata,
-       c.writer_key AS writer_key,
-       c.priority AS priority,
-     ROW_NUMBER() OVER (
-         PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-         ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
-       ) AS rn
-     FROM candidates c
-  )
 SELECT
   w."entity_id" AS "entity_id",
   w."schema_key" AS "schema_key",
@@ -372,7 +269,50 @@ SELECT
   w."commit_id" AS "commit_id",
   w."metadata" AS "metadata",
   COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
-FROM ranked w
+FROM (
+  SELECT
+    c.entity_id AS entity_id,
+    c.schema_key AS schema_key,
+    c.file_id AS file_id,
+    c.plugin_key AS plugin_key,
+    c.snapshot_content AS snapshot_content,
+    c.schema_version AS schema_version,
+    c.version_id AS version_id,
+    c.created_at AS created_at,
+    c.updated_at AS updated_at,
+    c.inherited_from_version_id AS inherited_from_version_id,
+    c.change_id AS change_id,
+    c.untracked AS untracked,
+    c.commit_id AS commit_id,
+    c.metadata AS metadata,
+    c.writer_key AS writer_key,
+    c.priority AS priority,
+    ROW_NUMBER() OVER (
+            PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+            ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
+          ) AS rn
+  FROM (
+      SELECT
+        unt.entity_id AS entity_id,
+        unt.schema_key AS schema_key,
+        unt.file_id AS file_id,
+        unt.plugin_key AS plugin_key,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.schema_version AS schema_version,
+        unt.version_id AS version_id,
+        unt.created_at AS created_at,
+        unt.updated_at AS updated_at,
+        NULL AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        NULL AS writer_key,
+        2 AS priority
+      FROM lix_internal_state_all_untracked unt
+      WHERE (unt.schema_key IN ('validate_state_mutation_repro', 'lix_active_version')) AND (unt.version_id IN ('global'))
+  ) AS c
+) AS w
 
 LEFT JOIN lix_internal_state_writer ws_dst ON
   ws_dst.file_id = w.file_id AND
@@ -402,19 +342,19 @@ WHERE "entity_id" = ?1 AND "schema_key" = ?2
     "id": 2,
     "parent": 0,
     "notused": 0,
-    "detail": "CO-ROUTINE ranked"
+    "detail": "CO-ROUTINE w"
   },
   {
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-29)"
+    "detail": "CO-ROUTINE (subquery-24)"
   },
   {
     "id": 7,
     "parent": 5,
     "notused": 0,
-    "detail": "CO-ROUTINE candidates"
+    "detail": "CO-ROUTINE c"
   },
   {
     "id": 8,
@@ -504,7 +444,7 @@ WHERE "entity_id" = ?1 AND "schema_key" = ?2
     "id": 233,
     "parent": 2,
     "notused": 256,
-    "detail": "SCAN (subquery-29)"
+    "detail": "SCAN (subquery-24)"
   },
   {
     "id": 317,
@@ -516,148 +456,64 @@ WHERE "entity_id" = ?1 AND "schema_key" = ?2
     "id": 331,
     "parent": 0,
     "notused": 0,
-    "detail": "LIST SUBQUERY 26"
+    "detail": "LIST SUBQUERY 21"
   },
   {
-    "id": 335,
+    "id": 334,
     "parent": 331,
     "notused": 0,
-    "detail": "MATERIALIZE ranked"
+    "detail": "CO-ROUTINE w"
   },
   {
-    "id": 338,
-    "parent": 335,
+    "id": 337,
+    "parent": 334,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-30)"
+    "detail": "CO-ROUTINE (subquery-25)"
   },
   {
-    "id": 341,
-    "parent": 338,
-    "notused": 0,
-    "detail": "MATERIALIZE candidates"
-  },
-  {
-    "id": 343,
-    "parent": 341,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 344,
-    "parent": 343,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 346,
-    "parent": 344,
-    "notused": 216,
-    "detail": "SCAN unt"
-  },
-  {
-    "id": 372,
-    "parent": 343,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 375,
-    "parent": 372,
-    "notused": 0,
-    "detail": "MATERIALIZE version_inheritance"
-  },
-  {
-    "id": 379,
-    "parent": 375,
-    "notused": 0,
-    "detail": "SETUP"
-  },
-  {
-    "id": 382,
-    "parent": 379,
-    "notused": 24,
-    "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
-  },
-  {
-    "id": 410,
-    "parent": 375,
-    "notused": 0,
-    "detail": "RECURSIVE STEP"
-  },
-  {
-    "id": 413,
-    "parent": 410,
+    "id": 348,
+    "parent": 337,
     "notused": 62,
-    "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
+    "detail": "SEARCH unt USING INDEX ix_unt_v_f_s_e (version_id=?)"
   },
   {
-    "id": 422,
-    "parent": 410,
-    "notused": 216,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 440,
-    "parent": 372,
-    "notused": 295,
-    "detail": "SCAN vi"
-  },
-  {
-    "id": 444,
-    "parent": 372,
+    "id": 408,
+    "parent": 337,
     "notused": 0,
-    "detail": "BLOOM FILTER ON unt (is_tombstone=?)"
+    "detail": "USE TEMP B-TREE FOR LAST 9 TERMS OF ORDER BY"
   },
   {
-    "id": 469,
-    "parent": 372,
-    "notused": 53,
-    "detail": "SEARCH unt USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=?)"
+    "id": 452,
+    "parent": 334,
+    "notused": 95,
+    "detail": "SCAN (subquery-25)"
   },
   {
-    "id": 508,
-    "parent": 338,
-    "notused": 336,
-    "detail": "SCAN c"
-  },
-  {
-    "id": 544,
-    "parent": 338,
-    "notused": 0,
-    "detail": "USE TEMP B-TREE FOR ORDER BY"
-  },
-  {
-    "id": 585,
-    "parent": 335,
-    "notused": 336,
-    "detail": "SCAN (subquery-30)"
-  },
-  {
-    "id": 673,
+    "id": 536,
     "parent": 331,
     "notused": 0,
     "detail": "BLOOM FILTER ON w (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 697,
+    "id": 571,
     "parent": 331,
-    "notused": 57,
+    "notused": 50,
     "detail": "SEARCH w USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 712,
+    "id": 586,
     "parent": 331,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   },
   {
-    "id": 721,
+    "id": 595,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 734,
+    "id": 608,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"

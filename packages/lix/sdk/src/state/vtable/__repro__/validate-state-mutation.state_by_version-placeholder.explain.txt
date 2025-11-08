@@ -45,52 +45,6 @@ FROM lix_internal_transaction_state AS t
 WHERE t.untracked = 0) AS change
 WHERE change.id = lix_internal_state_vtable.change_id) AS metadata
 FROM (
-WITH
-  candidates AS (
-     SELECT
-       unt.entity_id AS entity_id,
-       unt.schema_key AS schema_key,
-       unt.file_id AS file_id,
-       unt.plugin_key AS plugin_key,
-       json(unt.snapshot_content) AS snapshot_content,
-       unt.schema_version AS schema_version,
-       unt.version_id AS version_id,
-       unt.created_at AS created_at,
-       unt.updated_at AS updated_at,
-       NULL AS inherited_from_version_id,
-       'untracked' AS change_id,
-       1 AS untracked,
-       'untracked' AS commit_id,
-       NULL AS metadata,
-       NULL AS writer_key,
-       2 AS priority
-     FROM lix_internal_state_all_untracked unt
-     WHERE unt.schema_key IN ('validate_state_mutation_repro')
-  ),
-  ranked AS (
-     SELECT
-       c.entity_id AS entity_id,
-       c.schema_key AS schema_key,
-       c.file_id AS file_id,
-       c.plugin_key AS plugin_key,
-       c.snapshot_content AS snapshot_content,
-       c.schema_version AS schema_version,
-       c.version_id AS version_id,
-       c.created_at AS created_at,
-       c.updated_at AS updated_at,
-       c.inherited_from_version_id AS inherited_from_version_id,
-       c.change_id AS change_id,
-       c.untracked AS untracked,
-       c.commit_id AS commit_id,
-       c.metadata AS metadata,
-       c.writer_key AS writer_key,
-       c.priority AS priority,
-     ROW_NUMBER() OVER (
-         PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-         ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
-       ) AS rn
-     FROM candidates c
-  )
 SELECT
   w."entity_id" AS "entity_id",
   w."schema_key" AS "schema_key",
@@ -107,7 +61,50 @@ SELECT
   w."commit_id" AS "commit_id",
   w."metadata" AS "metadata",
   COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
-FROM ranked w
+FROM (
+  SELECT
+    c.entity_id AS entity_id,
+    c.schema_key AS schema_key,
+    c.file_id AS file_id,
+    c.plugin_key AS plugin_key,
+    c.snapshot_content AS snapshot_content,
+    c.schema_version AS schema_version,
+    c.version_id AS version_id,
+    c.created_at AS created_at,
+    c.updated_at AS updated_at,
+    c.inherited_from_version_id AS inherited_from_version_id,
+    c.change_id AS change_id,
+    c.untracked AS untracked,
+    c.commit_id AS commit_id,
+    c.metadata AS metadata,
+    c.writer_key AS writer_key,
+    c.priority AS priority,
+    ROW_NUMBER() OVER (
+            PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+            ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
+          ) AS rn
+  FROM (
+      SELECT
+        unt.entity_id AS entity_id,
+        unt.schema_key AS schema_key,
+        unt.file_id AS file_id,
+        unt.plugin_key AS plugin_key,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.schema_version AS schema_version,
+        unt.version_id AS version_id,
+        unt.created_at AS created_at,
+        unt.updated_at AS updated_at,
+        NULL AS inherited_from_version_id,
+        'untracked' AS change_id,
+        1 AS untracked,
+        'untracked' AS commit_id,
+        NULL AS metadata,
+        NULL AS writer_key,
+        2 AS priority
+      FROM lix_internal_state_all_untracked unt
+      WHERE (unt.schema_key IN ('validate_state_mutation_repro')) AND (unt.version_id IN ('global'))
+  ) AS c
+) AS w
 
 LEFT JOIN lix_internal_state_writer ws_dst ON
   ws_dst.file_id = w.file_id AND
@@ -136,7 +133,7 @@ WHERE "schema_key" = ?1 AND json_extract(snapshot_content, '$.id') = ?2 AND "ver
     "id": 2,
     "parent": 0,
     "notused": 0,
-    "detail": "CO-ROUTINE ranked"
+    "detail": "CO-ROUTINE w"
   },
   {
     "id": 5,
@@ -145,27 +142,27 @@ WHERE "schema_key" = ?1 AND json_extract(snapshot_content, '$.id') = ?2 AND "ver
     "detail": "CO-ROUTINE (subquery-9)"
   },
   {
-    "id": 12,
+    "id": 15,
     "parent": 5,
     "notused": 62,
     "detail": "SEARCH unt USING INDEX ix_unt_v_f_s_e (version_id=?)"
   },
   {
-    "id": 72,
+    "id": 75,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR LAST 9 TERMS OF ORDER BY"
   },
   {
-    "id": 116,
+    "id": 119,
     "parent": 2,
-    "notused": 48,
+    "notused": 47,
     "detail": "SCAN (subquery-9)"
   },
   {
-    "id": 198,
+    "id": 201,
     "parent": 0,
-    "notused": 48,
+    "notused": 47,
     "detail": "SCAN w"
   }
 ]

@@ -30,9 +30,16 @@ export function createExplainQuery(args: {
 		});
 
 		ensureCacheTablesForSql(args.engine, result.sql);
-
+		const trimmed = result.sql.trimStart();
+		const needsWrapper = trimmed.startsWith("(");
+		// Wrap the rewritten SQL in a trivial CTE only when we end up with a bare derived table.
+		// SQLite refuses to EXPLAIN `(…) AS alias`, but regular INSERT/UPDATE/SELECT statements
+		// should be explained as-is.
+		const explainTarget = needsWrapper
+			? `WITH __lix_explain_target AS (${result.sql}) SELECT * FROM __lix_explain_target`
+			: result.sql;
 		const explainRows = args.engine.sqlite.exec({
-			sql: `EXPLAIN QUERY PLAN ${result.sql}`,
+			sql: `EXPLAIN QUERY PLAN ${explainTarget}`,
 			bind: result.parameters as any[],
 			returnValue: "resultRows",
 			rowMode: "object",

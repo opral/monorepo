@@ -11,56 +11,53 @@ select "snapshot_content" from "lix_internal_state_vtable" where "schema_key" = 
 -- rewritten SQL
 SELECT "snapshot_content"
 FROM (
-WITH
-  candidates AS (
-     SELECT
-       unt.entity_id AS entity_id,
-       unt.schema_key AS schema_key,
-       unt.file_id AS file_id,
-       json(unt.snapshot_content) AS snapshot_content,
-       unt.version_id AS version_id,
-       unt.created_at AS created_at,
-       NULL AS inherited_from_version_id,
-       'untracked' AS change_id,
-       2 AS priority
-     FROM lix_internal_state_all_untracked unt
-     WHERE unt.schema_key IN ('text_play_fk_target')
-
-         UNION ALL
-
-     SELECT
-       cache.entity_id AS entity_id,
-       cache.schema_key AS schema_key,
-       cache.file_id AS file_id,
-       json(cache.snapshot_content) AS snapshot_content,
-       cache.version_id AS version_id,
-       cache.created_at AS created_at,
-       cache.inherited_from_version_id AS inherited_from_version_id,
-       cache.change_id AS change_id,
-       3 AS priority
-     FROM "lix_internal_state_cache_v1_text_play_fk_target" cache
-     WHERE cache.schema_key IN ('text_play_fk_target')
-  ),
-  ranked AS (
-     SELECT
-       c.entity_id AS entity_id,
-       c.schema_key AS schema_key,
-       c.file_id AS file_id,
-       c.snapshot_content AS snapshot_content,
-       c.version_id AS version_id,
-       c.created_at AS created_at,
-       c.inherited_from_version_id AS inherited_from_version_id,
-       c.change_id AS change_id,
-       c.priority AS priority,
-     ROW_NUMBER() OVER (
-         PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-         ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
-       ) AS rn
-     FROM candidates c
-  )
 SELECT
   "w"."snapshot_content" as "snapshot_content", "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."inherited_from_version_id" as "inherited_from_version_id"
-FROM ranked w
+FROM (
+  SELECT
+    c.entity_id AS entity_id,
+    c.schema_key AS schema_key,
+    c.file_id AS file_id,
+    c.snapshot_content AS snapshot_content,
+    c.version_id AS version_id,
+    c.created_at AS created_at,
+    c.inherited_from_version_id AS inherited_from_version_id,
+    c.change_id AS change_id,
+    c.priority AS priority,
+    ROW_NUMBER() OVER (
+            PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+            ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
+          ) AS rn
+  FROM (
+      SELECT
+        unt.entity_id AS entity_id,
+        unt.schema_key AS schema_key,
+        unt.file_id AS file_id,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.version_id AS version_id,
+        unt.created_at AS created_at,
+        NULL AS inherited_from_version_id,
+        'untracked' AS change_id,
+        2 AS priority
+      FROM lix_internal_state_all_untracked unt
+      WHERE (unt.schema_key IN ('text_play_fk_target')) AND (unt.version_id IN ('global'))
+
+          UNION ALL
+
+      SELECT
+        cache.entity_id AS entity_id,
+        cache.schema_key AS schema_key,
+        cache.file_id AS file_id,
+        json(cache.snapshot_content) AS snapshot_content,
+        cache.version_id AS version_id,
+        cache.created_at AS created_at,
+        cache.inherited_from_version_id AS inherited_from_version_id,
+        cache.change_id AS change_id,
+        3 AS priority
+      FROM "lix_internal_state_cache_v1_text_play_fk_target" cache
+      WHERE (cache.schema_key IN ('text_play_fk_target')) AND (cache.version_id IN ('global'))
+  ) AS c
+) AS w
 
 
 
@@ -74,7 +71,7 @@ WHERE "schema_key" = ? AND "snapshot_content" IS NOT NULL AND json_extract(snaps
     "id": 2,
     "parent": 0,
     "notused": 0,
-    "detail": "CO-ROUTINE ranked"
+    "detail": "CO-ROUTINE w"
   },
   {
     "id": 5,
@@ -86,7 +83,7 @@ WHERE "schema_key" = ? AND "snapshot_content" IS NOT NULL AND json_extract(snaps
     "id": 7,
     "parent": 5,
     "notused": 0,
-    "detail": "CO-ROUTINE candidates"
+    "detail": "CO-ROUTINE c"
   },
   {
     "id": 8,
@@ -101,45 +98,45 @@ WHERE "schema_key" = ? AND "snapshot_content" IS NOT NULL AND json_extract(snaps
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 15,
+    "id": 18,
     "parent": 9,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 36,
+    "id": 39,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 42,
-    "parent": 36,
+    "id": 48,
+    "parent": 39,
     "notused": 62,
     "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_fk_target_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 68,
+    "id": 74,
     "parent": 5,
-    "notused": 58,
+    "notused": 57,
     "detail": "SCAN c"
   },
   {
-    "id": 102,
+    "id": 108,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 135,
+    "id": 141,
     "parent": 2,
-    "notused": 38,
+    "notused": 37,
     "detail": "SCAN (subquery-6)"
   },
   {
-    "id": 203,
+    "id": 209,
     "parent": 0,
-    "notused": 38,
+    "notused": 37,
     "detail": "SCAN w"
   }
 ]
