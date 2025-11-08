@@ -122,6 +122,7 @@ export interface ViewContext {
 			readonly diffConfig?: DiffViewConfig;
 		},
 	) => void;
+	readonly openHistoryView?: (options?: { readonly focus?: boolean }) => void;
 	readonly closeDiffView?: (fileId: string) => void;
 	readonly isPanelFocused?: boolean;
 	readonly setTabBadgeCount: (count: number | null | undefined) => void;

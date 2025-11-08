@@ -1,11 +1,17 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
 import type { ViewContext, ViewInstance } from "../../app/types";
 import { File, GitCommitVertical } from "lucide-react";
 import { createReactViewDefinition } from "../../app/react-view";
+import {
+	selectCheckpointFiles,
+	type CheckpointFileChangeRow,
+} from "./queries";
 
 type CommitFile = {
+	id: string;
+	fullPath: string;
 	path: string;
 	added: number;
 	removed: number;
@@ -34,30 +40,39 @@ function formatTimestamp(value: string | null | undefined): string {
 	}
 }
 
-function deriveTitle(added: number, removed: number): string {
-	if (added + removed >= 12) return "Major update";
-	if (added > 0 && removed > 0) return "Edited content";
-	if (added > 0) return "Added content";
-	if (removed > 0) return "Clean up";
-	return "Checkpoint";
-}
-
-export function CommitView({ context: _context, view }: CommitViewProps) {
+export function CommitView({ context, view }: CommitViewProps) {
 	const checkpointId = view?.metadata?.checkpointId;
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
 	const checkpoint = checkpoints.find((cp) => cp.id === checkpointId);
 
-	// Mock file data - replace with actual data from checkpoint
+	const changeSetId = checkpoint?.id ?? "__invalid_checkpoint__";
+	const fileRows =
+		useQuery(
+			({ lix }) =>
+				selectCheckpointFiles({
+					lix,
+					changeSetId,
+				}),
+			{ subscribe: Boolean(checkpointId) },
+		) ?? [];
+
 	const files = useMemo<CommitFile[]>(() => {
 		if (!checkpoint) return [];
-		// TODO: Get actual file changes from checkpoint
-		return [
-			{ path: "hello-world.md", added: 12, removed: 3 },
-			{ path: "writing-style.md", added: 5, removed: 1 },
-			{ path: "tasks.md", added: 8, removed: 0 },
-		];
-	}, [checkpoint]);
+		return fileRows.map((row: CheckpointFileChangeRow) => {
+			const added = row.added ?? 0;
+			const removed = row.removed ?? 0;
+			const rawPath = row.path && row.path.length > 0 ? row.path : row.file_id;
+			const normalizedPath = rawPath.replace(/^\/+/, "");
+			return {
+				id: row.file_id,
+				fullPath: rawPath,
+				path: normalizedPath,
+				added,
+				removed,
+			};
+		});
+	}, [checkpoint, fileRows]);
 
 	if (!checkpoint) {
 		return (
@@ -69,14 +84,32 @@ export function CommitView({ context: _context, view }: CommitViewProps) {
 		);
 	}
 
-	const title = deriveTitle(checkpoint.added ?? 0, checkpoint.removed ?? 0);
 	const timestamp = formatTimestamp(checkpoint.checkpoint_created_at);
+	const handleOpenDiff = useCallback(
+		(file: CommitFile) => {
+			if (!context?.openDiffView) return;
+			const diffOptions = context.isPanelFocused ? { focus: false } : undefined;
+			context.openDiffView(file.id, file.fullPath, diffOptions);
+		},
+		[context],
+	);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col overflow-auto px-3 py-2">
 			{/* Header */}
 			<div className="border-b border-border bg-background px-3 py-2">
-				<h2 className="text-sm font-semibold text-foreground">{title}</h2>
+				<h2 className="text-sm font-semibold text-foreground">
+					Upvote issue{" "}
+					<a
+						className="text-primary underline-offset-4 hover:underline"
+						href="https://github.com/opral/flashtype/issues/82"
+						target="_blank"
+						rel="noreferrer"
+					>
+						#82
+					</a>{" "}
+					to add comments to checkpoints
+				</h2>
 				<p className="mt-0.5 text-xs text-muted-foreground">{timestamp}</p>
 			</div>
 
@@ -89,11 +122,20 @@ export function CommitView({ context: _context, view }: CommitViewProps) {
 				) : (
 					<div className="flex flex-col gap-1">
 						{files.map((file) => {
-							const totalChanges = file.added + file.removed;
+							const summaryParts: string[] = [];
+							if (file.added > 0) summaryParts.push(`+${file.added}`);
+							if (file.removed > 0) summaryParts.push(`-${file.removed}`);
+							const changeSummary =
+								summaryParts.length > 0
+									? summaryParts.join(" ")
+									: `${file.added + file.removed} change${
+											file.added + file.removed === 1 ? "" : "s"
+										}`;
 							return (
 								<button
-									key={file.path}
+									key={file.id}
 									type="button"
+									onClick={() => handleOpenDiff(file)}
 									className="group flex items-center gap-3 rounded-md border border-transparent px-3 py-2.5 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 								>
 									<File className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
@@ -101,7 +143,7 @@ export function CommitView({ context: _context, view }: CommitViewProps) {
 										{file.path}
 									</span>
 									<span className="text-xs text-muted-foreground">
-										{totalChanges} {totalChanges === 1 ? "change" : "changes"}
+										{changeSummary}
 									</span>
 								</button>
 							);

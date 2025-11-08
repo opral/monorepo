@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GitCommitVertical } from "lucide-react";
 import clsx from "clsx";
 import { LixProvider, useQuery } from "@lix-js/react-utils";
@@ -8,8 +8,8 @@ import { createReactViewDefinition } from "../../app/react-view";
 
 type HistoryCheckpoint = {
 	id: string;
-	title: string;
 	timestampLabel: string;
+	label: string;
 };
 
 const timestampFormatter = new Intl.DateTimeFormat(undefined, {
@@ -30,14 +30,6 @@ function formatTimestamp(value: string | null | undefined): string {
 	}
 }
 
-function deriveTitle(added: number, removed: number): string {
-	if (added + removed >= 12) return "Major update";
-	if (added > 0 && removed > 0) return "Edited content";
-	if (added > 0) return "Added content";
-	if (removed > 0) return "Clean up";
-	return "Checkpoint";
-}
-
 type HistoryViewProps = {
 	readonly context?: ViewContext;
 };
@@ -45,11 +37,18 @@ type HistoryViewProps = {
 export function HistoryView({ context }: HistoryViewProps) {
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
-	const items: HistoryCheckpoint[] = checkpoints.map((cp) => ({
-		id: cp.id,
-		title: deriveTitle(cp.added ?? 0, cp.removed ?? 0),
-		timestampLabel: formatTimestamp(cp.checkpoint_created_at),
-	}));
+	const items = useMemo<HistoryCheckpoint[]>(
+		() =>
+			checkpoints.map((cp) => {
+				const timestampLabel = formatTimestamp(cp.checkpoint_created_at);
+				return {
+					id: cp.id,
+					timestampLabel,
+					label: timestampLabel,
+				};
+			}),
+		[checkpoints],
+	);
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -90,7 +89,7 @@ export function HistoryView({ context }: HistoryViewProps) {
 										setSelectedId(item.id);
 										context?.openCommitView?.(
 											item.id,
-											`${item.title} • ${item.timestampLabel}`,
+											item.label,
 											context?.isPanelFocused ? { focus: false } : undefined,
 										);
 									}}
@@ -102,9 +101,6 @@ export function HistoryView({ context }: HistoryViewProps) {
 									)}
 								>
 									<span className="text-sm font-medium leading-5 text-foreground">
-										{item.title}
-									</span>
-									<span className="text-xs leading-4 text-muted-foreground">
 										{item.timestampLabel}
 									</span>
 								</button>
