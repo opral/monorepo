@@ -1,4 +1,5 @@
 import { Editor } from "@tiptap/core";
+import History from "@tiptap/extension-history";
 import Placeholder from "@tiptap/extension-placeholder";
 import { nanoId, type Lix, withWriterKey } from "@lix-js/sdk";
 import {
@@ -158,7 +159,14 @@ export function createEditor(args: CreateEditorArgs): Editor {
 	};
 
 	return new Editor({
-		extensions: [...MarkdownWc({}), Placeholder.configure(placeholderConfig)],
+		extensions: [
+			...MarkdownWc({}),
+			History.configure({
+				depth: 200,
+				newGroupDelay: 500,
+			}),
+			Placeholder.configure(placeholderConfig),
+		],
 		content: astToTiptapDoc(ast) as any,
 		onCreate: ({ editor }) => {
 			currentEditor = editor as Editor;
