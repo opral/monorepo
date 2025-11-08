@@ -107,7 +107,7 @@ export function PromptComposer({
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 	const [value, setValue] = useState("");
 	const [history, setHistory] = useState<string[]>([]);
-	const [, setHistoryIdx] = useState(-1);
+	const [historyIdx, setHistoryIdx] = useState(-1);
 	const [slashOpen, setSlashOpen] = useState(false);
 	const [slashIdx, setSlashIdx] = useState(0);
 	const [mentionOpen, setMentionOpen] = useState(false);
@@ -317,16 +317,38 @@ export function PromptComposer({
 				!event.metaKey &&
 				!event.ctrlKey
 			) {
+				const textarea = event.currentTarget;
+				const selectionStart = textarea.selectionStart ?? 0;
+				const selectionEnd = textarea.selectionEnd ?? 0;
+				const isSelectionCollapsed = selectionStart === selectionEnd;
+				const atStart = isSelectionCollapsed && selectionStart === 0;
+				const isComposerEmpty =
+					textarea.value.trim().length === 0 && isSelectionCollapsed;
+				const shouldOpenHistory =
+					event.key === "ArrowUp" &&
+					historyIdx === -1 &&
+					isComposerEmpty &&
+					atStart;
+				const shouldNavigateHistory = historyIdx !== -1;
+
+				if (
+					(!shouldOpenHistory && !shouldNavigateHistory) ||
+					history.length === 0
+				) {
+					return;
+				}
+
 				event.preventDefault();
 				setHistoryIdx((idx) => {
+					const baseIdx = shouldOpenHistory ? -1 : idx;
 					if (event.key === "ArrowUp") {
-						const nextIdx = Math.min(idx + 1, history.length - 1);
+						const nextIdx = Math.min(baseIdx + 1, history.length - 1);
 						const entry = history[nextIdx];
 						if (entry !== undefined) setValue(entry);
 						queueMicrotask(() => moveCaretToEnd(textAreaRef.current));
 						return nextIdx;
 					}
-					const nextIdx = Math.max(idx - 1, -1);
+					const nextIdx = Math.max(baseIdx - 1, -1);
 					const entry = nextIdx === -1 ? "" : (history[nextIdx] ?? "");
 					setValue(entry);
 					queueMicrotask(() => moveCaretToEnd(textAreaRef.current));
@@ -364,6 +386,7 @@ export function PromptComposer({
 			filteredCommands,
 			slashIdx,
 			history,
+			historyIdx,
 			setMentionIdx,
 			setSlashIdx,
 			setSlashOpen,
@@ -424,6 +447,7 @@ export function PromptComposer({
 						const next = event.target.value;
 						const token = extractSlashToken(next);
 						setValue(next);
+						setHistoryIdx(-1);
 						onNotice(null);
 						setSlashOpen(token !== null);
 						setSlashIdx(0);
