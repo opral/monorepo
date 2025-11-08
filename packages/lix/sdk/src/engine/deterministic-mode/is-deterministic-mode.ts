@@ -59,7 +59,7 @@ export function isDeterministicModeSync(args: {
 	const [row] = withRuntimeCache(
 		engine,
 		internalQueryBuilder
-			.selectFrom("lix_internal_state_vtable")
+			.selectFrom("state")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.where("snapshot_content", "is not", null)
