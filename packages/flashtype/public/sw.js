@@ -45,6 +45,38 @@ self.addEventListener("fetch", (event) => {
 		return;
 	}
 
+	const isDocumentRequest =
+		request.mode === "navigate" ||
+		request.destination === "document" ||
+		request.headers.get("accept")?.includes("text/html") === true;
+
+	if (isDocumentRequest) {
+	// Network-first for documents: ensures new deploys are visible immediately while
+	// keeping the cached shell as a fallback when offline.
+		event.respondWith(
+			fetch(request)
+				.then((response) => {
+					if (response && response.status === 200) {
+						const cloned = response.clone();
+						caches
+							.open(CACHE_VERSION)
+							.then((cache) => cache.put(request, cloned))
+							.catch(() => undefined);
+					}
+
+					return response;
+				})
+				.catch(async () => {
+					const cachedDocument =
+						(await caches.match(request)) ??
+						(await caches.match("/index.html"));
+					if (cachedDocument) return cachedDocument;
+					return Response.error();
+				}),
+		);
+		return;
+	}
+
 	event.respondWith(
 		caches.match(request).then((cached) => {
 			if (cached) return cached;
