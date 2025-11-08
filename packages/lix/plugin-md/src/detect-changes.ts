@@ -41,8 +41,22 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	// Build before index from state via querySync: entity_id -> node snapshot
 	const beforeNodes = new Map<string, any>();
 	let beforeOrder: string[] = [];
+	const schemaFilter = Array.from(
+		new Set(
+			AstSchemas.allSchemas
+				.map((schema) => schema["x-lix-key"])
+				.filter(
+					(key): key is string =>
+						typeof key === "string" &&
+						(key === AstSchemas.DocumentSchema["x-lix-key"] ||
+							key.startsWith("markdown_wc_")),
+				),
+		),
+	);
 	const rows = querySync("state")
 		.where("file_id", "=", after.id)
+		.where("inherited_from_version_id", "is", null)
+		.where("schema_key", "in", schemaFilter as [string, ...string[]])
 		.select(["entity_id", "schema_key", "snapshot_content"])
 		.execute();
 	for (const row of rows) {
