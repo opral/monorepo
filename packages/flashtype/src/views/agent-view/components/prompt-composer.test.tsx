@@ -107,6 +107,30 @@ describe("PromptComposer", () => {
 		expect(textarea.value).toBe("message-5");
 	});
 
+	test("does not enter history navigation while editing a draft", async () => {
+		const onSendMessage = vi.fn().mockResolvedValue(undefined);
+		const { textarea, sendButton } = renderComposer({ onSendMessage });
+
+		await act(async () => {
+			fireEvent.change(textarea, { target: { value: "previous message" } });
+			fireEvent.click(sendButton);
+		});
+		await waitFor(() => {
+			expect(onSendMessage).toHaveBeenCalledWith("previous message");
+			expect(textarea.value).toBe("");
+		});
+
+		const draft = ["line one", "line two", "line three"].join("\n");
+		fireEvent.change(textarea, { target: { value: draft } });
+		textarea.setSelectionRange(draft.length, draft.length);
+
+		await act(async () => {
+			fireEvent.keyDown(textarea, { key: "ArrowUp" });
+		});
+
+		expect(textarea.value).toBe(draft);
+	});
+
 	test("auto accept toggle forwards next value", async () => {
 		const onAutoAcceptToggle = vi.fn().mockResolvedValue(undefined);
 		renderComposer({ onAutoAcceptToggle });
