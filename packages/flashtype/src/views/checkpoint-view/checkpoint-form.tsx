@@ -1,57 +1,55 @@
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type CheckpointFormProps = {
-	message: string;
-	onMessageChange: (message: string) => void;
 	onCreateCheckpoint: () => void;
 	isSubmitting?: boolean;
 };
 
 /**
- * Form for composing a new checkpoint message and triggering creation.
+ * Minimal checkpoint form – currently only supports creating a checkpoint
+ * without an accompanying message.
  *
  * @example
- * <CheckpointForm message={message} onMessageChange={setMessage} onCreateCheckpoint={handleCreate} />
+ * <CheckpointForm onCreateCheckpoint={handleCreate} />
  */
 export function CheckpointForm({
-	message,
-	onMessageChange,
 	onCreateCheckpoint,
 	isSubmitting = false,
 }: CheckpointFormProps) {
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleSubmit = (event: React.FormEvent) => {
+		event.preventDefault();
+		if (isSubmitting) return;
 		onCreateCheckpoint();
 	};
 
 	return (
 		<form onSubmit={handleSubmit} className="flex flex-col gap-2 py-3">
-			<div className="relative">
-				<textarea
-					placeholder="Checkpoint message"
-					value={message}
-					onChange={(e) => onMessageChange(e.target.value)}
-					rows={4}
-					className="w-full resize-none rounded-md border border-input bg-transparent pl-3 pr-28 pt-3 pb-3 text-xs leading-4 text-foreground shadow-none outline-none"
-					disabled={isSubmitting}
-					data-testid="checkpoint-message"
-				/>
-				<button
-					type="submit"
-					disabled={isSubmitting || !message.trim()}
-					className={cn(
-						"absolute bottom-3 right-3 z-10 inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
-						"border-input bg-transparent text-neutral-500",
-						message.trim() &&
-							!isSubmitting &&
-							"bg-neutral-200 text-neutral-900",
-						isSubmitting && "opacity-60 cursor-not-allowed",
-					)}
-					data-testid="checkpoint-submit"
+			<Button
+				type="submit"
+				disabled={isSubmitting}
+				className={cn(
+					"w-full border border-border/70 bg-transparent px-3 py-2 text-xs font-medium text-muted-foreground transition hover:text-foreground shadow-none",
+					isSubmitting && "cursor-not-allowed opacity-60",
+				)}
+				size="sm"
+				variant="outline"
+				data-testid="checkpoint-submit"
+			>
+				Create checkpoint
+			</Button>
+			<p className="px-1 text-xs leading-4 text-muted-foreground">
+				Upvote issue{" "}
+				<a
+					className="text-primary underline-offset-4 hover:underline"
+					href="https://github.com/opral/flashtype/issues/82"
+					target="_blank"
+					rel="noreferrer"
 				>
-					Create
-				</button>
-			</div>
+					#82
+				</a>{" "}
+				for a commenting feature on checkpoints.
+			</p>
 		</form>
 	);
 }

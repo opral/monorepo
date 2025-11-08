@@ -9,7 +9,14 @@ import {
 	type KeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUp, Brain, Check, ChevronDown, Loader2 } from "lucide-react";
+import {
+	ArrowUp,
+	Brain,
+	Check,
+	ChevronDown,
+	FastForward,
+	Loader2,
+} from "lucide-react";
 import { ChangeProposalRejectedError } from "@lix-js/agent-sdk";
 import { MentionMenu, CommandMenu } from "../menu";
 import type { SlashCommand } from "../commands";
@@ -52,6 +59,14 @@ type PromptComposerProps = {
 	 */
 	pending: boolean;
 	/**
+	 * When `true`, apply agent edits without proposal review.
+	 */
+	autoAcceptEnabled: boolean;
+	/**
+	 * Toggle auto-accept mode for future messages.
+	 */
+	onAutoAcceptToggle(next: boolean): Promise<void> | void;
+	/**
 	 * Update the notice banner rendered by the parent view.
 	 */
 	onNotice(value: string | null): void;
@@ -79,6 +94,8 @@ export function PromptComposer({
 	models,
 	modelId,
 	onModelChange,
+	autoAcceptEnabled,
+	onAutoAcceptToggle,
 	commands,
 	files,
 	pending,
@@ -447,6 +464,39 @@ export function PromptComposer({
 				</button>
 			</div>
 			<div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+				<button
+					type="button"
+					onClick={() => {
+						void onAutoAcceptToggle(!autoAcceptEnabled);
+					}}
+					disabled={!hasKey}
+					className={[
+						"inline-flex items-center gap-1 rounded-full border px-2 py-1 font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
+						autoAcceptEnabled
+							? "border-purple-300 bg-purple-50 text-purple-900 hover:bg-purple-100"
+							: "border-border/80 text-muted-foreground hover:bg-muted/30 hover:text-foreground",
+					].join(" ")}
+					aria-pressed={autoAcceptEnabled}
+					title={
+						autoAcceptEnabled
+							? "Auto-accept agent edits is enabled"
+							: "Enable auto-accept agent edits"
+					}
+					aria-label={
+						autoAcceptEnabled ? "Disable auto accept" : "Enable auto accept"
+					}
+				>
+					<FastForward
+						className={[
+							"h-3.5 w-3.5",
+							autoAcceptEnabled
+								? "text-purple-500"
+								: "text-muted-foreground/80",
+						].join(" ")}
+						aria-hidden="true"
+					/>
+					<span>Auto accept</span>
+				</button>
 				<ModelSelector
 					options={models}
 					value={modelId}

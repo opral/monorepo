@@ -152,6 +152,17 @@ export class OpfsSahEnvironment implements LixEnvironment {
 		this.eventHandler = undefined;
 	}
 
+	/**
+	 * Spawn a dedicated worker-based actor.
+	 *
+	 * Messages emitted by the worker before any subscribers attach are buffered
+	 * and replayed to the first subscriber so initialization events are never lost.
+	 *
+	 * @example
+	 * const actor = await env.spawnActor({ entryModule, name: "echo" });
+	 * const unsubscribe = actor.subscribe((message) => console.log(message));
+	 * actor.post({ type: "ping" });
+	 */
 	async spawnActor(opts: SpawnActorOptions): Promise<EnvironmentActorHandle> {
 		const workerUrl = new URL(opts.entryModule, import.meta.url);
 		const actor = new Worker(workerUrl, {
@@ -159,6 +170,19 @@ export class OpfsSahEnvironment implements LixEnvironment {
 			name: opts.name,
 		});
 		this.actorWorkers.add(actor);
+		const listeners = new Set<(message: unknown) => void>();
+		const pending: unknown[] = [];
+		const dispatch = (message: unknown) => {
+			if (listeners.size === 0) {
+				pending.push(message);
+				return;
+			}
+			for (const listener of listeners) listener(message);
+		};
+		const onMessage = (event: MessageEvent) => {
+			dispatch(event.data);
+		};
+		actor.addEventListener("message", onMessage);
 
 		const handle: EnvironmentActorHandle = {
 			post: (message: unknown, transfer?: Transferable[]) => {
@@ -169,14 +193,22 @@ export class OpfsSahEnvironment implements LixEnvironment {
 				actor.postMessage(message);
 			},
 			subscribe: (listener: (message: unknown) => void) => {
-				const handler = (event: MessageEvent) => listener(event.data);
-				actor.addEventListener("message", handler);
+				listeners.add(listener);
+				if (pending.length > 0) {
+					const buffered = pending.splice(0, pending.length);
+					for (const message of buffered) {
+						listener(message);
+					}
+				}
 				return () => {
-					actor.removeEventListener("message", handler);
+					listeners.delete(listener);
 				};
 			},
 			terminate: async () => {
 				this.actorWorkers.delete(actor);
+				actor.removeEventListener("message", onMessage);
+				listeners.clear();
+				pending.length = 0;
 				actor.terminate();
 			},
 		};

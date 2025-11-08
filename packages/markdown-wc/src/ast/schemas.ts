@@ -444,10 +444,7 @@ export const schemasByType: Record<string, JsonSchema> = {
 /**
  * Collection of Markdown schemas including AST nodes and persistence metadata like `DocumentSchema`.
  */
-export const allSchemas: JsonSchema[] = [
-	...Object.values(schemasByType),
-	DocumentSchema,
-]
+export const allSchemas: JsonSchema[] = [...Object.values(schemasByType), DocumentSchema]
 
 // Type exports derived from JSON Schemas (no mdast import)
 export type AstRoot = FromSchema<typeof RootSchema>

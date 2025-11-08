@@ -23,6 +23,8 @@ function renderComposer(
 		models: [{ id: "claude-3-opus", label: "Claude 3 Opus" }],
 		modelId: "claude-3-opus",
 		onModelChange: vi.fn(),
+		autoAcceptEnabled: false,
+		onAutoAcceptToggle: vi.fn().mockResolvedValue(undefined),
 		onNotice: vi.fn(),
 		onSlashCommand: vi.fn().mockResolvedValue(undefined),
 		onSendMessage: vi.fn().mockResolvedValue(undefined),
@@ -103,5 +105,17 @@ describe("PromptComposer", () => {
 			fireEvent.keyDown(textarea, { key: "ArrowUp" });
 		});
 		expect(textarea.value).toBe("message-5");
+	});
+
+	test("auto accept toggle forwards next value", async () => {
+		const onAutoAcceptToggle = vi.fn().mockResolvedValue(undefined);
+		renderComposer({ onAutoAcceptToggle });
+		const toggleButton = screen.getByRole("button", {
+			name: /Enable auto accept/i,
+		});
+		fireEvent.click(toggleButton);
+		await waitFor(() => {
+			expect(onAutoAcceptToggle).toHaveBeenCalledWith(true);
+		});
 	});
 });

@@ -62,7 +62,7 @@ export function ChatMessage({
 	}
 
 	return (
-		<div className="w-full py-2">
+		<div className="w-full pt-1 pb-2">
 			{message.toolRuns && message.toolRuns.length > 0 && (
 				<ToolRunList runs={message.toolRuns} />
 			)}
