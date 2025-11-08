@@ -77,10 +77,7 @@ describe("transition with 100 deletions", async () => {
 	}));
 	const deletionKeys = deletionEntries.map((entry) => entry.key);
 	for (const entry of deletionEntries) {
-		await lix.db
-			.insertInto("key_value")
-			.values(entry)
-			.execute();
+		await lix.db.insertInto("key_value").values(entry).execute();
 	}
 	const fullCp = await createCheckpoint({ lix });
 
