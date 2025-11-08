@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { GitCommitVertical } from "lucide-react";
 import clsx from "clsx";
 import { LixProvider, useQuery } from "@lix-js/react-utils";
@@ -37,18 +37,14 @@ type HistoryViewProps = {
 export function HistoryView({ context }: HistoryViewProps) {
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
-	const items = useMemo<HistoryCheckpoint[]>(
-		() =>
-			checkpoints.map((cp) => {
-				const timestampLabel = formatTimestamp(cp.checkpoint_created_at);
-				return {
-					id: cp.id,
-					timestampLabel,
-					label: timestampLabel,
-				};
-			}),
-		[checkpoints],
-	);
+	const items: HistoryCheckpoint[] = checkpoints.map((cp) => {
+		const timestampLabel = formatTimestamp(cp.checkpoint_created_at);
+		return {
+			id: cp.id,
+			timestampLabel,
+			label: timestampLabel,
+		};
+	});
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -85,6 +81,7 @@ export function HistoryView({ context }: HistoryViewProps) {
 								</div>
 								<button
 									type="button"
+									data-testid={`history-checkpoint-${item.id}`}
 									onClick={() => {
 										setSelectedId(item.id);
 										context?.openCommitView?.(

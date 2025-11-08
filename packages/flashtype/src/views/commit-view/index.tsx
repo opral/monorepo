@@ -1,13 +1,10 @@
-import { useMemo, useCallback } from "react";
+import { useCallback } from "react";
 import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
 import type { ViewContext, ViewInstance } from "../../app/types";
 import { File, GitCommitVertical } from "lucide-react";
 import { createReactViewDefinition } from "../../app/react-view";
-import {
-	selectCheckpointFiles,
-	type CheckpointFileChangeRow,
-} from "./queries";
+import { selectCheckpointFiles, type CheckpointFileChangeRow } from "./queries";
 
 type CommitFile = {
 	id: string;
@@ -57,22 +54,14 @@ export function CommitView({ context, view }: CommitViewProps) {
 			{ subscribe: Boolean(checkpointId) },
 		) ?? [];
 
-	const files = useMemo<CommitFile[]>(() => {
-		if (!checkpoint) return [];
-		return fileRows.map((row: CheckpointFileChangeRow) => {
-			const added = row.added ?? 0;
-			const removed = row.removed ?? 0;
-			const rawPath = row.path && row.path.length > 0 ? row.path : row.file_id;
-			const normalizedPath = rawPath.replace(/^\/+/, "");
-			return {
-				id: row.file_id,
-				fullPath: rawPath,
-				path: normalizedPath,
-				added,
-				removed,
-			};
-		});
-	}, [checkpoint, fileRows]);
+	const handleOpenDiff = useCallback(
+		(file: CommitFile) => {
+			if (!context?.openDiffView) return;
+			const diffOptions = context.isPanelFocused ? { focus: false } : undefined;
+			context.openDiffView(file.id, file.fullPath, diffOptions);
+		},
+		[context],
+	);
 
 	if (!checkpoint) {
 		return (
@@ -84,15 +73,21 @@ export function CommitView({ context, view }: CommitViewProps) {
 		);
 	}
 
+	const files: CommitFile[] = fileRows.map((row: CheckpointFileChangeRow) => {
+		const added = row.added ?? 0;
+		const removed = row.removed ?? 0;
+		const rawPath = row.path && row.path.length > 0 ? row.path : row.file_id;
+		const normalizedPath = rawPath.replace(/^\/+/, "");
+		return {
+			id: row.file_id,
+			fullPath: rawPath,
+			path: normalizedPath,
+			added,
+			removed,
+		};
+	});
+
 	const timestamp = formatTimestamp(checkpoint.checkpoint_created_at);
-	const handleOpenDiff = useCallback(
-		(file: CommitFile) => {
-			if (!context?.openDiffView) return;
-			const diffOptions = context.isPanelFocused ? { focus: false } : undefined;
-			context.openDiffView(file.id, file.fullPath, diffOptions);
-		},
-		[context],
-	);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col overflow-auto px-3 py-2">
