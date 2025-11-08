@@ -54,7 +54,7 @@ type ColumnSelectionSummary = {
 	supportColumns: ReadonlySet<string>;
 };
 
-type SchemaKeyPredicateSummary = {
+type ColumnPredicateSummary = {
 	count: number;
 	literals: string[];
 };
@@ -73,6 +73,7 @@ type TableReferenceInfo = {
 
 type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
+	fileIds: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
@@ -81,6 +82,7 @@ type InlineRewriteMetadata = {
 
 type SubqueryPredicateMetadata = {
 	schemaKeys: readonly string[];
+	fileIds: readonly string[];
 	pruneInheritance: boolean;
 };
 
@@ -146,14 +148,16 @@ function rewriteSelectStatement(
 	select: SelectStatementNode,
 	context: PreprocessorStepContext,
 	pushdownSchemaKeys: readonly string[] = [],
-	pushdownPruneInheritance = false
+	pushdownPruneInheritance = false,
+	pushdownFileIds: readonly string[] = []
 ): SelectStatementNode {
 	const parameters = context.parameters ?? [];
 	const subqueryPredicateMap = collectSubqueryPredicateMap(
 		select,
 		parameters,
 		pushdownSchemaKeys,
-		pushdownPruneInheritance
+		pushdownPruneInheritance,
+		pushdownFileIds
 	);
 	const withRewrittenSubqueries = visitSelectStatement(select, {
 		subquery(node, visitContext) {
@@ -170,19 +174,22 @@ function rewriteSelectStatement(
 				predicateMetadata?.schemaKeys ?? pushdownSchemaKeys;
 			const nextPrune =
 				predicateMetadata?.pruneInheritance ?? pushdownPruneInheritance;
+			const nextFileIds = predicateMetadata?.fileIds ?? pushdownFileIds;
 			const rewrittenStatement =
 				node.statement.node_kind === "compound_select"
 					? rewriteCompoundSelect(
 							node.statement,
 							context,
 							nextSchemaKeys,
-							nextPrune
+							nextPrune,
+							nextFileIds
 						)
 					: rewriteSelectStatement(
 							node.statement,
 							context,
 							nextSchemaKeys,
-							nextPrune
+							nextPrune,
+							nextFileIds
 						);
 			if (rewrittenStatement !== node.statement) {
 				return {
@@ -216,11 +223,11 @@ function rewriteSelectStatement(
 		tableNamesForTrace,
 		parameters
 	);
-	const mergedSchemaKeys = mergeSchemaKeyLiterals(
+	const mergedSchemaKeys = mergeStringLiterals(
 		pushdownSchemaKeys,
 		schemaSummary.literals
 	);
-	const schemaSummaryForTrace: SchemaKeyPredicateSummary = {
+	const schemaSummaryForTrace: ColumnPredicateSummary = {
 		count: schemaSummary.count,
 		literals: mergedSchemaKeys,
 	};
@@ -239,7 +246,8 @@ function rewriteSelectStatement(
 		references,
 		parameters,
 		pushdownSchemaKeys,
-		pushdownPruneInheritance
+		pushdownPruneInheritance,
+		pushdownFileIds
 	);
 
 	const rewritten = visitSelectStatement(
@@ -264,14 +272,16 @@ function rewriteCompoundSelect(
 	compound: CompoundSelectNode,
 	context: PreprocessorStepContext,
 	pushdownSchemaKeys: readonly string[] = [],
-	pushdownPruneInheritance = false
+	pushdownPruneInheritance = false,
+	pushdownFileIds: readonly string[] = []
 ): CompoundSelectNode {
 	let changed = false;
 	const first = rewriteSelectStatement(
 		compound.first,
 		context,
 		pushdownSchemaKeys,
-		pushdownPruneInheritance
+		pushdownPruneInheritance,
+		pushdownFileIds
 	);
 	if (first !== compound.first) {
 		changed = true;
@@ -282,7 +292,8 @@ function rewriteCompoundSelect(
 			branch.select,
 			context,
 			pushdownSchemaKeys,
-			pushdownPruneInheritance
+			pushdownPruneInheritance,
+			pushdownFileIds
 		);
 		if (rewritten !== branch.select) {
 			changed = true;
@@ -350,7 +361,8 @@ function collectSubqueryPredicateMap(
 	select: SelectStatementNode,
 	parameters: ReadonlyArray<unknown>,
 	pushdownSchemaKeys: readonly string[],
-	pushdownPruneInheritance: boolean
+	pushdownPruneInheritance: boolean,
+	pushdownFileIds: readonly string[]
 ): Map<string, SubqueryPredicateMetadata> {
 	const map = new Map<string, SubqueryPredicateMetadata>();
 	const register = (
@@ -381,15 +393,36 @@ function collectSubqueryPredicateMap(
 			parameters,
 			false
 		);
-		const localKeys = mergeSchemaKeyLiterals(
+		const localKeys = mergeStringLiterals(
 			whereSummary.literals,
 			joinSummary.literals
 		);
+		const fileWhereSummary = collectFileIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const fileJoinSummary = collectFileIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localFileIds = mergeStringLiterals(
+			fileWhereSummary.literals,
+			fileJoinSummary.literals
+		);
+
 		const existing = map.get(normalizedAlias);
-		const merged = mergeSchemaKeyLiterals(
+		const merged = mergeStringLiterals(
 			existing?.schemaKeys ?? [],
 			pushdownSchemaKeys,
 			localKeys
+		);
+		const mergedFileIds = mergeStringLiterals(
+			existing?.fileIds ?? [],
+			pushdownFileIds,
+			localFileIds
 		);
 		const pruneFromWhere = requiresNullPredicateForColumn(
 			select.where_clause,
@@ -408,9 +441,13 @@ function collectSubqueryPredicateMap(
 			pushdownPruneInheritance ||
 			pruneFromWhere ||
 			pruneFromJoin;
-		if (merged.length > 0 || combinedPrune) {
+		const finalFileIds = shouldPushFileFilter(merged, mergedFileIds)
+			? mergedFileIds
+			: [];
+		if (merged.length > 0 || finalFileIds.length > 0 || combinedPrune) {
 			map.set(normalizedAlias, {
 				schemaKeys: merged,
+				fileIds: finalFileIds,
 				pruneInheritance: combinedPrune,
 			});
 		}
@@ -431,7 +468,8 @@ function buildInlineMetadata(
 	references: readonly TableReferenceInfo[],
 	parameters: ReadonlyArray<unknown>,
 	pushdownSchemaKeys: readonly string[],
-	pushdownPruneInheritance: boolean
+	pushdownPruneInheritance: boolean,
+	pushdownFileIds: readonly string[]
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -449,16 +487,29 @@ function buildInlineMetadata(
 			tableNames,
 			parameters
 		);
-		const schemaKeys = mergeSchemaKeyLiterals(
+		const schemaKeys = mergeStringLiterals(
 			pushdownSchemaKeys,
 			summary.literals
 		);
+		const fileSummary = collectFileIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedFileIds = mergeStringLiterals(
+			pushdownFileIds,
+			fileSummary.literals
+		);
+		const fileIds = shouldPushFileFilter(schemaKeys, mergedFileIds)
+			? mergedFileIds
+			: [];
 		const columnSummary = collectSelectedColumns(select, tableNames);
 		const pruneInheritance =
 			pushdownPruneInheritance ||
 			shouldPruneInheritance(select.where_clause, tableNames, parameters);
 		metadata.set(aliasKey, {
 			schemaKeys,
+			fileIds,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
 			supportColumns: new Set(columnSummary.supportColumns),
@@ -525,6 +576,7 @@ function createInlineVisitor(
 				INTERNAL_STATE_VTABLE;
 			const inlineSql = buildVtableSelectRewrite({
 				schemaKeys: metadataEntry.schemaKeys,
+				fileIds: metadataEntry.fileIds,
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
 				hiddenColumns: metadataEntry.hiddenColumns,
@@ -546,18 +598,14 @@ function collectSchemaKeyPredicates(
 	tableNames: Set<string>,
 	parameters: ReadonlyArray<unknown>,
 	allowUnqualified = true
-): SchemaKeyPredicateSummary {
-	if (!whereClause) {
-		return { count: 0, literals: [] };
-	}
-
-	const context: PredicateVisitContext = {
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
 		tableNames,
 		parameters,
-		allowUnqualified,
-	};
-
-	return visitExpression(whereClause, context);
+		"schema_key",
+		allowUnqualified
+	);
 }
 
 function collectSchemaKeyPredicatesFromExpression(
@@ -565,7 +613,71 @@ function collectSchemaKeyPredicatesFromExpression(
 	tableNames: Set<string>,
 	parameters: ReadonlyArray<unknown>,
 	allowUnqualified: boolean
-): SchemaKeyPredicateSummary {
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"schema_key",
+		allowUnqualified
+	);
+}
+
+function collectFileIdPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
+		tableNames,
+		parameters,
+		"file_id",
+		allowUnqualified
+	);
+}
+
+function collectFileIdPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"file_id",
+		allowUnqualified
+	);
+}
+
+function collectColumnPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	columnName: string,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	if (!whereClause) {
+		return { count: 0, literals: [] };
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	return visitExpression(whereClause, context, columnName);
+}
+
+function collectColumnPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	columnName: string,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
 	if (!expression) {
 		return { count: 0, literals: [] };
 	}
@@ -574,7 +686,7 @@ function collectSchemaKeyPredicatesFromExpression(
 		parameters,
 		allowUnqualified,
 	};
-	return visitExpression(expression, context);
+	return visitExpression(expression, context, columnName);
 }
 
 function expressionRequiresNullForColumn(
@@ -641,23 +753,24 @@ function expressionRequiresNullForColumn(
 
 function visitExpression(
 	expression: ExpressionNode | RawFragmentNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
 	if ("sql_text" in expression) {
 		return { count: 0, literals: [] };
 	}
 
 	switch (expression.node_kind) {
 		case "grouped_expression":
-			return visitExpression(expression.expression, context);
+			return visitExpression(expression.expression, context, columnName);
 		case "binary_expression":
-			return visitBinaryExpression(expression, context);
+			return visitBinaryExpression(expression, context, columnName);
 		case "unary_expression":
-			return visitExpression(expression.operand, context);
+			return visitExpression(expression.operand, context, columnName);
 		case "in_list_expression":
-			return visitInListExpression(expression, context);
+			return visitInListExpression(expression, context, columnName);
 		case "between_expression":
-			return visitBetweenExpression(expression, context);
+			return visitBetweenExpression(expression, context, columnName);
 		case "column_reference":
 		case "literal":
 		case "parameter":
@@ -668,12 +781,13 @@ function visitExpression(
 
 function visitBinaryExpression(
 	expression: BinaryExpressionNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
 	if (isLogicalOperator(expression.operator)) {
 		return mergeSummaries(
-			visitExpression(expression.left, context),
-			visitExpression(expression.right, context)
+			visitExpression(expression.left, context, columnName),
+			visitExpression(expression.right, context, columnName)
 		);
 	}
 
@@ -681,18 +795,18 @@ function visitBinaryExpression(
 		return { count: 0, literals: [] };
 	}
 
-	let summary: SchemaKeyPredicateSummary = {
+	let summary: ColumnPredicateSummary = {
 		count: 0,
 		literals: [],
 	};
 
-	const leftIsSchema = isSchemaKeyReference(expression.left, context);
-	const rightIsSchema = isSchemaKeyReference(expression.right, context);
+	const leftMatches = isColumnReference(expression.left, context, columnName);
+	const rightMatches = isColumnReference(expression.right, context, columnName);
 
-	if (leftIsSchema) {
+	if (leftMatches) {
 		summary = incrementSummaryWithOperand(summary, expression.right, context);
 	}
-	if (rightIsSchema) {
+	if (rightMatches) {
 		summary = incrementSummaryWithOperand(summary, expression.left, context);
 	}
 
@@ -701,12 +815,13 @@ function visitBinaryExpression(
 
 function visitInListExpression(
 	expression: InListExpressionNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, context)) {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
+	if (!isColumnReference(expression.operand, context, columnName)) {
 		return { count: 0, literals: [] };
 	}
-	let summary: SchemaKeyPredicateSummary = {
+	let summary: ColumnPredicateSummary = {
 		count: 1,
 		literals: [],
 	};
@@ -718,12 +833,13 @@ function visitInListExpression(
 
 function visitBetweenExpression(
 	expression: BetweenExpressionNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, context)) {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
+	if (!isColumnReference(expression.operand, context, columnName)) {
 		return { count: 0, literals: [] };
 	}
-	let summary: SchemaKeyPredicateSummary = {
+	let summary: ColumnPredicateSummary = {
 		count: 1,
 		literals: [],
 	};
@@ -733,10 +849,10 @@ function visitBetweenExpression(
 }
 
 function incrementSummaryWithOperand(
-	summary: SchemaKeyPredicateSummary,
+	summary: ColumnPredicateSummary,
 	operand: ExpressionNode | RawFragmentNode,
 	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
+): ColumnPredicateSummary {
 	const next = { ...summary };
 	const node = unwrapExpression(operand);
 	switch (node.node_kind) {
@@ -807,13 +923,6 @@ function unwrapExpression(
 	return expression;
 }
 
-function isSchemaKeyReference(
-	expression: ExpressionNode | RawFragmentNode,
-	context: PredicateVisitContext
-): boolean {
-	return isColumnReference(expression, context, "schema_key");
-}
-
 function isColumnReference(
 	expression: ExpressionNode | RawFragmentNode,
 	context: PredicateVisitContext,
@@ -852,9 +961,9 @@ function isEqualityOperator(
 }
 
 function mergeSummaries(
-	...summaries: SchemaKeyPredicateSummary[]
-): SchemaKeyPredicateSummary {
-	return summaries.reduce<SchemaKeyPredicateSummary>(
+	...summaries: ColumnPredicateSummary[]
+): ColumnPredicateSummary {
+	return summaries.reduce<ColumnPredicateSummary>(
 		(accumulator, current) => {
 			accumulator.count += current.count;
 			accumulator.literals.push(...current.literals);
@@ -864,7 +973,7 @@ function mergeSummaries(
 	);
 }
 
-function mergeSchemaKeyLiterals(
+function mergeStringLiterals(
 	...lists: readonly (readonly string[])[]
 ): string[] {
 	const seen = new Set<string>();
@@ -1087,7 +1196,7 @@ function determineProjectionKind(
 function buildTraceEntry(args: {
 	aliasList: readonly string[];
 	projectionKind: "selectAll" | "partial";
-	schemaSummary: SchemaKeyPredicateSummary;
+	schemaSummary: ColumnPredicateSummary;
 	selectedColumns: SelectedProjection[] | null;
 }): PreprocessorTraceEntry {
 	const { aliasList, schemaSummary, projectionKind, selectedColumns } = args;
@@ -1109,6 +1218,7 @@ function buildTraceEntry(args: {
 
 function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
+	fileIds: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
@@ -1125,6 +1235,11 @@ function buildVtableSelectRewrite(options: {
 	candidateColumns.add("priority");
 	rankedColumns.add("priority");
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
+	const fileFilter =
+		options.fileIds && options.fileIds.length > 0
+			? buildFileFilter(options.fileIds)
+			: null;
+	const txnFilter = combineFilters(schemaFilter, fileFilter);
 	const cacheSource = buildCacheSource(
 		schemaFilterList,
 		options.cacheTables,
@@ -1152,12 +1267,12 @@ function buildVtableSelectRewrite(options: {
 	];
 	const segments: string[] = [];
 	if (options.hasOpenTransaction !== false) {
-		segments.push(buildTransactionSegment(schemaFilter, candidateColumns));
+		segments.push(buildTransactionSegment(txnFilter, candidateColumns));
 	}
-	segments.push(buildUntrackedSegment(schemaFilter, candidateColumns));
+	segments.push(buildUntrackedSegment(txnFilter, candidateColumns));
 	const cacheSegment = buildCacheSegment(
 		cacheSource,
-		schemaFilter,
+		txnFilter,
 		candidateColumns
 	);
 	if (cacheSegment) {
@@ -1169,7 +1284,7 @@ function buildVtableSelectRewrite(options: {
 		if (cacheSegment) {
 			const inheritedCache = buildInheritedCacheSegment(
 				cacheSource,
-				schemaFilter,
+				txnFilter,
 				candidateColumns
 			);
 			if (inheritedCache) {
@@ -1177,11 +1292,11 @@ function buildVtableSelectRewrite(options: {
 			}
 		}
 		inheritedSegments.push(
-			buildInheritedUntrackedSegment(schemaFilter, candidateColumns)
+			buildInheritedUntrackedSegment(txnFilter, candidateColumns)
 		);
 		if (options.hasOpenTransaction !== false) {
 			inheritedSegments.push(
-				buildInheritedTransactionSegment(schemaFilter, candidateColumns)
+				buildInheritedTransactionSegment(txnFilter, candidateColumns)
 			);
 		}
 		allSegments = segments.concat(inheritedSegments);
@@ -1449,7 +1564,8 @@ function buildTransactionSegment(
 	schemaFilter: string | null,
 	projectionColumns: Set<string>
 ): string {
-	const filterClause = schemaFilter ? `WHERE ${schemaFilter}` : "";
+	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "txn");
+	const filterClause = rewrittenFilter ? `WHERE ${rewrittenFilter}` : "";
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
@@ -1488,9 +1604,7 @@ function buildUntrackedSegment(
 	schemaFilter: string | null,
 	projectionColumns: Set<string>
 ): string {
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "unt.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "unt");
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
@@ -1533,9 +1647,7 @@ function buildCacheSegment(
 	if (!cacheSource) {
 		return null;
 	}
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "cache.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "cache");
 	const sourceKeyword = cacheSource.trim().toLowerCase();
 	const sourceSql = sourceKeyword.startsWith("select")
 		? `(${cacheSource})`
@@ -1569,12 +1681,7 @@ function buildCacheSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const conditions: string[] = [];
-	if (rewrittenFilter) {
-		conditions.push(rewrittenFilter);
-	}
-	const whereClause =
-		conditions.length > 0 ? `\n\t\tWHERE ${conditions.join(" AND ")}` : "";
+	const whereClause = rewrittenFilter ? `\n\t\tWHERE ${rewrittenFilter}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
@@ -1677,9 +1784,7 @@ function buildInheritedCacheSegment(
 	if (!cacheSource) {
 		return null;
 	}
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "cache.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "cache");
 	const sourceKeyword = cacheSource.trim().toLowerCase();
 	const sourceSql = sourceKeyword.startsWith("select")
 		? `(${cacheSource})`
@@ -1741,9 +1846,7 @@ function buildInheritedUntrackedSegment(
 	schemaFilter: string | null,
 	projectionColumns: Set<string>
 ): string {
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "unt.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "unt");
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
@@ -1831,7 +1934,7 @@ function buildInheritedTransactionSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const rewrittenFilter = schemaFilter ?? null;
+	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "txn");
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
@@ -1870,6 +1973,16 @@ function buildSchemaFilter(schemaKeys: readonly string[]): string | null {
 	}
 	const values = schemaKeys.map((key) => `'${key}'`).join(", ");
 	return `txn.schema_key IN (${values})`;
+}
+
+function buildFileFilter(fileIds: readonly string[]): string | null {
+	if (!fileIds || fileIds.length === 0) {
+		return null;
+	}
+	const values = fileIds
+		.map((fileId) => `'${escapeSqlLiteral(fileId)}'`)
+		.join(", ");
+	return `txn.file_id IN (${values})`;
 }
 
 function buildCacheSource(
@@ -1973,4 +2086,45 @@ function indent(value: string, spaces: number): string {
 
 function quoteIdentifier(identifier: string): string {
 	return `"${identifier.replace(/"/g, '""')}"`;
+}
+
+function shouldPushFileFilter(
+	schemaKeys: readonly string[],
+	fileIds: readonly string[]
+): boolean {
+	if (!schemaKeys || schemaKeys.length === 0) return false;
+	if (!fileIds || fileIds.length === 0) return false;
+	return schemaKeys.every(
+		(key) => typeof key === "string" && !key.startsWith("lix_")
+	);
+}
+
+function combineFilters(
+	...filters: Array<string | null | undefined>
+): string | null {
+	const active = filters.filter(
+		(filter): filter is string =>
+			typeof filter === "string" && filter.length > 0
+	);
+	if (active.length === 0) {
+		return null;
+	}
+	if (active.length === 1) {
+		return active[0]!;
+	}
+	return active.map((filter) => `(${filter})`).join(" AND ");
+}
+
+function rewriteFilterForAlias(
+	filter: string | null,
+	alias: string
+): string | null {
+	if (!filter) {
+		return null;
+	}
+	return filter.replace(/txn\./g, `${alias}.`);
+}
+
+function escapeSqlLiteral(value: string): string {
+	return value.replace(/'/g, "''");
 }

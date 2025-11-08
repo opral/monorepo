@@ -215,3 +215,23 @@ test("state filter on inherited_from_version_id=NULL prunes inheritance rewrites
 
 	await lix.close();
 });
+
+test("state file_id predicate is pushed into vtable rewrite for markdown schemas", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const result = preprocess({
+		sql: `
+		SELECT st.entity_id
+		FROM state AS st
+		WHERE st.file_id = ?
+		  AND st.schema_key IN ('markdown_wc_paragraph')
+		`,
+		parameters: ["file-xyz"],
+	});
+
+	const normalized = result.sql.toLowerCase();
+	expect(normalized).toContain("unt.file_id in ('file-xyz')");
+
+	await lix.close();
+});
