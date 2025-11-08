@@ -7,9 +7,19 @@
 }
 
 /* Base markdown view container */
-.markdown-view .ProseMirror {
+.markdown-view {
+	flex: 1 1 auto;
+	min-height: 0;
 	padding-left: 0.75rem;
-	padding-right: 0.75em;
+	padding-right: 0.75rem;
+}
+
+.markdown-view .tiptap {
+	min-height: calc(100% + 1px);
+	padding-bottom: 4rem;
+}
+
+.markdown-view .ProseMirror {
 	font-size: 0.9rem;
 	line-height: 1.6;
 	min-height: auto;

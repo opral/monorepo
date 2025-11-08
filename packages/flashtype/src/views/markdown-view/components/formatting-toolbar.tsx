@@ -331,7 +331,7 @@ export function FormattingToolbar({ className }: { className?: string }) {
 			</span>
 			<Toolbar.Root
 				className={clsx(
-					"flex w-full max-w-5xl items-center gap-1 rounded-md border border-border py-0.5 text-xs text-foreground",
+					"flex w-full max-w-5xl items-center gap-1 rounded-md border border-border py-0.5 text-xs text-foreground mx-auto",
 					className,
 				)}
 				aria-label="Formatting toolbar"
