@@ -56,6 +56,16 @@ export function isDeterministicModeSync(args: {
 		return true;
 	}
 
+	const stateViewReady =
+		engine.executeSync({
+			sql: "SELECT 1 FROM sqlite_schema WHERE type = 'view' AND name = 'state' LIMIT 1",
+			preprocessMode: "none",
+		}).rows.length > 0;
+
+	if (!stateViewReady) {
+		return false;
+	}
+
 	const [row] = withRuntimeCache(
 		engine,
 		internalQueryBuilder
