@@ -12,6 +12,7 @@ test("validateLixSchemaDefinition passes for valid Lix schema", () => {
 		properties: {
 			id: { type: "string" },
 		},
+		additionalProperties: false,
 	};
 
 	expect(() => validateLixSchemaDefinition(validSchema)).not.toThrow();
@@ -25,6 +26,7 @@ test("validateLixSchemaDefinition throws for invalid schema", () => {
 		properties: {
 			id: { type: "string" },
 		},
+		additionalProperties: false,
 		// Missing required x-lix-key
 	};
 
@@ -43,6 +45,7 @@ test("validateLixSchema validates both schema and data successfully", () => {
 			name: { type: "string" },
 		},
 		required: ["id", "name"],
+		additionalProperties: false,
 	};
 
 	const validData = {
@@ -62,6 +65,7 @@ test("validateLixSchema throws when schema is invalid", () => {
 		properties: {
 			id: { type: "string" },
 		},
+		additionalProperties: false,
 	};
 
 	const data = { id: "123" };
@@ -81,6 +85,7 @@ test("validateLixSchema throws when data doesn't match schema", () => {
 			name: { type: "string" },
 		},
 		required: ["id", "name"],
+		additionalProperties: false,
 	};
 
 	const invalidData = {
@@ -90,6 +95,22 @@ test("validateLixSchema throws when data doesn't match schema", () => {
 
 	expect(() => validateLixSchema(schema, invalidData)).toThrow(
 		"Data validation failed"
+	);
+});
+
+test("validateLixSchemaDefinition rejects when additionalProperties is missing", () => {
+	const schemaMissingAdditionalProps = {
+		"x-lix-key": "user",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+	};
+
+	expect(() => validateLixSchemaDefinition(schemaMissingAdditionalProps)).toThrow(
+		"Invalid Lix schema definition"
 	);
 });
 

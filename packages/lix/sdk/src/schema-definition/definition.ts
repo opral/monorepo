@@ -199,7 +199,7 @@ export const LixSchemaDefinition = {
 					},
 				},
 			},
-			required: ["x-lix-key", "x-lix-version"],
+			required: ["x-lix-key", "x-lix-version", "additionalProperties"],
 		},
 	],
 } as const;
