@@ -1265,8 +1265,51 @@ function extractColumnFromExpression(
 		}
 		case "grouped_expression":
 			return extractColumnFromExpression(expression.expression, tableNames);
+		case "function_call":
+			return extractColumnFromFunctionCall(expression, tableNames);
 		default:
 			return null;
+	}
+}
+
+function extractColumnFromFunctionCall(
+	expression: Extract<ExpressionNode, { node_kind: "function_call" }>,
+	tableNames: Set<string>
+): string | null {
+	let referencedColumn: string | null = null;
+	for (const argument of expression.arguments) {
+		if (argument.node_kind === "all_columns") {
+			return null;
+		}
+		const extracted = extractColumnFromExpression(argument, tableNames);
+		if (extracted) {
+			if (referencedColumn && referencedColumn !== extracted) {
+				return null;
+			}
+			referencedColumn = extracted;
+			continue;
+		}
+		if (!isLiteralOrParameter(argument)) {
+			return null;
+		}
+	}
+	return referencedColumn;
+}
+
+function isLiteralOrParameter(
+	expression: ExpressionNode | RawFragmentNode
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "literal":
+		case "parameter":
+			return true;
+		case "grouped_expression":
+			return isLiteralOrParameter(expression.expression);
+		default:
+			return false;
 	}
 }
 
@@ -1521,9 +1564,9 @@ function buildRewriteProjectionSql(
 									eb.ref("ws_src.writer_key"),
 									eb.ref("w.writer_key")
 								)
-								.as(entry.alias ?? entry.column) as unknown as any;
+								.as(entry.column) as unknown as any;
 						}
-						return eb.ref(`w.${entry.column}`).as(entry.alias ?? entry.column);
+						return eb.ref(`w.${entry.column}`).as(entry.column);
 					})
 				);
 

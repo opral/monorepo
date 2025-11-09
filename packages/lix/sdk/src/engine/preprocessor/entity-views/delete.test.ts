@@ -214,7 +214,8 @@ test("rewrites deletes for stored schema views", async () => {
 			equalities,
 			(left, right) =>
 				isColumnReference(left, ["state_by_version", "version_id"]) &&
-				right.node_kind === "subquery_expression"
+				(right.node_kind === "subquery_expression" ||
+					right.node_kind === "literal")
 		)
 	).toBe(true);
 

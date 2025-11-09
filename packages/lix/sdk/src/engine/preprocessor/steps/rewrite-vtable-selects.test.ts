@@ -96,6 +96,33 @@ test("rewrites to inline vtable subquery", () => {
 	expect(sql).not.toMatch(/\bFROM\s+"lix_internal_state_vtable"\b/i);
 });
 
+test("json_extract projection tracks snapshot_content dependency", () => {
+	const trace: PreprocessorTraceEntry[] = [];
+	const rewritten = rewrite(
+		`
+		SELECT json_extract(snapshot_content, '$.value.enabled') AS enabled
+		FROM lix_internal_state_vtable
+		WHERE schema_key = 'lix_key_value'
+	`,
+		{ hasOpenTransaction: () => true, trace }
+	);
+
+	const payload = trace[0]?.payload as Record<string, unknown>;
+	expect(payload?.selected_columns).toEqual(["enabled"]);
+
+	const projection = firstSelect(rewritten).projection;
+	expect(projection).toHaveLength(1);
+	const [item] = projection;
+	if (item.node_kind !== "select_expression") {
+		throw new Error("expected select expression");
+	}
+	expect(item.alias?.value.toLowerCase()).toBe("enabled");
+
+	const normalizedSql = compileSql(rewritten).toLowerCase();
+	expect(normalizedSql).not.toContain("lix_internal_state_writer");
+	expect(normalizedSql).not.toContain("lix_internal_change");
+});
+
 test("cache segment projects snapshot_content even when not selected explicitly", () => {
 	const schemaKey = "lix_stored_schema";
 	const cacheTable = schemaKeyToCacheTableName(schemaKey);
@@ -621,7 +648,8 @@ test("respects aliases when projecting columns", () => {
 	expect(payload.selected_columns).toEqual(["schema_key_alias"]);
 
 	const sql = compileSql(rewritten);
-	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key_alias"');
+	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key"');
+	expect(sql.toLowerCase()).toContain("select v.schema_key as schema_key_alias");
 	expect(sql.toLowerCase()).not.toContain('"w"."_pk" as "_pk"');
 });
 
