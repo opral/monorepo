@@ -112,7 +112,10 @@ test("json_extract projection tracks snapshot_content dependency", () => {
 
 	const projection = firstSelect(rewritten).projection;
 	expect(projection).toHaveLength(1);
-	const [item] = projection;
+	const item = projection[0];
+	if (!item) {
+		throw new Error("missing projection item");
+	}
 	if (item.node_kind !== "select_expression") {
 		throw new Error("expected select expression");
 	}
@@ -649,7 +652,9 @@ test("respects aliases when projecting columns", () => {
 
 	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key"');
-	expect(sql.toLowerCase()).toContain("select v.schema_key as schema_key_alias");
+	expect(sql.toLowerCase()).toContain(
+		"select v.schema_key as schema_key_alias"
+	);
 	expect(sql.toLowerCase()).not.toContain('"w"."_pk" as "_pk"');
 });
 

@@ -122,10 +122,11 @@ function maybeRewriteInListExpression(
 	if (!isVersionIdColumn(node.operand)) {
 		return node;
 	}
-	const literal = literalForActiveVersionSubquery(
-		node.items[0],
-		activeVersionId
-	);
+	const [firstItem] = node.items;
+	if (!firstItem) {
+		return node;
+	}
+	const literal = literalForActiveVersionSubquery(firstItem, activeVersionId);
 	if (!literal) {
 		return node;
 	}
@@ -203,6 +204,9 @@ function selectReturnsActiveVersion(
 		return false;
 	}
 	const clause = statement.from_clauses[0];
+	if (!clause) {
+		return false;
+	}
 	if (clause.joins.length > 0) {
 		return false;
 	}
@@ -213,7 +217,7 @@ function selectReturnsActiveVersion(
 		return false;
 	}
 	const projection = statement.projection[0];
-	if (projection.node_kind !== "select_expression") {
+	if (!projection || projection.node_kind !== "select_expression") {
 		return false;
 	}
 	return isVersionIdSelectExpression(projection);
