@@ -6,10 +6,7 @@ import { getTimestamp } from "../../engine/functions/timestamp.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import type { MaterializedState } from "../vtable/generate-commit.js";
-import {
-	getStateCacheTables,
-	type InternalStateCacheRow,
-} from "./schema.js";
+import { getStateCacheTables, type InternalStateCacheRow } from "./schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 const { schemaKeyToCacheTableName } = cacheTableModule;
@@ -686,13 +683,13 @@ test("handles duplicate entity updates - last change wins", async () => {
 		],
 	});
 
-	await ensureCacheSchemas(lix, ["test-schema"]);
+	await ensureCacheSchemas(lix, ["test_schema"]);
 
 	// Create test changes for the same entity
 	const change1: MaterializedState = {
 		id: "change-1",
 		entity_id: "test-entity",
-		schema_key: "test-schema",
+		schema_key: "test_schema",
 		file_id: "test-file",
 		plugin_key: "test-plugin",
 		snapshot_content: JSON.stringify({ value: "first" }),
@@ -705,7 +702,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 	const change2: MaterializedState = {
 		id: "change-2",
 		entity_id: "test-entity", // Same entity
-		schema_key: "test-schema",
+		schema_key: "test_schema",
 		file_id: "test-file",
 		plugin_key: "test-plugin",
 		snapshot_content: JSON.stringify({ value: "second" }),
@@ -758,14 +755,14 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 		],
 	});
 
-	await ensureCacheSchemas(lix, ["test-schema"]);
+	await ensureCacheSchemas(lix, ["test_schema"]);
 
 	// Create multiple changes for the same entity in a single batch
 	const changes: MaterializedState[] = [
 		{
 			id: "change-1",
 			entity_id: "test-entity",
-			schema_key: "test-schema",
+			schema_key: "test_schema",
 			file_id: "test-file",
 			plugin_key: "test-plugin",
 			snapshot_content: JSON.stringify({ value: "first" }),
@@ -777,7 +774,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 		{
 			id: "change-2",
 			entity_id: "test-entity", // Same entity
-			schema_key: "test-schema",
+			schema_key: "test_schema",
 			file_id: "test-file",
 			plugin_key: "test-plugin",
 			snapshot_content: JSON.stringify({ value: "second" }),
@@ -789,7 +786,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 		{
 			id: "change-3",
 			entity_id: "test-entity", // Same entity again
-			schema_key: "test-schema",
+			schema_key: "test_schema",
 			file_id: "test-file",
 			plugin_key: "test-plugin",
 			snapshot_content: JSON.stringify({ value: "third" }),

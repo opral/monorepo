@@ -2469,7 +2469,7 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		const deleteSchema: LixSchemaDefinition = {
-			"x-lix-key": "delete-cache-schema",
+			"x-lix-key": "delete_cache_schema",
 			"x-lix-version": "1.0",
 			type: "object",
 			additionalProperties: false,
@@ -2488,7 +2488,7 @@ simulationTest(
 			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "delete-cache-entity",
-				schema_key: "delete-cache-schema",
+				schema_key: "delete_cache_schema",
 				file_id: "delete-cache-file",
 				plugin_key: "delete-plugin",
 				snapshot_content: JSON.stringify({ to: "delete" }),
@@ -2512,7 +2512,7 @@ simulationTest(
 		await db
 			.deleteFrom("lix_internal_state_vtable")
 			.where("entity_id", "=", "delete-cache-entity")
-			.where("schema_key", "=", "delete-cache-schema")
+			.where("schema_key", "=", "delete_cache_schema")
 			.where("file_id", "=", "delete-cache-file")
 			.where("version_id", "=", activeVersion.id)
 			.execute();
@@ -2551,7 +2551,7 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		const writeThroughSchema: LixSchemaDefinition = {
-			"x-lix-key": "write-through-schema",
+			"x-lix-key": "write_through_schema",
 			"x-lix-version": "1.0",
 			type: "object",
 			additionalProperties: false,
@@ -2570,7 +2570,7 @@ simulationTest(
 			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "write-through-entity",
-				schema_key: "write-through-schema",
+				schema_key: "write_through_schema",
 				file_id: "write-through-file",
 				plugin_key: "write-through-plugin",
 				snapshot_content: JSON.stringify({ test: "write-through-data" }),
@@ -2585,7 +2585,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "write-through-entity")
-			.where("schema_key", "=", "write-through-schema")
+			.where("schema_key", "=", "write_through_schema")
 			.where("file_id", "=", "write-through-file")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()
@@ -2638,7 +2638,7 @@ simulationTest(
 
 		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 		const updateSchema: LixSchemaDefinition = {
-			"x-lix-key": "update-cache-schema",
+			"x-lix-key": "update_cache_schema",
 			"x-lix-version": "1.0",
 			type: "object",
 			additionalProperties: false,
@@ -2657,7 +2657,7 @@ simulationTest(
 			.insertInto("lix_internal_state_vtable")
 			.values({
 				entity_id: "update-cache-entity",
-				schema_key: "update-cache-schema",
+				schema_key: "update_cache_schema",
 				file_id: "update-cache-file",
 				plugin_key: "initial-plugin",
 				snapshot_content: JSON.stringify({ initial: "value" }),
@@ -2675,7 +2675,7 @@ simulationTest(
 				plugin_key: "updated-plugin",
 			})
 			.where("entity_id", "=", "update-cache-entity")
-			.where("schema_key", "=", "update-cache-schema")
+			.where("schema_key", "=", "update_cache_schema")
 			.where("file_id", "=", "update-cache-file")
 			.where("version_id", "=", activeVersion.id)
 			.execute();
@@ -2685,7 +2685,7 @@ simulationTest(
 			.selectFrom("lix_internal_state_vtable")
 			.where("_pk", "like", "C%")
 			.where("entity_id", "=", "update-cache-entity")
-			.where("schema_key", "=", "update-cache-schema")
+			.where("schema_key", "=", "update_cache_schema")
 			.where("file_id", "=", "update-cache-file")
 			.where("version_id", "=", activeVersion.id)
 			.selectAll()

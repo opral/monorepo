@@ -109,9 +109,9 @@ test("validateLixSchemaDefinition rejects when additionalProperties is missing",
 		required: ["id"],
 	};
 
-	expect(() => validateLixSchemaDefinition(schemaMissingAdditionalProps)).toThrow(
-		"Invalid Lix schema definition"
-	);
+	expect(() =>
+		validateLixSchemaDefinition(schemaMissingAdditionalProps)
+	).toThrow("Invalid Lix schema definition");
 });
 
 test("additional properties must be false", () => {

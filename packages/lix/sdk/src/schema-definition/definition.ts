@@ -58,6 +58,8 @@ export const LixSchemaDefinition = {
 					type: "array",
 					items: {
 						type: "array",
+						minItems: 1,
+						uniqueItems: true,
 						items: {
 							type: "string",
 							format: "json-pointer",
@@ -73,6 +75,8 @@ export const LixSchemaDefinition = {
 				},
 				"x-lix-primary-key": {
 					type: "array",
+					minItems: 1,
+					uniqueItems: true,
 					items: {
 						type: "string",
 						format: "json-pointer",
@@ -521,15 +525,16 @@ type IsAny<T> = 0 extends 1 & T ? true : false;
 /**
  * Transform object types with no properties from unknown to Record<string, any>
  */
-type TransformEmptyObject<T> = IsAny<T> extends true
-	? any
-	: IsNever<T> extends true
-		? never
-		: T extends object
-			? keyof T extends never
-				? Record<string, any>
-				: T
-			: T;
+type TransformEmptyObject<T> =
+	IsAny<T> extends true
+		? any
+		: IsNever<T> extends true
+			? never
+			: T extends object
+				? keyof T extends never
+					? Record<string, any>
+					: T
+				: T;
 
 /**
  * Check if a schema property is an empty object type (no properties defined)

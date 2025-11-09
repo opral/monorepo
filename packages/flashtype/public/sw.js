@@ -51,8 +51,8 @@ self.addEventListener("fetch", (event) => {
 		request.headers.get("accept")?.includes("text/html") === true;
 
 	if (isDocumentRequest) {
-	// Network-first for documents: ensures new deploys are visible immediately while
-	// keeping the cached shell as a fallback when offline.
+		// Network-first for documents: ensures new deploys are visible immediately while
+		// keeping the cached shell as a fallback when offline.
 		event.respondWith(
 			fetch(request)
 				.then((response) => {

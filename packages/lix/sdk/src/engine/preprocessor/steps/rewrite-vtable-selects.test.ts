@@ -112,7 +112,7 @@ test("cache segment projects snapshot_content even when not selected explicitly"
 });
 
 test("resolves cache table when schema key requires sanitization", () => {
-	const schemaKey = "delete-cache-schema";
+	const schemaKey = "delete_cache_schema";
 	const sanitizedKey = schemaKey.replace(/[^a-zA-Z0-9]/g, "_");
 	const cacheTable = `lix_internal_state_cache_v1_${sanitizedKey}`;
 	const rewritten = rewrite(

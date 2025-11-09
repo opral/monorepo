@@ -1764,7 +1764,7 @@ function buildPhysicalCacheSelect(
  *
  * @example
  * ```ts
- * resolveCacheTableName(new Map([["delete_cache_schema", "cache_table"]]), "delete-cache-schema");
+ * resolveCacheTableName(new Map([["delete_cache_schema", "cache_table"]]), "delete_cache_schema");
  * // "cache_table"
  * ```
  */

@@ -140,6 +140,72 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
+test("x-lix-primary-key must include at least one unique pointer", () => {
+	const baseSchema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	};
+
+	const emptyPk = {
+		...baseSchema,
+		"x-lix-primary-key": [],
+	} as LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(emptyPk)).toThrow();
+
+	const duplicatePk = {
+		...baseSchema,
+		"x-lix-primary-key": ["/id", "/id"],
+	} as LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(duplicatePk)).toThrow();
+
+	const validPk = {
+		...baseSchema,
+		"x-lix-primary-key": ["/id"],
+	} as LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(validPk)).not.toThrow();
+});
+
+test("x-lix-unique groups must include unique pointers", () => {
+	const baseSchema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: { type: "string" },
+			email: { type: "string" },
+		},
+		required: ["id", "email"],
+		additionalProperties: false,
+	};
+
+	const emptyGroup = {
+		...baseSchema,
+		"x-lix-unique": [[]],
+	} as LixSchemaDefinition;
+	expect(() => validateLixSchemaDefinition(emptyGroup)).toThrow();
+
+	const duplicatePointers = {
+		...baseSchema,
+		"x-lix-unique": [["/email", "/email"]],
+	} as LixSchemaDefinition;
+	expect(() => validateLixSchemaDefinition(duplicatePointers)).toThrow();
+
+	const validUnique = {
+		...baseSchema,
+		"x-lix-unique": [["/email"]],
+	} as LixSchemaDefinition;
+	expect(() => validateLixSchemaDefinition(validUnique)).not.toThrow();
+});
+
 test("x-lix-override-lixcols accepts cel expressions", () => {
 	const schema = {
 		type: "object",
