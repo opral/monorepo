@@ -108,7 +108,7 @@ test("json_extract projection tracks snapshot_content dependency", () => {
 	);
 
 	const payload = trace[0]?.payload as Record<string, unknown>;
-	expect(payload?.selected_columns).toEqual(["enabled"]);
+	expect(payload?.selected_columns).toEqual(["snapshot_content"]);
 
 	const projection = firstSelect(rewritten).projection;
 	expect(projection).toHaveLength(1);
@@ -645,7 +645,7 @@ test("respects aliases when projecting columns", () => {
 	);
 
 	const payload = trace[0]!.payload as Record<string, unknown>;
-	expect(payload.selected_columns).toEqual(["schema_key_alias"]);
+	expect(payload.selected_columns).toEqual(["schema_key"]);
 
 	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key"');

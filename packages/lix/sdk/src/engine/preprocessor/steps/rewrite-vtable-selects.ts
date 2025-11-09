@@ -1342,7 +1342,7 @@ function buildTraceEntry(args: {
 			schema_key_predicates: schemaSummary.count,
 			schema_key_literals: schemaSummary.literals,
 			selected_columns: selectedColumns
-				? selectedColumns.map((entry) => entry.alias ?? entry.column)
+				? selectedColumns.map((entry) => entry.column)
 				: null,
 		},
 	};
@@ -1380,11 +1380,6 @@ function buildVtableSelectRewrite(options: {
 			: null;
 	const versionFilter = buildVersionFilter(inheritancePlan.versionFilterIds);
 	const txnFilter = combineFilters(schemaFilter, fileFilter, versionFilter);
-	const cacheSource = buildCacheSource(
-		schemaFilterList,
-		options.cacheTables,
-		candidateColumns
-	);
 	const needsWriterJoin = candidateColumns.has("writer_key");
 	if (needsWriterJoin) {
 		candidateColumns.add("inherited_from_version_id");
@@ -1396,6 +1391,11 @@ function buildVtableSelectRewrite(options: {
 		needsWriterJoin,
 		candidateColumns,
 	});
+	const cacheSource = buildCacheSource(
+		schemaFilterList,
+		options.cacheTables,
+		candidateColumns
+	);
 	const rankingOrder = [
 		"c.priority",
 		"c.created_at DESC",
