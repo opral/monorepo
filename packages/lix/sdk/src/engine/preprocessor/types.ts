@@ -46,6 +46,7 @@ export type PreprocessorContext = {
 	readonly getCelEnvironment?: () => CelEnvironment;
 	readonly getEngine?: () => LixEngine;
 	readonly getVersionInheritance?: () => VersionInheritanceMap;
+	readonly getActiveVersionId?: () => string | null;
 	readonly trace?: PreprocessorTrace;
 };
 

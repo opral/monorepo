@@ -20,16 +20,16 @@ test(
 	"playground: explain queries during state inserts",
 	{ timeout: 20_000 },
 	async () => {
-	const lix = await openLix({});
-	const captured = await captureStateInsertQueries({
-		lix,
-		fileId: "playground-file",
-		count: 200,
-	});
-	await lix.close();
+		const lix = await openLix({});
+		const captured = await captureStateInsertQueries({
+			lix,
+			fileId: "playground-file",
+			count: 200,
+		});
+		await lix.close();
 
-	const text = formatExplainStages(captured);
-	await fs.writeFile(playgroundOutput, text, "utf8");
+		const text = formatExplainStages(captured);
+		await fs.writeFile(playgroundOutput, text, "utf8");
 	}
 );
 

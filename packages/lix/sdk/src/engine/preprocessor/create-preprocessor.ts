@@ -15,6 +15,7 @@ import { cacheTableNameToSchemaKey } from "../../state/cache/create-schema-cache
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
 import { expandSqlViews } from "./steps/expand-sql-views.js";
 import { cachePopulator } from "./steps/cache-populator.js";
+import { rewriteActiveVersionSubquery } from "./steps/rewrite-active-version-subquery.js";
 import { rewriteVtableSelects } from "./steps/rewrite-vtable-selects.js";
 import {
 	createCelEnvironment,
@@ -42,11 +43,13 @@ const fullPipeline: PreprocessorStep[] = [
 	rewriteEntityViewUpdate,
 	rewriteEntityViewDelete,
 	cachePopulator,
+	rewriteActiveVersionSubquery,
 	rewriteVtableSelects,
 ];
 
 const vtableOnlyPipeline: PreprocessorStep[] = [
 	cachePopulator,
+	rewriteActiveVersionSubquery,
 	rewriteVtableSelects,
 ];
 
@@ -97,6 +100,7 @@ export function createPreprocessor(args: {
 					getCelEnvironment: context.getCelEnvironment,
 					getEngine: context.getEngine,
 					getVersionInheritance: context.getVersionInheritance,
+					getActiveVersionId: context.getActiveVersionId,
 					trace: context.trace,
 				}),
 			statements
@@ -135,6 +139,7 @@ function buildContext(
 	let sqlViews: Map<string, string> | undefined;
 	let transactionState: boolean | undefined;
 	let celEnvironment: CelEnvironment | undefined;
+	let cachedActiveVersionId: string | null | undefined;
 
 	const loadStoredSchemas = (): Map<string, LixSchemaDefinition> => {
 		if (!storedSchemas) {
@@ -150,6 +155,28 @@ function buildContext(
 			cacheTables = buildCacheTableMap(cacheTableSet);
 		}
 		return cacheTables;
+	};
+
+	const loadActiveVersionId = (): string | null => {
+		if (cachedActiveVersionId !== undefined) {
+			return cachedActiveVersionId;
+		}
+		try {
+			const rows = engine.sqlite.exec({
+				sql: "SELECT version_id FROM active_version LIMIT 1",
+				returnValue: "resultRows",
+				rowMode: "object",
+				columnNames: [],
+			}) as Array<{ version_id: string | null }>;
+			const versionId = rows[0]?.version_id;
+			cachedActiveVersionId =
+				typeof versionId === "string" && versionId.length > 0
+					? versionId
+					: null;
+		} catch (error) {
+			cachedActiveVersionId = null;
+		}
+		return cachedActiveVersionId;
 	};
 
 	const context: PreprocessorContext = {
@@ -180,6 +207,7 @@ function buildContext(
 		},
 		getEngine: () => engine,
 		getVersionInheritance: () => getVersionInheritanceSnapshot({ engine }),
+		getActiveVersionId: () => loadActiveVersionId(),
 		...(trace ? { trace } : {}),
 	} as PreprocessorContext;
 
