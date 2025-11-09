@@ -40,7 +40,7 @@ This schema has two types of fields:
 
 **1. Lix-Specific Fields (Basic):**
 
-- **`x-lix-key`**: A globally unique string that identifies this schema. When a plugin reports a change, it references this key, telling Lix which schema to use for validation and interpretation.
+- **`x-lix-key`**: A globally unique string that identifies this schema. Keys must be snake_case (start with a lowercase letter, contain only lowercase letters, numbers, and underscores) so they can be safely embedded in SQL identifiers. When a plugin reports a change, it references this key, telling Lix which schema to use for validation and interpretation.
 - **`x-lix-version`**: A version number for the schema itself, allowing schemas to evolve over time.
 
 **2. Standard JSON Schema Fields:**

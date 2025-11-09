@@ -50,6 +50,46 @@ test("x-key is required", () => {
 	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
+test("x-lix-key must be snake_case", () => {
+	const baseSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	};
+
+	const invalidKeys = [
+		"Invalid-Key!",
+		"also.invalid",
+		"123starts_with_number",
+		"contains space",
+		"camelCaseKey",
+		"UPPER_CASE",
+		"mixed-Case_Value",
+	];
+	for (const key of invalidKeys) {
+		const schema = {
+			...baseSchema,
+			"x-lix-key": key,
+		} as LixSchemaDefinition;
+
+		expect(() => validateLixSchemaDefinition(schema)).toThrow();
+	}
+
+	const validKeys = ["abc", "abc123", "abc_123", "a", "snake_case_key"];
+	for (const key of validKeys) {
+		const schema = {
+			...baseSchema,
+			"x-lix-key": key,
+		} as LixSchemaDefinition;
+
+		expect(() => validateLixSchemaDefinition(schema)).not.toThrow();
+	}
+});
+
 test("x-lix-unique is optional", () => {
 	const schema = {
 		type: "object",

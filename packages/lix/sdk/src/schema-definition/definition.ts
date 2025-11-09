@@ -144,8 +144,9 @@ export const LixSchemaDefinition = {
 				},
 				"x-lix-key": {
 					type: "string",
+					pattern: "^[a-z][a-z0-9_]*$",
 					description:
-						"The key of the schema. The key is used to identify the schema. You must use a unique key for each schema.",
+						"The schema identifier. Must be snake_case (lowercase, underscores) to safely embed in SQL identifiers.",
 					examples: ["csv_plugin_cell"],
 				},
 				"x-lix-immutable": {
