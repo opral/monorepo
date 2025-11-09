@@ -269,7 +269,7 @@ export const plugin = {
   key: 'mock_json',
   detectChangesGlob: '*.json',
   detectChanges: ({ after }) => {
-    const schema = { "x-lix-key": "mock_schema", "x-lix-version": "1.0", type: "object", properties: { name: { type: "string" } } };
+    const schema = { "x-lix-key": "mock_schema", "x-lix-version": "1.0", type: "object", properties: { name: { type: "string" } }, additionalProperties: false };
     return [{ entity_id: after.id + ':mock', schema, snapshot_content: { name: 'hello' } }];
   }
 };

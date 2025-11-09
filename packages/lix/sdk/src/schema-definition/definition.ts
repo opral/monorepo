@@ -514,12 +514,21 @@ export type LixSelectable<T> = {
 	[K in keyof T]: SelectType<T[K]>;
 };
 
+type IsNever<T> = [T] extends [never] ? true : false;
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
 /**
  * Transform object types with no properties from unknown to Record<string, any>
  */
-type TransformEmptyObject<T> = T extends { [x: string]: unknown }
-	? Record<string, any>
-	: T;
+type TransformEmptyObject<T> = IsAny<T> extends true
+	? any
+	: IsNever<T> extends true
+		? never
+		: T extends object
+			? keyof T extends never
+				? Record<string, any>
+				: T
+			: T;
 
 /**
  * Check if a schema property is an empty object type (no properties defined)
