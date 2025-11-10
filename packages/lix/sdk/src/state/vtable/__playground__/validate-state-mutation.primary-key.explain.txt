@@ -11,6 +11,10 @@ select "snapshot_content" from "lix_internal_state_vtable" where "schema_key" = 
 -- rewritten SQL
 SELECT "snapshot_content"
 FROM (
+WITH
+  wanted_versions AS (
+    SELECT 'global' AS version_id
+  )
 SELECT
   "w"."snapshot_content" as "snapshot_content", "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."inherited_from_version_id" as "inherited_from_version_id", "w"."_pk" as "_pk"
 FROM (
@@ -42,7 +46,8 @@ FROM (
         'untracked' AS change_id,
         2 AS priority
       FROM lix_internal_state_all_untracked unt
-      WHERE (unt.schema_key IN ('text_play_pk')) AND (unt.version_id IN ('global'))
+      JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
+      WHERE unt.schema_key IN ('text_play_pk')
 
           UNION ALL
 
@@ -58,7 +63,8 @@ FROM (
         cache.change_id AS change_id,
         3 AS priority
       FROM "lix_internal_state_cache_v1_text_play_pk" cache
-      WHERE (cache.schema_key IN ('text_play_pk')) AND (cache.version_id IN ('global'))
+      JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
+      WHERE cache.schema_key IN ('text_play_pk')
   ) AS c
 ) AS w
 
@@ -80,7 +86,7 @@ WHERE "schema_key" = ? AND "version_id" = ? AND "inherited_from_version_id" IS N
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-6)"
+    "detail": "CO-ROUTINE (subquery-7)"
   },
   {
     "id": 7,
@@ -101,45 +107,69 @@ WHERE "schema_key" = ? AND "version_id" = ? AND "inherited_from_version_id" IS N
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 18,
+    "id": 12,
+    "parent": 9,
+    "notused": 0,
+    "detail": "MATERIALIZE wanted_versions"
+  },
+  {
+    "id": 14,
+    "parent": 12,
+    "notused": 0,
+    "detail": "SCAN CONSTANT ROW"
+  },
+  {
+    "id": 27,
+    "parent": 9,
+    "notused": 16,
+    "detail": "SCAN wv_unt"
+  },
+  {
+    "id": 33,
     "parent": 9,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 50,
+    "id": 66,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 59,
-    "parent": 50,
+    "id": 74,
+    "parent": 66,
+    "notused": 216,
+    "detail": "SCAN wv_cache"
+  },
+  {
+    "id": 80,
+    "parent": 66,
     "notused": 62,
     "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_pk_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
   },
   {
-    "id": 96,
+    "id": 118,
     "parent": 5,
-    "notused": 57,
+    "notused": 228,
     "detail": "SCAN c"
   },
   {
-    "id": 131,
+    "id": 153,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 165,
+    "id": 187,
     "parent": 2,
-    "notused": 37,
-    "detail": "SCAN (subquery-6)"
+    "notused": 208,
+    "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 235,
+    "id": 257,
     "parent": 0,
-    "notused": 37,
+    "notused": 208,
     "detail": "SCAN w"
   }
 ]

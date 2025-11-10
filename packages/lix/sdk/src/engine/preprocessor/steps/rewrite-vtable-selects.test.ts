@@ -126,6 +126,75 @@ test("json_extract projection tracks snapshot_content dependency", () => {
 	expect(normalizedSql).not.toContain("lix_internal_change");
 });
 
+test("pushes schema filters into derived state selects", () => {
+	const cacheTables = new Map([
+		["demo_schema", '"cache_demo"'],
+		["other_schema", '"cache_other"'],
+	]);
+	const rewritten = rewrite(
+		`
+		WITH descriptor AS (
+			SELECT *
+			FROM (
+				SELECT entity_id, schema_key, file_id
+				FROM lix_internal_state_vtable
+			) AS state_with_tombstones
+			WHERE version_id = 'global'
+		)
+		SELECT *
+		FROM descriptor
+		WHERE schema_key = 'demo_schema'
+	`,
+		{ getCacheTables: () => cacheTables }
+	);
+
+	const sql = compileSql(rewritten);
+	expect(sql).toContain('"cache_demo"');
+	expect(sql).not.toContain('"cache_other"');
+});
+
+test("limits base segments to requested versions while inherited segments see ancestors", () => {
+	const versionId = "01920000-0000-7000-8000-000000000026";
+	const ancestorId = "global";
+	const cacheTables = new Map([["demo_schema", '"cache_demo"']]);
+	const inheritance = new Map<string, VersionInheritanceNode>([
+		[
+			ancestorId,
+			{ versionId: ancestorId, inheritsFromVersionId: null, ancestors: [] },
+		],
+		[
+			versionId,
+			{
+				versionId,
+				inheritsFromVersionId: ancestorId,
+				ancestors: [ancestorId],
+			},
+		],
+	]);
+	const rewritten = rewrite(
+		`
+		SELECT entity_id
+		FROM lix_internal_state_vtable
+		WHERE schema_key = 'demo_schema'
+		  AND version_id = '${versionId}'
+	`,
+		{
+			getCacheTables: () => cacheTables,
+			getVersionInheritance: () => inheritance,
+			hasOpenTransaction: () => true,
+		}
+	);
+	const sql = compileSql(rewritten);
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_cache\s+ON\s+wv_cache\.version_id\s*=\s*cache\.version_id/i
+	);
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_vi\s+ON\s+wv_vi\.version_id\s*=\s*vi\.version_id/i
+	);
+	expect(sql).toContain("cache.version_id = vi.ancestor_version_id");
+	expect(sql).toMatch(/'global'\s+as\s+ancestor_version_id/i);
+});
+
 test("cache segment projects snapshot_content even when not selected explicitly", () => {
 	const schemaKey = "lix_stored_schema";
 	const cacheTable = schemaKeyToCacheTableName(schemaKey);
@@ -266,7 +335,7 @@ test("prunes inheritance when version filters are parameterized", () => {
 	expect(sql).not.toContain("version_inheritance");
 });
 
-test("collapses single-parent inheritance chains into simple WHERE IN filters", () => {
+test("collapses single-parent inheritance chains inline without recursion", () => {
 	const versionGraph = new Map<string, VersionInheritanceNode>([
 		[
 			"global",
@@ -298,11 +367,16 @@ test("collapses single-parent inheritance chains into simple WHERE IN filters", 
 		}
 	);
 
-	const sql = compileSql(rewritten).toLowerCase();
-	expect(sql).not.toContain("version_inheritance");
-	expect(sql.replace(/\s+/g, " ")).toMatch(
-		/version_id in \('active_version','global'\)/i
+	const sql = compileSql(rewritten);
+	expect(sql.toLowerCase()).not.toContain("version_inheritance");
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_txn\s+ON\s+wv_txn\.version_id\s*=\s*txn\.version_id/i
 	);
+	expect(
+		sql
+			.replace(/\s+/g, " ")
+			.match(/select 'active_version' as version_id, 'global' as ancestor_version_id/i)
+	).not.toBeNull();
 });
 
 test("collapses multi-level single-parent inheritance chains inline", () => {
@@ -346,16 +420,18 @@ test("collapses multi-level single-parent inheritance chains inline", () => {
 	);
 
 	const sql = compileSql(rewritten);
-	const normalized = sql.replace(/\s+/g, " ").toLowerCase();
+	const normalized = sql.toLowerCase();
 	expect(normalized).not.toContain("version_inheritance");
-	expect(normalized).toContain(
-		"version_id in ('feature_version','active_version','global')"
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_txn\s+ON\s+wv_txn\.version_id\s*=\s*txn\.version_id/i
 	);
 	expect(
-		normalized.includes(
-			"select 'feature_version' as version_id, 'global' as ancestor_version_id"
-		)
-	).toBe(true);
+		sql
+			.replace(/\s+/g, " ")
+			.match(
+				/select 'feature_version' as version_id, 'global' as ancestor_version_id/i
+			)
+	).not.toBeNull();
 });
 
 test("retains version filters when inheritance map lacks the version", () => {
@@ -372,8 +448,10 @@ test("retains version filters when inheritance map lacks the version", () => {
 		}
 	);
 
-	const normalized = compileSql(rewritten).replace(/\s+/g, " ").toLowerCase();
-	expect(normalized).toContain("version_id in ('missing_version')");
+	const sql = compileSql(rewritten);
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_txn\s+ON\s+wv_txn\.version_id\s*=\s*txn\.version_id/i
+	);
 });
 
 test("resolves cache rows across recursive version inheritance chains", async () => {

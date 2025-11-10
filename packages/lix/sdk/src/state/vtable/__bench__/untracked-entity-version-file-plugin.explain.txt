@@ -13,6 +13,10 @@ SELECT * FROM lix_internal_state_vtable
 -- rewritten SQL --
 SELECT *
 FROM (
+WITH
+  wanted_versions AS (
+    SELECT 'global' AS version_id
+  )
 SELECT
   w."entity_id" AS "entity_id",
   w."schema_key" AS "schema_key",
@@ -70,7 +74,8 @@ FROM (
         NULL AS writer_key,
         2 AS priority
       FROM lix_internal_state_all_untracked unt
-      WHERE (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file')) AND (unt.version_id IN ('global'))
+      JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
+      WHERE (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file'))
 
           UNION ALL
 
@@ -92,7 +97,8 @@ FROM (
         NULL AS writer_key,
         3 AS priority
       FROM "lix_internal_state_cache_v1_bench_vtable_schema" cache
-      WHERE (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file')) AND (cache.version_id IN ('global'))
+      JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
+      WHERE (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file'))
   ) AS c
 ) AS w
 
@@ -126,7 +132,7 @@ LIMIT 1
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-6)"
+    "detail": "CO-ROUTINE (subquery-7)"
   },
   {
     "id": 7,
@@ -147,55 +153,79 @@ LIMIT 1
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 21,
+    "id": 12,
+    "parent": 9,
+    "notused": 0,
+    "detail": "MATERIALIZE wanted_versions"
+  },
+  {
+    "id": 14,
+    "parent": 12,
+    "notused": 0,
+    "detail": "SCAN CONSTANT ROW"
+  },
+  {
+    "id": 30,
+    "parent": 9,
+    "notused": 16,
+    "detail": "SCAN wv_unt"
+  },
+  {
+    "id": 36,
     "parent": 9,
     "notused": 47,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 55,
+    "id": 70,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 66,
-    "parent": 55,
-    "notused": 39,
+    "id": 80,
+    "parent": 70,
+    "notused": 45,
     "detail": "SEARCH cache USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 100,
+    "id": 93,
+    "parent": 70,
+    "notused": 216,
+    "detail": "SCAN wv_cache"
+  },
+  {
+    "id": 120,
     "parent": 5,
-    "notused": 25,
+    "notused": 194,
     "detail": "SCAN c"
   },
   {
-    "id": 151,
+    "id": 171,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR LAST 7 TERMS OF ORDER BY"
   },
   {
-    "id": 195,
+    "id": 215,
     "parent": 2,
-    "notused": 5,
-    "detail": "SCAN (subquery-6)"
+    "notused": 174,
+    "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 280,
+    "id": 300,
     "parent": 0,
-    "notused": 5,
+    "notused": 174,
     "detail": "SCAN w"
   },
   {
-    "id": 295,
+    "id": 315,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 308,
+    "id": 328,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"

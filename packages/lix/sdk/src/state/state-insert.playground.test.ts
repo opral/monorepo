@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import { openLix } from "../lix/open-lix.js";
 import { createExplainQuery } from "../engine/explain-query.js";
 import type { Lix } from "../lix/open-lix.js";
+import { performance } from "node:perf_hooks";
 
 type ExplainStage = ReturnType<ReturnType<typeof createExplainQuery>>;
 
@@ -10,6 +11,7 @@ type Captured = {
 	sql: string;
 	parameters: unknown[];
 	stage: ExplainStage;
+	durationMs: number;
 };
 
 const playgroundOutput = decodeURIComponent(
@@ -39,6 +41,14 @@ async function captureStateInsertQueries(args: {
 	count: number;
 }): Promise<Captured[]> {
 	const { lix, fileId, count } = args;
+
+	await seedStateRows({
+		lix,
+		fileId: `${fileId}-warmup`,
+		count: 1,
+		schemaSuffix: "_warmup",
+	});
+
 	const captured: Captured[] = [];
 	const originalExecute = lix.engine!.executeSync;
 	const explain = createExplainQuery({ engine: lix.engine! });
@@ -64,14 +74,19 @@ async function captureStateInsertQueries(args: {
 		} finally {
 			explaining = false;
 		}
-		if (stage) {
-			captured.push({
-				sql: queryArgs.sql,
-				parameters,
-				stage,
-			});
+		const start = performance.now();
+		try {
+			return originalExecute(queryArgs);
+		} finally {
+			if (stage) {
+				captured.push({
+					sql: queryArgs.sql,
+					parameters,
+					stage,
+					durationMs: performance.now() - start,
+				});
+			}
 		}
-		return originalExecute(queryArgs);
 	}) as typeof originalExecute;
 
 	try {
@@ -87,11 +102,12 @@ async function seedStateRows(args: {
 	lix: Lix;
 	fileId: string;
 	count: number;
+	schemaSuffix?: string;
 }) {
-	const { lix, fileId, count } = args;
+	const { lix, fileId, count, schemaSuffix = "" } = args;
 
 	const schema = {
-		"x-lix-key": "playground_markdown_block",
+		"x-lix-key": `playground_markdown_block${schemaSuffix}`,
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
 		type: "object",
@@ -104,7 +120,7 @@ async function seedStateRows(args: {
 	} as const;
 
 	const documentSchema = {
-		"x-lix-key": "playground_document",
+		"x-lix-key": `playground_document${schemaSuffix}`,
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["/id"],
 		type: "object",
@@ -181,6 +197,7 @@ function formatExplainStages(entries: Captured[]): string {
 					);
 		return [
 			`# Query ${idx + 1}`,
+			`Time:\n${entry.durationMs.toFixed(2)}ms`,
 			`Original SQL:\n${entry.sql}`,
 			entry.stage.rewrittenSql
 				? `Rewritten SQL:\n${entry.stage.rewrittenSql}`

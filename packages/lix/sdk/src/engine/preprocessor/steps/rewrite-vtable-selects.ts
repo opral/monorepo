@@ -5,6 +5,7 @@ import {
 	type ExpressionNode,
 	type IdentifierNode,
 	type InListExpressionNode,
+	type ObjectNameNode,
 	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type SegmentedStatementNode,
@@ -12,6 +13,7 @@ import {
 	type SelectStatementNode,
 	type TableReferenceNode,
 	type RelationNode,
+	type WithClauseNode,
 } from "../sql-parser/nodes.js";
 import type {
 	PreprocessorStep,
@@ -159,7 +161,7 @@ function rewriteSelectStatement(
 	pushdownVersionIds: readonly string[] = []
 ): SelectStatementNode {
 	const parameters = context.parameters ?? [];
-	const subqueryPredicateMap = collectSubqueryPredicateMap(
+	const ctePredicateMap = collectCtePredicateMap(
 		select,
 		parameters,
 		pushdownSchemaKeys,
@@ -167,7 +169,24 @@ function rewriteSelectStatement(
 		pushdownFileIds,
 		pushdownVersionIds
 	);
-	const withRewrittenSubqueries = visitSelectStatement(select, {
+	const selectWithRewrittenCtes = rewriteSelectWithClause(
+		select,
+		context,
+		ctePredicateMap,
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownFileIds,
+		pushdownVersionIds
+	);
+	const subqueryPredicateMap = collectSubqueryPredicateMap(
+		selectWithRewrittenCtes,
+		parameters,
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownFileIds,
+		pushdownVersionIds
+	);
+	const withRewrittenSubqueries = visitSelectStatement(selectWithRewrittenCtes, {
 		subquery(node, visitContext) {
 			const parentKind = visitContext.parent?.node_kind;
 			const aliasValue = getIdentifierValue(node.alias);
@@ -289,6 +308,17 @@ function rewriteCompoundSelect(
 	pushdownFileIds: readonly string[] = [],
 	pushdownVersionIds: readonly string[] = []
 ): CompoundSelectNode {
+	const rewrittenWithClause = compound.with_clause
+		? rewriteWithClauseNode(
+				compound.with_clause,
+				context,
+				new Map(),
+				pushdownSchemaKeys,
+				pushdownPruneInheritance,
+				pushdownFileIds,
+				pushdownVersionIds
+			)
+		: null;
 	let changed = false;
 	const first = rewriteSelectStatement(
 		compound.first,
@@ -322,13 +352,19 @@ function rewriteCompoundSelect(
 	});
 
 	if (!changed) {
-		return compound;
+		return rewrittenWithClause === compound.with_clause
+			? compound
+			: {
+					...compound,
+					with_clause: rewrittenWithClause,
+				};
 	}
 
 	return {
 		...compound,
 		first,
 		compounds: branches,
+		with_clause: rewrittenWithClause ?? compound.with_clause,
 	};
 }
 
@@ -505,6 +541,231 @@ function collectSubqueryPredicateMap(
 	}
 
 	return map;
+}
+
+function collectCtePredicateMap(
+	select: SelectStatementNode,
+	parameters: ReadonlyArray<unknown>,
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownVersionIds: readonly string[]
+): Map<string, SubqueryPredicateMetadata> {
+	const withClause = select.with_clause;
+	if (!withClause || withClause.ctes.length === 0) {
+		return new Map();
+	}
+	const cteNames = new Set(
+		withClause.ctes
+			.map((cte) => normalizeIdentifierValue(cte.name.value))
+			.filter((name): name is string => !!name)
+	);
+	if (cteNames.size === 0) {
+		return new Map();
+	}
+	const map = new Map<string, SubqueryPredicateMetadata>();
+	const register = (
+		table: TableReferenceNode,
+		joinFilter: ExpressionNode | RawFragmentNode | null
+	) => {
+		const normalizedName = normalizeObjectName(table.name);
+		if (!normalizedName || !cteNames.has(normalizedName)) {
+			return;
+		}
+		const aliasValue = getIdentifierValue(table.alias);
+		const tableNames = new Set<string>([
+			normalizedName,
+			DEFAULT_ALIAS_KEY,
+			ORIGINAL_TABLE_KEY,
+		]);
+		if (aliasValue) {
+			tableNames.add(normalizeIdentifierValue(aliasValue));
+		}
+		const whereSummary = collectSchemaKeyPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const joinSummary = collectSchemaKeyPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localKeys = mergeStringLiterals(
+			whereSummary.literals,
+			joinSummary.literals
+		);
+		const fileWhereSummary = collectFileIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const fileJoinSummary = collectFileIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localFileIds = mergeStringLiterals(
+			fileWhereSummary.literals,
+			fileJoinSummary.literals
+		);
+		const versionWhereSummary = collectVersionIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const versionJoinSummary = collectVersionIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localVersionIds = mergeStringLiterals(
+			versionWhereSummary.literals,
+			versionJoinSummary.literals
+		);
+		const existing = map.get(normalizedName);
+		const mergedSchemaKeys = mergeStringLiterals(
+			existing?.schemaKeys ?? [],
+			pushdownSchemaKeys,
+			localKeys
+		);
+		const mergedFileIds = mergeStringLiterals(
+			existing?.fileIds ?? [],
+			pushdownFileIds,
+			localFileIds
+		);
+		const mergedVersionIds = mergeStringLiterals(
+			existing?.versionIds ?? [],
+			pushdownVersionIds,
+			localVersionIds
+		);
+		const pruneFromWhere = requiresNullPredicateForColumn(
+			select.where_clause,
+			tableNames,
+			parameters,
+			true
+		);
+		const pruneFromJoin = requiresNullPredicateForColumn(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const combinedPrune =
+			(existing?.pruneInheritance ?? false) ||
+			pushdownPruneInheritance ||
+			pruneFromWhere ||
+			pruneFromJoin;
+		const finalFileIds = shouldPushFileFilter(mergedSchemaKeys, mergedFileIds)
+			? mergedFileIds
+			: [];
+		map.set(normalizedName, {
+			schemaKeys: mergedSchemaKeys,
+			fileIds: finalFileIds,
+			versionIds: mergedVersionIds,
+			pruneInheritance: combinedPrune,
+		});
+	};
+
+	for (const clause of select.from_clauses) {
+		if (clause.relation.node_kind === "table_reference") {
+			register(clause.relation, null);
+		}
+		for (const join of clause.joins) {
+			if (join.relation.node_kind === "table_reference") {
+				register(join.relation, join.on_expression);
+			}
+		}
+	}
+
+	return map;
+}
+
+function rewriteSelectWithClause(
+	select: SelectStatementNode,
+	context: PreprocessorStepContext,
+	predicateMap: Map<string, SubqueryPredicateMetadata>,
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownVersionIds: readonly string[]
+): SelectStatementNode {
+	if (!select.with_clause) {
+		return select;
+	}
+	const rewritten = rewriteWithClauseNode(
+		select.with_clause,
+		context,
+		predicateMap,
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownFileIds,
+		pushdownVersionIds
+	);
+	if (rewritten === select.with_clause) {
+		return select;
+	}
+	return {
+		...select,
+		with_clause: rewritten,
+	};
+}
+
+function rewriteWithClauseNode(
+	withClause: WithClauseNode,
+	context: PreprocessorStepContext,
+	predicateMap: Map<string, SubqueryPredicateMetadata>,
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownVersionIds: readonly string[]
+): WithClauseNode {
+	let changed = false;
+	const rewrittenCtes = withClause.ctes.map((cte) => {
+		const cteName = normalizeIdentifierValue(cte.name.value);
+		const metadata = cteName ? predicateMap.get(cteName) : undefined;
+		const nextSchemaKeys = metadata?.schemaKeys ?? pushdownSchemaKeys;
+		const nextPrune =
+			metadata?.pruneInheritance ?? pushdownPruneInheritance;
+		const nextFileIds = metadata?.fileIds ?? pushdownFileIds;
+		const nextVersionIds = metadata?.versionIds ?? pushdownVersionIds;
+		const statement =
+			cte.statement.node_kind === "compound_select"
+				? rewriteCompoundSelect(
+						cte.statement,
+						context,
+						nextSchemaKeys,
+						nextPrune,
+						nextFileIds,
+						nextVersionIds
+					)
+				: rewriteSelectStatement(
+						cte.statement,
+						context,
+						nextSchemaKeys,
+						nextPrune,
+						nextFileIds,
+						nextVersionIds
+					);
+		if (statement !== cte.statement) {
+			changed = true;
+			return {
+				...cte,
+				statement,
+			};
+		}
+		return cte;
+	});
+	if (!changed) {
+		return withClause;
+	}
+	return {
+		...withClause,
+		ctes: rewrittenCtes,
+	};
 }
 
 function buildInlineMetadata(
@@ -1361,6 +1622,9 @@ function buildVtableSelectRewrite(options: {
 	versionInheritance?: VersionInheritanceMap;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
+	const requestedVersionIds = Array.from(new Set(options.versionIds ?? []));
+	const wantedVersionsCteName =
+		requestedVersionIds.length > 0 ? "wanted_versions" : null;
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
 		options.selectedColumns,
 		options.hiddenColumns,
@@ -1378,8 +1642,15 @@ function buildVtableSelectRewrite(options: {
 		options.fileIds && options.fileIds.length > 0
 			? buildFileFilter(options.fileIds)
 			: null;
-	const versionFilter = buildVersionFilter(inheritancePlan.versionFilterIds);
-	const txnFilter = combineFilters(schemaFilter, fileFilter, versionFilter);
+	const txnFilter = combineFilters(schemaFilter, fileFilter);
+	const inheritedFilter = combineFilters(schemaFilter, fileFilter);
+	const buildVersionJoin = (alias: string, joinAlias: string) =>
+		buildWantedVersionJoinClause(wantedVersionsCteName, alias, joinAlias);
+	const txnVersionJoin = buildVersionJoin("txn", "wv_txn");
+	const untrackedVersionJoin = buildVersionJoin("unt", "wv_unt");
+	const cacheVersionJoin = buildVersionJoin("cache", "wv_cache");
+	const inheritanceVersionJoin = buildVersionJoin("vi", "wv_vi");
+	const parentVersionJoin = buildVersionJoin("vi", "wv_parent");
 	const needsWriterJoin = candidateColumns.has("writer_key");
 	if (needsWriterJoin) {
 		candidateColumns.add("inherited_from_version_id");
@@ -1407,13 +1678,18 @@ function buildVtableSelectRewrite(options: {
 	];
 	const segments: string[] = [];
 	if (options.hasOpenTransaction !== false) {
-		segments.push(buildTransactionSegment(txnFilter, candidateColumns));
+		segments.push(
+			buildTransactionSegment(txnFilter, candidateColumns, txnVersionJoin)
+		);
 	}
-	segments.push(buildUntrackedSegment(txnFilter, candidateColumns));
+	segments.push(
+		buildUntrackedSegment(txnFilter, candidateColumns, untrackedVersionJoin)
+	);
 	const cacheSegment = buildCacheSegment(
 		cacheSource,
 		txnFilter,
-		candidateColumns
+		candidateColumns,
+		cacheVersionJoin
 	);
 	if (cacheSegment) {
 		segments.push(cacheSegment);
@@ -1428,35 +1704,38 @@ function buildVtableSelectRewrite(options: {
 		parentJoinSource = buildInlineParentSource(inheritancePlan.parentPairs);
 	}
 	let allSegments = segments;
-	if (!shouldPruneInheritance) {
-		const inheritedSegments: string[] = [];
-		if (cacheSegment) {
-			const inheritedCache = buildInheritedCacheSegment(
-				cacheSource,
-				txnFilter,
-				candidateColumns,
-				inheritanceJoinSource
-			);
-			if (inheritedCache) {
-				inheritedSegments.push(inheritedCache);
-			}
-		}
-		inheritedSegments.push(
-			buildInheritedUntrackedSegment(
-				txnFilter,
-				candidateColumns,
-				inheritanceJoinSource
-			)
-		);
-		if (options.hasOpenTransaction !== false) {
-			inheritedSegments.push(
-				buildInheritedTransactionSegment(
-					txnFilter,
+		if (!shouldPruneInheritance) {
+			const inheritedSegments: string[] = [];
+			if (cacheSegment) {
+				const inheritedCache = buildInheritedCacheSegment(
+					cacheSource,
+					inheritedFilter,
 					candidateColumns,
-					parentJoinSource
+					inheritanceJoinSource,
+					inheritanceVersionJoin
+				);
+				if (inheritedCache) {
+					inheritedSegments.push(inheritedCache);
+				}
+			}
+			inheritedSegments.push(
+				buildInheritedUntrackedSegment(
+					inheritedFilter,
+					candidateColumns,
+					inheritanceJoinSource,
+					inheritanceVersionJoin
 				)
 			);
-		}
+			if (options.hasOpenTransaction !== false) {
+				inheritedSegments.push(
+					buildInheritedTransactionSegment(
+						inheritedFilter,
+						candidateColumns,
+						parentJoinSource,
+						parentVersionJoin
+					)
+				);
+			}
 		allSegments = segments.concat(inheritedSegments);
 	}
 	const candidates = allSegments.join(`\n\n    UNION ALL\n\n`);
@@ -1489,10 +1768,17 @@ LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
 		candidatesSql: candidates,
 	});
 	const withClauses: string[] = [];
+	if (wantedVersionsCteName) {
+		withClauses.push(
+			buildWantedVersionsCte(wantedVersionsCteName, requestedVersionIds)
+		);
+	}
 	if (inheritancePlan.mode === "recursive") {
 		withClauses.push(buildVersionDescriptorCte());
-		withClauses.push(buildVersionInheritanceCte());
-		withClauses.push(buildVersionParentCte());
+		withClauses.push(
+			buildVersionInheritanceCte(wantedVersionsCteName)
+		);
+		withClauses.push(buildVersionParentCte(wantedVersionsCteName));
 	}
 	const withPrefix =
 		withClauses.length > 0
@@ -1717,10 +2003,11 @@ const PROJECTION_COLUMN_ORDER = ALL_SEGMENT_COLUMNS.filter(
 const INTERNAL_ONLY_COLUMN_SET = new Set<string>(["priority", "rn"]);
 
 function buildTransactionSegment(
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	versionJoinClause: string
 ): string {
-	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "txn");
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "txn");
 	const filterClause = rewrittenFilter ? `WHERE ${rewrittenFilter}` : "";
 	const columns: Array<[string, string]> = [
 		[
@@ -1748,19 +2035,23 @@ function buildTransactionSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause
+		? `\n\t\t${versionJoinClause}`
+		: "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM lix_internal_transaction_state txn
+		FROM lix_internal_transaction_state txn${joinClause}
 		${filterClause}
 	`).trimEnd();
 }
 
 function buildUntrackedSegment(
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	versionJoinClause: string
 ): string {
-	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "unt");
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "unt");
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
@@ -1787,23 +2078,27 @@ function buildUntrackedSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause
+		? `\n\t\t${versionJoinClause}`
+		: "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM lix_internal_state_all_untracked unt
+		FROM lix_internal_state_all_untracked unt${joinClause}
 		${rewrittenFilter ? `WHERE ${rewrittenFilter}` : ""}
 	`).trimEnd();
 }
 
 function buildCacheSegment(
 	cacheSource: string | null,
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	versionJoinClause: string
 ): string | null {
 	if (!cacheSource) {
 		return null;
 	}
-	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "cache");
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "cache");
 	const sourceKeyword = cacheSource.trim().toLowerCase();
 	const sourceSql = sourceKeyword.startsWith("select")
 		? `(${cacheSource})`
@@ -1838,10 +2133,13 @@ function buildCacheSegment(
 		.map(([, sql]) => sql)
 		.join(",\n");
 	const whereClause = rewrittenFilter ? `\n\t\tWHERE ${rewrittenFilter}` : "";
+	const joinClause = versionJoinClause
+		? `\n\t\t${versionJoinClause}`
+		: "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM ${sourceSql} cache${whereClause}
+		FROM ${sourceSql} cache${joinClause}${whereClause}
 	`).trimEnd();
 }
 
@@ -1870,20 +2168,25 @@ function buildVersionDescriptorCte(): string {
 /**
  * Builds the recursive CTE that unfolds the full inheritance chain.
  *
+ * @param seedCteName - Optional wanted version CTE that limits recursion seeds.
  * @returns SQL fragment for the version inheritance CTE.
  *
  * @example
  * ```ts
- * const sql = buildVersionInheritanceCte();
+ * const sql = buildVersionInheritanceCte("wanted_versions");
  * ```
  */
-function buildVersionInheritanceCte(): string {
+function buildVersionInheritanceCte(seedCteName: string | null): string {
+	const seedJoin = seedCteName
+		? `
+	  JOIN ${seedCteName} wv ON wv.version_id = vdb.version_id`
+		: "";
 	return stripIndent(`
 	version_inheritance(version_id, ancestor_version_id) AS (
 	  SELECT
 	    vdb.version_id,
 	    vdb.inherits_from_version_id
-	  FROM version_descriptor_base vdb
+	  FROM version_descriptor_base vdb${seedJoin}
 	  WHERE vdb.inherits_from_version_id IS NOT NULL
 
 	  UNION ALL
@@ -1900,22 +2203,55 @@ function buildVersionInheritanceCte(): string {
 /**
  * Builds the CTE mapping each version to its direct parent version.
  *
+ * @param seedCteName - Optional wanted version CTE limiting descriptors.
  * @returns SQL fragment for the version parent CTE.
  *
  * @example
  * ```ts
- * const sql = buildVersionParentCte();
+ * const sql = buildVersionParentCte("wanted_versions");
  * ```
  */
-function buildVersionParentCte(): string {
+function buildVersionParentCte(seedCteName: string | null): string {
+	const seedJoin = seedCteName
+		? `
+	  JOIN ${seedCteName} wv ON wv.version_id = vdb.version_id`
+		: "";
 	return stripIndent(`
 	version_parent AS (
 	  SELECT
 	    vdb.version_id,
 	    vdb.inherits_from_version_id AS parent_version_id
-	  FROM version_descriptor_base vdb
+	  FROM version_descriptor_base vdb${seedJoin}
 	  WHERE vdb.inherits_from_version_id IS NOT NULL
 	)`).trim();
+}
+
+/**
+ * Builds a CTE enumerating the requested versions for join-based filters.
+ *
+ * @param cteName - The identifier assigned to the CTE.
+ * @param versionIds - Ordered list of version identifiers to include.
+ * @returns SQL fragment for the wanted versions CTE.
+ *
+ * @example
+ * ```ts
+ * const sql = buildWantedVersionsCte("wanted_versions", ["v1", "v2"]);
+ * ```
+ */
+function buildWantedVersionsCte(
+	cteName: string,
+	versionIds: readonly string[]
+): string {
+	const selects = versionIds
+		.map(
+			(versionId) =>
+				`SELECT '${escapeSqlLiteral(versionId)}' AS version_id`
+		)
+		.join("\nUNION ALL\n");
+	return stripIndent(`
+${cteName} AS (
+${indent(selects, 2)}
+)`).trim();
 }
 
 /**
@@ -1923,25 +2259,33 @@ function buildVersionParentCte(): string {
  * the target schema version.
  *
  * @param cacheSource - The SQL producing the cache rows.
- * @param schemaFilter - Optional schema predicate scoped to the cache alias.
+ * @param segmentFilter - Optional predicate scoped to the cache alias.
  * @param projectionColumns - Columns required for the projection.
+ * @param versionJoinClause - SQL equi-join tying descendants to wanted versions.
  * @returns SQL fragment or null when no cache source exists.
  *
  * @example
  * ```ts
- * const sql = buildInheritedCacheSegment('"cache_table"', "txn.schema_key = 'demo'", new Set());
+ * const sql = buildInheritedCacheSegment(
+ *   '"cache_table"',
+ *   "txn.schema_key = 'demo'",
+ *   new Set(),
+ *   "version_inheritance vi",
+ *   "JOIN wanted_versions wv ON wv.version_id = vi.version_id"
+ * );
  * ```
  */
 function buildInheritedCacheSegment(
 	cacheSource: string | null,
-	schemaFilter: string | null,
+	segmentFilter: string | null,
 	projectionColumns: Set<string>,
-	inheritanceJoin: string
+	inheritanceJoin: string,
+	versionJoinClause: string
 ): string | null {
 	if (!cacheSource) {
 		return null;
 	}
-	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "cache");
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "cache");
 	const sourceKeyword = cacheSource.trim().toLowerCase();
 	const sourceSql = sourceKeyword.startsWith("select")
 		? `(${cacheSource})`
@@ -1975,10 +2319,13 @@ function buildInheritedCacheSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause
+		? `\n\t\t${versionJoinClause}`
+		: "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM ${inheritanceJoin}
+		FROM ${inheritanceJoin}${joinClause}
 		JOIN ${sourceSql} cache ON cache.version_id = vi.ancestor_version_id
 		WHERE cache.is_tombstone = 0
 		  AND cache.snapshot_content IS NOT NULL${
@@ -1990,21 +2337,28 @@ ${indent(columnSql, 4)}
 /**
  * Builds the inherited segment sourcing data from `lix_internal_state_all_untracked`.
  *
- * @param schemaFilter - Optional schema predicate scoped to the untracked alias.
+ * @param segmentFilter - Optional predicate scoped to the untracked alias.
  * @param projectionColumns - Columns required for the projection.
+ * @param versionJoinClause - SQL equi-join tying descendants to wanted versions.
  * @returns SQL fragment selecting inherited untracked rows.
  *
  * @example
  * ```ts
- * const sql = buildInheritedUntrackedSegment(null, new Set(["entity_id"]));
+ * const sql = buildInheritedUntrackedSegment(
+ *   null,
+ *   new Set(["entity_id"]),
+ *   "version_inheritance vi",
+ *   "JOIN wanted_versions wv ON wv.version_id = vi.version_id"
+ * );
  * ```
  */
 function buildInheritedUntrackedSegment(
-	schemaFilter: string | null,
+	segmentFilter: string | null,
 	projectionColumns: Set<string>,
-	inheritanceJoin: string
+	inheritanceJoin: string,
+	versionJoinClause: string
 ): string {
-	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "unt");
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "unt");
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
@@ -2034,10 +2388,13 @@ function buildInheritedUntrackedSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause
+		? `\n\t\t${versionJoinClause}`
+		: "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM ${inheritanceJoin}
+		FROM ${inheritanceJoin}${joinClause}
 		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
 		WHERE unt.is_tombstone = 0
 		  AND unt.snapshot_content IS NOT NULL${
@@ -2050,19 +2407,26 @@ ${indent(columnSql, 4)}
  * Builds the inherited segment that projects transaction rows onto descendant
  * versions.
  *
- * @param schemaFilter - Optional schema predicate scoped to the transaction alias.
+ * @param segmentFilter - Optional predicate scoped to the transaction alias.
  * @param projectionColumns - Columns required for the projection.
+ * @param versionJoinClause - SQL equi-join tying descendants to wanted versions.
  * @returns SQL fragment selecting inherited transaction rows.
  *
  * @example
  * ```ts
- * const sql = buildInheritedTransactionSegment("txn.schema_key = 'demo'", new Set(["change_id"]));
+ * const sql = buildInheritedTransactionSegment(
+ *   "txn.schema_key = 'demo'",
+ *   new Set(["change_id"]),
+ *   "version_parent vi",
+ *   "JOIN wanted_versions wv ON wv.version_id = vi.version_id"
+ * );
  * ```
  */
 function buildInheritedTransactionSegment(
-	schemaFilter: string | null,
+	segmentFilter: string | null,
 	projectionColumns: Set<string>,
-	parentJoinSource: string
+	parentJoinSource: string,
+	versionJoinClause: string
 ): string {
 	const columns: Array<[string, string]> = [
 		[
@@ -2093,11 +2457,14 @@ function buildInheritedTransactionSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const rewrittenFilter = rewriteFilterForAlias(schemaFilter, "txn");
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "txn");
+	const joinClause = versionJoinClause
+		? `\n\t\t${versionJoinClause}`
+		: "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM ${parentJoinSource}
+		FROM ${parentJoinSource}${joinClause}
 		JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id
 		WHERE vi.parent_version_id IS NOT NULL
 		  AND txn.snapshot_content IS NOT NULL${
@@ -2149,14 +2516,28 @@ function buildFileFilter(fileIds: readonly string[]): string | null {
 	return `txn.file_id IN (${values})`;
 }
 
-function buildVersionFilter(versionIds: readonly string[]): string | null {
-	if (!versionIds || versionIds.length === 0) {
-		return null;
+/**
+ * Builds an equi-join clause tying a table alias to the wanted versions CTE.
+ *
+ * @param cteName - Name of the wanted versions CTE.
+ * @param targetAlias - Table alias exposing a `version_id` column.
+ * @param joinAlias - Alias assigned to the join for readability.
+ * @returns SQL JOIN clause or an empty string when no CTE is provided.
+ *
+ * @example
+ * ```ts
+ * const joinSql = buildWantedVersionJoinClause("wanted_versions", "txn", "wv_txn");
+ * ```
+ */
+function buildWantedVersionJoinClause(
+	cteName: string | null,
+	targetAlias: string,
+	joinAlias: string
+): string {
+	if (!cteName) {
+		return "";
 	}
-	const values = versionIds
-		.map((versionId) => `'${escapeSqlLiteral(versionId)}'`)
-		.join(",");
-	return `txn.version_id IN (${values})`;
+	return `JOIN ${cteName} ${joinAlias} ON ${joinAlias}.version_id = ${targetAlias}.version_id`;
 }
 
 function buildCacheSource(
@@ -2299,18 +2680,25 @@ function rewriteFilterForAlias(
 	return filter.replace(/txn\./g, `${alias}.`);
 }
 
+function normalizeObjectName(objectName: ObjectNameNode): string | null {
+	if (objectName.parts.length === 0) {
+		return null;
+	}
+	const last = objectName.parts[objectName.parts.length - 1]!;
+	return normalizeIdentifierValue(last.value);
+}
+
 function escapeSqlLiteral(value: string): string {
 	return value.replace(/'/g, "''");
 }
 
 type InheritancePlan =
-	| { mode: "pruned"; versionFilterIds: readonly string[] }
-	| { mode: "recursive"; versionFilterIds: readonly string[] }
+	| { mode: "pruned" }
+	| { mode: "recursive" }
 	| {
 			mode: "inline";
 			versionAncestorPairs: Array<{ versionId: string; ancestorId: string }>;
 			parentPairs: Array<{ versionId: string; parentId: string }>;
-			versionFilterIds: readonly string[];
 	  };
 
 function determineInheritancePlan(args: {
@@ -2321,24 +2709,21 @@ function determineInheritancePlan(args: {
 	const requested = Array.from(new Set(args.requestedVersionIds ?? []));
 
 	if (args.forcedPrune) {
-		return { mode: "pruned", versionFilterIds: requested };
+		return { mode: "pruned" };
 	}
 
 	if (requested.length === 0) {
-		return args.versionInheritance
-			? { mode: "recursive", versionFilterIds: [] }
-			: { mode: "pruned", versionFilterIds: [] };
+		return args.versionInheritance ? { mode: "recursive" } : { mode: "pruned" };
 	}
 
 	if (!args.versionInheritance || args.versionInheritance.size === 0) {
-		return { mode: "pruned", versionFilterIds: requested };
+		return { mode: "pruned" };
 	}
 
 	const ancestorPairs: Array<{ versionId: string; ancestorId: string }> = [];
 	const parentPairs: Array<{ versionId: string; parentId: string }> = [];
 	const ancestorSeen = new Set<string>();
 	const parentSeen = new Set<string>();
-	const versionFilterSet = new Set(requested);
 
 	for (const versionId of requested) {
 		let current = versionId;
@@ -2348,7 +2733,6 @@ function determineInheritancePlan(args: {
 			if (!node) {
 				return {
 					mode: "recursive",
-					versionFilterIds: Array.from(versionFilterSet),
 				};
 			}
 			const parentId = node.inheritsFromVersionId;
@@ -2358,11 +2742,9 @@ function determineInheritancePlan(args: {
 			if (chainVisited.has(parentId)) {
 				return {
 					mode: "recursive",
-					versionFilterIds: Array.from(versionFilterSet),
 				};
 			}
 			chainVisited.add(parentId);
-			versionFilterSet.add(parentId);
 
 			const ancestorKey = `${versionId}::${parentId}`;
 			if (!ancestorSeen.has(ancestorKey)) {
@@ -2381,14 +2763,13 @@ function determineInheritancePlan(args: {
 	}
 
 	if (ancestorPairs.length === 0) {
-		return { mode: "pruned", versionFilterIds: requested };
+		return { mode: "pruned" };
 	}
 
 	return {
 		mode: "inline",
 		versionAncestorPairs: ancestorPairs,
 		parentPairs,
-		versionFilterIds: Array.from(versionFilterSet),
 	};
 }
 
