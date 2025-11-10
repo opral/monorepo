@@ -17,6 +17,12 @@ const testHooksSchema = {
 	required: ["id"],
 } as const satisfies LixSchemaDefinition;
 
+const emptyChangesPayload = { changes: [] as StateCommitChange[] };
+const sampleFileChangePayload = {
+	fileId: "file_change_test",
+	operation: "updated" as const,
+};
+
 test("should create hooks with onStateCommit method", () => {
 	const hooks = createHooks();
 
@@ -31,7 +37,7 @@ test("should call handler when state_commit event is emitted", () => {
 	const handler = vi.fn();
 
 	hooks.onStateCommit(handler);
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 
 	expect(handler).toHaveBeenCalledTimes(1);
 });
@@ -43,7 +49,7 @@ test("should call multiple handlers when state_commit event is emitted", () => {
 
 	hooks.onStateCommit(handler1);
 	hooks.onStateCommit(handler2);
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 
 	expect(handler1).toHaveBeenCalledTimes(1);
 	expect(handler2).toHaveBeenCalledTimes(1);
@@ -56,12 +62,12 @@ test("should return unsubscribe function that removes the handler", () => {
 	const unsubscribe = hooks.onStateCommit(handler);
 
 	// Emit event - handler should be called
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 	expect(handler).toHaveBeenCalledTimes(1);
 
 	// Unsubscribe and emit again - handler should not be called
 	unsubscribe();
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 	expect(handler).toHaveBeenCalledTimes(1);
 });
 
@@ -76,14 +82,14 @@ test("should handle multiple subscriptions and unsubscriptions correctly", () =>
 	const unsubscribe3 = hooks.onStateCommit(handler3);
 
 	// All handlers should be called
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 	expect(handler1).toHaveBeenCalledTimes(1);
 	expect(handler2).toHaveBeenCalledTimes(1);
 	expect(handler3).toHaveBeenCalledTimes(1);
 
 	// Remove handler2
 	unsubscribe2();
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 	expect(handler1).toHaveBeenCalledTimes(2);
 	expect(handler2).toHaveBeenCalledTimes(1); // Still 1
 	expect(handler3).toHaveBeenCalledTimes(2);
@@ -91,7 +97,7 @@ test("should handle multiple subscriptions and unsubscriptions correctly", () =>
 	// Remove handler1 and handler3
 	unsubscribe1();
 	unsubscribe3();
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 	expect(handler1).toHaveBeenCalledTimes(2); // Still 2
 	expect(handler2).toHaveBeenCalledTimes(1); // Still 1
 	expect(handler3).toHaveBeenCalledTimes(2); // Still 2
@@ -102,7 +108,7 @@ test("should not call handlers for different event types", () => {
 	const handler = vi.fn();
 
 	hooks.onStateCommit(handler);
-	hooks._emit("other_event");
+	hooks._emit("file_change", sampleFileChangePayload);
 
 	expect(handler).not.toHaveBeenCalled();
 });
@@ -112,7 +118,7 @@ test("should handle async handlers without issues", async () => {
 	const handler = vi.fn().mockResolvedValue(undefined);
 
 	hooks.onStateCommit(handler);
-	hooks._emit("state_commit");
+	hooks._emit("state_commit", emptyChangesPayload);
 
 	// Wait a bit to ensure async handler has time to run
 	await new Promise((resolve) => setTimeout(resolve, 0));
@@ -130,12 +136,12 @@ test("should create independent hook instances", () => {
 	hooks2.onStateCommit(handler2);
 
 	// Emit on hooks1 - only handler1 should be called
-	hooks1._emit("state_commit");
+	hooks1._emit("state_commit", emptyChangesPayload);
 	expect(handler1).toHaveBeenCalledTimes(1);
 	expect(handler2).not.toHaveBeenCalled();
 
 	// Emit on hooks2 - only handler2 should be called
-	hooks2._emit("state_commit");
+	hooks2._emit("state_commit", emptyChangesPayload);
 	expect(handler1).toHaveBeenCalledTimes(1);
 	expect(handler2).toHaveBeenCalledTimes(1);
 });
