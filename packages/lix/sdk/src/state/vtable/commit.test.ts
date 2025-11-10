@@ -12,6 +12,7 @@ import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { selectActiveVersion } from "../../version/select-active-version.js";
+import type { StateCommitChange } from "../../hooks/create-hooks.js";
 
 /**
  * One-Commit Model
@@ -906,6 +907,70 @@ test("global version should move forward when mutations occur", async () => {
 		.selectAll()
 		.execute();
 	expect(cseRows.length).toBeGreaterThan(0);
+});
+
+test("commit emits normalized untracked payloads when no tracked rows exist", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
+	});
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+	const activeVersion = await db
+		.selectFrom("active_version")
+		.select(["version_id"])
+		.executeTakeFirstOrThrow();
+
+	const events: StateCommitChange[][] = [];
+	const unsubscribe = lix.engine!.hooks.onStateCommit(({ changes }) => {
+		events.push(changes);
+	});
+
+	insertTransactionState({
+		engine: lix.engine!,
+		timestamp: await getTimestamp({ lix }),
+		data: [
+			{
+				entity_id: "untracked-hook-entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					key: "log",
+					value: "hello",
+				}),
+				metadata: JSON.stringify({ severity: "info" }),
+				schema_version: "1.0",
+				version_id: activeVersion.version_id,
+				untracked: true,
+			},
+		],
+	});
+
+	commit({
+		engine: lix.engine!,
+	});
+
+	unsubscribe();
+
+	expect(events.length).toBeGreaterThan(0);
+	const untrackedChange = events
+		.flat()
+		.find((c) => c.entity_id === "untracked-hook-entity");
+
+	expect(untrackedChange).toBeDefined();
+	expect(untrackedChange?.untracked).toBe(1);
+	expect(untrackedChange?.commit_id).toBe("untracked");
+	expect(untrackedChange?.snapshot_content).toEqual({
+		key: "log",
+		value: "hello",
+	});
+	expect(untrackedChange?.metadata).toEqual({ severity: "info" });
+
+	await lix.close();
 });
 
 // https://github.com/opral/lix-sdk/issues/364#issuecomment-3218464923

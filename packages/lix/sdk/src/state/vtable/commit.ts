@@ -66,6 +66,7 @@ export function commit(args: {
 	// Separate tracked and untracked changes
 	const trackedChangesByVersion = new Map<string, any[]>();
 	const untrackedChanges: any[] = [];
+	let untrackedHookChanges: StateCommitChange[] | undefined;
 
 	for (const change of allTransactionChanges) {
 		if (change.untracked === 1) {
@@ -93,6 +94,23 @@ export function commit(args: {
 			metadata: change.metadata ?? null,
 		}));
 		updateUntrackedState({ engine, changes: untrackedBatch });
+		untrackedHookChanges = untrackedChanges.map((change) => ({
+			id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			schema_version: change.schema_version,
+			file_id: change.file_id,
+			plugin_key: change.plugin_key,
+			created_at: change.created_at,
+			snapshot_content: change.snapshot_content
+				? JSON.parse(change.snapshot_content)
+				: null,
+			metadata: change.metadata ? JSON.parse(change.metadata) : null,
+			version_id: change.version_id,
+			commit_id: "untracked",
+			untracked: 1,
+			writer_key: change.writer_key ?? null,
+		}));
 	}
 
 	// Track metadata for each version that gets a commit
@@ -469,7 +487,9 @@ export function commit(args: {
 			timestamp: transactionTimestamp,
 		});
 		// Emit hook for untracked-only commit
-		args.engine.hooks._emit("state_commit", { changes: untrackedChanges });
+		args.engine.hooks._emit("state_commit", {
+			changes: untrackedHookChanges ?? [],
+		});
 		return 0;
 	}
 	// Build versions map: include all versions with tracked changes + global
