@@ -129,8 +129,8 @@ export const intermediateChangesAtom = atom<
 			"change_set_element.change_id",
 			"change.id"
 		)
-    .where("change_set_element.change_set_id", "=", workingChangeSetId)
-		.where("change.file_id", "!=", "lix_sdk")
+		.where("change_set_element.change_set_id", "=", workingChangeSetId)
+		.where("change.file_id", "!=", "lix")
 		.select([
 			"change.id",
 			"change.entity_id",
