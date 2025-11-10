@@ -65,7 +65,7 @@ test("commit writes business rows to active version; graph edges update globally
 				entity_id: "para-1",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({ key: "k1", value: "v1" }),
 				schema_version: "1.0",
 				version_id: activeVersionId,
@@ -75,7 +75,7 @@ test("commit writes business rows to active version; graph edges update globally
 				entity_id: "para-2",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({ key: "k2", value: "v2" }),
 				schema_version: "1.0",
 				version_id: activeVersionId,
@@ -225,7 +225,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionAChangeSetId,
 				schema_key: "lix_change_set",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionAChangeSetId,
 				}),
@@ -244,7 +244,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionAWorkingChangeSetId,
 				schema_key: "lix_change_set",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionAWorkingChangeSetId,
 				}),
@@ -263,7 +263,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionBChangeSetId,
 				schema_key: "lix_change_set",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionBChangeSetId,
 				}),
@@ -282,7 +282,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionBWorkingChangeSetId,
 				schema_key: "lix_change_set",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionBWorkingChangeSetId,
 				}),
@@ -302,7 +302,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionACommitId,
 				schema_key: "lix_commit",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionACommitId,
 					change_set_id: versionAChangeSetId,
@@ -322,7 +322,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionAWorkingCommitId,
 				schema_key: "lix_commit",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionAWorkingCommitId,
 					change_set_id: versionAWorkingChangeSetId,
@@ -343,7 +343,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionAId,
 				schema_key: "lix_version_descriptor",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionAId,
 					name: "version A",
@@ -358,7 +358,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionAId,
 				schema_key: "lix_version_tip",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionAId,
 					commit_id: versionACommitId,
@@ -379,7 +379,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionBCommitId,
 				schema_key: "lix_commit",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionBCommitId,
 					change_set_id: versionBChangeSetId,
@@ -399,7 +399,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionBWorkingCommitId,
 				schema_key: "lix_commit",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionBWorkingCommitId,
 					change_set_id: versionBWorkingChangeSetId,
@@ -420,7 +420,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionBId,
 				schema_key: "lix_version_descriptor",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionBId,
 					name: "version B",
@@ -435,7 +435,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: versionBId,
 				schema_key: "lix_version_tip",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: versionBId,
 					commit_id: versionBCommitId,
@@ -456,7 +456,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: "version-a-entity",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "version-a-key",
 					value: "version-a-value",
@@ -477,7 +477,7 @@ test("commit should handle multiple versions correctly", async () => {
 				entity_id: "version-b-entity",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "version-b-key",
 					value: "version-b-value",
@@ -863,7 +863,7 @@ test("global version should move forward when mutations occur", async () => {
 				entity_id: "test-global-entity",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "test-global-key",
 					value: "test-global-value",
@@ -990,7 +990,7 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 				entity_id: "test-edge-entity",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "test-edge-key",
 					value: "test-edge-value",
@@ -1088,7 +1088,7 @@ test("active version should move forward when mutations occur", async () => {
 				entity_id: "test-active-entity",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "test-active-key",
 					value: "test-active-value",
@@ -1777,7 +1777,7 @@ describe("file lixcol cache updates", () => {
 					entity_id: "new-file-id",
 					schema_key: "lix_file_descriptor",
 					file_id: "new-file-id",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: JSON.stringify({
 						id: "new-file-id",
 						directory_id: null,
@@ -1795,7 +1795,7 @@ describe("file lixcol cache updates", () => {
 					entity_id: "update-file-id",
 					schema_key: "lix_file_descriptor",
 					file_id: "update-file-id",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: JSON.stringify({
 						id: "update-file-id",
 						directory_id: null,
@@ -1814,7 +1814,7 @@ describe("file lixcol cache updates", () => {
 					entity_id: "delete-file-id",
 					schema_key: "lix_file_descriptor",
 					file_id: "delete-file-id",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: null, // Deletion
 					schema_version: "1.0",
 					version_id: activeVersion.id,

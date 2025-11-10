@@ -127,7 +127,7 @@ export function generateCommit(args: {
 			schema_key: LixVersionTipSchema["x-lix-key"],
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: vid,
@@ -146,7 +146,7 @@ export function generateCommit(args: {
 			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: meta.commitId,
@@ -182,7 +182,7 @@ export function generateCommit(args: {
 				schema_key: "lix_change_set_element",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					change_set_id: meta.changeSetId,
 					change_id: dc.id,
@@ -212,7 +212,7 @@ export function generateCommit(args: {
 					schema_key: "lix_change_author",
 					schema_version: "1.0",
 					file_id: "lix",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: JSON.stringify({
 						change_id: dc.id,
 						account_id: acct,
@@ -266,7 +266,7 @@ export function generateCommit(args: {
 			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: meta.commitId,
 				change_set_id: meta.changeSetId,
@@ -288,7 +288,7 @@ export function generateCommit(args: {
 			schema_key: LixVersionTipSchema["x-lix-key"],
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: vid,
 				commit_id: meta.commitId,
@@ -313,7 +313,7 @@ export function generateCommit(args: {
 					schema_key: "lix_commit_edge",
 					schema_version: "1.0",
 					file_id: "lix",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: JSON.stringify({
 						parent_id: parent,
 						child_id: meta.commitId,

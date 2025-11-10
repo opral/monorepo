@@ -54,7 +54,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				version_id: sql`(SELECT version_id FROM active_version)`,
 				snapshot_content: JSON.stringify({
@@ -84,7 +84,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: {
 					value: "hello world",
 				},
@@ -123,7 +123,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: {
 					value: "hello world - updated",
 				},
@@ -1009,7 +1009,7 @@ simulationTest(
 				entity_id: "meta-entity",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: { key: "meta", value: "value" } as any,
 				schema_version: "1.0",
 				metadata: { foo: "bar" },
@@ -2350,7 +2350,7 @@ simulationTest(
 					entity_id: "e0",
 					file_id: "f0",
 					schema_key: "mock_schema",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					schema_version: "1.0",
 					snapshot_content: JSON.stringify({
 						value: "hello world", // Should be a number, not a string
@@ -2394,7 +2394,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				snapshot_content: JSON.stringify({
 					value: 5,
@@ -2439,7 +2439,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: {
 					value: 5,
 				},
@@ -3087,7 +3087,7 @@ simulationTest(
 				entity_id: "e_txn",
 				file_id: "f_txn",
 				schema_key: "mock_schema_txn",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				version_id: sql`(SELECT version_id FROM active_version)`,
 				snapshot_content: JSON.stringify({ value: "v1" }),
@@ -3375,7 +3375,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				version_id: sql`(SELECT version_id FROM active_version)`,
 				snapshot_content: JSON.stringify({
@@ -3479,7 +3479,7 @@ simulationTest(
 					entity_id: "tx_skip_flag_untracked",
 					file_id: "system",
 					schema_key: "key_value",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					schema_version: "1.0",
 					version_id: (active as any).version_id ?? (active as any).id,
 					snapshot_content: JSON.stringify({
@@ -3712,7 +3712,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				version_id: "version_a",
 				snapshot_content: JSON.stringify({
@@ -3729,7 +3729,7 @@ simulationTest(
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				version_id: "version_b",
 				snapshot_content: JSON.stringify({
@@ -4071,7 +4071,7 @@ simulationTest(
 					entity_id: "tx_skip_flag_tracked",
 					file_id: "system",
 					schema_key: "key_value",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					schema_version: "1.0",
 					version_id: (active as any).version_id ?? (active as any).id,
 					snapshot_content: JSON.stringify({

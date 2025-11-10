@@ -272,7 +272,7 @@ export async function newLixFile(args?: {
 				entity_id: activeVersionEntityId,
 				schema_key: "lix_active_version",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: activeVersionEntityId,
 					version_id: initialVersionId,
@@ -298,7 +298,7 @@ export async function newLixFile(args?: {
 						entity_id: kv.key,
 						schema_key: "lix_key_value",
 						file_id: "lix",
-						plugin_key: "lix_own_entity",
+						plugin_key: "lix_sdk",
 						snapshot_content: JSON.stringify({
 							key: kv.key,
 							value: kv.value,
@@ -394,7 +394,7 @@ function createBootstrapChanges(args: {
 			schema_key: "lix_change_set",
 			schema_version: LixChangeSetSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: changeSet,
 			created_at: args.created_at,
@@ -412,7 +412,7 @@ function createBootstrapChanges(args: {
 		schema_key: "lix_commit",
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: globalCommitId,
@@ -429,7 +429,7 @@ function createBootstrapChanges(args: {
 		schema_key: "lix_commit",
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: mainCommitId,
@@ -446,7 +446,7 @@ function createBootstrapChanges(args: {
 		schema_key: "lix_commit",
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: globalWorkingCommitId,
@@ -462,7 +462,7 @@ function createBootstrapChanges(args: {
 		schema_key: "lix_commit",
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: mainWorkingCommitId,
@@ -479,7 +479,7 @@ function createBootstrapChanges(args: {
 		schema_key: LixVersionDescriptorSchema["x-lix-key"],
 		schema_version: LixVersionDescriptorSchema["x-lix-version"],
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: "global",
@@ -496,7 +496,7 @@ function createBootstrapChanges(args: {
 		schema_key: LixVersionTipSchema["x-lix-key"],
 		schema_version: LixVersionTipSchema["x-lix-version"],
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: "global",
@@ -513,7 +513,7 @@ function createBootstrapChanges(args: {
 		schema_key: LixVersionDescriptorSchema["x-lix-key"],
 		schema_version: LixVersionDescriptorSchema["x-lix-version"],
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: initialVersionId,
@@ -530,7 +530,7 @@ function createBootstrapChanges(args: {
 		schema_key: LixVersionTipSchema["x-lix-key"],
 		schema_version: LixVersionTipSchema["x-lix-version"],
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: initialVersionId,
@@ -548,7 +548,7 @@ function createBootstrapChanges(args: {
 		schema_key: "lix_label",
 		schema_version: LixLabelSchema["x-lix-version"],
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: checkpointLabelId,
@@ -582,7 +582,7 @@ function createBootstrapChanges(args: {
 		schema_key: "lix_key_value",
 		schema_version: LixKeyValueSchema["x-lix-version"],
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			key: "lix_id",
@@ -601,7 +601,7 @@ function createBootstrapChanges(args: {
 		schema_key: "lix_key_value",
 		schema_version: LixKeyValueSchema["x-lix-version"],
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			key: "lix_name",
@@ -639,7 +639,7 @@ function createBootstrapChanges(args: {
 				schema_key: "lix_key_value",
 				schema_version: LixKeyValueSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_id: args.generateUuid(),
 				snapshot_content: {
 					key: kv.key,
@@ -658,7 +658,7 @@ function createBootstrapChanges(args: {
 			schema_key: "lix_stored_schema",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
 				value: schema,
@@ -679,7 +679,7 @@ function createBootstrapChanges(args: {
 			schema_key: "lix_stored_schema",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
 				value: schema,
@@ -714,7 +714,7 @@ function createBootstrapChanges(args: {
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
 				change_set_id: targetChangeSetId,
@@ -770,7 +770,7 @@ function createBootstrapChanges(args: {
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_id: args.generateUuid(),
 			snapshot_content: {
 				change_set_id: initialGlobalVersionChangeSetId,

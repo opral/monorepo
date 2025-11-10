@@ -304,7 +304,7 @@ test("derives commit edges and change sets", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: "commit-987",
 					parent_commit_ids: ["parent-1", "parent-2"],

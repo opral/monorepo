@@ -191,7 +191,7 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 		schema_key: "lix_version_descriptor",
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		created_at: timestamp,
 		snapshot_content: JSON.stringify({
 			id: versionId,
@@ -224,7 +224,7 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 		schema_key: schemaKey,
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		created_at: timestamp,
 		snapshot_content: JSON.stringify({
 			id: "entity-recursive",

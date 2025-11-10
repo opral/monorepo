@@ -19,7 +19,7 @@ test("rewrites inserts for stored schema views", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -81,7 +81,7 @@ test("rewrites inserts for _by_version view", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -191,7 +191,7 @@ test("missing lixcol_version_id for _by_version view throws", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -233,7 +233,7 @@ test("defaults version for _by_version view when schema defines lixcol_version_i
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 			lixcol_version_id: '"global"',
 		},
 		type: "object",
@@ -291,7 +291,7 @@ test("base-only view applies lixcol version id override", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 			lixcol_version_id: '"global"',
 		},
 		"x-lix-entity-views": ["state"],
@@ -359,7 +359,7 @@ test("default values insert populates schema defaults", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -417,7 +417,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 		"x-lix-primary-key": ["/category", "/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -556,7 +556,7 @@ test("nested primary key pointer is used for state's entity id", async () => {
 		"x-lix-primary-key": ["/payload/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -624,7 +624,7 @@ test.skip("preserves SQL expression parameters during insert rewrite", async () 
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -729,7 +729,7 @@ test("does not rewrite history view inserts", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -762,7 +762,7 @@ test("applies JSON defaults when column is omitted", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -820,7 +820,7 @@ test("applies function defaults when column is omitted", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -873,7 +873,7 @@ test("applies CEL defaults when column is omitted", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -943,7 +943,7 @@ test("function defaults override literal defaults", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -1004,7 +1004,7 @@ test("rewrites multi-row inserts with JSON payloads", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -1086,7 +1086,7 @@ test("regression: handles json function call parameters when deriving entity_id"
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {

@@ -102,7 +102,7 @@ describe.skip("selectCommitDiff full + pushdown scope", async () => {
 			lix: ctx.lix,
 			before: ctx.beforeCommitId,
 			after: ctx.afterCommitId,
-			hints: { fileId: "lix", pluginKey: "lix_own_entity" },
+			hints: { fileId: "lix", pluginKey: "lix_sdk" },
 		})
 			.where("diff.schema_key", "=", "lix_key_value")
 			.execute();
@@ -146,7 +146,7 @@ describe.skip("selectCommitDiff changed-only + pushdown", async () => {
 			hints: {
 				includeUnchanged: false,
 				fileId: "lix",
-				pluginKey: "lix_own_entity",
+				pluginKey: "lix_sdk",
 			},
 		})
 			.where("diff.schema_key", "=", "lix_key_value")

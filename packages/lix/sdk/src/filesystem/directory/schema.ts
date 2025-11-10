@@ -25,7 +25,7 @@ export function applyDirectoryDatabaseSchema(args: {
 	const schemaKey = LixDirectoryDescriptorSchema["x-lix-key"];
 	const schemaVersion = LixDirectoryDescriptorSchema["x-lix-version"];
 	const fileId = "lix_directory_descriptor";
-	const pluginKey = "lix_own_entity";
+	const pluginKey = "lix_sdk";
 
 	const upsertDirectory = ({
 		idArg,

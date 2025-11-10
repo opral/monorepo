@@ -93,7 +93,7 @@ export async function applyChangeSet(args: {
 			// Skip plugin processing for lix own file changes (file metadata changes)
 			// These are handled by the database triggers and don't need plugin processing
 			const hasLixOwnEntityChanges = changes.some(
-				(c) => c.plugin_key === "lix_own_entity"
+				(c) => c.plugin_key === "lix_sdk"
 			);
 			if (hasLixOwnEntityChanges) {
 				continue;

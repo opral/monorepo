@@ -134,7 +134,7 @@ export function updateStateCache(args: {
 							schema_key: "lix_commit_edge",
 							schema_version: "1.0",
 							file_id: "lix",
-							plugin_key: "lix_own_entity",
+							plugin_key: "lix_sdk",
 							snapshot_content: JSON.stringify({
 								parent_id: parentId,
 								child_id: childId,
@@ -161,7 +161,7 @@ export function updateStateCache(args: {
 							schema_key: "lix_change_set",
 							schema_version: "1.0",
 							file_id: "lix",
-							plugin_key: "lix_own_entity",
+							plugin_key: "lix_sdk",
 							snapshot_content: JSON.stringify({
 								id: changeSetId,
 								metadata: null,

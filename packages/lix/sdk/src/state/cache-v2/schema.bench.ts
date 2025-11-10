@@ -39,7 +39,7 @@ async function registerBenchSchema(lix: Awaited<ReturnType<typeof openLix>>) {
 				schema_key: LixStoredSchemaSchema["x-lix-key"],
 				schema_version: LixStoredSchemaSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({ value: benchSchemaDefinition }),
 				created_at: timestamp,
 			},

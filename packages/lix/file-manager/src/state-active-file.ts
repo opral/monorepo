@@ -130,7 +130,7 @@ export const intermediateChangesAtom = atom<
 			"change.id"
 		)
     .where("change_set_element.change_set_id", "=", workingChangeSetId)
-		.where("change.file_id", "!=", "lix_own_change_control")
+		.where("change.file_id", "!=", "lix_sdk")
 		.select([
 			"change.id",
 			"change.entity_id",
