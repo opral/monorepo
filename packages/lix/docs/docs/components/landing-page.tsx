@@ -10,11 +10,15 @@ const CopyIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="h-4 w-4"
-    viewBox="0 0 20 20"
-    fill="currentColor"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   >
-    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
   </svg>
 );
 
@@ -89,31 +93,25 @@ const PackageInstaller = () => {
   const [copied, setCopied] = useState(false);
 
   const copyFullCommand = () => {
-    const command = "npm install @lix-js/sdk";
+    const command = "npm i @lix-js/sdk";
     navigator.clipboard.writeText(command);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="relative w-auto">
-      <div className="bg-white/90 backdrop-blur text-gray-800 px-4 py-2 rounded-lg font-mono text-sm flex items-center justify-center sm:justify-between border border-gray-200 shadow-sm">
-        <span className="text-gray-500 select-none text-sm">npm install</span>
-        <span
-          className="tracking-wide cursor-text select-all text-sm px-2"
-          style={{ color: "#0692B6" }}
-        >
-          @lix-js/sdk
-        </span>
-        <button
-          onClick={copyFullCommand}
-          className="h-8 w-8 ml-2 transition-colors duration-200 flex-shrink-0 cursor-pointer flex items-center justify-center rounded-md text-gray-500 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-          title="Copy full command"
-          aria-label={copied ? "Command copied" : "Copy install command"}
-        >
-          {copied ? <CheckIcon /> : <CopyIcon />}
-        </button>
-      </div>
+    <div className="inline-flex h-11 items-center justify-center gap-3 px-5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 transition-colors duration-200 hover:bg-gray-50">
+      <span className="font-mono text-sm leading-none cursor-text select-all">
+        npm i @lix-js/sdk
+      </span>
+      <button
+        onClick={copyFullCommand}
+        className="h-6 w-6 transition-colors duration-200 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+        title="Copy full command"
+        aria-label={copied ? "Command copied" : "Copy install command"}
+      >
+        {copied ? <CheckIcon /> : <CopyIcon />}
+      </button>
     </div>
   );
 };
@@ -130,29 +128,25 @@ function LandingPage() {
       {/* Main content */}
       <main className="relative px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="relative overflow-hidden pt-32 pb-20 px-4 sm:px-6">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-          <div className="relative max-w-4xl mx-auto text-center">
-            <h1 className="text-gray-900 font-bold leading-tight text-5xl sm:text-6xl lg:text-7xl tracking-tight mb-6">
+        <section className="relative overflow-hidden pt-18 pb-20 px-4 sm:px-6">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+          <div className="relative max-w-5xl mx-auto text-center">
+            <h1 className="text-gray-900 font-bold leading-tight text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-8">
               Change control SDK for
               <br />
               apps and <span style={{ color: "#0692B6" }}>AI agents</span>
             </h1>
 
-            <p className="text-gray-600 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
+            <p className="text-gray-600 text-lg sm:text-xl max-w-3xl mx-auto leading-relaxed mt-12">
               Lix is a JavaScript SDK that enables Git-like capabilities for
               apps and agents: Change proposals, versioning (branching),
               history, blame, etc.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-              <PackageInstaller />
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16  mt-8">
               <a
                 href="/guide/getting-started.html"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-md text-base font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{ backgroundColor: "#0692B6", color: "#ffffff" }}
                 onMouseEnter={(event) => {
                   event.currentTarget.style.backgroundColor = "#047497";
@@ -166,7 +160,7 @@ function LandingPage() {
                 Getting started
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 ml-2"
+                  className="h-5 w-5 ml-2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="#ffffff"
@@ -179,34 +173,37 @@ function LandingPage() {
                   />
                 </svg>
               </a>
+              <PackageInstaller />
               <a
                 href="https://prosemirror-example.onrender.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-md text-base font-medium text-gray-800 bg-white hover:bg-gray-50 border border-gray-200 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-300"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 border border-gray-300 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-300"
               >
                 Try an example app
               </a>
             </div>
 
-            <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <a
                 href="https://www.npmjs.com/package/@lix-js/sdk"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 py-5 px-6 rounded-xl border border-gray-200 bg-white/80 backdrop-blur hover:bg-white transition-colors duration-200"
+                className="flex flex-col items-center justify-center gap-3 py-8 px-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200"
               >
                 <svg
-                  className="w-8 h-8 text-red-500"
+                  className="w-9 h-9 text-red-500"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
                 </svg>
-                <span className="text-sm text-gray-500">npm</span>
-                <span className="font-semibold text-lg text-gray-800">
-                  30k+ weekly downloads
+                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                  npm
+                </span>
+                <span className="font-bold text-base text-gray-900">
+                  60k+ weekly downloads
                 </span>
               </a>
 
@@ -214,18 +211,20 @@ function LandingPage() {
                 href="https://github.com/opral/monorepo/graphs/contributors"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 py-5 px-6 rounded-xl border border-gray-200 bg-white/80 backdrop-blur hover:bg-white transition-colors duration-200"
+                className="flex flex-col items-center justify-center gap-3 py-8 px-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200"
               >
                 <svg
-                  className="w-8 h-8 text-gray-700"
+                  className="w-9 h-9 text-gray-700"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.48 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
                 </svg>
-                <span className="text-sm text-gray-500">GitHub</span>
-                <span className="font-semibold text-lg text-gray-800">
+                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                  GitHub
+                </span>
+                <span className="font-bold text-base text-gray-900">
                   100+ contributors
                 </span>
               </a>
@@ -234,18 +233,20 @@ function LandingPage() {
                 href="https://github.com/opral/monorepo/blob/main/packages/lix/sdk/LICENSE"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 py-5 px-6 rounded-xl border border-gray-200 bg-white/80 backdrop-blur hover:bg-white transition-colors duration-200"
+                className="flex flex-col items-center justify-center gap-3 py-8 px-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200"
               >
                 <svg
-                  className="w-8 h-8 text-gray-700"
+                  className="w-9 h-9 text-gray-700"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12zM11 7h2v6h-2V7zm0 8h2v2h-2v-2z" />
                 </svg>
-                <span className="text-sm text-gray-500">License</span>
-                <span className="font-semibold text-lg text-gray-800">
+                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                  License
+                </span>
+                <span className="font-bold text-base text-gray-900">
                   MIT Open Source
                 </span>
               </a>
