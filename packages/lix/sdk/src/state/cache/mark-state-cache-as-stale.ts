@@ -22,7 +22,7 @@ export function markStateCacheAsStale(args: {
 				entity_id: CACHE_STALE_KEY,
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: CACHE_STALE_KEY,
 					value: true,
@@ -50,7 +50,7 @@ export function markStateCacheAsFresh(args: {
 				entity_id: CACHE_STALE_KEY,
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: CACHE_STALE_KEY,
 					value: false,

@@ -221,7 +221,7 @@ export function commitDeterministicRngState(args: {
 				entity_id: "lix_deterministic_rng_state",
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: newValue,
 				schema_version: LixKeyValueSchema["x-lix-version"],
 				created_at: now,

@@ -11,7 +11,7 @@ test("rewrites updates for stored schema views", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -81,7 +81,7 @@ test("rewrites quoted updates for stored schema views", async () => {
 		"x-lix-primary-key": ["/messageId"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -158,7 +158,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 			lixcol_version_id: '"global"',
 		},
 		type: "object",
@@ -289,7 +289,7 @@ test("updates to immutable schemas are rejected", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		"x-lix-immutable": true,
 		type: "object",
@@ -334,7 +334,7 @@ test("base-only views reuse metadata version defaults on update", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 			lixcol_version_id: '"global"',
 		},
 		"x-lix-entity-views": ["state"],

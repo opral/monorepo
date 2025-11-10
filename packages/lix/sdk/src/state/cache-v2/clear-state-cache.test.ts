@@ -50,7 +50,7 @@ test("clearStateCacheV2 deletes all cache entries", async () => {
 				schema_key: schemaKey,
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({ value: "cached" }),
 				created_at: "2024-01-01T00:00:00Z",
 			},

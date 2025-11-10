@@ -361,7 +361,7 @@ test("active_account view injects global version defaults", async () => {
 	expect(row).toMatchObject({
 		schema_key: "lix_active_account",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		untracked: 1,
 	});
 	expect(row.version_id).toBeDefined();

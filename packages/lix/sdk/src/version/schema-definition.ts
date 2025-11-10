@@ -14,7 +14,7 @@ export const LixVersionDescriptorSchema = {
 	"x-lix-foreign-keys": [],
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
-		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_plugin_key: '"lix_sdk"',
 	},
 	type: "object",
 	properties: {
@@ -58,7 +58,7 @@ export const LixVersionTipSchema = {
 	],
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
-		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_plugin_key: '"lix_sdk"',
 	},
 	type: "object",
 	properties: {
@@ -90,7 +90,7 @@ export const LixActiveVersionSchema = {
 	],
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
-		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_plugin_key: '"lix_sdk"',
 		lixcol_untracked: "1",
 		lixcol_version_id: '"global"',
 	},

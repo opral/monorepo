@@ -113,7 +113,7 @@ test("selecting from stored schema view returns rows via preprocessor", async ()
 			schema_key: "e2e_schema",
 			file_id: "lix",
 			version_id: activeVersion.version_id,
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: { id: "row-1", name: "Entity 1" },
 			schema_version: "1.0",
 			metadata: null,

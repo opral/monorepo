@@ -41,7 +41,7 @@ async function registerStoredSchema(
 				schema_key: LixStoredSchemaSchema["x-lix-key"],
 				schema_version: LixStoredSchemaSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null,
 				created_at: timestamp,
 			},
@@ -59,7 +59,7 @@ async function registerStoredSchema(
 				schema_key: LixStoredSchemaSchema["x-lix-key"],
 				schema_version: LixStoredSchemaSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					value: {
 						$schema: "http://json-schema.org/draft-07/schema#",

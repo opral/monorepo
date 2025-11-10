@@ -21,7 +21,7 @@ test("it applies lix own entity changes", async () => {
 	const mockKeyValueChange: LixChange = {
 		id: "change1",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		metadata: null,
 		snapshot_content: mockKeyValue,
 		entity_id: "test", // entity_id should match the key

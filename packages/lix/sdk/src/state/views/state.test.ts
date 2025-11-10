@@ -48,7 +48,7 @@ simulationTest(
 				entity_id: "entity0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				snapshot_content: { value: "initial content" },
 			})
@@ -67,7 +67,7 @@ simulationTest(
 			entity_id: "entity0",
 			file_id: "f0",
 			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			schema_version: "1.0",
 			snapshot_content: { value: "initial content" },
 		});

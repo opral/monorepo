@@ -409,7 +409,7 @@ export function commit(args: {
 						entity_id: entityIdForDeletion,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
-						plugin_key: "lix_own_entity",
+						plugin_key: "lix_sdk",
 						snapshot_content: null,
 						schema_version: LixChangeSetElementSchema["x-lix-version"],
 						created_at: transactionTimestamp,
@@ -426,7 +426,7 @@ export function commit(args: {
 							entity_id: `${workingChangeSetId}~${deletion.id}`,
 							schema_key: "lix_change_set_element",
 							file_id: "lix",
-							plugin_key: "lix_own_entity",
+							plugin_key: "lix_sdk",
 							snapshot_content: JSON.stringify({
 								change_set_id: workingChangeSetId,
 								change_id: deletion.id,
@@ -448,7 +448,7 @@ export function commit(args: {
 						entity_id: `${workingChangeSetId}~${change.id}`,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
-						plugin_key: "lix_own_entity",
+						plugin_key: "lix_sdk",
 						snapshot_content: JSON.stringify({
 							change_set_id: workingChangeSetId,
 							change_id: change.id,

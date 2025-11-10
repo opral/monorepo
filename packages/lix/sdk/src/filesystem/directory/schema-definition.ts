@@ -14,7 +14,7 @@ export const LixDirectoryDescriptorSchema = {
 	"x-lix-unique": [["/parent_id", "/name"]],
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
-		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_plugin_key: '"lix_sdk"',
 	},
 	type: "object",
 	properties: {
