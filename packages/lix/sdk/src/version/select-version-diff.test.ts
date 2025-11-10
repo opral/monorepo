@@ -609,7 +609,7 @@ simulationTest(
 		await lix.db
 			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "e_del")
-		.where("schema_key", "=", "test_schema_a")
+			.where("schema_key", "=", "test_schema_a")
 			.where("file_id", "=", "file1")
 			.where("version_id", "=", sourceVersion.id)
 			.execute();
