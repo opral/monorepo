@@ -415,6 +415,31 @@ test("x-lix-foreign-keys with valid structure", () => {
 	expect(validateLixSchemaDefinition(schema)).toBe(true);
 });
 
+test("x-lix-foreign-keys reject duplicate pointers", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "invalid_fk_duplicates",
+		"x-lix-version": "1.0",
+		"x-lix-foreign-keys": [
+			{
+				// duplicates in local definition
+				properties: ["/local", "/local"],
+				references: {
+					schemaKey: "remote_schema",
+					properties: ["/id", "/version"],
+				},
+			},
+		],
+		properties: {
+			local: { type: "string" },
+		},
+		required: ["local"],
+		additionalProperties: false,
+	};
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
+
 test("x-lix-foreign-keys with schemaVersion", () => {
 	const schema = {
 		type: "object",

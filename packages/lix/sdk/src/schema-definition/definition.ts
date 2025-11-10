@@ -98,6 +98,7 @@ export const LixSchemaDefinition = {
 									format: "json-pointer",
 									description: "JSON Pointer referencing the local field.",
 								},
+								uniqueItems: true,
 								description:
 									"Local JSON-schema property names that participate in the FK",
 							},
@@ -117,6 +118,7 @@ export const LixSchemaDefinition = {
 											format: "json-pointer",
 											description: "JSON Pointer referencing the remote field.",
 										},
+										uniqueItems: true,
 										description:
 											"Remote property names (same length as local properties)",
 									},
