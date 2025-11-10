@@ -256,12 +256,6 @@ export function handleFileInsert(args: {
 	// Don't cache lixcol metadata here either - the commit_id will change after auto-commit
 	// The cache will be populated on first read via selectFileLixcol
 
-	// Emit file change event
-	args.engine.hooks._emit("file_change", {
-		fileId: args.file.id,
-		operation: "inserted",
-	});
-
 	return 0;
 }
 
@@ -537,12 +531,6 @@ export function handleFileUpdate(args: {
 		engine: args.engine,
 		fileId: args.file.id,
 		versionId: args.versionId,
-	});
-
-	// Emit file change event
-	args.engine.hooks._emit("file_change", {
-		fileId: args.file.id,
-		operation: "updated",
 	});
 
 	return 0;

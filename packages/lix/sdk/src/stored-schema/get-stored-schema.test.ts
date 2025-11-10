@@ -34,7 +34,7 @@ const countCallsForSql = (
 	targetSql: string
 ) =>
 	calls.filter(
-	([args]) => (args as { sql?: string } | undefined)?.sql === targetSql
+		([args]) => (args as { sql?: string } | undefined)?.sql === targetSql
 	).length;
 
 const createStoredSchemaHookChange = (): StateCommitChange => ({

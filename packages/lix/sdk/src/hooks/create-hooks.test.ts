@@ -18,10 +18,6 @@ const testHooksSchema = {
 } as const satisfies LixSchemaDefinition;
 
 const emptyChangesPayload = { changes: [] as StateCommitChange[] };
-const sampleFileChangePayload = {
-	fileId: "file_change_test",
-	operation: "updated" as const,
-};
 
 test("should create hooks with onStateCommit method", () => {
 	const hooks = createHooks();
@@ -101,16 +97,6 @@ test("should handle multiple subscriptions and unsubscriptions correctly", () =>
 	expect(handler1).toHaveBeenCalledTimes(2); // Still 2
 	expect(handler2).toHaveBeenCalledTimes(1); // Still 1
 	expect(handler3).toHaveBeenCalledTimes(2); // Still 2
-});
-
-test("should not call handlers for different event types", () => {
-	const hooks = createHooks();
-	const handler = vi.fn();
-
-	hooks.onStateCommit(handler);
-	hooks._emit("file_change", sampleFileChangePayload);
-
-	expect(handler).not.toHaveBeenCalled();
 });
 
 test("should handle async handlers without issues", async () => {

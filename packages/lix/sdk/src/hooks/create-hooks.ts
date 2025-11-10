@@ -53,7 +53,6 @@ export type StateCommitChange = {
  */
 type HookEvents = {
 	state_commit: { changes: StateCommitChange[] };
-	file_change: { fileId: string; operation: "inserted" | "updated" };
 };
 
 type HookEventType = keyof HookEvents;
@@ -103,10 +102,7 @@ export type LixHooks = {
 	 * This method is for internal use only and should not be called directly.
 	 * Use this to emit events from state mutation functions.
 	 */
-	_emit: <T extends HookEventType>(
-		eventType: T,
-		data: HookEvents[T]
-	) => void;
+	_emit: <T extends HookEventType>(eventType: T, data: HookEvents[T]) => void;
 };
 
 /**
@@ -152,10 +148,7 @@ export function createHooks(): LixHooks {
 				eventTarget.removeEventListener("state_commit", wrappedHandler);
 		},
 
-		_emit<T extends HookEventType>(
-			eventType: T,
-			data: HookEvents[T]
-		): void {
+		_emit<T extends HookEventType>(eventType: T, data: HookEvents[T]): void {
 			eventTarget.dispatchEvent(new CustomEvent(eventType, { detail: data }));
 		},
 	};
