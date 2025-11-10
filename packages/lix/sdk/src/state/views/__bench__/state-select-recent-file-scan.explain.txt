@@ -126,7 +126,7 @@ FROM (
         NULL AS writer_key,
         2 AS priority
       FROM lix_internal_state_all_untracked unt
-      WHERE unt.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global')
+      WHERE unt.version_id IN ('boot_0000000000','global')
 
           UNION ALL
 
@@ -193,6 +193,22 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
+        FROM "lix_internal_state_cache_v1_lix_key_value"
+      UNION ALL
+      SELECT
+          "entity_id",
+          "schema_key",
+          "file_id",
+          "plugin_key",
+          "snapshot_content",
+          "schema_version",
+          "version_id",
+          "created_at",
+          "updated_at",
+          "inherited_from_version_id",
+          "change_id",
+          "commit_id",
+          "is_tombstone"
         FROM "lix_internal_state_cache_v1_lix_active_account"
       UNION ALL
       SELECT
@@ -241,38 +257,6 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
-        FROM "lix_internal_state_cache_v1_lix_change_set"
-      UNION ALL
-      SELECT
-          "entity_id",
-          "schema_key",
-          "file_id",
-          "plugin_key",
-          "snapshot_content",
-          "schema_version",
-          "version_id",
-          "created_at",
-          "updated_at",
-          "inherited_from_version_id",
-          "change_id",
-          "commit_id",
-          "is_tombstone"
-        FROM "lix_internal_state_cache_v1_lix_label"
-      UNION ALL
-      SELECT
-          "entity_id",
-          "schema_key",
-          "file_id",
-          "plugin_key",
-          "snapshot_content",
-          "schema_version",
-          "version_id",
-          "created_at",
-          "updated_at",
-          "inherited_from_version_id",
-          "change_id",
-          "commit_id",
-          "is_tombstone"
         FROM "lix_internal_state_cache_v1_lix_version_tip"
       UNION ALL
       SELECT
@@ -289,7 +273,7 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
-        FROM "lix_internal_state_cache_v1_lix_key_value"
+        FROM "lix_internal_state_cache_v1_lix_change_set"
       UNION ALL
       SELECT
           "entity_id",
@@ -321,8 +305,24 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
+        FROM "lix_internal_state_cache_v1_lix_label"
+      UNION ALL
+      SELECT
+          "entity_id",
+          "schema_key",
+          "file_id",
+          "plugin_key",
+          "snapshot_content",
+          "schema_version",
+          "version_id",
+          "created_at",
+          "updated_at",
+          "inherited_from_version_id",
+          "change_id",
+          "commit_id",
+          "is_tombstone"
         FROM "lix_internal_state_cache_v1_bench_state_view") cache
-      		WHERE cache.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global')
+      		WHERE cache.version_id IN ('boot_0000000000','global')
 
           UNION ALL
 
@@ -344,7 +344,7 @@ FROM (
           NULL AS writer_key,
           4 AS priority
       		FROM (
-      SELECT 'zWV5MeJApKKgdkBY6bUhu' AS version_id, 'global' AS ancestor_version_id
+      SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
       ) AS vi
       		JOIN (SELECT
           "entity_id",
@@ -392,6 +392,22 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
+        FROM "lix_internal_state_cache_v1_lix_key_value"
+      UNION ALL
+      SELECT
+          "entity_id",
+          "schema_key",
+          "file_id",
+          "plugin_key",
+          "snapshot_content",
+          "schema_version",
+          "version_id",
+          "created_at",
+          "updated_at",
+          "inherited_from_version_id",
+          "change_id",
+          "commit_id",
+          "is_tombstone"
         FROM "lix_internal_state_cache_v1_lix_active_account"
       UNION ALL
       SELECT
@@ -440,38 +456,6 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
-        FROM "lix_internal_state_cache_v1_lix_change_set"
-      UNION ALL
-      SELECT
-          "entity_id",
-          "schema_key",
-          "file_id",
-          "plugin_key",
-          "snapshot_content",
-          "schema_version",
-          "version_id",
-          "created_at",
-          "updated_at",
-          "inherited_from_version_id",
-          "change_id",
-          "commit_id",
-          "is_tombstone"
-        FROM "lix_internal_state_cache_v1_lix_label"
-      UNION ALL
-      SELECT
-          "entity_id",
-          "schema_key",
-          "file_id",
-          "plugin_key",
-          "snapshot_content",
-          "schema_version",
-          "version_id",
-          "created_at",
-          "updated_at",
-          "inherited_from_version_id",
-          "change_id",
-          "commit_id",
-          "is_tombstone"
         FROM "lix_internal_state_cache_v1_lix_version_tip"
       UNION ALL
       SELECT
@@ -488,7 +472,7 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
-        FROM "lix_internal_state_cache_v1_lix_key_value"
+        FROM "lix_internal_state_cache_v1_lix_change_set"
       UNION ALL
       SELECT
           "entity_id",
@@ -520,9 +504,25 @@ FROM (
           "change_id",
           "commit_id",
           "is_tombstone"
+        FROM "lix_internal_state_cache_v1_lix_label"
+      UNION ALL
+      SELECT
+          "entity_id",
+          "schema_key",
+          "file_id",
+          "plugin_key",
+          "snapshot_content",
+          "schema_version",
+          "version_id",
+          "created_at",
+          "updated_at",
+          "inherited_from_version_id",
+          "change_id",
+          "commit_id",
+          "is_tombstone"
         FROM "lix_internal_state_cache_v1_bench_state_view") cache ON cache.version_id = vi.ancestor_version_id
       		WHERE cache.is_tombstone = 0
-      		  AND cache.snapshot_content IS NOT NULL AND cache.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global')
+      		  AND cache.snapshot_content IS NOT NULL AND cache.version_id IN ('boot_0000000000','global')
 
           UNION ALL
 
@@ -544,11 +544,11 @@ FROM (
           NULL AS writer_key,
           5 AS priority
       		FROM (
-      SELECT 'zWV5MeJApKKgdkBY6bUhu' AS version_id, 'global' AS ancestor_version_id
+      SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
       ) AS vi
       		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
       		WHERE unt.is_tombstone = 0
-      		  AND unt.snapshot_content IS NOT NULL AND unt.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global')
+      		  AND unt.snapshot_content IS NOT NULL AND unt.version_id IN ('boot_0000000000','global')
   ) AS c
 ) AS w
 
@@ -568,7 +568,7 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 WHERE w.rn = 1
 ) AS "lix_internal_state_vtable"
 WHERE snapshot_content IS NOT NULL) AS state_by_version
-WHERE version_id = 'zWV5MeJApKKgdkBY6bUhu') AS state
+WHERE version_id = 'boot_0000000000') AS state
 WHERE file_id = ?
 ORDER BY updated_at DESC
 LIMIT 20
@@ -657,7 +657,7 @@ LIMIT 20
     "id": 126,
     "parent": 119,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 156,
@@ -669,7 +669,7 @@ LIMIT 20
     "id": 163,
     "parent": 156,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 193,
@@ -681,7 +681,7 @@ LIMIT 20
     "id": 200,
     "parent": 193,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 230,
@@ -693,7 +693,7 @@ LIMIT 20
     "id": 237,
     "parent": 230,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 267,
@@ -705,7 +705,7 @@ LIMIT 20
     "id": 274,
     "parent": 267,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 304,
@@ -717,7 +717,7 @@ LIMIT 20
     "id": 311,
     "parent": 304,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 341,
@@ -729,7 +729,7 @@ LIMIT 20
     "id": 348,
     "parent": 341,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 378,
@@ -741,7 +741,7 @@ LIMIT 20
     "id": 385,
     "parent": 378,
     "notused": 61,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_fv (file_id=? AND version_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_fv (file_id=? AND version_id=?)"
   },
   {
     "id": 415,
@@ -855,7 +855,7 @@ LIMIT 20
     "id": 572,
     "parent": 556,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 607,
@@ -885,7 +885,7 @@ LIMIT 20
     "id": 623,
     "parent": 607,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_active_account USING INDEX idx_lix_internal_state_cache_v1_lix_active_account_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 658,
@@ -915,7 +915,7 @@ LIMIT 20
     "id": 674,
     "parent": 658,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit USING INDEX idx_lix_internal_state_cache_v1_lix_commit_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 709,
@@ -945,7 +945,7 @@ LIMIT 20
     "id": 725,
     "parent": 709,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_commit_edge USING INDEX idx_lix_internal_state_cache_v1_lix_commit_edge_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 760,
@@ -975,7 +975,7 @@ LIMIT 20
     "id": 776,
     "parent": 760,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 811,
@@ -1005,7 +1005,7 @@ LIMIT 20
     "id": 827,
     "parent": 811,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_version_tip USING INDEX idx_lix_internal_state_cache_v1_lix_version_tip_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 862,
@@ -1035,7 +1035,7 @@ LIMIT 20
     "id": 878,
     "parent": 862,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_key_value USING INDEX idx_lix_internal_state_cache_v1_lix_key_value_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 913,
@@ -1065,7 +1065,7 @@ LIMIT 20
     "id": 929,
     "parent": 913,
     "notused": 27,
-    "detail": "SEARCH lix_internal_state_cache_v1_lix_change_set_element USING INDEX idx_lix_internal_state_cache_v1_lix_change_set_element_live_vfe (version_id=? AND file_id=?)"
+    "detail": "SEARCH lix_internal_state_cache_v1_lix_label USING INDEX idx_lix_internal_state_cache_v1_lix_label_live_vfe (version_id=? AND file_id=?)"
   },
   {
     "id": 964,

@@ -124,7 +124,7 @@ FROM (
         NULL AS writer_key,
         2 AS priority
       FROM lix_internal_state_all_untracked unt
-      WHERE (unt.schema_key IN ('bench_state_view')) AND (unt.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global'))
+      WHERE (unt.schema_key IN ('bench_state_view')) AND (unt.version_id IN ('boot_0000000000','global'))
 
           UNION ALL
 
@@ -146,7 +146,7 @@ FROM (
         NULL AS writer_key,
         3 AS priority
       FROM "lix_internal_state_cache_v1_bench_state_view" cache
-      WHERE (cache.schema_key IN ('bench_state_view')) AND (cache.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global'))
+      WHERE (cache.schema_key IN ('bench_state_view')) AND (cache.version_id IN ('boot_0000000000','global'))
 
           UNION ALL
 
@@ -168,11 +168,11 @@ FROM (
           NULL AS writer_key,
           4 AS priority
       		FROM (
-      SELECT 'zWV5MeJApKKgdkBY6bUhu' AS version_id, 'global' AS ancestor_version_id
+      SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
       ) AS vi
       		JOIN "lix_internal_state_cache_v1_bench_state_view" cache ON cache.version_id = vi.ancestor_version_id
       		WHERE cache.is_tombstone = 0
-      		  AND cache.snapshot_content IS NOT NULL AND (cache.schema_key IN ('bench_state_view')) AND (cache.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global'))
+      		  AND cache.snapshot_content IS NOT NULL AND (cache.schema_key IN ('bench_state_view')) AND (cache.version_id IN ('boot_0000000000','global'))
 
           UNION ALL
 
@@ -194,11 +194,11 @@ FROM (
           NULL AS writer_key,
           5 AS priority
       		FROM (
-      SELECT 'zWV5MeJApKKgdkBY6bUhu' AS version_id, 'global' AS ancestor_version_id
+      SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
       ) AS vi
       		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
       		WHERE unt.is_tombstone = 0
-      		  AND unt.snapshot_content IS NOT NULL AND (unt.schema_key IN ('bench_state_view')) AND (unt.version_id IN ('zWV5MeJApKKgdkBY6bUhu','global'))
+      		  AND unt.snapshot_content IS NOT NULL AND (unt.schema_key IN ('bench_state_view')) AND (unt.version_id IN ('boot_0000000000','global'))
   ) AS c
 ) AS w
 
@@ -218,7 +218,7 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 WHERE w.rn = 1
 ) AS "lix_internal_state_vtable"
 WHERE snapshot_content IS NOT NULL) AS state_by_version
-WHERE version_id = 'zWV5MeJApKKgdkBY6bUhu') AS state
+WHERE version_id = 'boot_0000000000') AS state
 WHERE schema_key = ? AND entity_id = ?
 
 -- plan --
