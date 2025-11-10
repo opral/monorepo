@@ -18,7 +18,7 @@ export const LixEntityConversationSchema = {
 	],
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
-		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_plugin_key: '"lix_sdk"',
 	},
 	"x-lix-foreign-keys": [
 		{

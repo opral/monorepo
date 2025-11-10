@@ -13,7 +13,7 @@ export const LixEntityLabelSchema = {
 	"x-lix-primary-key": ["/entity_id", "/schema_key", "/file_id", "/label_id"],
 	"x-lix-override-lixcols": {
 		lixcol_file_id: '"lix"',
-		lixcol_plugin_key: '"lix_own_entity"',
+		lixcol_plugin_key: '"lix_sdk"',
 	},
 	"x-lix-foreign-keys": [
 		{

@@ -345,7 +345,7 @@ function upsertDerivedCommitEntities(args: {
 				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					parent_id: parentId,
 					child_id: childId,
@@ -364,7 +364,7 @@ function upsertDerivedCommitEntities(args: {
 				schema_key: LixChangeSetSchema["x-lix-key"],
 				schema_version: LixChangeSetSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: changeSetId,
 				} satisfies LixChangeSet),

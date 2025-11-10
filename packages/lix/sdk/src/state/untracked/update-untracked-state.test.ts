@@ -33,7 +33,7 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 				entity_id: "direct-untracked-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "direct-untracked-key",
 					value: "direct-value",
@@ -105,7 +105,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 				entity_id: "update-test-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "update-test-key",
 					value: "initial-value",
@@ -126,7 +126,7 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 				entity_id: "update-test-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "update-test-key",
 					value: "updated-value",
@@ -196,7 +196,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 				entity_id: "delete-test-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "delete-test-key",
 					value: "to-be-deleted",
@@ -227,7 +227,7 @@ test("updateUntrackedState deletes direct untracked entity", async () => {
 				entity_id: "delete-test-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null, // Deletion
 				schema_version: "1.0",
 				created_at: currentTime,
@@ -274,7 +274,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 			schema_key: "lix_key_value",
 			file_id: "lix",
 			version_id: "global",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: sql`jsonb(${JSON.stringify({
 				key: "inherited-untracked-key",
 				value: "parent-value",
@@ -306,7 +306,7 @@ test("updateUntrackedState creates tombstone for inherited untracked entity dele
 				entity_id: "inherited-untracked-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null, // Deletion
 				schema_version: "1.0",
 				created_at: currentTime,
@@ -357,7 +357,7 @@ test("updateUntrackedState handles timestamp consistency for new entities", asyn
 				entity_id: "timestamp-test-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "timestamp-test-key",
 					value: "timestamp-value",
@@ -410,7 +410,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 				entity_id: "tombstone-test-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null, // Creates tombstone
 				schema_version: "1.0",
 				created_at: currentTime,
@@ -440,7 +440,7 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 				entity_id: "tombstone-test-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "tombstone-test-key",
 					value: "revived-value",

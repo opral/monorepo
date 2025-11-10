@@ -94,7 +94,7 @@ export function handleFileInsert(args: {
 				entity_id: args.file.id,
 				schema_key: LixFileDescriptorSchema["x-lix-key"],
 				file_id: args.file.id,
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: {
 					id: args.file.id,
 					directory_id: descriptorFields.directoryId,

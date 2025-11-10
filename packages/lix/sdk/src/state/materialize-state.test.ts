@@ -918,7 +918,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 					schema_key: "lix_commit",
 					schema_version: "1.0",
 					file_id: "lix",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: {
 						id: mergeCommitId,
 						change_set_id: mergeChangeSetId,
@@ -937,7 +937,7 @@ describe("lix_internal_materialization_commit_graph", () => {
 					schema_key: LixVersionTipSchema["x-lix-key"],
 					schema_version: LixVersionTipSchema["x-lix-version"],
 					file_id: "lix",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: {
 						id: "merge-version-a",
 						commit_id: mergeCommitId,
@@ -1249,7 +1249,7 @@ simulationTest(
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: {
 					id: mergeCommitId,
 					change_set_id: mergeChangeSetId,
@@ -1268,7 +1268,7 @@ simulationTest(
 				schema_key: LixVersionTipSchema["x-lix-key"],
 				schema_version: LixVersionTipSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: { id: vA.id, commit_id: mergeCommitId },
 				created_at: ts,
 			})

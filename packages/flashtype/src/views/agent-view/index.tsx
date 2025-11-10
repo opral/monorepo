@@ -642,7 +642,7 @@ function createProposalDiffConfig(args: {
 						.coalesce(
 							eb.ref("after.plugin_key"),
 							eb.ref("before.plugin_key"),
-							eb.val("lix_own_entity"),
+							eb.val("lix_sdk"),
 						)
 						.as("plugin_key"),
 				])

@@ -173,7 +173,7 @@ export async function mergeVersion(args: {
 			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: targetCommitId,
 				change_set_id: targetChangeSetId,
@@ -192,7 +192,7 @@ export async function mergeVersion(args: {
 			schema_key: LixVersionTipSchema["x-lix-key"],
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: target.id,
 				commit_id: targetCommitId,
@@ -230,7 +230,7 @@ export async function mergeVersion(args: {
 				schema_key: "lix_change_set_element",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					change_set_id: targetChangeSetId,
 					change_id: ref.id,
@@ -248,7 +248,7 @@ export async function mergeVersion(args: {
 				schema_key: "lix_change_set_element",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					change_set_id: targetChangeSetId,
 					change_id: del.id,
@@ -297,7 +297,7 @@ export async function mergeVersion(args: {
 					schema_key: "lix_change_set_element",
 					schema_version: "1.0",
 					file_id: "lix",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: JSON.stringify({
 						change_set_id: targetChangeSetId,
 						change_id: row.id,
@@ -467,7 +467,7 @@ export async function mergeVersion(args: {
 			schema_key: "lix_change_set_element",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				change_set_id: targetChangeSetId,
 				change_id,

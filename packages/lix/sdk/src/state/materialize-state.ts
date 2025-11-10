@@ -178,7 +178,7 @@ export function applyMaterializeStateSchema(args: {
             t.version_id           AS entity_id,
             'lix_version_tip'      AS schema_key,
             'lix'                  AS file_id,
-            'lix_own_entity'       AS plugin_key,
+            'lix_sdk'       AS plugin_key,
             json_object(
                 'id',                t.version_id,
                 'commit_id',         t.tip_commit_id,
@@ -204,7 +204,7 @@ export function applyMaterializeStateSchema(args: {
             c.entity_id,
             'lix_commit' AS schema_key,
             'lix' AS file_id,
-            'lix_own_entity' AS plugin_key,
+            'lix_sdk' AS plugin_key,
             c.snapshot_content,
             c.schema_version,
             c.created_at AS entity_created_at,
@@ -227,7 +227,7 @@ export function applyMaterializeStateSchema(args: {
             (json_extract(cmt.snapshot_content,'$.change_set_id') || '~' || c.id) AS entity_id,
             'lix_change_set_element' AS schema_key,
             'lix' AS file_id,
-            'lix_own_entity' AS plugin_key,
+            'lix_sdk' AS plugin_key,
             json_object(
                 'change_set_id', json_extract(cmt.snapshot_content,'$.change_set_id'),
                 'change_id', c.id,
@@ -267,7 +267,7 @@ export function applyMaterializeStateSchema(args: {
             (je.value || '~' || cg.commit_id) AS entity_id,
             'lix_commit_edge' AS schema_key,
             'lix' AS file_id,
-            'lix_own_entity' AS plugin_key,
+            'lix_sdk' AS plugin_key,
             json_object(
                 'parent_id', je.value,
                 'child_id', cg.commit_id
@@ -305,7 +305,7 @@ export function applyMaterializeStateSchema(args: {
             (c.id || '~' || ja.value) AS entity_id,
             'lix_change_author' AS schema_key,
             'lix' AS file_id,
-            'lix_own_entity' AS plugin_key,
+            'lix_sdk' AS plugin_key,
             json_object(
                 'change_id', c.id,
                 'account_id', ja.value
@@ -388,7 +388,7 @@ export function applyMaterializeStateSchema(args: {
         c.entity_id,
         'lix_commit' AS schema_key,
         'lix' AS file_id,
-        'lix_own_entity' AS plugin_key,
+        'lix_sdk' AS plugin_key,
         c.snapshot_content,
         c.schema_version,
         c.created_at AS created_at,
@@ -440,7 +440,7 @@ export function applyMaterializeStateSchema(args: {
         (CAST(json_extract(vg.snapshot_content,'$.commit_id') AS TEXT) || '~' || CAST(json_extract(vg.snapshot_content,'$.working_commit_id') AS TEXT)) AS entity_id,
         'lix_commit_edge' AS schema_key,
         'lix' AS file_id,
-        'lix_own_entity' AS plugin_key,
+        'lix_sdk' AS plugin_key,
         json_object(
             'parent_id', json_extract(vg.snapshot_content,'$.commit_id'),
             'child_id',  json_extract(vg.snapshot_content,'$.working_commit_id')

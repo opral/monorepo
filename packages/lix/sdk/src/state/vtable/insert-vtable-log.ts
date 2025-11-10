@@ -44,7 +44,7 @@ export function insertVTableLog(args: {
 					entity_id: id,
 					schema_key: LixLogSchema["x-lix-key"],
 					file_id: "lix",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: JSON.stringify({
 						id,
 						key: args.key,

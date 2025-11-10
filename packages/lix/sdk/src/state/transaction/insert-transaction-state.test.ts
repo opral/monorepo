@@ -189,7 +189,7 @@ test("creates tombstone for inherited entity deletion", async () => {
 				entity_id: "inherited-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null, // Deletion
 				schema_version: "1.0",
 				version_id: activeVersion.version_id,
@@ -296,7 +296,7 @@ test("creates tombstone for inherited untracked entity deletion", async () => {
 				entity_id: "inherited-untracked-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null, // Deletion
 				schema_version: "1.0",
 				version_id: activeVersion.version_id,
@@ -460,7 +460,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 				entity_id: "direct-untracked-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					key: "direct-untracked-key",
 					value: "direct-value",
@@ -515,7 +515,7 @@ test("deletes direct untracked entity on null snapshot_content", async () => {
 				entity_id: "direct-untracked-key",
 				schema_key: "lix_key_value",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null, // Deletion
 				schema_version: "1.0",
 				version_id: activeVersion.version_id,

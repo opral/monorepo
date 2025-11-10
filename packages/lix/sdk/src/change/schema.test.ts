@@ -388,7 +388,7 @@ test("untracked changes in transaction don't show up in change view after commit
 				entity_id: "test_untracked_entity",
 				schema_key: "lix_log",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: "test_log_id",
 					key: "test_log_key",

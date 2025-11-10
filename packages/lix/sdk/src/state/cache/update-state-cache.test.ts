@@ -844,7 +844,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: {
 				id: childId,
 				change_set_id: changeSetId,
@@ -866,7 +866,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -928,7 +928,7 @@ test("commit caching materializes its change set in cache", async () => {
 			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: {
 				id: childId,
 				change_set_id: changeSetId,
@@ -950,7 +950,7 @@ test("commit caching materializes its change set in cache", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -1001,7 +1001,7 @@ test("caches commit edges from commit.parent_commit_ids", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -1057,7 +1057,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -1089,7 +1089,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
