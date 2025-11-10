@@ -130,6 +130,7 @@ function LandingPage() {
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-18 pb-20 px-4 sm:px-6">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-white pointer-events-none" />
           <div className="relative max-w-5xl mx-auto text-center">
             <h1 className="text-gray-900 font-bold leading-tight text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-8">
               Change control SDK for
@@ -184,15 +185,15 @@ function LandingPage() {
               </a>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
               <a
                 href="https://www.npmjs.com/package/@lix-js/sdk"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-3 py-8 px-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200"
+                className="flex flex-col items-center justify-center gap-2.5 py-6 px-5 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
               >
                 <svg
-                  className="w-9 h-9 text-red-500"
+                  className="w-8 h-8 text-red-500"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
@@ -202,7 +203,7 @@ function LandingPage() {
                 <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                   npm
                 </span>
-                <span className="font-bold text-base text-gray-900">
+                <span className="font-semibold text-sm text-gray-900">
                   60k+ weekly downloads
                 </span>
               </a>
@@ -211,10 +212,10 @@ function LandingPage() {
                 href="https://github.com/opral/monorepo/graphs/contributors"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-3 py-8 px-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200"
+                className="flex flex-col items-center justify-center gap-2.5 py-6 px-5 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
               >
                 <svg
-                  className="w-9 h-9 text-gray-700"
+                  className="w-8 h-8 text-gray-700"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
@@ -224,7 +225,7 @@ function LandingPage() {
                 <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                   GitHub
                 </span>
-                <span className="font-bold text-base text-gray-900">
+                <span className="font-semibold text-sm text-gray-900">
                   100+ contributors
                 </span>
               </a>
@@ -233,10 +234,10 @@ function LandingPage() {
                 href="https://github.com/opral/monorepo/blob/main/packages/lix/sdk/LICENSE"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-3 py-8 px-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200"
+                className="flex flex-col items-center justify-center gap-2.5 py-6 px-5 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
               >
                 <svg
-                  className="w-9 h-9 text-gray-700"
+                  className="w-8 h-8 text-gray-700"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   xmlns="http://www.w3.org/2000/svg"
@@ -246,7 +247,7 @@ function LandingPage() {
                 <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                   License
                 </span>
-                <span className="font-bold text-base text-gray-900">
+                <span className="font-semibold text-sm text-gray-900">
                   MIT Open Source
                 </span>
               </a>
@@ -255,7 +256,7 @@ function LandingPage() {
         </section>
 
         {/* What You Can Build Section */}
-        <section className="py-20 bg-gradient-to-r from-gray-50 to-white w-full px-6 sm:px-12 md:px-16 mt-16">
+        <section className="pt-12 pb-20 bg-gradient-to-r from-gray-50 to-white w-full px-6 sm:px-12 md:px-16">
           <h2 className="text-center text-2xl sm:text-3xl font-bold mb-24 text-gray-800 flex items-center justify-center">
             <span>What people build with</span>{" "}
             <LixLogo className="ml-2 w-10 h-8 transform translate-y-[-2px]" />
