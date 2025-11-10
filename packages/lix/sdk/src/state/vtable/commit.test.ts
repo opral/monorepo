@@ -12,6 +12,7 @@ import { sql } from "kysely";
 import { switchAccount } from "../../account/switch-account.js";
 import { commitIsAncestorOf } from "../../query-filter/commit-is-ancestor-of.js";
 import { selectActiveVersion } from "../../version/select-active-version.js";
+import { withWriterKey } from "../writer.js";
 import type { StateCommitChange } from "../../hooks/create-hooks.js";
 
 /**
@@ -923,31 +924,35 @@ test("commit emits normalized untracked payloads when no tracked rows exist", as
 		.selectFrom("active_version")
 		.select(["version_id"])
 		.executeTakeFirstOrThrow();
+	const WRITER = "test:hooks#untracked";
 
 	const events: StateCommitChange[][] = [];
 	const unsubscribe = lix.engine!.hooks.onStateCommit(({ changes }) => {
 		events.push(changes);
 	});
 
-	insertTransactionState({
-		engine: lix.engine!,
-		timestamp: await getTimestamp({ lix }),
-		data: [
-			{
-				entity_id: "untracked-hook-entity",
-				schema_key: "lix_key_value",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					key: "log",
-					value: "hello",
-				}),
-				metadata: JSON.stringify({ severity: "info" }),
-				schema_version: "1.0",
-				version_id: activeVersion.version_id,
-				untracked: true,
-			},
-		],
+	const timestamp = await getTimestamp({ lix });
+	await withWriterKey(lix.db, WRITER, async () => {
+		insertTransactionState({
+			engine: lix.engine!,
+			timestamp,
+			data: [
+				{
+					entity_id: "untracked-hook-entity",
+					schema_key: "lix_key_value",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						key: "log",
+						value: "hello",
+					}),
+					metadata: JSON.stringify({ severity: "info" }),
+					schema_version: "1.0",
+					version_id: activeVersion.version_id,
+					untracked: true,
+				},
+			],
+		});
 	});
 
 	commit({
@@ -969,6 +974,7 @@ test("commit emits normalized untracked payloads when no tracked rows exist", as
 		value: "hello",
 	});
 	expect(untrackedChange?.metadata).toEqual({ severity: "info" });
+	expect(untrackedChange?.writer_key).toBe(WRITER);
 
 	await lix.close();
 });
