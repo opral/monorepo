@@ -16,6 +16,7 @@ WITH
     SELECT 'global' AS version_id
   )
 SELECT
+  w."source_tag" AS "source_tag",
   w."entity_id" AS "entity_id",
   w."schema_key" AS "schema_key",
   w."file_id" AS "file_id",
@@ -33,6 +34,7 @@ SELECT
   COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
 FROM (
   SELECT
+    c.source_tag AS source_tag,
     c.entity_id AS entity_id,
     c.schema_key AS schema_key,
     c.file_id AS file_id,
@@ -55,6 +57,7 @@ FROM (
           ) AS rn
   FROM (
       SELECT
+        'U' AS source_tag,
         unt.entity_id AS entity_id,
         unt.schema_key AS schema_key,
         unt.file_id AS file_id,
@@ -78,6 +81,7 @@ FROM (
           UNION ALL
 
       SELECT
+        'C' AS source_tag,
         cache.entity_id AS entity_id,
         cache.schema_key AS schema_key,
         cache.file_id AS file_id,
@@ -175,55 +179,55 @@ LIMIT 1
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
   },
   {
-    "id": 65,
+    "id": 66,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 73,
-    "parent": 65,
+    "id": 74,
+    "parent": 66,
     "notused": 47,
     "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_vtable_schema_version_id (version_id=? AND entity_id=?)"
   },
   {
-    "id": 87,
-    "parent": 65,
+    "id": 88,
+    "parent": 66,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 115,
+    "id": 117,
     "parent": 5,
     "notused": 195,
     "detail": "SCAN c"
   },
   {
-    "id": 158,
+    "id": 161,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 198,
+    "id": 202,
     "parent": 2,
     "notused": 175,
     "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 283,
+    "id": 289,
     "parent": 0,
     "notused": 175,
     "detail": "SCAN w"
   },
   {
-    "id": 294,
+    "id": 300,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 307,
+    "id": 313,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"

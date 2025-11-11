@@ -822,6 +822,19 @@ test("includes hidden _pk when referenced in predicates", () => {
 	expect(sql.toLowerCase()).toContain(" as _pk");
 });
 
+test("exposes source_tag column when selected", () => {
+	const rewritten = rewrite(
+		`
+		SELECT v.source_tag
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	expect(sql).toContain('"w"."source_tag" as "source_tag"');
+});
+
 test("retains writer joins when writer_key is selected", () => {
 	const rewritten = rewrite(
 		`
@@ -993,6 +1006,33 @@ test("prunes transaction segment when transaction closed", () => {
 	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
 	const unionCount = upper.match(/\bUNION ALL\b/g) ?? [];
 	expect(unionCount.length).toBe(2);
+});
+
+test("prunes transaction segments when filtering out transaction source_tag", () => {
+	const baseline = rewrite(
+		`
+		SELECT v.schema_key
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+	const baselineSql = compileSql(baseline).toUpperCase();
+	expect(baselineSql).toContain("LIX_INTERNAL_TRANSACTION_STATE");
+
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+		  AND v.source_tag != 'T'
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
+	const sql = compileSql(rewritten).toUpperCase();
+	expect(sql).not.toContain("'T' AS SOURCE_TAG");
+	expect(sql).toContain("'TI' AS SOURCE_TAG");
 });
 
 test("unions all available cache tables when no schema filter is provided", () => {

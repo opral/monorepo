@@ -394,8 +394,8 @@ function validatePrimaryKeyConstraints(args: {
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
 
-	// Exclude transaction-state rows: _pk starting with 'T~'
-	query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
+	// Exclude transaction-state rows: source_tag 'T' identifies direct txn entries.
+	query = query.where("source_tag", "!=", "T");
 
 	// For updates, exclude the current entity from the check
 	if (args.operation === "update" && args.entity_id) {
@@ -474,7 +474,7 @@ function validateUniqueConstraints(args: {
 		query = query.where("inherited_from_version_id", "is", null);
 		// Exclude tombstones
 		query = query.where("snapshot_content", "is not", null);
-		query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
+		query = query.where("source_tag", "!=", "T");
 
 		// For updates, exclude the current entity from the check
 		if (args.operation === "update" && args.entity_id) {

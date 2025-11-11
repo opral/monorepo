@@ -85,6 +85,7 @@ type InlineRewriteMetadata = {
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
 	pruneInheritance: boolean;
+	pruneTransactionSegment: boolean;
 };
 
 type SubqueryPredicateMetadata = {
@@ -92,6 +93,7 @@ type SubqueryPredicateMetadata = {
 	fileIds: readonly string[];
 	versionIds: readonly string[];
 	pruneInheritance: boolean;
+	pruneTransactionSegment: boolean;
 };
 
 /**
@@ -157,6 +159,7 @@ function rewriteSelectStatement(
 	context: PreprocessorStepContext,
 	pushdownSchemaKeys: readonly string[] = [],
 	pushdownPruneInheritance = false,
+	pushdownPruneTransactions = false,
 	pushdownFileIds: readonly string[] = [],
 	pushdownVersionIds: readonly string[] = []
 ): SelectStatementNode {
@@ -166,6 +169,7 @@ function rewriteSelectStatement(
 		parameters,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
+		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownVersionIds
 	);
@@ -175,6 +179,7 @@ function rewriteSelectStatement(
 		ctePredicateMap,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
+		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownVersionIds
 	);
@@ -213,11 +218,19 @@ function rewriteSelectStatement(
 			fallbackAliasNames,
 			parameters
 		);
+	const fallbackPruneTransactions =
+		pushdownPruneTransactions ||
+		shouldPruneTransactionSegment(
+			selectWithRewrittenCtes.where_clause,
+			fallbackAliasNames,
+			parameters
+		);
 	const subqueryPredicateMap = collectSubqueryPredicateMap(
 		selectWithRewrittenCtes,
 		parameters,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
+		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownVersionIds
 	);
@@ -238,6 +251,9 @@ function rewriteSelectStatement(
 					predicateMetadata?.schemaKeys ?? fallbackSchemaKeys;
 				const nextPrune =
 					predicateMetadata?.pruneInheritance ?? fallbackPruneInheritance;
+				const nextPruneTransactions =
+					predicateMetadata?.pruneTransactionSegment ??
+					fallbackPruneTransactions;
 				const nextFileIds = predicateMetadata?.fileIds ?? fallbackFileIds;
 				const nextVersionIds =
 					predicateMetadata?.versionIds ?? fallbackVersionIds;
@@ -248,6 +264,7 @@ function rewriteSelectStatement(
 								context,
 								nextSchemaKeys,
 								nextPrune,
+								nextPruneTransactions,
 								nextFileIds,
 								nextVersionIds
 							)
@@ -256,6 +273,7 @@ function rewriteSelectStatement(
 								context,
 								nextSchemaKeys,
 								nextPrune,
+								nextPruneTransactions,
 								nextFileIds,
 								nextVersionIds
 							);
@@ -316,6 +334,7 @@ function rewriteSelectStatement(
 		parameters,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
+		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownVersionIds
 	);
@@ -343,6 +362,7 @@ function rewriteCompoundSelect(
 	context: PreprocessorStepContext,
 	pushdownSchemaKeys: readonly string[] = [],
 	pushdownPruneInheritance = false,
+	pushdownPruneTransactions = false,
 	pushdownFileIds: readonly string[] = [],
 	pushdownVersionIds: readonly string[] = []
 ): CompoundSelectNode {
@@ -353,6 +373,7 @@ function rewriteCompoundSelect(
 				new Map(),
 				pushdownSchemaKeys,
 				pushdownPruneInheritance,
+				pushdownPruneTransactions,
 				pushdownFileIds,
 				pushdownVersionIds
 			)
@@ -363,6 +384,7 @@ function rewriteCompoundSelect(
 		context,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
+		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownVersionIds
 	);
@@ -376,6 +398,7 @@ function rewriteCompoundSelect(
 			context,
 			pushdownSchemaKeys,
 			pushdownPruneInheritance,
+			pushdownPruneTransactions,
 			pushdownFileIds,
 			pushdownVersionIds
 		);
@@ -452,6 +475,7 @@ function collectSubqueryPredicateMap(
 	parameters: ReadonlyArray<unknown>,
 	pushdownSchemaKeys: readonly string[],
 	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): Map<string, SubqueryPredicateMetadata> {
@@ -553,6 +577,27 @@ function collectSubqueryPredicateMap(
 			pushdownPruneInheritance ||
 			pruneFromWhere ||
 			pruneFromJoin;
+		const pruneTxnFromWhere = excludesColumnLiteralFromExpression(
+			select.where_clause,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			true
+		);
+		const pruneTxnFromJoin = excludesColumnLiteralFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			false
+		);
+		const combinedTxnPrune =
+			(existing?.pruneTransactionSegment ?? false) ||
+			pushdownPruneTransactions ||
+			pruneTxnFromWhere ||
+			pruneTxnFromJoin;
 		const finalFileIds = shouldPushFileFilter(merged, mergedFileIds)
 			? mergedFileIds
 			: [];
@@ -560,13 +605,15 @@ function collectSubqueryPredicateMap(
 			merged.length > 0 ||
 			finalFileIds.length > 0 ||
 			mergedVersionIds.length > 0 ||
-			combinedPrune
+			combinedPrune ||
+			combinedTxnPrune
 		) {
 			map.set(normalizedAlias, {
 				schemaKeys: merged,
 				fileIds: finalFileIds,
 				versionIds: mergedVersionIds,
 				pruneInheritance: combinedPrune,
+				pruneTransactionSegment: combinedTxnPrune,
 			});
 		}
 	};
@@ -613,6 +660,7 @@ function collectCtePredicateMap(
 	parameters: ReadonlyArray<unknown>,
 	pushdownSchemaKeys: readonly string[],
 	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): Map<string, SubqueryPredicateMetadata> {
@@ -724,6 +772,27 @@ function collectCtePredicateMap(
 			pushdownPruneInheritance ||
 			pruneFromWhere ||
 			pruneFromJoin;
+		const pruneTxnFromWhere = excludesColumnLiteralFromExpression(
+			select.where_clause,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			true
+		);
+		const pruneTxnFromJoin = excludesColumnLiteralFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			false
+		);
+		const combinedTxnPrune =
+			(existing?.pruneTransactionSegment ?? false) ||
+			pushdownPruneTransactions ||
+			pruneTxnFromWhere ||
+			pruneTxnFromJoin;
 		const finalFileIds = shouldPushFileFilter(mergedSchemaKeys, mergedFileIds)
 			? mergedFileIds
 			: [];
@@ -732,6 +801,7 @@ function collectCtePredicateMap(
 			fileIds: finalFileIds,
 			versionIds: mergedVersionIds,
 			pruneInheritance: combinedPrune,
+			pruneTransactionSegment: combinedTxnPrune,
 		};
 		map.set(normalizedName, entry);
 	};
@@ -756,6 +826,7 @@ function rewriteSelectWithClause(
 	predicateMap: Map<string, SubqueryPredicateMetadata>,
 	pushdownSchemaKeys: readonly string[],
 	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): SelectStatementNode {
@@ -768,6 +839,7 @@ function rewriteSelectWithClause(
 		predicateMap,
 		pushdownSchemaKeys,
 		pushdownPruneInheritance,
+		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownVersionIds
 	);
@@ -786,6 +858,7 @@ function rewriteWithClauseNode(
 	predicateMap: Map<string, SubqueryPredicateMetadata>,
 	pushdownSchemaKeys: readonly string[],
 	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): WithClauseNode {
@@ -795,6 +868,8 @@ function rewriteWithClauseNode(
 		const metadata = cteName ? predicateMap.get(cteName) : undefined;
 		const nextSchemaKeys = metadata?.schemaKeys ?? pushdownSchemaKeys;
 		const nextPrune = metadata?.pruneInheritance ?? pushdownPruneInheritance;
+		const nextPruneTransactions =
+			metadata?.pruneTransactionSegment ?? pushdownPruneTransactions;
 		const nextFileIds = metadata?.fileIds ?? pushdownFileIds;
 		const nextVersionIds = metadata?.versionIds ?? pushdownVersionIds;
 		const statement =
@@ -804,6 +879,7 @@ function rewriteWithClauseNode(
 						context,
 						nextSchemaKeys,
 						nextPrune,
+						nextPruneTransactions,
 						nextFileIds,
 						nextVersionIds
 					)
@@ -812,6 +888,7 @@ function rewriteWithClauseNode(
 						context,
 						nextSchemaKeys,
 						nextPrune,
+						nextPruneTransactions,
 						nextFileIds,
 						nextVersionIds
 					);
@@ -839,6 +916,7 @@ function buildInlineMetadata(
 	parameters: ReadonlyArray<unknown>,
 	pushdownSchemaKeys: readonly string[],
 	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): Map<string, InlineRewriteMetadata> {
@@ -887,6 +965,13 @@ function buildInlineMetadata(
 		const pruneInheritance =
 			pushdownPruneInheritance ||
 			shouldPruneInheritance(select.where_clause, tableNames, parameters);
+		const pruneTransactionSegment =
+			pushdownPruneTransactions ||
+			shouldPruneTransactionSegment(
+				select.where_clause,
+				tableNames,
+				parameters
+			);
 		metadata.set(aliasKey, {
 			schemaKeys,
 			fileIds,
@@ -895,6 +980,7 @@ function buildInlineMetadata(
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
 			supportColumns: new Set(columnSummary.supportColumns),
 			pruneInheritance,
+			pruneTransactionSegment,
 		});
 	}
 	return metadata;
@@ -909,6 +995,21 @@ function shouldPruneInheritance(
 		whereClause,
 		tableNames,
 		parameters,
+		true
+	);
+}
+
+function shouldPruneTransactionSegment(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>
+): boolean {
+	return excludesColumnLiteralFromExpression(
+		whereClause,
+		tableNames,
+		parameters,
+		"source_tag",
+		"T",
 		true
 	);
 }
@@ -932,6 +1033,163 @@ function requiresNullPredicateForColumn(
 		"inherited_from_version_id",
 		context
 	);
+}
+
+function excludesColumnLiteralFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	columnName: string,
+	literal: string,
+	allowUnqualified: boolean
+): boolean {
+	if (!expression) {
+		return false;
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	return expressionExcludesColumnLiteral(
+		expression,
+		columnName,
+		literal,
+		context
+	);
+}
+
+function expressionExcludesColumnLiteral(
+	expression: ExpressionNode | RawFragmentNode,
+	columnName: string,
+	literal: string,
+	context: PredicateVisitContext
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "grouped_expression":
+			return expressionExcludesColumnLiteral(
+				expression.expression,
+				columnName,
+				literal,
+				context
+			);
+		case "binary_expression":
+			if (expression.operator === "and") {
+				return (
+					expressionExcludesColumnLiteral(
+						expression.left,
+						columnName,
+						literal,
+						context
+					) ||
+					expressionExcludesColumnLiteral(
+						expression.right,
+						columnName,
+						literal,
+						context
+					)
+				);
+			}
+			if (expression.operator === "or") {
+				return (
+					expressionExcludesColumnLiteral(
+						expression.left,
+						columnName,
+						literal,
+						context
+					) &&
+					expressionExcludesColumnLiteral(
+						expression.right,
+						columnName,
+						literal,
+						context
+					)
+				);
+			}
+			return (
+				columnComparisonExcludes(
+					expression,
+					expression.left,
+					expression.right,
+					columnName,
+					literal,
+					context
+				) ||
+				columnComparisonExcludes(
+					expression,
+					expression.right,
+					expression.left,
+					columnName,
+					literal,
+					context
+				)
+			);
+		case "in_list_expression": {
+			if (!isColumnReference(expression.operand, context, columnName)) {
+				return false;
+			}
+			const values = expression.items
+				.map((item) => extractStringLiteral(item, context))
+				.filter((value): value is string => typeof value === "string");
+			if (values.length === 0) {
+				return false;
+			}
+			if (expression.negated) {
+				return values.includes(literal);
+			}
+			return !values.includes(literal);
+		}
+		default:
+			return false;
+	}
+}
+
+function columnComparisonExcludes(
+	expression: BinaryExpressionNode,
+	columnSide: ExpressionNode | RawFragmentNode,
+	valueSide: ExpressionNode | RawFragmentNode,
+	columnName: string,
+	literal: string,
+	context: PredicateVisitContext
+): boolean {
+	if (!isColumnReference(columnSide, context, columnName)) {
+		return false;
+	}
+	const value = extractStringLiteral(valueSide, context);
+	if (typeof value !== "string") {
+		return false;
+	}
+	switch (expression.operator) {
+		case "=":
+		case "is":
+			return value !== literal;
+		case "!=":
+		case "<>":
+		case "is_not":
+			return value === literal;
+		default:
+			return false;
+	}
+}
+
+function extractStringLiteral(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
+): string | null {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return null;
+	}
+	if (node.node_kind === "literal") {
+		return typeof node.value === "string" ? node.value : null;
+	}
+	if (node.node_kind === "parameter") {
+		return resolveParameterSchemaLiteral(node, context.parameters);
+	}
+	return null;
 }
 
 function createInlineVisitor(
@@ -965,6 +1223,7 @@ function createInlineVisitor(
 				supportColumns: metadataEntry.supportColumns,
 				hasOpenTransaction: context.hasOpenTransaction!(),
 				pruneInheritance: metadataEntry.pruneInheritance,
+				pruneTransactionSegment: metadataEntry.pruneTransactionSegment,
 				versionInheritance: context.getVersionInheritance
 					? context.getVersionInheritance()
 					: undefined,
@@ -1684,6 +1943,7 @@ function buildVtableSelectRewrite(options: {
 	supportColumns: ReadonlySet<string>;
 	hasOpenTransaction: boolean;
 	pruneInheritance: boolean;
+	pruneTransactionSegment: boolean;
 	versionInheritance?: VersionInheritanceMap;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
@@ -1742,7 +2002,10 @@ function buildVtableSelectRewrite(options: {
 		"c.change_id",
 	];
 	const segments: string[] = [];
-	if (options.hasOpenTransaction !== false) {
+	if (
+		options.hasOpenTransaction !== false &&
+		!options.pruneTransactionSegment
+	) {
 		segments.push(
 			buildTransactionSegment(txnFilter, candidateColumns, txnVersionJoin)
 		);
@@ -2015,6 +2278,7 @@ const NEWLINE = "\n";
 
 const ALL_SEGMENT_COLUMNS = [
 	"_pk",
+	"source_tag",
 	"entity_id",
 	"schema_key",
 	"file_id",
@@ -2077,6 +2341,7 @@ function buildTransactionSegment(
 			"_pk",
 			`'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk`,
 		],
+		["source_tag", "'T' AS source_tag"],
 		["entity_id", "txn.entity_id AS entity_id"],
 		["schema_key", "txn.schema_key AS schema_key"],
 		["file_id", "txn.file_id AS file_id"],
@@ -2118,6 +2383,7 @@ function buildUntrackedSegment(
 			"_pk",
 			`'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk`,
 		],
+		["source_tag", "'U' AS source_tag"],
 		["entity_id", "unt.entity_id AS entity_id"],
 		["schema_key", "unt.schema_key AS schema_key"],
 		["file_id", "unt.file_id AS file_id"],
@@ -2167,6 +2433,7 @@ function buildCacheSegment(
 			"_pk",
 			`'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk`,
 		],
+		["source_tag", "'C' AS source_tag"],
 		["entity_id", "cache.entity_id AS entity_id"],
 		["schema_key", "cache.schema_key AS schema_key"],
 		["file_id", "cache.file_id AS file_id"],
@@ -2349,6 +2616,7 @@ function buildInheritedCacheSegment(
 			"_pk",
 			`'CI' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
 		],
+		["source_tag", "'CI' AS source_tag"],
 		["entity_id", "cache.entity_id AS entity_id"],
 		["schema_key", "cache.schema_key AS schema_key"],
 		["file_id", "cache.file_id AS file_id"],
@@ -2416,6 +2684,7 @@ function buildInheritedUntrackedSegment(
 			"_pk",
 			`'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
 		],
+		["source_tag", "'UI' AS source_tag"],
 		["entity_id", "unt.entity_id AS entity_id"],
 		["schema_key", "unt.schema_key AS schema_key"],
 		["file_id", "unt.file_id AS file_id"],
@@ -2483,6 +2752,7 @@ function buildInheritedTransactionSegment(
 			"_pk",
 			`'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
 		],
+		["source_tag", "'TI' AS source_tag"],
 		["entity_id", "txn.entity_id AS entity_id"],
 		["schema_key", "txn.schema_key AS schema_key"],
 		["file_id", "txn.file_id AS file_id"],

@@ -17,6 +17,7 @@ WITH
     SELECT 'bench_active_version' AS version_id
   )
 SELECT
+  w."source_tag" AS "source_tag",
   w."entity_id" AS "entity_id",
   w."schema_key" AS "schema_key",
   w."file_id" AS "file_id",
@@ -34,6 +35,7 @@ SELECT
   COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
 FROM (
   SELECT
+    c.source_tag AS source_tag,
     c.entity_id AS entity_id,
     c.schema_key AS schema_key,
     c.file_id AS file_id,
@@ -56,6 +58,7 @@ FROM (
           ) AS rn
   FROM (
       SELECT
+        'U' AS source_tag,
         unt.entity_id AS entity_id,
         unt.schema_key AS schema_key,
         unt.file_id AS file_id,
@@ -79,6 +82,7 @@ FROM (
           UNION ALL
 
       SELECT
+        'C' AS source_tag,
         cache.entity_id AS entity_id,
         cache.schema_key AS schema_key,
         cache.file_id AS file_id,
@@ -102,6 +106,7 @@ FROM (
           UNION ALL
 
       		SELECT
+          'CI' AS source_tag,
           cache.entity_id AS entity_id,
           cache.schema_key AS schema_key,
           cache.file_id AS file_id,
@@ -129,6 +134,7 @@ FROM (
           UNION ALL
 
       		SELECT
+          'UI' AS source_tag,
           unt.entity_id AS entity_id,
           unt.schema_key AS schema_key,
           unt.file_id AS file_id,
@@ -229,127 +235,127 @@ WHERE schema_key = 'bench_vtable_schema' AND entity_id = ? AND version_id = ? AN
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 70,
+    "id": 71,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 80,
-    "parent": 70,
+    "id": 81,
+    "parent": 71,
     "notused": 45,
     "detail": "SEARCH cache USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 93,
-    "parent": 70,
+    "id": 94,
+    "parent": 71,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 118,
+    "id": 120,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 120,
-    "parent": 118,
+    "id": 122,
+    "parent": 120,
     "notused": 0,
     "detail": "CO-ROUTINE vi"
   },
   {
-    "id": 121,
-    "parent": 120,
+    "id": 123,
+    "parent": 122,
     "notused": 0,
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 143,
-    "parent": 118,
+    "id": 145,
+    "parent": 120,
     "notused": 16,
     "detail": "SCAN vi"
   },
   {
-    "id": 148,
-    "parent": 118,
+    "id": 150,
+    "parent": 120,
     "notused": 27,
     "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_vtable_schema_live_vfe (version_id=? AND file_id=? AND entity_id=?)"
   },
   {
-    "id": 165,
-    "parent": 118,
+    "id": 167,
+    "parent": 120,
     "notused": 216,
     "detail": "SCAN wv_vi"
   },
   {
-    "id": 191,
+    "id": 194,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 193,
-    "parent": 191,
+    "id": 196,
+    "parent": 194,
     "notused": 0,
     "detail": "CO-ROUTINE vi"
   },
   {
-    "id": 194,
-    "parent": 193,
+    "id": 197,
+    "parent": 196,
     "notused": 0,
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 216,
-    "parent": 191,
+    "id": 219,
+    "parent": 194,
     "notused": 16,
     "detail": "SCAN vi"
   },
   {
-    "id": 221,
-    "parent": 191,
+    "id": 224,
+    "parent": 194,
     "notused": 47,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 240,
-    "parent": 191,
+    "id": 243,
+    "parent": 194,
     "notused": 216,
     "detail": "SCAN wv_vi"
   },
   {
-    "id": 267,
+    "id": 271,
     "parent": 5,
     "notused": 198,
     "detail": "SCAN c"
   },
   {
-    "id": 318,
+    "id": 323,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR LAST 7 TERMS OF ORDER BY"
   },
   {
-    "id": 362,
+    "id": 368,
     "parent": 2,
     "notused": 178,
     "detail": "SCAN (subquery-11)"
   },
   {
-    "id": 446,
+    "id": 454,
     "parent": 0,
     "notused": 178,
     "detail": "SCAN w"
   },
   {
-    "id": 461,
+    "id": 469,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 474,
+    "id": 482,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
