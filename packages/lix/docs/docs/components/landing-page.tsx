@@ -169,6 +169,30 @@ function LandingPage() {
     },
   ];
 
+  const howItWorksSteps = [
+    {
+      number: "1",
+      title: "Create a lix with the plugins",
+      description:
+        "Lix becomes file format-aware via plugins (`.json`, `.xlsx`, etc.). Otherwise, everything is just a blob.",
+      offsetClass: "",
+    },
+    {
+      number: "2",
+      title: "Write a file into the lix",
+      description:
+        "Lix is powered by SQL under the hood. Writing a file, querying diffs, etc. happens all via SQL.",
+      offsetClass: "mt-10 sm:mt-12",
+    },
+    {
+      number: "3",
+      title: "Query changes, diffs, etc.",
+      description:
+        "Query working diffs, history, propose changes or merge similar to git, right in the browser.",
+      offsetClass: "mt-10 sm:mt-12",
+    },
+  ];
+
   const createImageErrorHandler =
     (fallback: string) => (event: SyntheticEvent<HTMLImageElement>) => {
       const container = event.currentTarget.parentElement;
@@ -188,7 +212,7 @@ function LandingPage() {
       {/* Main content */}
       <main className="relative px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="relative overflow-hidden pt-18 pb-20 px-4 sm:px-6">
+        <section className="relative overflow-hidden pt-16 pb-16 px-4 sm:px-6">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-white pointer-events-none" />
           <div className="relative max-w-5xl mx-auto text-center">
@@ -200,8 +224,9 @@ function LandingPage() {
 
             <p className="text-gray-600 text-lg sm:text-xl max-w-3xl mx-auto leading-relaxed mt-12">
               Lix is a JavaScript SDK that enables Git-like capabilities for
-              apps and agents: Change proposals, versioning (branching),
-              history, blame, etc.
+              apps and agents:
+              <br />
+              Change proposals, versions (branches), history, blame, etc.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16  mt-8">
@@ -315,8 +340,180 @@ function LandingPage() {
           </div>
         </section>
 
+        {/* How It Works */}
+        <section className="pt-6 pb-14 px-6 sm:px-12 md:px-16 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                How lix works
+              </h2>
+            </div>
+
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,260px)_1fr]">
+              <div className="flex flex-col justify-between gap-4">
+                {howItWorksSteps.map(
+                  ({ number, title, description, offsetClass }) => (
+                    <div
+                      key={number}
+                      className={`flex flex-col gap-2 ${offsetClass}`}
+                    >
+                      <span className="text-sm font-semibold text-gray-500">
+                        Step {number}
+                      </span>
+                      <h3 className="text-base font-semibold text-gray-900">
+                        {title}
+                      </h3>
+                      <p className="text-sm text-gray-600">{description}</p>
+                    </div>
+                  ),
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white">
+                <div className="flex items-center gap-2 rounded-t-2xl border-b border-gray-200 px-4 py-3 bg-gray-50">
+                  <span className="flex h-3 w-3 rounded-full bg-red-400" />
+                  <span className="flex h-3 w-3 rounded-full bg-yellow-300" />
+                  <span className="flex h-3 w-3 rounded-full bg-green-400" />
+                  <span className="ml-4 text-xs font-medium text-gray-500">
+                    example.ts
+                  </span>
+                </div>
+                <pre className="overflow-x-auto px-6 py-6 text-sm leading-7 text-gray-900 bg-white">
+                  <code>
+                    <span className="text-indigo-600">import</span>{" "}
+                    <span className="text-gray-900">
+                      {"{ openLix, selectWorkingDiff, newLixFile }"}
+                    </span>{" "}
+                    <span className="text-indigo-600">from</span>{" "}
+                    <span className="text-amber-600">"@lix-js/sdk";</span>
+                    <br />
+                    <span className="text-indigo-600">import</span>{" "}
+                    <span className="text-gray-900">
+                      {"{ plugin as json }"}
+                    </span>{" "}
+                    <span className="text-indigo-600">from</span>{" "}
+                    <span className="text-amber-600">
+                      "@lix-js/plugin-json";
+                    </span>
+                    <br />
+                    <br />
+                    <span className="text-gray-500">// 1) Create a lix</span>
+                    <br />
+                    <span className="text-indigo-600">const</span>{" "}
+                    <span className="text-sky-700">lix</span>{" "}
+                    <span className="text-indigo-600">=</span>{" "}
+                    <span className="text-indigo-600">await</span>{" "}
+                    <span className="text-sky-700">openLix</span>
+                    <span className="text-gray-900">(</span>
+                    <span className="text-gray-900">{"{"}</span>
+                    <br />
+                    {"  "}
+                    <span className="text-sky-700">providePlugins</span>
+                    <span className="text-gray-900">:</span>{" "}
+                    <span className="text-gray-900">[</span>
+                    <span className="text-sky-700">json</span>
+                    <span className="text-gray-900">],</span>
+                    <br />
+                    {"  "}
+                    <span className="text-sky-700">blob</span>
+                    <span className="text-gray-900">:</span>{" "}
+                    <span className="text-indigo-600">await</span>{" "}
+                    <span className="text-sky-700">newLixFile</span>
+                    <span className="text-gray-900">(),</span>
+                    <br />
+                    <span className="text-gray-900">{"});"}</span>
+                    <br />
+                    <br />
+                    <span className="text-gray-500">
+                      // 2) Write a file via SQL
+                    </span>
+                    <br />
+                    <span className="text-indigo-600">await</span>{" "}
+                    <span className="text-sky-700">lix</span>
+                    <span className="text-gray-900">.</span>
+                    <span className="text-sky-700">db</span>
+                    <br />
+                    {"  "}
+                    <span className="text-gray-900">.</span>
+                    <span className="text-sky-700">insertInto</span>
+                    <span className="text-gray-900">(</span>
+                    <span className="text-amber-600">"file"</span>
+                    <span className="text-gray-900">)</span>
+                    <br />
+                    {"  "}
+                    <span className="text-gray-900">.</span>
+                    <span className="text-sky-700">values</span>
+                    <span className="text-gray-900">(</span>
+                    <span className="text-gray-900">{"{"}</span>
+                    <br />
+                    {"    "}
+                    <span className="text-sky-700">path</span>
+                    <span className="text-gray-900">:</span>{" "}
+                    <span className="text-amber-600">"/settings.json"</span>
+                    <span className="text-gray-900">,</span>
+                    <br />
+                    {"    "}
+                    <span className="text-sky-700">data</span>
+                    <span className="text-gray-900">:</span>{" "}
+                    <span className="text-indigo-600">new</span>{" "}
+                    <span className="text-sky-700">TextEncoder</span>
+                    <span className="text-gray-900">().</span>
+                    <span className="text-sky-700">encode</span>
+                    <span className="text-gray-900">(</span>
+                    <br />
+                    {"      "}
+                    <span className="text-sky-700">JSON</span>
+                    <span className="text-gray-900">.</span>
+                    <span className="text-sky-700">stringify</span>
+                    <span className="text-gray-900">(</span>
+                    <span className="text-gray-900">{"{"}</span>{" "}
+                    <span className="text-sky-700">theme</span>
+                    <span className="text-gray-900">:</span>{" "}
+                    <span className="text-amber-600">"light"</span>{" "}
+                    <span className="text-gray-900">{"}"}</span>
+                    <span className="text-gray-900">)</span>
+                    <br />
+                    {"    "}
+                    <span className="text-gray-900">),</span>
+                    <br />
+                    <span className="text-gray-900">{"  })"}</span>
+                    <br />
+                    {"  "}
+                    <span className="text-gray-900">.</span>
+                    <span className="text-sky-700">execute</span>
+                    <span className="text-gray-900">();</span>
+                    <br />
+                    <br />
+                    <span className="text-gray-500">// 3) Log the changes</span>
+                    <br />
+                    <span className="text-indigo-600">const</span>{" "}
+                    <span className="text-sky-700">diff</span>{" "}
+                    <span className="text-indigo-600">=</span>{" "}
+                    <span className="text-indigo-600">await</span>{" "}
+                    <span className="text-sky-700">selectWorkingDiff</span>
+                    <span className="text-gray-900">(</span>
+                    <span className="text-gray-900">{"{"}</span>{" "}
+                    <span className="text-sky-700">lix</span>{" "}
+                    <span className="text-gray-900">{"}"}</span>
+                    <span className="text-gray-900">).</span>
+                    <span className="text-sky-700">execute</span>
+                    <span className="text-gray-900">();</span>
+                    <br />
+                    <span className="text-sky-700">console</span>
+                    <span className="text-gray-900">.</span>
+                    <span className="text-sky-700">log</span>
+                    <span className="text-gray-900">(</span>
+                    <span className="text-sky-700">diff</span>
+                    <span className="text-gray-900">);</span>
+                  </code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* What You Can Build Section */}
-        <section className="py-20 px-6 sm:px-12 md:px-16 bg-white">
+        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
           <div className="max-w-6xl mx-auto">
             <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-3xl sm:text-4xl font-bold text-gray-900">
               <span>What people build with</span>
