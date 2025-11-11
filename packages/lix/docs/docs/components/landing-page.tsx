@@ -344,7 +344,7 @@ function LandingPage() {
         <section className="pt-6 pb-14 px-6 sm:px-12 md:px-16 bg-white">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 How lix works
               </h2>
             </div>
@@ -515,7 +515,7 @@ function LandingPage() {
         {/* What You Can Build Section */}
         <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
           <div className="max-w-6xl mx-auto">
-            <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-3xl sm:text-4xl font-bold text-gray-900">
+            <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-2xl sm:text-3xl font-bold text-gray-900">
               <span>What people build with</span>
               <span className="text-[#0692B6]">Lix</span>
             </h2>
