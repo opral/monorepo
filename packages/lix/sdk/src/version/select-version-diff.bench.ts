@@ -139,7 +139,7 @@ bench("selectVersionDiff (full document diff)", async () => {
 		target: { id: targetId },
 	});
 
-const rows = await qb.execute();
-if (!rows || rows.length === 0)
-	throw new Error("unexpected empty diff in bench");
+	const rows = await qb.execute();
+	if (!rows || rows.length === 0)
+		throw new Error("unexpected empty diff in bench");
 });

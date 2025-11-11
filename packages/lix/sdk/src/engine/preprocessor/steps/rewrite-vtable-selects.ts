@@ -186,51 +186,54 @@ function rewriteSelectStatement(
 		pushdownFileIds,
 		pushdownVersionIds
 	);
-	const withRewrittenSubqueries = visitSelectStatement(selectWithRewrittenCtes, {
-		subquery(node, visitContext) {
-			const parentKind = visitContext.parent?.node_kind;
-			const aliasValue = getIdentifierValue(node.alias);
-			const normalizedAlias = aliasValue
-				? normalizeIdentifierValue(aliasValue)
-				: DEFAULT_ALIAS_KEY;
-			const predicateMetadata =
-				parentKind === "from_clause" || parentKind === "join_clause"
-					? subqueryPredicateMap.get(normalizedAlias)
-					: undefined;
-			const nextSchemaKeys =
-				predicateMetadata?.schemaKeys ?? pushdownSchemaKeys;
-			const nextPrune =
-				predicateMetadata?.pruneInheritance ?? pushdownPruneInheritance;
-			const nextFileIds = predicateMetadata?.fileIds ?? pushdownFileIds;
-			const nextVersionIds =
-				predicateMetadata?.versionIds ?? pushdownVersionIds;
-			const rewrittenStatement =
-				node.statement.node_kind === "compound_select"
-					? rewriteCompoundSelect(
-							node.statement,
-							context,
-							nextSchemaKeys,
-							nextPrune,
-							nextFileIds,
-							nextVersionIds
-						)
-					: rewriteSelectStatement(
-							node.statement,
-							context,
-							nextSchemaKeys,
-							nextPrune,
-							nextFileIds,
-							nextVersionIds
-						);
-			if (rewrittenStatement !== node.statement) {
-				return {
-					...node,
-					statement: rewrittenStatement,
-				};
-			}
-			return node;
-		},
-	});
+	const withRewrittenSubqueries = visitSelectStatement(
+		selectWithRewrittenCtes,
+		{
+			subquery(node, visitContext) {
+				const parentKind = visitContext.parent?.node_kind;
+				const aliasValue = getIdentifierValue(node.alias);
+				const normalizedAlias = aliasValue
+					? normalizeIdentifierValue(aliasValue)
+					: DEFAULT_ALIAS_KEY;
+				const predicateMetadata =
+					parentKind === "from_clause" || parentKind === "join_clause"
+						? subqueryPredicateMap.get(normalizedAlias)
+						: undefined;
+				const nextSchemaKeys =
+					predicateMetadata?.schemaKeys ?? pushdownSchemaKeys;
+				const nextPrune =
+					predicateMetadata?.pruneInheritance ?? pushdownPruneInheritance;
+				const nextFileIds = predicateMetadata?.fileIds ?? pushdownFileIds;
+				const nextVersionIds =
+					predicateMetadata?.versionIds ?? pushdownVersionIds;
+				const rewrittenStatement =
+					node.statement.node_kind === "compound_select"
+						? rewriteCompoundSelect(
+								node.statement,
+								context,
+								nextSchemaKeys,
+								nextPrune,
+								nextFileIds,
+								nextVersionIds
+							)
+						: rewriteSelectStatement(
+								node.statement,
+								context,
+								nextSchemaKeys,
+								nextPrune,
+								nextFileIds,
+								nextVersionIds
+							);
+				if (rewrittenStatement !== node.statement) {
+					return {
+						...node,
+						statement: rewrittenStatement,
+					};
+				}
+				return node;
+			},
+		}
+	);
 
 	const references = collectInternalStateReferences(withRewrittenSubqueries);
 	if (references.length === 0) {
@@ -728,8 +731,7 @@ function rewriteWithClauseNode(
 		const cteName = normalizeIdentifierValue(cte.name.value);
 		const metadata = cteName ? predicateMap.get(cteName) : undefined;
 		const nextSchemaKeys = metadata?.schemaKeys ?? pushdownSchemaKeys;
-		const nextPrune =
-			metadata?.pruneInheritance ?? pushdownPruneInheritance;
+		const nextPrune = metadata?.pruneInheritance ?? pushdownPruneInheritance;
 		const nextFileIds = metadata?.fileIds ?? pushdownFileIds;
 		const nextVersionIds = metadata?.versionIds ?? pushdownVersionIds;
 		const statement =
@@ -1704,38 +1706,38 @@ function buildVtableSelectRewrite(options: {
 		parentJoinSource = buildInlineParentSource(inheritancePlan.parentPairs);
 	}
 	let allSegments = segments;
-		if (!shouldPruneInheritance) {
-			const inheritedSegments: string[] = [];
-			if (cacheSegment) {
-				const inheritedCache = buildInheritedCacheSegment(
-					cacheSource,
-					inheritedFilter,
-					candidateColumns,
-					inheritanceJoinSource,
-					inheritanceVersionJoin
-				);
-				if (inheritedCache) {
-					inheritedSegments.push(inheritedCache);
-				}
+	if (!shouldPruneInheritance) {
+		const inheritedSegments: string[] = [];
+		if (cacheSegment) {
+			const inheritedCache = buildInheritedCacheSegment(
+				cacheSource,
+				inheritedFilter,
+				candidateColumns,
+				inheritanceJoinSource,
+				inheritanceVersionJoin
+			);
+			if (inheritedCache) {
+				inheritedSegments.push(inheritedCache);
 			}
+		}
+		inheritedSegments.push(
+			buildInheritedUntrackedSegment(
+				inheritedFilter,
+				candidateColumns,
+				inheritanceJoinSource,
+				inheritanceVersionJoin
+			)
+		);
+		if (options.hasOpenTransaction !== false) {
 			inheritedSegments.push(
-				buildInheritedUntrackedSegment(
+				buildInheritedTransactionSegment(
 					inheritedFilter,
 					candidateColumns,
-					inheritanceJoinSource,
-					inheritanceVersionJoin
+					parentJoinSource,
+					parentVersionJoin
 				)
 			);
-			if (options.hasOpenTransaction !== false) {
-				inheritedSegments.push(
-					buildInheritedTransactionSegment(
-						inheritedFilter,
-						candidateColumns,
-						parentJoinSource,
-						parentVersionJoin
-					)
-				);
-			}
+		}
 		allSegments = segments.concat(inheritedSegments);
 	}
 	const candidates = allSegments.join(`\n\n    UNION ALL\n\n`);
@@ -1775,9 +1777,7 @@ LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
 	}
 	if (inheritancePlan.mode === "recursive") {
 		withClauses.push(buildVersionDescriptorCte());
-		withClauses.push(
-			buildVersionInheritanceCte(wantedVersionsCteName)
-		);
+		withClauses.push(buildVersionInheritanceCte(wantedVersionsCteName));
 		withClauses.push(buildVersionParentCte(wantedVersionsCteName));
 	}
 	const withPrefix =
@@ -2035,9 +2035,7 @@ function buildTransactionSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const joinClause = versionJoinClause
-		? `\n\t\t${versionJoinClause}`
-		: "";
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
@@ -2078,9 +2076,7 @@ function buildUntrackedSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const joinClause = versionJoinClause
-		? `\n\t\t${versionJoinClause}`
-		: "";
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
@@ -2133,9 +2129,7 @@ function buildCacheSegment(
 		.map(([, sql]) => sql)
 		.join(",\n");
 	const whereClause = rewrittenFilter ? `\n\t\tWHERE ${rewrittenFilter}` : "";
-	const joinClause = versionJoinClause
-		? `\n\t\t${versionJoinClause}`
-		: "";
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
@@ -2243,10 +2237,7 @@ function buildWantedVersionsCte(
 	versionIds: readonly string[]
 ): string {
 	const selects = versionIds
-		.map(
-			(versionId) =>
-				`SELECT '${escapeSqlLiteral(versionId)}' AS version_id`
-		)
+		.map((versionId) => `SELECT '${escapeSqlLiteral(versionId)}' AS version_id`)
 		.join("\nUNION ALL\n");
 	return stripIndent(`
 ${cteName} AS (
@@ -2319,9 +2310,7 @@ function buildInheritedCacheSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const joinClause = versionJoinClause
-		? `\n\t\t${versionJoinClause}`
-		: "";
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
@@ -2388,9 +2377,7 @@ function buildInheritedUntrackedSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const joinClause = versionJoinClause
-		? `\n\t\t${versionJoinClause}`
-		: "";
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
@@ -2458,9 +2445,7 @@ function buildInheritedTransactionSegment(
 		.map(([, sql]) => sql)
 		.join(",\n");
 	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "txn");
-	const joinClause = versionJoinClause
-		? `\n\t\t${versionJoinClause}`
-		: "";
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}

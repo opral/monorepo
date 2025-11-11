@@ -13,97 +13,28 @@ SELECT
 FROM (SELECT
   entity_id,
   schema_key,
-  file_id,
-  plugin_key,
-  snapshot_content,
-  schema_version,
-  created_at,
-  updated_at,
-  inherited_from_version_id,
-  change_id,
-  untracked,
-  commit_id,
-  writer_key,
-  metadata
+  snapshot_content
 FROM (SELECT
   entity_id,
   schema_key,
-  file_id,
   version_id,
-  plugin_key,
-  snapshot_content,
-  schema_version,
-  created_at,
-  updated_at,
-  inherited_from_version_id,
-  change_id,
-  untracked,
-  commit_id,
-  writer_key,
-  (SELECT json(metadata)
-FROM (SELECT
-  c.id,
-  c.entity_id,
-  c.schema_key,
-  c.schema_version,
-  c.file_id,
-  c.plugin_key,
-  json(c.metadata) AS metadata,
-  c.created_at,
-  json(s.content) AS snapshot_content
-FROM lix_internal_change AS c LEFT JOIN lix_internal_snapshot AS s ON s.id = c.snapshot_id
-UNION ALL
-SELECT
-  t.id,
-  t.entity_id,
-  t.schema_key,
-  t.schema_version,
-  t.file_id,
-  t.plugin_key,
-  json(t.metadata) AS metadata,
-  t.created_at,
-  json(t.snapshot_content) AS snapshot_content
-FROM lix_internal_transaction_state AS t
-WHERE t.untracked = 0) AS change
-WHERE change.id = lix_internal_state_vtable.change_id) AS metadata
+  snapshot_content
 FROM (
 WITH
   wanted_versions AS (
     SELECT 'boot_0000000000' AS version_id
   )
 SELECT
-  w."entity_id" AS "entity_id",
-  w."schema_key" AS "schema_key",
-  w."file_id" AS "file_id",
-  w."plugin_key" AS "plugin_key",
-  w."snapshot_content" AS "snapshot_content",
-  w."schema_version" AS "schema_version",
-  w."version_id" AS "version_id",
-  w."created_at" AS "created_at",
-  w."updated_at" AS "updated_at",
-  w."inherited_from_version_id" AS "inherited_from_version_id",
-  w."change_id" AS "change_id",
-  w."untracked" AS "untracked",
-  w."commit_id" AS "commit_id",
-  w."metadata" AS "metadata",
-  COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
+  "w"."entity_id" as "entity_id", "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."snapshot_content" as "snapshot_content"
 FROM (
   SELECT
     c.entity_id AS entity_id,
     c.schema_key AS schema_key,
     c.file_id AS file_id,
-    c.plugin_key AS plugin_key,
     c.snapshot_content AS snapshot_content,
-    c.schema_version AS schema_version,
     c.version_id AS version_id,
     c.created_at AS created_at,
-    c.updated_at AS updated_at,
-    c.inherited_from_version_id AS inherited_from_version_id,
     c.change_id AS change_id,
-    c.untracked AS untracked,
-    c.commit_id AS commit_id,
-    c.metadata AS metadata,
-    c.writer_key AS writer_key,
     c.priority AS priority,
     ROW_NUMBER() OVER (
             PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
@@ -114,18 +45,10 @@ FROM (
         unt.entity_id AS entity_id,
         unt.schema_key AS schema_key,
         unt.file_id AS file_id,
-        unt.plugin_key AS plugin_key,
         json(unt.snapshot_content) AS snapshot_content,
-        unt.schema_version AS schema_version,
         unt.version_id AS version_id,
         unt.created_at AS created_at,
-        unt.updated_at AS updated_at,
-        NULL AS inherited_from_version_id,
         'untracked' AS change_id,
-        1 AS untracked,
-        'untracked' AS commit_id,
-        NULL AS metadata,
-        NULL AS writer_key,
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
@@ -137,18 +60,10 @@ FROM (
         cache.entity_id AS entity_id,
         cache.schema_key AS schema_key,
         cache.file_id AS file_id,
-        cache.plugin_key AS plugin_key,
         json(cache.snapshot_content) AS snapshot_content,
-        cache.schema_version AS schema_version,
         cache.version_id AS version_id,
         cache.created_at AS created_at,
-        cache.updated_at AS updated_at,
-        cache.inherited_from_version_id AS inherited_from_version_id,
         cache.change_id AS change_id,
-        0 AS untracked,
-        cache.commit_id AS commit_id,
-        NULL AS metadata,
-        NULL AS writer_key,
         3 AS priority
       FROM "lix_internal_state_cache_v1_bench_state_view" cache
       JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
@@ -160,18 +75,10 @@ FROM (
           cache.entity_id AS entity_id,
           cache.schema_key AS schema_key,
           cache.file_id AS file_id,
-          cache.plugin_key AS plugin_key,
           json(cache.snapshot_content) AS snapshot_content,
-          cache.schema_version AS schema_version,
           vi.version_id AS version_id,
           cache.created_at AS created_at,
-          cache.updated_at AS updated_at,
-          cache.version_id AS inherited_from_version_id,
           cache.change_id AS change_id,
-          0 AS untracked,
-          cache.commit_id AS commit_id,
-          NULL AS metadata,
-          NULL AS writer_key,
           4 AS priority
       		FROM (
       SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
@@ -187,18 +94,10 @@ FROM (
           unt.entity_id AS entity_id,
           unt.schema_key AS schema_key,
           unt.file_id AS file_id,
-          unt.plugin_key AS plugin_key,
           json(unt.snapshot_content) AS snapshot_content,
-          unt.schema_version AS schema_version,
           vi.version_id AS version_id,
           unt.created_at AS created_at,
-          unt.updated_at AS updated_at,
-          unt.version_id AS inherited_from_version_id,
           'untracked' AS change_id,
-          1 AS untracked,
-          'untracked' AS commit_id,
-          NULL AS metadata,
-          NULL AS writer_key,
           5 AS priority
       		FROM (
       SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
@@ -210,18 +109,7 @@ FROM (
   ) AS c
 ) AS w
 
-LEFT JOIN lix_internal_state_writer ws_dst ON
-  ws_dst.file_id = w.file_id AND
-  ws_dst.entity_id = w.entity_id AND
-  ws_dst.schema_key = w.schema_key AND
-  ws_dst.version_id = w.version_id
-LEFT JOIN lix_internal_state_writer ws_src ON
-  ws_src.file_id = w.file_id AND
-  ws_src.entity_id = w.entity_id AND
-  ws_src.schema_key = w.schema_key AND
-  ws_src.version_id = w.inherited_from_version_id
 
-LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 
 WHERE w.rn = 1
 ) AS "lix_internal_state_vtable"
@@ -241,7 +129,7 @@ WHERE schema_key = ? AND entity_id = ?
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-16)"
+    "detail": "CO-ROUTINE (subquery-13)"
   },
   {
     "id": 7,
@@ -286,121 +174,121 @@ WHERE schema_key = ? AND entity_id = ?
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
   },
   {
-    "id": 65,
+    "id": 57,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 73,
-    "parent": 65,
+    "id": 65,
+    "parent": 57,
     "notused": 47,
     "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_version_id (version_id=? AND entity_id=?)"
   },
   {
-    "id": 86,
-    "parent": 65,
+    "id": 78,
+    "parent": 57,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 112,
+    "id": 96,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 114,
-    "parent": 112,
+    "id": 98,
+    "parent": 96,
     "notused": 0,
     "detail": "CO-ROUTINE vi"
   },
   {
-    "id": 115,
-    "parent": 114,
+    "id": 99,
+    "parent": 98,
     "notused": 0,
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 131,
-    "parent": 112,
+    "id": 115,
+    "parent": 96,
     "notused": 16,
     "detail": "SCAN vi"
   },
   {
-    "id": 136,
-    "parent": 112,
+    "id": 120,
+    "parent": 96,
     "notused": 27,
     "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_version_id (version_id=? AND entity_id=?)"
   },
   {
-    "id": 154,
-    "parent": 112,
+    "id": 138,
+    "parent": 96,
     "notused": 216,
     "detail": "SCAN wv_vi"
   },
   {
-    "id": 180,
+    "id": 156,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 182,
-    "parent": 180,
+    "id": 158,
+    "parent": 156,
     "notused": 0,
     "detail": "CO-ROUTINE vi"
   },
   {
-    "id": 183,
-    "parent": 182,
+    "id": 159,
+    "parent": 158,
     "notused": 0,
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 199,
-    "parent": 180,
+    "id": 175,
+    "parent": 156,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
   },
   {
-    "id": 215,
-    "parent": 180,
+    "id": 191,
+    "parent": 156,
     "notused": 0,
     "detail": "BLOOM FILTER ON wv_vi (version_id=?)"
   },
   {
-    "id": 230,
-    "parent": 180,
+    "id": 206,
+    "parent": 156,
     "notused": 53,
     "detail": "SEARCH wv_vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 236,
-    "parent": 180,
+    "id": 212,
+    "parent": 156,
     "notused": 16,
     "detail": "SCAN vi"
   },
   {
-    "id": 267,
+    "id": 235,
     "parent": 5,
     "notused": 196,
     "detail": "SCAN c"
   },
   {
-    "id": 310,
+    "id": 270,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 350,
+    "id": 302,
     "parent": 2,
     "notused": 176,
-    "detail": "SCAN (subquery-16)"
+    "detail": "SCAN (subquery-13)"
   },
   {
-    "id": 432,
+    "id": 368,
     "parent": 0,
     "notused": 176,
     "detail": "SCAN w"

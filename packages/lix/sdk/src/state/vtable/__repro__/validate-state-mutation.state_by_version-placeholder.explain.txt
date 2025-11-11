@@ -4,84 +4,27 @@ select "snapshot_content" from "state_by_version" where "schema_key" = ?1 and js
 -- rewritten SQL
 SELECT "snapshot_content"
 FROM (SELECT
-  entity_id,
   schema_key,
-  file_id,
   version_id,
-  plugin_key,
   snapshot_content,
-  schema_version,
-  created_at,
-  updated_at,
-  inherited_from_version_id,
-  change_id,
-  untracked,
-  commit_id,
-  writer_key,
-  (SELECT json(metadata)
-FROM (SELECT
-  c.id,
-  c.entity_id,
-  c.schema_key,
-  c.schema_version,
-  c.file_id,
-  c.plugin_key,
-  json(c.metadata) AS metadata,
-  c.created_at,
-  json(s.content) AS snapshot_content
-FROM lix_internal_change AS c LEFT JOIN lix_internal_snapshot AS s ON s.id = c.snapshot_id
-UNION ALL
-SELECT
-  t.id,
-  t.entity_id,
-  t.schema_key,
-  t.schema_version,
-  t.file_id,
-  t.plugin_key,
-  json(t.metadata) AS metadata,
-  t.created_at,
-  json(t.snapshot_content) AS snapshot_content
-FROM lix_internal_transaction_state AS t
-WHERE t.untracked = 0) AS change
-WHERE change.id = lix_internal_state_vtable.change_id) AS metadata
+  inherited_from_version_id
 FROM (
 WITH
   wanted_versions AS (
     SELECT 'global' AS version_id
   )
 SELECT
-  w."entity_id" AS "entity_id",
-  w."schema_key" AS "schema_key",
-  w."file_id" AS "file_id",
-  w."plugin_key" AS "plugin_key",
-  w."snapshot_content" AS "snapshot_content",
-  w."schema_version" AS "schema_version",
-  w."version_id" AS "version_id",
-  w."created_at" AS "created_at",
-  w."updated_at" AS "updated_at",
-  w."inherited_from_version_id" AS "inherited_from_version_id",
-  w."change_id" AS "change_id",
-  w."untracked" AS "untracked",
-  w."commit_id" AS "commit_id",
-  w."metadata" AS "metadata",
-  COALESCE(ws_dst.writer_key, ws_src.writer_key, w.writer_key) AS "writer_key"
+  "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."snapshot_content" as "snapshot_content", "w"."inherited_from_version_id" as "inherited_from_version_id"
 FROM (
   SELECT
     c.entity_id AS entity_id,
     c.schema_key AS schema_key,
     c.file_id AS file_id,
-    c.plugin_key AS plugin_key,
     c.snapshot_content AS snapshot_content,
-    c.schema_version AS schema_version,
     c.version_id AS version_id,
     c.created_at AS created_at,
-    c.updated_at AS updated_at,
     c.inherited_from_version_id AS inherited_from_version_id,
     c.change_id AS change_id,
-    c.untracked AS untracked,
-    c.commit_id AS commit_id,
-    c.metadata AS metadata,
-    c.writer_key AS writer_key,
     c.priority AS priority,
     ROW_NUMBER() OVER (
             PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
@@ -92,18 +35,11 @@ FROM (
         unt.entity_id AS entity_id,
         unt.schema_key AS schema_key,
         unt.file_id AS file_id,
-        unt.plugin_key AS plugin_key,
         json(unt.snapshot_content) AS snapshot_content,
-        unt.schema_version AS schema_version,
         unt.version_id AS version_id,
         unt.created_at AS created_at,
-        unt.updated_at AS updated_at,
         NULL AS inherited_from_version_id,
         'untracked' AS change_id,
-        1 AS untracked,
-        'untracked' AS commit_id,
-        NULL AS metadata,
-        NULL AS writer_key,
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
@@ -111,18 +47,7 @@ FROM (
   ) AS c
 ) AS w
 
-LEFT JOIN lix_internal_state_writer ws_dst ON
-  ws_dst.file_id = w.file_id AND
-  ws_dst.entity_id = w.entity_id AND
-  ws_dst.schema_key = w.schema_key AND
-  ws_dst.version_id = w.version_id
-LEFT JOIN lix_internal_state_writer ws_src ON
-  ws_src.file_id = w.file_id AND
-  ws_src.entity_id = w.entity_id AND
-  ws_src.schema_key = w.schema_key AND
-  ws_src.version_id = w.inherited_from_version_id
 
-LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 
 WHERE w.rn = 1
 ) AS "lix_internal_state_vtable"
@@ -144,7 +69,7 @@ WHERE "schema_key" = ?1 AND json_extract(snapshot_content, '$.id') = ?2 AND "ver
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-10)"
+    "detail": "CO-ROUTINE (subquery-7)"
   },
   {
     "id": 7,
@@ -171,19 +96,19 @@ WHERE "schema_key" = ?1 AND json_extract(snapshot_content, '$.id') = ?2 AND "ver
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 86,
+    "id": 75,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 126,
+    "id": 108,
     "parent": 2,
     "notused": 28,
-    "detail": "SCAN (subquery-10)"
+    "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 208,
+    "id": 176,
     "parent": 0,
     "notused": 28,
     "detail": "SCAN w"

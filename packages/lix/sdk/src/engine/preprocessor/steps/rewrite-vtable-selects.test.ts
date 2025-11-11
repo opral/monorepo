@@ -375,7 +375,9 @@ test("collapses single-parent inheritance chains inline without recursion", () =
 	expect(
 		sql
 			.replace(/\s+/g, " ")
-			.match(/select 'active_version' as version_id, 'global' as ancestor_version_id/i)
+			.match(
+				/select 'active_version' as version_id, 'global' as ancestor_version_id/i
+			)
 	).not.toBeNull();
 });
 
