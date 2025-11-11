@@ -178,6 +178,41 @@ function rewriteSelectStatement(
 		pushdownFileIds,
 		pushdownVersionIds
 	);
+	const fallbackAliasNames = collectRelationAliasNames(selectWithRewrittenCtes);
+	const fallbackSchemaSummary = collectSchemaKeyPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackSchemaKeys = mergeStringLiterals(
+		pushdownSchemaKeys,
+		fallbackSchemaSummary.literals
+	);
+	const fallbackFileSummary = collectFileIdPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackFileIds = mergeStringLiterals(
+		pushdownFileIds,
+		fallbackFileSummary.literals
+	);
+	const fallbackVersionSummary = collectVersionIdPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackVersionIds = mergeStringLiterals(
+		pushdownVersionIds,
+		fallbackVersionSummary.literals
+	);
+	const fallbackPruneInheritance =
+		pushdownPruneInheritance ||
+		shouldPruneInheritance(
+			selectWithRewrittenCtes.where_clause,
+			fallbackAliasNames,
+			parameters
+		);
 	const subqueryPredicateMap = collectSubqueryPredicateMap(
 		selectWithRewrittenCtes,
 		parameters,
@@ -200,12 +235,12 @@ function rewriteSelectStatement(
 						? subqueryPredicateMap.get(normalizedAlias)
 						: undefined;
 				const nextSchemaKeys =
-					predicateMetadata?.schemaKeys ?? pushdownSchemaKeys;
+					predicateMetadata?.schemaKeys ?? fallbackSchemaKeys;
 				const nextPrune =
-					predicateMetadata?.pruneInheritance ?? pushdownPruneInheritance;
-				const nextFileIds = predicateMetadata?.fileIds ?? pushdownFileIds;
+					predicateMetadata?.pruneInheritance ?? fallbackPruneInheritance;
+				const nextFileIds = predicateMetadata?.fileIds ?? fallbackFileIds;
 				const nextVersionIds =
-					predicateMetadata?.versionIds ?? pushdownVersionIds;
+					predicateMetadata?.versionIds ?? fallbackVersionIds;
 				const rewrittenStatement =
 					node.statement.node_kind === "compound_select"
 						? rewriteCompoundSelect(
@@ -546,6 +581,32 @@ function collectSubqueryPredicateMap(
 	return map;
 }
 
+function collectRelationAliasNames(select: SelectStatementNode): Set<string> {
+	const aliases = new Set<string>([DEFAULT_ALIAS_KEY, ORIGINAL_TABLE_KEY]);
+	const addAlias = (alias: IdentifierNode | null) => {
+		const value = getIdentifierValue(alias);
+		if (value) {
+			aliases.add(normalizeIdentifierValue(value));
+		}
+	};
+	for (const clause of select.from_clauses) {
+		addAlias(extractRelationAlias(clause.relation));
+		for (const join of clause.joins) {
+			addAlias(extractRelationAlias(join.relation));
+		}
+	}
+	return aliases;
+}
+
+function extractRelationAlias(relation: RelationNode): IdentifierNode | null {
+	if ("alias" in relation) {
+		const alias = (relation as Extract<RelationNode, { alias?: IdentifierNode | null }>)
+			.alias;
+		return alias ?? null;
+	}
+	return null;
+}
+
 function collectCtePredicateMap(
 	select: SelectStatementNode,
 	parameters: ReadonlyArray<unknown>,
@@ -665,12 +726,13 @@ function collectCtePredicateMap(
 		const finalFileIds = shouldPushFileFilter(mergedSchemaKeys, mergedFileIds)
 			? mergedFileIds
 			: [];
-		map.set(normalizedName, {
+		const entry = {
 			schemaKeys: mergedSchemaKeys,
 			fileIds: finalFileIds,
 			versionIds: mergedVersionIds,
 			pruneInheritance: combinedPrune,
-		});
+		};
+		map.set(normalizedName, entry);
 	};
 
 	for (const clause of select.from_clauses) {

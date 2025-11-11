@@ -216,6 +216,44 @@ test("state filter on inherited_from_version_id=NULL prunes inheritance rewrites
 	await lix.close();
 });
 
+test("version view rewrite prunes cache unions", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const result = preprocess({
+		sql: `
+			SELECT id
+			FROM version
+			WHERE id = ?
+		`,
+		parameters: ["global"],
+		trace: true,
+	});
+
+	const normalizedSql = result.sql.toLowerCase();
+	expect(normalizedSql).toContain(
+		`"lix_internal_state_cache_v1_lix_version_descriptor"`
+	);
+	// Ensure cache unions are pruned down to descriptor/tip tables.
+	expect(normalizedSql).not.toContain(
+		`"lix_internal_state_cache_v1_lix_stored_schema"`
+	);
+
+	const rewriteTrace =
+		result.trace?.filter((entry) => entry.step === "rewrite_vtable_selects") ??
+		[];
+	expect(rewriteTrace.length).toBeGreaterThan(0);
+	expect(
+		rewriteTrace.some((entry) =>
+			(entry.payload?.schema_key_literals ?? []).includes(
+				"lix_version_descriptor"
+			)
+		)
+	).toBe(true);
+
+	await lix.close();
+});
+
 test("state file_id predicate is pushed into vtable rewrite for markdown schemas", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });
