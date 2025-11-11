@@ -465,9 +465,30 @@ function pruneExpandedStatement(
 		return statement;
 	}
 	if (statement.node_kind === "select_statement") {
-		return pruneSelectProjection(statement, requirements);
+		return pruneSelectStatement(statement, requirements);
 	}
 	return statement;
+}
+
+function pruneSelectStatement(
+	statement: SelectStatementNode,
+	requirements: ColumnUsageSummary
+): SelectStatementNode {
+	let current = statement;
+	const prunedProjection = pruneSelectProjection(current, requirements);
+	let changed = prunedProjection !== current;
+	current = prunedProjection;
+	const prunedJoins = pruneUnusedLeftJoins(current);
+	if (prunedJoins !== current) {
+		changed = true;
+		current = prunedJoins;
+	}
+	const prunedWithClause = pruneUnusedCommonTableExpressions(current);
+	if (prunedWithClause !== current) {
+		changed = true;
+		current = prunedWithClause;
+	}
+	return changed ? current : statement;
 }
 
 function pruneSelectProjection(
@@ -500,6 +521,197 @@ function pruneSelectProjection(
 		...statement,
 		projection: filtered,
 	};
+}
+
+function pruneUnusedLeftJoins(
+	select: SelectStatementNode
+): SelectStatementNode {
+	if (select.from_clauses.length === 0) {
+		return select;
+	}
+	let changed = false;
+	const rewrittenFrom = select.from_clauses.map((clause, clauseIndex) => {
+		if (clause.joins.length === 0) {
+			return clause;
+		}
+		const filteredJoins = clause.joins.filter((join, joinIndex) => {
+			if (join.join_type !== "left") {
+				return true;
+			}
+			if (join.relation.node_kind === "raw_fragment") {
+				return true;
+			}
+			const alias = resolveRelationAlias(join.relation);
+			if (!alias) {
+				return true;
+			}
+			if (aliasReferencedOutsideJoin(select, clauseIndex, joinIndex, alias)) {
+				return true;
+			}
+			changed = true;
+			return false;
+		});
+		if (filteredJoins.length === clause.joins.length) {
+			return clause;
+		}
+		return {
+			...clause,
+			joins: filteredJoins,
+		};
+	});
+	if (!changed) {
+		return select;
+	}
+	return {
+		...select,
+		from_clauses: rewrittenFrom,
+	};
+}
+
+function aliasReferencedOutsideJoin(
+	select: SelectStatementNode,
+	clauseIndex: number,
+	joinIndex: number,
+	alias: string
+): boolean {
+	const strippedSelect: SelectStatementNode = {
+		...select,
+		from_clauses: select.from_clauses.map((clause, currentClauseIndex) => {
+			if (currentClauseIndex !== clauseIndex) {
+				return clause;
+			}
+			return {
+				...clause,
+				joins: clause.joins.map((join, currentJoinIndex) => {
+					if (currentJoinIndex !== joinIndex) {
+						return join;
+					}
+					if (!join.on_expression) {
+						return join;
+					}
+					return {
+						...join,
+						on_expression: null,
+					};
+				}),
+			};
+		}),
+	};
+	const usage = collectTableColumnUsage(strippedSelect);
+	const summary = usage.get(alias);
+	return !!summary && (summary.requiresAllColumns || summary.columns.size > 0);
+}
+
+function pruneUnusedCommonTableExpressions(
+	select: SelectStatementNode
+): SelectStatementNode {
+	const withClause = select.with_clause;
+	if (!withClause || withClause.ctes.length === 0) {
+		return select;
+	}
+	const cteNames = withClause.ctes
+		.map((cte) => normalizeIdentifierValue(cte.name.value))
+		.filter((name): name is string => Boolean(name));
+	if (cteNames.length === 0) {
+		return select;
+	}
+	const targetNames = new Set(cteNames);
+	const dependencyMap = new Map<string, Set<string>>();
+	const rootReferences = collectReferencedCtes(select, targetNames);
+	if (rootReferences.hasRawReferences) {
+		return select;
+	}
+	dependencyMap.set("__root__", rootReferences.references);
+	for (const cte of withClause.ctes) {
+		const normalized = normalizeIdentifierValue(cte.name.value);
+		if (!normalized) {
+			continue;
+		}
+		const references = collectReferencedCtes(cte.statement, targetNames);
+		if (references.hasRawReferences) {
+			return select;
+		}
+		dependencyMap.set(normalized, references.references);
+	}
+
+	const needed = new Set<string>();
+	const queue: string[] = Array.from(dependencyMap.get("__root__") ?? []);
+	while (queue.length > 0) {
+		const current = queue.pop();
+		if (!current || needed.has(current)) {
+			continue;
+		}
+		needed.add(current);
+		const deps = dependencyMap.get(current);
+		if (!deps) {
+			continue;
+		}
+		for (const dep of deps) {
+			queue.push(dep);
+		}
+	}
+
+	if (needed.size === targetNames.size) {
+		return select;
+	}
+	if (needed.size === 0) {
+		return {
+			...select,
+			with_clause: null,
+		};
+	}
+	const filteredCtes = withClause.ctes.filter((cte) => {
+		const normalized = normalizeIdentifierValue(cte.name.value);
+		if (!normalized) {
+			return true;
+		}
+		return needed.has(normalized);
+	});
+	if (filteredCtes.length === withClause.ctes.length) {
+		return select;
+	}
+	return {
+		...select,
+		with_clause:
+			filteredCtes.length === 0
+				? null
+				: {
+						...withClause,
+						ctes: filteredCtes,
+					},
+	};
+}
+
+function collectReferencedCtes(
+	statement: SelectStatementNode | CompoundSelectNode,
+	targetNames: ReadonlySet<string>
+): { references: Set<string>; hasRawReferences: boolean } {
+	const references = new Set<string>();
+	let hasRawReferences = false;
+	const visitor: AstVisitor = {
+		table_reference(node) {
+			const normalized = normalizeObjectName(node.name);
+			if (normalized && targetNames.has(normalized)) {
+				references.add(normalized);
+			}
+			return node;
+		},
+		raw_fragment() {
+			hasRawReferences = true;
+		},
+	};
+	visitStatement(statement, visitor);
+	return { references, hasRawReferences };
+}
+
+function normalizeObjectName(
+	object: TableReferenceNode["name"]
+): string | null {
+	const last = object.parts[object.parts.length - 1];
+	if (!last) {
+		return null;
+	}
+	return normalizeIdentifierValue(last.value);
 }
 
 function extractProjectedColumnName(

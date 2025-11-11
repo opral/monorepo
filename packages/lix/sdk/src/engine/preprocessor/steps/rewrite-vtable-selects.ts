@@ -600,8 +600,9 @@ function collectRelationAliasNames(select: SelectStatementNode): Set<string> {
 
 function extractRelationAlias(relation: RelationNode): IdentifierNode | null {
 	if ("alias" in relation) {
-		const alias = (relation as Extract<RelationNode, { alias?: IdentifierNode | null }>)
-			.alias;
+		const alias = (
+			relation as Extract<RelationNode, { alias?: IdentifierNode | null }>
+		).alias;
 		return alias ?? null;
 	}
 	return null;

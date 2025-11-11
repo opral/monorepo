@@ -695,6 +695,123 @@ test("prunes view defined with CTEs while preserving structure", () => {
 	}
 });
 
+test("drops unused joins when expanded view projection prunes joined alias", () => {
+	const statements = parseStatements(`
+		SELECT v.id
+		FROM version AS v
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"version",
+					`
+						WITH descriptor AS (
+							SELECT id
+							FROM descriptor_table
+						),
+						tip AS (
+							SELECT id, commit_id
+							FROM tip_table
+						)
+						SELECT d.id, t.commit_id
+						FROM descriptor AS d
+						LEFT JOIN tip AS t ON t.id = d.id
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	const select = assertSingleSelect(rewritten);
+	const expanded = findExpandedSubquery(select, "v");
+	if (!expanded || expanded.statement.node_kind !== "select_statement") {
+		throw new Error("expected expanded version view");
+	}
+
+	const expandedSelect = expanded.statement;
+	const [from] = expandedSelect.from_clauses;
+	if (!from) {
+		throw new Error("expected FROM clause");
+	}
+	expect(from.joins.length).toBe(0);
+
+	const cteNames =
+		expandedSelect.with_clause?.ctes
+			.map((cte) => getIdentifierValue(cte.name))
+			.filter((name): name is string => Boolean(name)) ?? [];
+	expect(cteNames).toEqual(["descriptor"]);
+	expect(readProjectionColumns(expandedSelect)).toEqual(["id"]);
+});
+
+test("preserves joins when joined alias contributes referenced columns", () => {
+	const statements = parseStatements(`
+		SELECT v.commit_id
+		FROM version AS v
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"version",
+					`
+						WITH descriptor AS (
+							SELECT id
+							FROM descriptor_table
+						),
+						tip AS (
+							SELECT id, commit_id
+							FROM tip_table
+						)
+						SELECT d.id, t.commit_id
+						FROM descriptor AS d
+						LEFT JOIN tip AS t ON t.id = d.id
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	const select = assertSingleSelect(rewritten);
+	const expanded = findExpandedSubquery(select, "v");
+	if (!expanded || expanded.statement.node_kind !== "select_statement") {
+		throw new Error("expected expanded version view");
+	}
+
+	const expandedSelect = expanded.statement;
+	const [from] = expandedSelect.from_clauses;
+	if (!from) {
+		throw new Error("expected FROM clause");
+	}
+	expect(from.joins).toHaveLength(1);
+
+	const firstJoin = from.joins[0];
+	if (!firstJoin) {
+		throw new Error("expected join clause");
+	}
+	const joinRelation = firstJoin.relation;
+	if (joinRelation.node_kind === "raw_fragment") {
+		throw new Error("expected structured join relation");
+	}
+	const joinAlias = getIdentifierValue(joinRelation.alias);
+	expect(joinAlias).toBe("t");
+
+	const cteNames =
+		expandedSelect.with_clause?.ctes
+			.map((cte) => getIdentifierValue(cte.name))
+			.filter((name): name is string => Boolean(name)) ?? [];
+	expect(cteNames).toEqual(["descriptor", "tip"]);
+	expect(readProjectionColumns(expandedSelect)).toEqual(["commit_id"]);
+});
+
 function assertSingleSelect(
 	statements: readonly SegmentedStatementNode[]
 ): SelectStatementNode {
