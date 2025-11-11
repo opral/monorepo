@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { SyntheticEvent } from "react";
 
 /**
  * Copy icon used for the install command interaction.
@@ -123,6 +124,65 @@ const PackageInstaller = () => {
  * <LandingPage />
  */
 function LandingPage() {
+  const buildShowcases = [
+    {
+      id: "prosemirror",
+      title: "ProseMirror / TipTap Plugin",
+      category: "Real-time editors",
+      description:
+        "Collaborative publishing UI with branching proposals, inline reviews, and one-click merges.",
+      screenshot: "/prosemirror.png",
+      fallback: "ProseMirror Demo",
+      href: "https://prosemirror-example.onrender.com/",
+      ctaLabel: "Open demo →",
+      creator: "Studio Alva",
+      creatorRole: "Product studio",
+      creatorInitials: "SA",
+    },
+    {
+      id: "fink",
+      title: "Fink – Translation Editor",
+      category: "Operations tools",
+      description:
+        "End-to-end localization workflow with granular diffing, approvals, and release channels.",
+      screenshot: "/fink2.png",
+      fallback: "Fink Demo",
+      href: "https://fink2.onrender.com/",
+      ctaLabel: "Try live demo →",
+      creator: "Team Fink",
+      creatorRole: "Internal tool",
+      creatorInitials: "TF",
+    },
+    {
+      id: "flashtype",
+      title: "Flashtype – AI Markdown Editor",
+      category: "AI content",
+      description:
+        "Generate documents with AI, capture history for every prompt, and ship safe revisions.",
+      screenshot: "/flashtype.jpg",
+      fallback: "Flashtype Demo",
+      href: "https://flashtype.ai",
+      ctaLabel: "Explore Flashtype →",
+      creator: "Flashtype",
+      creatorRole: "Public app",
+      creatorInitials: "FT",
+    },
+  ];
+
+  const createImageErrorHandler =
+    (fallback: string) => (event: SyntheticEvent<HTMLImageElement>) => {
+      const container = event.currentTarget.parentElement;
+      if (!container) {
+        return;
+      }
+
+      container.style.backgroundColor = "#0f172a";
+      container.style.display = "flex";
+      container.style.alignItems = "center";
+      container.style.justifyContent = "center";
+      container.innerHTML = `<div style="color: #cbd5f5; font-size: 14px; font-weight: 500;">${fallback}</div>`;
+    };
+
   return (
     <div className="font-sans text-gray-900 bg-gradient-to-b from-gray-50 to-white">
       {/* Main content */}
@@ -256,138 +316,45 @@ function LandingPage() {
         </section>
 
         {/* What You Can Build Section */}
-        <section className="pt-12 pb-20 bg-gradient-to-r from-gray-50 to-white w-full px-6 sm:px-12 md:px-16">
-          <h2 className="text-center text-2xl sm:text-3xl font-bold mb-24 text-gray-800 flex items-center justify-center">
-            <span>What people build with</span>{" "}
-            <LixLogo className="ml-2 w-10 h-8 transform translate-y-[-2px]" />
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-14 max-w-[100rem] mx-auto px-4 sm:px-6 mt-16">
-            <div className="group cursor-pointer text-center">
-              <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* ProseMirror Document Editor - Real Screenshot */}
-                <div className="w-full h-64 relative overflow-hidden">
-                  <img
-                    src="/prosemirror.png"
-                    alt="ProseMirror editor with Lix version control"
-                    className="w-full h-full object-cover"
-                    onLoad={() =>
-                      console.log("prosemirror.png loaded successfully")
-                    }
-                    onError={(e) => {
-                      console.error("Failed to load prosemirror.png", e);
-                      const container = e.currentTarget.parentElement;
-                      if (container) {
-                        container.style.backgroundColor = "#f3f4f6";
-                        container.style.display = "flex";
-                        container.style.alignItems = "center";
-                        container.style.justifyContent = "center";
-                        container.innerHTML =
-                          '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">ProseMirror Demo</div>';
-                      }
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <a
-                      href="https://prosemirror-example.onrender.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
-                      style={{ color: "white" }}
-                    >
-                      Open →
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <p className="text-gray-800 text-xl font-medium">
-                  Prosemirror / TipTap Plugin
-                </p>
-              </div>
-            </div>
-            <div className="group cursor-pointer text-center">
-              <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* Fink App - Real Screenshot */}
-                <div className="w-full h-64 relative overflow-hidden">
-                  <img
-                    src="/fink2.png"
-                    alt="Fink localization app with change tracking"
-                    className="w-full h-full object-cover"
-                    onLoad={() => console.log("fink2.png loaded successfully")}
-                    onError={(e) => {
-                      console.error("Failed to load fink2.png", e);
-                      const container = e.currentTarget.parentElement;
-                      if (container) {
-                        container.style.backgroundColor = "#f3f4f6";
-                        container.style.display = "flex";
-                        container.style.alignItems = "center";
-                        container.style.justifyContent = "center";
-                        container.innerHTML =
-                          '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Fink Demo</div>';
-                      }
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <a
-                      href="https://fink2.onrender.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
-                      style={{ color: "white" }}
-                    >
-                      Try Live Demo →
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <p className="text-gray-800 text-xl font-medium">
-                  Fink - Translation Editor
-                </p>
-              </div>
-            </div>
-            <div className="group cursor-pointer text-center">
-              <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* GitHub Integration Screenshot */}
-                <div className="w-full h-64 relative overflow-hidden">
-                  <img
-                    src="/flashtype.jpg"
-                    alt="Flashtype app with Lix change control"
-                    className="w-full h-full object-cover"
-                    onLoad={() =>
-                      console.log("flashtype.jpg loaded successfully")
-                    }
-                    onError={(e) => {
-                      console.error("Failed to load flashtype.jpg", e);
-                      const container = e.currentTarget.parentElement;
-                      if (container) {
-                        container.style.backgroundColor = "#f3f4f6";
-                        container.style.display = "flex";
-                        container.style.alignItems = "center";
-                        container.style.justifyContent = "center";
-                        container.innerHTML =
-                          '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Flashtype Demo</div>';
-                      }
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <a
-                      href="https://flashtype.ai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
-                      style={{ color: "white" }}
-                    >
-                      Try Flashtype →
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <p className="text-gray-800 text-xl font-medium">
-                  Flashtype - AI Markdown Editor
-                </p>
-              </div>
+        <section className="py-20 px-6 sm:px-12 md:px-16 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-3xl sm:text-4xl font-bold text-gray-900">
+              <span>What people build with</span>
+              <span className="text-[#0692B6]">Lix</span>
+            </h2>
+            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
+              {buildShowcases.map(
+                ({ id, title, screenshot, fallback, href, ctaLabel }) => (
+                  <a
+                    key={id}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 transition-transform duration-300 hover:-translate-y-2 hover:border-gray-300"
+                  >
+                    <div className="relative aspect-[21/9] overflow-hidden">
+                      <img
+                        src={screenshot}
+                        alt={title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        onError={createImageErrorHandler(fallback)}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 px-5 py-4 text-gray-900">
+                      <h3 className="text-sm font-semibold sm:text-base md:text-lg">
+                        {title}
+                      </h3>
+                      <span className="relative inline-flex items-center text-sm font-medium text-blue-600">
+                        <span className="sr-only">{ctaLabel}</span>
+                        <span className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-hover:text-blue-700">
+                          Open
+                          <span aria-hidden>→</span>
+                        </span>
+                      </span>
+                    </div>
+                  </a>
+                ),
+              )}
             </div>
           </div>
         </section>
