@@ -375,9 +375,7 @@ function validatePrimaryKeyConstraints(args: {
 		primaryKeyValues.push(value);
 	}
 
-	// Query existing resolved state (including cache/untracked/inherited) to check for duplicates,
-	// but ignore transaction rows (tag 'T' in _pk) so that multiple inserts within the same
-	// transaction can overwrite without tripping PK validation.
+	// Query existing resolved state (including cache/untracked/inherited) to check for duplicates.
 	const db =
 		internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 	let query = db
@@ -394,8 +392,9 @@ function validatePrimaryKeyConstraints(args: {
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
 
-	// Exclude transaction-state rows: source_tag 'T' identifies direct txn entries.
-	query = query.where("source_tag", "!=", "T");
+	// Retain transaction rows so tombstones (source_tag 'T') can mask prior snapshots
+	// during validation. Dropping them would resurface the cached row we just deleted
+	// within the same statement, causing spurious primary-key violations.
 
 	// For updates, exclude the current entity from the check
 	if (args.operation === "update" && args.entity_id) {
@@ -462,7 +461,8 @@ function validateUniqueConstraints(args: {
 			continue;
 		}
 
-		// Query existing resolved state for duplicates, excluding transaction-state rows (tag 'T')
+		// Query existing resolved state for duplicates. Keep transaction rows so
+		// in-flight tombstones still suppress cached snapshots during validation.
 		const db =
 			internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 		let query = db
@@ -474,7 +474,6 @@ function validateUniqueConstraints(args: {
 		query = query.where("inherited_from_version_id", "is", null);
 		// Exclude tombstones
 		query = query.where("snapshot_content", "is not", null);
-		query = query.where("source_tag", "!=", "T");
 
 		// For updates, exclude the current entity from the check
 		if (args.operation === "update" && args.entity_id) {
