@@ -318,6 +318,34 @@ const PackageInstaller = () => {
 function LandingPage() {
   const buildShowcases = [
     {
+      id: "flashtype",
+      title: "Flashtype – AI Markdown Editor",
+      category: "AI content",
+      description:
+        "Generate documents with AI, capture history for every prompt, and ship safe revisions.",
+      screenshot: "/flashtype.png",
+      fallback: "Flashtype Demo",
+      href: "https://flashtype.ai",
+      ctaLabel: "Explore Flashtype →",
+      creator: "Flashtype",
+      creatorRole: "Public app",
+      creatorInitials: "FT",
+    },
+    {
+      id: "inlang",
+      title: "Inlang – Software globalization ecosystem",
+      category: "Localization platform",
+      description:
+        "Create, localize, and deliver product experiences with AI-assisted translation, review workflows, and Lix change control.",
+      screenshot: "/inlang.png",
+      fallback: "Inlang Preview",
+      href: "https://inlang.com",
+      ctaLabel: "Explore Inlang →",
+      creator: "Inlang",
+      creatorRole: "Product ecosystem",
+      creatorInitials: "IL",
+    },
+    {
       id: "prosemirror",
       title: "ProseMirror / TipTap Plugin",
       category: "Real-time editors",
@@ -330,34 +358,6 @@ function LandingPage() {
       creator: "Studio Alva",
       creatorRole: "Product studio",
       creatorInitials: "SA",
-    },
-    {
-      id: "fink",
-      title: "Fink – Translation Editor",
-      category: "Operations tools",
-      description:
-        "End-to-end localization workflow with granular diffing, approvals, and release channels.",
-      screenshot: "/fink2.png",
-      fallback: "Fink Demo",
-      href: "https://fink2.onrender.com/",
-      ctaLabel: "Try live demo →",
-      creator: "Team Fink",
-      creatorRole: "Internal tool",
-      creatorInitials: "TF",
-    },
-    {
-      id: "flashtype",
-      title: "Flashtype – AI Markdown Editor",
-      category: "AI content",
-      description:
-        "Generate documents with AI, capture history for every prompt, and ship safe revisions.",
-      screenshot: "/flashtype.jpg",
-      fallback: "Flashtype Demo",
-      href: "https://flashtype.ai",
-      ctaLabel: "Explore Flashtype →",
-      creator: "Flashtype",
-      creatorRole: "Public app",
-      creatorInitials: "FT",
     },
   ];
 
@@ -769,7 +769,7 @@ function LandingPage() {
                     rel="noopener noreferrer"
                     className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 transition-transform duration-300 hover:-translate-y-2 hover:border-gray-300"
                   >
-                    <div className="relative aspect-[21/9] overflow-hidden">
+                    <div className="relative aspect-[16/9] overflow-hidden">
                       <img
                         src={screenshot}
                         alt={title}
