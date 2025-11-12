@@ -1,6 +1,11 @@
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
 
+const prosemirrorScreenshot = new URL(
+  "../../../plugin-prosemirror/assets/prosemirror.png",
+  import.meta.url,
+).href;
+
 /**
  * Copy icon used for the install command interaction.
  *
@@ -351,10 +356,10 @@ function LandingPage() {
       category: "Real-time editors",
       description:
         "Collaborative publishing UI with branching proposals, inline reviews, and one-click merges.",
-      screenshot: "/prosemirror.png",
+      screenshot: prosemirrorScreenshot,
       fallback: "ProseMirror Demo",
-      href: "https://prosemirror-example.onrender.com/",
-      ctaLabel: "Open demo →",
+      href: "https://github.com/opral/monorepo/tree/main/packages/lix/plugin-prosemirror",
+      ctaLabel: "View code →",
       creator: "Studio Alva",
       creatorRole: "Product studio",
       creatorInitials: "SA",
@@ -387,24 +392,24 @@ function LandingPage() {
 
   const featureSpotlights = [
     {
-      id: "cursor-editing",
-      title: "Query and diff AI changes",
+      id: "review-everything",
+      title: "Every AI change is tracked",
       description:
-        "Suggest edits and let users accept or reject them. Lix powers the diff and versioning under the hood.",
+        "Lix tracks every change AI agents do. Query the changes and display diffs in apps.",
       Illustration: CursorEditingIllustration,
     },
     {
-      id: "audit-traceability",
-      title: "The user stays in control",
+      id: "human-approval",
+      title: "Users stay in control",
       description:
-        "Let users view, approve, or undo LLM-generated changes step by step. Automations and approvals fit right in.",
+        "Change proposals allow users to accept or reject AI changes.",
       Illustration: AuditWorkflowIllustration,
     },
     {
       id: "async-workflows",
-      title: "Background agents",
+      title: "Safe sandboxes for agents",
       description:
-        "Assign work to an agent, review the diff trail, and merge the work when it's done.",
+        "Versions let AI agents experiment without affecting user data.",
       Illustration: AsyncWorkflowIllustration,
     },
   ];
@@ -477,7 +482,7 @@ function LandingPage() {
               </a>
               <PackageInstaller />
               <a
-                href="https://prosemirror-example.onrender.com/"
+                href="https://flashtype.ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 border border-gray-300 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-300"
@@ -505,7 +510,7 @@ function LandingPage() {
                   npm
                 </span>
                 <span className="font-semibold text-sm text-gray-900">
-                  60k+ weekly downloads
+                  50k+ weekly downloads
                 </span>
               </a>
 
@@ -552,6 +557,50 @@ function LandingPage() {
                   MIT Open Source
                 </span>
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* What You Can Build Section */}
+        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-2xl sm:text-3xl font-bold text-gray-900">
+              <span>What people build with</span>
+              <span className="text-[#0692B6]">lix</span>
+            </h2>
+            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
+              {buildShowcases.map(
+                ({ id, title, screenshot, fallback, href, ctaLabel }) => (
+                  <a
+                    key={id}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 transition-transform duration-300 hover:-translate-y-2 hover:border-gray-300"
+                  >
+                    <div className="relative aspect-[16/9] overflow-hidden">
+                      <img
+                        src={screenshot}
+                        alt={title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        onError={createImageErrorHandler(fallback)}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 px-5 py-4 text-gray-900">
+                      <h3 className="text-base font-semibold sm:text-lg md:text-xl">
+                        {title}
+                      </h3>
+                      <span className="relative inline-flex items-center text-sm font-medium text-[#0692B6]">
+                        <span className="sr-only">{ctaLabel}</span>
+                        <span className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100" style={{ color: '#047497' }}>
+                          Open
+                          <span aria-hidden>→</span>
+                        </span>
+                      </span>
+                    </div>
+                  </a>
+                ),
+              )}
             </div>
           </div>
         </section>
@@ -723,27 +772,27 @@ function LandingPage() {
 
         {/* Feature Spotlights */}
         <section className="py-12 px-6 sm:px-12 md:px-16 bg-white">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900">
               Lix enables the most powerful AI apps
             </h2>
-            <div className="mt-12 flex flex-col gap-12">
+            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
               {featureSpotlights.map(
                 ({ id, title, description, Illustration }) => (
                   <div
                     key={id}
-                    className="grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]"
+                    className="flex flex-col gap-6"
                   >
-                    <div className="max-w-md md:max-w-none">
+                    <div className="flex justify-center items-center h-40">
+                      <Illustration />
+                    </div>
+                    <div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         {title}
                       </h3>
-                      <p className="mt-3 text-sm sm:text-base text-gray-600">
+                      <p className="mt-3 text-base text-gray-600">
                         {description}
                       </p>
-                    </div>
-                    <div className="flex justify-center md:justify-end">
-                      <Illustration />
                     </div>
                   </div>
                 ),
@@ -752,77 +801,33 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* What You Can Build Section */}
-        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-2xl sm:text-3xl font-bold text-gray-900">
-              <span>What people build with</span>
-              <span className="text-[#0692B6]">lix</span>
-            </h2>
-            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
-              {buildShowcases.map(
-                ({ id, title, screenshot, fallback, href, ctaLabel }) => (
-                  <a
-                    key={id}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 transition-transform duration-300 hover:-translate-y-2 hover:border-gray-300"
-                  >
-                    <div className="relative aspect-[16/9] overflow-hidden">
-                      <img
-                        src={screenshot}
-                        alt={title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                        onError={createImageErrorHandler(fallback)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between gap-4 px-5 py-4 text-gray-900">
-                      <h3 className="text-sm font-semibold sm:text-base md:text-lg">
-                        {title}
-                      </h3>
-                      <span className="relative inline-flex items-center text-sm font-medium text-blue-600">
-                        <span className="sr-only">{ctaLabel}</span>
-                        <span className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-hover:text-blue-700">
-                          Open
-                          <span aria-hidden>→</span>
-                        </span>
-                      </span>
-                    </div>
-                  </a>
-                ),
-              )}
-            </div>
-          </div>
-        </section>
-
         {/* Learn More Section */}
-        <section className="py-14 px-6 sm:px-12 md:px-16 bg-white border-t border-gray-100">
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+        <section className="py-14 px-6 sm:px-12 md:px-16 bg-white">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-6">
             <a
               href="https://lix.dev/guide/index.html"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>📘</span>
               Go to Docs
             </a>
             <a
               href="https://discord.gg/GhjdFXsEgM"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>💬</span>
               Join Discord
             </a>
             <a
               href="https://github.com/opral/lix-sdk"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>🐙</span>
               Visit GitHub
             </a>
             <a
               href="https://opral.substack.com/t/lix"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>→</span>
               Read Substack
