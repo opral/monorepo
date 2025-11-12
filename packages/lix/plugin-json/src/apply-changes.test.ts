@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { applyChanges } from "./applyChanges.js";
+import { applyChanges } from "./apply-changes.js";
 import { mockChanges } from "./utilities/mockChanges.js";
 import type { LixPlugin } from "@lix-js/sdk";
 

@@ -3,7 +3,7 @@ import { JSONPropertySchema } from "./schemas/json-property.js";
 import {
 	pointerFromSegments,
 	type JSONValue,
-} from "./utilities/jsonPointer.js";
+} from "./utilities/json-pointer.js";
 
 const isObject = (value: unknown): value is Record<string, JSONValue> =>
 	typeof value === "object" && value !== null && !Array.isArray(value);

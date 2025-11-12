@@ -1,6 +1,6 @@
 import { type LixPlugin } from "@lix-js/sdk";
-import { applyChanges } from "./applyChanges.js";
-import { detectChanges } from "./detectChanges.js";
+import { applyChanges } from "./apply-changes.js";
+import { detectChanges } from "./detect-changes.js";
 
 export const plugin: LixPlugin = {
 	key: "plugin_json",

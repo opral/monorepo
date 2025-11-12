@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { detectChanges } from "./detectChanges.js";
+import { detectChanges } from "./detect-changes.js";
 import {
 	type FromLixSchemaDefinition,
 	type DetectedChange,

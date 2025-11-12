@@ -1,5 +1,5 @@
 import { type Change, type LixFile, type LixPlugin } from "@lix-js/sdk";
-import { detectChanges } from "../detectChanges.js";
+import { detectChanges } from "../detect-changes.js";
 
 type DetectArgs = Parameters<NonNullable<LixPlugin["detectChanges"]>>[0];
 type MockFile = Pick<LixFile, "id" | "path"> & {

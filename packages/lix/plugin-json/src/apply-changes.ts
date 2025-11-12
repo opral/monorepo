@@ -4,7 +4,7 @@ import {
 	setValueAtPointer,
 	removeValueAtPointer,
 	type JSONValue,
-} from "./utilities/jsonPointer.js";
+} from "./utilities/json-pointer.js";
 
 /**
  * Applies JSON Pointer based changes to a file's parsed JSON document.
