@@ -1,6 +1,11 @@
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
 
+const prosemirrorScreenshot = new URL(
+  "../../../plugin-prosemirror/assets/prosemirror.png",
+  import.meta.url,
+).href;
+
 /**
  * Copy icon used for the install command interaction.
  *
@@ -351,10 +356,10 @@ function LandingPage() {
       category: "Real-time editors",
       description:
         "Collaborative publishing UI with branching proposals, inline reviews, and one-click merges.",
-      screenshot: "/prosemirror.png",
+      screenshot: prosemirrorScreenshot,
       fallback: "ProseMirror Demo",
-      href: "https://prosemirror-example.onrender.com/",
-      ctaLabel: "Open demo →",
+      href: "https://github.com/opral/monorepo/tree/main/packages/lix/plugin-prosemirror",
+      ctaLabel: "View code →",
       creator: "Studio Alva",
       creatorRole: "Product studio",
       creatorInitials: "SA",
@@ -387,24 +392,24 @@ function LandingPage() {
 
   const featureSpotlights = [
     {
-      id: "cursor-editing",
-      title: "Query and diff AI changes",
+      id: "review-everything",
+      title: "Every AI change is reviewable",
       description:
-        "Suggest edits and let users accept or reject them. Lix powers the diff and versioning under the hood.",
+        "Lix records who or what changed every line. Diff AI output, attribute edits to specific agents, and merge only what passes human or automated review through change proposals.",
       Illustration: CursorEditingIllustration,
     },
     {
-      id: "audit-traceability",
-      title: "The user stays in control",
+      id: "human-approval",
+      title: "Users stay in control",
       description:
-        "Let users view, approve, or undo LLM-generated changes step by step. Automations and approvals fit right in.",
+        "Agents can draft changes, but humans choose what ships. Review conversations, request edits, and merge when the change proposal is ready.",
       Illustration: AuditWorkflowIllustration,
     },
     {
       id: "async-workflows",
-      title: "Background agents",
+      title: "Safe sandboxes for agents",
       description:
-        "Assign work to an agent, review the diff trail, and merge the work when it's done.",
+        "Give every agent its own version to experiment in. Compare their diffs, merge the winner, or restore a previous state instantly if the plan changes.",
       Illustration: AsyncWorkflowIllustration,
     },
   ];
@@ -552,6 +557,50 @@ function LandingPage() {
                   MIT Open Source
                 </span>
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* What You Can Build Section */}
+        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-2xl sm:text-3xl font-bold text-gray-900">
+              <span>What people build with</span>
+              <span className="text-[#0692B6]">lix</span>
+            </h2>
+            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
+              {buildShowcases.map(
+                ({ id, title, screenshot, fallback, href, ctaLabel }) => (
+                  <a
+                    key={id}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 transition-transform duration-300 hover:-translate-y-2 hover:border-gray-300"
+                  >
+                    <div className="relative aspect-[16/9] overflow-hidden">
+                      <img
+                        src={screenshot}
+                        alt={title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        onError={createImageErrorHandler(fallback)}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-4 px-5 py-4 text-gray-900">
+                      <h3 className="text-sm font-semibold sm:text-base md:text-lg">
+                        {title}
+                      </h3>
+                      <span className="relative inline-flex items-center text-sm font-medium text-blue-600">
+                        <span className="sr-only">{ctaLabel}</span>
+                        <span className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-hover:text-blue-700">
+                          Open
+                          <span aria-hidden>→</span>
+                        </span>
+                      </span>
+                    </div>
+                  </a>
+                ),
+              )}
             </div>
           </div>
         </section>
@@ -746,50 +795,6 @@ function LandingPage() {
                       <Illustration />
                     </div>
                   </div>
-                ),
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* What You Can Build Section */}
-        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-2xl sm:text-3xl font-bold text-gray-900">
-              <span>What people build with</span>
-              <span className="text-[#0692B6]">lix</span>
-            </h2>
-            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
-              {buildShowcases.map(
-                ({ id, title, screenshot, fallback, href, ctaLabel }) => (
-                  <a
-                    key={id}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 transition-transform duration-300 hover:-translate-y-2 hover:border-gray-300"
-                  >
-                    <div className="relative aspect-[16/9] overflow-hidden">
-                      <img
-                        src={screenshot}
-                        alt={title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                        onError={createImageErrorHandler(fallback)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between gap-4 px-5 py-4 text-gray-900">
-                      <h3 className="text-sm font-semibold sm:text-base md:text-lg">
-                        {title}
-                      </h3>
-                      <span className="relative inline-flex items-center text-sm font-medium text-blue-600">
-                        <span className="sr-only">{ctaLabel}</span>
-                        <span className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-hover:text-blue-700">
-                          Open
-                          <span aria-hidden>→</span>
-                        </span>
-                      </span>
-                    </div>
-                  </a>
                 ),
               )}
             </div>

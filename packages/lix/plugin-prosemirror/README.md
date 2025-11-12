@@ -2,12 +2,16 @@
 
 This package enables change control for [ProseMirror](https://prosemirror.net/) documents using the Lix SDK.
 
+[![Screenshot of the ProseMirror example app](./assets/prosemirror.png)](https://prosemirror-example.onrender.com/)
+
+[Try out the example app →](https://prosemirror-example.onrender.com/)
+
 An example can be found in the [example](./example) directory.
 
 ## Installation
 
 ```bash
-npm install @lix-js/sdk @lix-js/plugin-prosemirror 
+npm install @lix-js/sdk @lix-js/plugin-prosemirror
 ```
 
 ## Getting Started
@@ -19,7 +23,7 @@ import { openLix } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
 
 export const lix = await openLix({
-  providePlugins: [prosemirrorPlugin],
+	providePlugins: [prosemirrorPlugin],
 });
 ```
 
@@ -27,17 +31,17 @@ export const lix = await openLix({
 
 ```ts
 export const prosemirrorFile = await lix.db
-  .insertInto("file")
-  .values({
-    path: "/prosemirror.json",
-    data: new TextEncoder().encode(
-      JSON.stringify({
-        type: "doc",
-        content: [],
-      }),
-    ),
-  })
-  .execute();
+	.insertInto("file")
+	.values({
+		path: "/prosemirror.json",
+		data: new TextEncoder().encode(
+			JSON.stringify({
+				type: "doc",
+				content: [],
+			}),
+		),
+	})
+	.execute();
 ```
 
 ### Add the `lixProsemirror` Plugin to Your Editor State
@@ -49,16 +53,16 @@ import { lixProsemirror, idPlugin } from "@lix-js/plugin-prosemirror";
 import { EditorState } from "prosemirror-state";
 
 const state = EditorState.create({
-  doc: schema.nodeFromJSON(/* ... */),
-  schema,
-  plugins: [
-    // ...other plugins...
-    idPlugin(),
-    lixProsemirror({
-      lix, // your lix instance
-      fileId: prosemirrorFile.id, // the file id of your Prosemirror document
-    }),
-  ],
+	doc: schema.nodeFromJSON(/* ... */),
+	schema,
+	plugins: [
+		// ...other plugins...
+		idPlugin(),
+		lixProsemirror({
+			lix, // your lix instance
+			fileId: prosemirrorFile.id, // the file id of your Prosemirror document
+		}),
+	],
 });
 ```
 
@@ -72,10 +76,9 @@ import { idPlugin } from "@lix-js/plugin-prosemirror";
 idPlugin(),
 ```
 
-
 ## How it works
 
-The lix prosemirror plugin tracks changes in the Prosemirror document with unique IDs. 
+The lix prosemirror plugin tracks changes in the Prosemirror document with unique IDs.
 
 If you don't have a id for your nodes yet, use the `idPlugin()` to add them:
 
