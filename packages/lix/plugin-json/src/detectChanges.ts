@@ -1,9 +1,9 @@
 import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
-import { JSONPointerValueSchema } from "./schemas/json-pointer-value.js";
+import { JSONPropertySchema } from "./schemas/json-pointer-value.js";
 import {
 	pointerFromSegments,
 	type JSONValue,
-} from "./utilities/json-pointer.js";
+} from "./utilities/jsonPointer.js";
 
 const isObject = (value: unknown): value is Record<string, JSONValue> =>
 	typeof value === "object" && value !== null && !Array.isArray(value);
@@ -18,7 +18,7 @@ const areValuesEqual = (left: JSONValue, right: JSONValue): boolean =>
 
 const pushDeletion = (changes: DetectedChange[], pointer: string) => {
 	changes.push({
-		schema: JSONPointerValueSchema,
+		schema: JSONPropertySchema,
 		entity_id: pointer,
 		snapshot_content: null,
 	});
@@ -30,10 +30,10 @@ const pushUpsert = (
 	value: JSONValue,
 ) => {
 	changes.push({
-		schema: JSONPointerValueSchema,
+		schema: JSONPropertySchema,
 		entity_id: pointer,
 		snapshot_content: {
-			path: pointer,
+			property: pointer,
 			value,
 		},
 	});
@@ -93,7 +93,9 @@ const diffJson = (
 	}
 
 	if (afterValue === undefined) {
-		pushDeletion(changes, pointerFromSegments(path));
+		collectLeaves(beforeValue, path, (pointer, _value) => {
+			pushDeletion(changes, pointer);
+		});
 		return;
 	}
 

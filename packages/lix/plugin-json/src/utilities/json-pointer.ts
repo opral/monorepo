@@ -19,6 +19,14 @@ const isContainer = (
 const isIndexToken = (token: string): boolean =>
 	token === "-" || /^[0-9]+$/.test(token);
 
+const UNSAFE_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+
+const assertSafeKey = (token: string) => {
+	if (UNSAFE_KEYS.has(token)) {
+		throw new Error(`Unsafe JSON pointer segment "${token}" is not permitted.`);
+	}
+};
+
 const createContainerForToken = (
 	token: string,
 ): JSONValue[] | Record<string, JSONValue> => (isIndexToken(token) ? [] : {});
@@ -104,6 +112,8 @@ export const setValueAtPointer = (
 			continue;
 		}
 
+		assertSafeKey(token);
+
 		if (!isContainer(current[token])) {
 			current[token] = createContainerForToken(nextToken);
 		}
@@ -127,6 +137,7 @@ export const setValueAtPointer = (
 		return document;
 	}
 
+	assertSafeKey(lastToken);
 	current[lastToken] = value;
 	return document;
 };
@@ -167,6 +178,7 @@ export const removeValueAtPointer = (
 			});
 			current = current[index];
 		} else if (isObject(current)) {
+			assertSafeKey(token);
 			current = current[token];
 		} else {
 			return document;
@@ -191,6 +203,7 @@ export const removeValueAtPointer = (
 		return document;
 	}
 
+	assertSafeKey(lastToken);
 	delete current[lastToken];
 	return document;
 };

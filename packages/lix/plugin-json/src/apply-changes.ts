@@ -1,5 +1,5 @@
 import { type LixPlugin } from "@lix-js/sdk";
-import { JSONPropertySchema } from "./schemas/json-property.js";
+import { JSONPointerValueSchema } from "./schemas/json-pointer-value.js";
 import {
 	setValueAtPointer,
 	removeValueAtPointer,
@@ -27,7 +27,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	let document: JSONValue | undefined = initialDocument;
 
 	for (const change of changes) {
-		if (change.schema_key === JSONPropertySchema["x-lix-key"]) {
+		if (change.schema_key === JSONPointerValueSchema["x-lix-key"]) {
 			const propertyPath = change.entity_id;
 
 			if (change.snapshot_content === null) {

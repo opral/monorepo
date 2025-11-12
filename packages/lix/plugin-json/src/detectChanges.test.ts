@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
-import { detectChanges } from "./detect-changes.js";
+import { detectChanges } from "./detectChanges.js";
 import {
 	type FromLixSchemaDefinition,
 	type DetectedChange,
 	type LixPlugin,
 } from "@lix-js/sdk";
-import { JSONPointerValueSchema } from "./schemas/json-pointer-value.js";
+import { JSONPropertySchema } from "./schemas/json-pointer-value.js";
 
 type DetectChangesArgs = Parameters<NonNullable<LixPlugin["detectChanges"]>>[0];
 type TestFile = (DetectChangesArgs["before"] & DetectChangesArgs["after"]) & {
@@ -93,14 +93,14 @@ test("it should detect a new property on root level", async () => {
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/City",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/City",
+				property: "/City",
 				value: "New York",
 			},
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -135,31 +135,31 @@ test("it should detect a new properties on nested levels", async () => {
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/level1/newProp",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/newProp",
+				property: "/level1/newProp",
 				value: "level1.newProp",
 			},
 		},
 		{
 			entity_id: "/level1/level2/newProp",
 
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/newProp",
+				property: "/level1/level2/newProp",
 				value: "level1.level2.newProp",
 			},
 		},
 		{
 			entity_id: "/level1/level2/level3/newProp",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/level3/newProp",
+				property: "/level1/level2/level3/newProp",
 				value: "level1.level2.level3.newProp",
 			},
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -186,30 +186,30 @@ test("it should detect a new property containing an array on root level", async 
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/array/0",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/array/0",
+				property: "/array/0",
 				value: 1,
 			},
 		},
 		{
 			entity_id: "/array/1",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/array/1",
+				property: "/array/1",
 				value: 2,
 			},
 		},
 		{
 			entity_id: "/array/2",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/array/2",
+				property: "/array/2",
 				value: 3,
 			},
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -242,78 +242,78 @@ test("it should detect new properties containing an array in nested levels", asy
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/level1/prop/0",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/prop/0",
+				property: "/level1/prop/0",
 				value: "level1",
 			},
 		},
 		{
 			entity_id: "/level1/prop/1",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/prop/1",
+				property: "/level1/prop/1",
 				value: 2,
 			},
 		},
 		{
 			entity_id: "/level1/prop/2",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/prop/2",
+				property: "/level1/prop/2",
 				value: 3,
 			},
 		},
 		{
 			entity_id: "/level1/level2/prop/0",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/prop/0",
+				property: "/level1/level2/prop/0",
 				value: "level2",
 			},
 		},
 		{
 			entity_id: "/level1/level2/prop/1",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/prop/1",
+				property: "/level1/level2/prop/1",
 				value: 2,
 			},
 		},
 		{
 			entity_id: "/level1/level2/prop/2",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/prop/2",
+				property: "/level1/level2/prop/2",
 				value: 3,
 			},
 		},
 		{
 			entity_id: "/level1/level2/level3/prop/0",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/level3/prop/0",
+				property: "/level1/level2/level3/prop/0",
 				value: "level3",
 			},
 		},
 		{
 			entity_id: "/level1/level2/level3/prop/1",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/level3/prop/1",
+				property: "/level1/level2/level3/prop/1",
 				value: 2,
 			},
 		},
 		{
 			entity_id: "/level1/level2/level3/prop/2",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/level3/prop/2",
+				property: "/level1/level2/level3/prop/2",
 				value: 3,
 			},
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -337,19 +337,19 @@ test("it should detect updates and deletions inside arrays", async () => {
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/list/1",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/list/1",
+				property: "/list/1",
 				value: "x",
 			},
 		},
 		{
 			entity_id: "/list/2",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: null,
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -382,14 +382,14 @@ test("it should detect nested updates inside arrays", async () => {
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/items/0/value",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/items/0/value",
+				property: "/items/0/value",
 				value: 1,
 			},
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -415,14 +415,14 @@ test("it should detect an updated property on root level", async () => {
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/City",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/City",
+				property: "/City",
 				value: "New York",
 			},
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -465,45 +465,45 @@ test("it should detect updated properties on nested levels", async () => {
 	expect(detectedChanges).toStrictEqual([
 		{
 			entity_id: "/level1/prop",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: null,
 		},
 		{
 			entity_id: "/level1/level2/prop",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: null,
 		},
 		{
 			entity_id: "/level1/level2/level3/prop",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: null,
 		},
 		{
 			entity_id: "/level1/level2/level3/newProp",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/level3/newProp",
+				property: "/level1/level2/level3/newProp",
 				value: "level1.level2.level3.newProp",
 			},
 		},
 		{
 			entity_id: "/level1/level2/newProp",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/level2/newProp",
+				property: "/level1/level2/newProp",
 				value: "level1.level2.newProp",
 			},
 		},
 		{
 			entity_id: "/level1/newProp",
-			schema: JSONPointerValueSchema,
+			schema: JSONPropertySchema,
 			snapshot_content: {
-				path: "/level1/newProp",
+				property: "/level1/newProp",
 				value: "level1.newProp",
 			},
 		},
 	] satisfies DetectedChange<
-		FromLixSchemaDefinition<typeof JSONPointerValueSchema>
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
 	>[]);
 });
 
@@ -531,11 +531,11 @@ test("it should detect updated properties on nested levels", async () => {
 
 // 	expect(detectedChanges).toEqual([
 // 		{
-// 			schema: JSONPointerValueSchema,
+// 			schema: JSONPropertySchema,
 // 			entity_id: "/Age",
 // 			snapshot: 21,
 // 		},
-// 	] satisfies DetectedChange<typeof JSONPointerValueSchema>[]);
+// 	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
 // });
 
 // test("it should detect a deletion of a property", async () => {
@@ -559,8 +559,8 @@ test("it should detect updated properties on nested levels", async () => {
 // 	});
 
 // 	expect(detectedChanges).toStrictEqual([
-// 		{ entity_id: "/Age", schema: JSONPointerValueSchema, snapshot: undefined },
-// 	] satisfies DetectedChange<typeof JSONPointerValueSchema>[]);
+// 		{ entity_id: "/Age", schema: JSONPropertySchema, snapshot: undefined },
+// 	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
 // });
 
 // test("it should return [] if both before and after are empty", async () => {
@@ -605,18 +605,18 @@ test("it should detect updated properties on nested levels", async () => {
 // 	expect(detectedChanges).toEqual([
 // 		{
 // 			entity_id: "/Age",
-// 			schema: JSONPointerValueSchema,
+// 			schema: JSONPropertySchema,
 // 			snapshot: 21,
 // 		},
 // 		{
 // 			entity_id: "/City",
-// 			schema: JSONPointerValueSchema,
+// 			schema: JSONPropertySchema,
 // 			snapshot: undefined,
 // 		},
 // 		{
 // 			entity_id: "Country",
-// 			schema: JSONPointerValueSchema,
+// 			schema: JSONPropertySchema,
 // 			snapshot: "USA",
 // 		},
-// 	] satisfies DetectedChange<typeof JSONPointerValueSchema>[]);
+// 	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
 // });
