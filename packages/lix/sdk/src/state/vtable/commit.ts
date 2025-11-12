@@ -315,57 +315,97 @@ export function commit(args: {
 				}
 
 				// Find existing working change set elements to delete
-				const existingEntities = engine.executeSync(
-					db
-						.selectFrom("lix_internal_state_vtable")
-						.select([
-							"_pk",
-							"entity_id",
-							sql`json_extract(snapshot_content, '$.entity_id')`.as(
-								"element_entity_id"
-							),
-							sql`json_extract(snapshot_content, '$.schema_key')`.as(
-								"element_schema_key"
-							),
-							sql`json_extract(snapshot_content, '$.file_id')`.as(
-								"element_file_id"
-							),
-						])
-						.where("entity_id", "like", `${workingChangeSetId}~%`)
-						.where("schema_key", "=", "lix_change_set_element")
-						.where("file_id", "=", "lix")
-						.where("version_id", "=", "global")
-						.where((eb) =>
-							eb.or(
-								userChanges.map((change) =>
-									eb.and([
-										eb(
-											sql`json_extract(snapshot_content, '$.entity_id')`,
-											"=",
-											change.entity_id
-										),
-										eb(
-											sql`json_extract(snapshot_content, '$.schema_key')`,
-											"=",
-											change.schema_key
-										),
-										eb(
-											sql`json_extract(snapshot_content, '$.file_id')`,
-											"=",
-											change.file_id
-										),
-									])
-								)
-							)
-						)
-						.compile()
-				).rows as Array<{
+				const uniqueTargetEntities: Array<{
+					entity_id: string;
+					schema_key: string;
+					file_id: string;
+				}> = [];
+				const seenTargetKeys = new Set<string>();
+				for (const change of userChanges) {
+					const key = `${change.entity_id}~${change.schema_key}~${change.file_id}`;
+					if (seenTargetKeys.has(key)) {
+						continue;
+					}
+					seenTargetKeys.add(key);
+					uniqueTargetEntities.push({
+						entity_id: change.entity_id,
+						schema_key: change.schema_key,
+						file_id: change.file_id,
+					});
+				}
+
+				type WorkingChangeSetElement = {
 					_pk: string;
 					entity_id: string;
 					element_entity_id: string;
 					element_schema_key: string;
 					element_file_id: string;
-				}>;
+				};
+
+				let existingEntities: WorkingChangeSetElement[] = [];
+
+				if (uniqueTargetEntities.length > 0) {
+					// Build a literal table of all target entities so SQLite can join once
+					// instead of evaluating an OR per change.
+					const targetEntities = sql<{
+						entity_id: string;
+						schema_key: string;
+						file_id: string;
+					}>`
+						(${sql.join(
+							uniqueTargetEntities.map(
+								(target) =>
+									sql`SELECT ${target.entity_id} AS entity_id, ${target.schema_key} AS schema_key, ${target.file_id} AS file_id`
+							),
+							sql` UNION ALL `
+						)})
+						target_entities
+					`;
+
+					// Join working change set rows against the literal target table to locate
+					// existing elements that match the user changes (same entity/schema/file).
+					const cleanupQuery = db
+						.selectFrom("lix_internal_state_vtable as cse")
+						.select([
+							sql`cse."_pk"`.as("_pk"),
+							sql`cse."entity_id"`.as("entity_id"),
+							sql`json_extract(cse.snapshot_content, '$.entity_id')`.as(
+								"element_entity_id"
+							),
+							sql`json_extract(cse.snapshot_content, '$.schema_key')`.as(
+								"element_schema_key"
+							),
+							sql`json_extract(cse.snapshot_content, '$.file_id')`.as(
+								"element_file_id"
+							),
+						])
+						.where("cse.entity_id", "like", `${workingChangeSetId}~%`)
+						.where("cse.schema_key", "=", "lix_change_set_element")
+						.where("cse.file_id", "=", "lix")
+						.where("cse.version_id", "=", "global")
+						.innerJoin(targetEntities as any, (join) =>
+							join
+								.on(
+									sql`json_extract(cse.snapshot_content, '$.entity_id')`,
+									"=",
+									sql`target_entities.entity_id`
+								)
+								.on(
+									sql`json_extract(cse.snapshot_content, '$.schema_key')`,
+									"=",
+									sql`target_entities.schema_key`
+								)
+								.on(
+									sql`json_extract(cse.snapshot_content, '$.file_id')`,
+									"=",
+									sql`target_entities.file_id`
+								)
+						)
+						.compile();
+
+					existingEntities = engine.executeSync(cleanupQuery)
+						.rows as WorkingChangeSetElement[];
+				}
 
 				// Collect batched untracked updates for working CSE
 				const workingUntrackedBatch: Array<{
