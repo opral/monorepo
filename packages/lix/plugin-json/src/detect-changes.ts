@@ -125,8 +125,17 @@ const diffJson = (
 			]);
 
 			for (const key of keys) {
+				const beforeChild = isObject(beforeValue)
+					? beforeValue[key]
+					: undefined;
+				const afterChild = isObject(afterValue) ? afterValue[key] : undefined;
 				path.push(key);
-				diffJson(beforeValue[key], afterValue[key], path, changes);
+				diffJson(
+					beforeChild as JSONValue,
+					afterChild as JSONValue,
+					path,
+					changes,
+				);
 				path.pop();
 			}
 			return;

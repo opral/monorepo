@@ -70,7 +70,7 @@ test("it should not detect changes if the json did not update", async () => {
 	expect(detectedChanges).toEqual([]);
 });
 
-test("it should detect a new property on root level", async () => {
+test("it should detect a new path on root level", async () => {
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Anna",
@@ -163,7 +163,7 @@ test("it should detect a new properties on nested levels", async () => {
 	>[]);
 });
 
-test("it should detect a new property containing an array on root level", async () => {
+test("it should detect a new path containing an array on root level", async () => {
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Anna",
@@ -393,7 +393,7 @@ test("it should detect nested updates inside arrays", async () => {
 	>[]);
 });
 
-test("it should detect an updated property on root level", async () => {
+test("it should detect an updated path on root level", async () => {
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Samuel",
@@ -538,7 +538,7 @@ test("it should detect updated properties on nested levels", async () => {
 // 	] satisfies DetectedChange<typeof JSONPointerValueSchema>[]);
 // });
 
-// test("it should detect a deletion of a property", async () => {
+// test("it should detect a deletion of a path", async () => {
 // 	const lix = await openLix({});
 // 	const before = new TextEncoder().encode(
 // 		JSON.stringify({
