@@ -113,10 +113,7 @@ function MessageBody({ content }: { content: string }) {
 						</pre>
 					</div>
 				) : (
-					<div
-						key={index}
-						className="whitespace-pre-wrap text-sm leading-relaxed"
-					>
+					<div key={index} className="text-sm leading-relaxed">
 						{part.body}
 					</div>
 				),

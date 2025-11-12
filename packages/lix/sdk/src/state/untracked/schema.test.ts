@@ -29,7 +29,7 @@ test("untracked schema validates JSONB content properly", async () => {
 			schema_key: "lix_key_value",
 			file_id: "lix",
 			version_id: activeVersion.version_id,
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: sql`jsonb('{"key": "test", "value": "valid"}')`,
 			schema_version: "1.0",
 			created_at: "2023-01-01T00:00:00.000Z",
@@ -95,7 +95,7 @@ test("untracked schema rejects invalid JSONB", async () => {
 				schema_key: "lix_key_value",
 				file_id: "lix",
 				version_id: activeVersion.version_id,
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: sql`'invalid json {'`, // Invalid JSON
 				schema_version: "1.0",
 				created_at: "2023-01-01T00:00:00.000Z",
@@ -133,7 +133,7 @@ test("untracked schema rejects non-object JSONB types", async () => {
 				schema_key: "lix_key_value",
 				file_id: "lix",
 				version_id: activeVersion.version_id,
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: sql`jsonb('["array", "not", "object"]')`, // Array instead of object
 				schema_version: "1.0",
 				created_at: "2023-01-01T00:00:00.000Z",
@@ -153,7 +153,7 @@ test("untracked schema rejects non-object JSONB types", async () => {
 				schema_key: "lix_key_value",
 				file_id: "lix",
 				version_id: activeVersion.version_id,
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: sql`jsonb('"just a string"')`, // String instead of object
 				schema_version: "1.0",
 				created_at: "2023-01-01T00:00:00.000Z",
@@ -190,7 +190,7 @@ test("untracked schema validates is_tombstone constraints", async () => {
 			schema_key: "lix_key_value",
 			file_id: "lix",
 			version_id: activeVersion.version_id,
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: null, // NULL for tombstone
 			schema_version: "1.0",
 			created_at: "2023-01-01T00:00:00.000Z",
@@ -220,7 +220,7 @@ test("untracked schema validates is_tombstone constraints", async () => {
 				schema_key: "lix_key_value",
 				file_id: "lix",
 				version_id: activeVersion.version_id,
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: sql`jsonb('{"key": "value"}')`, // Content with tombstone marker
 				schema_version: "1.0",
 				created_at: "2023-01-01T00:00:00.000Z",
@@ -240,7 +240,7 @@ test("untracked schema validates is_tombstone constraints", async () => {
 				schema_key: "lix_key_value",
 				file_id: "lix",
 				version_id: activeVersion.version_id,
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: null,
 				schema_version: "1.0",
 				created_at: "2023-01-01T00:00:00.000Z",
@@ -278,7 +278,7 @@ test("untracked schema allows NULL snapshot_content with is_tombstone = 0", asyn
 			schema_key: "lix_key_value",
 			file_id: "lix",
 			version_id: activeVersion.version_id,
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: null, // NULL content
 			schema_version: "1.0",
 			created_at: "2023-01-01T00:00:00.000Z",

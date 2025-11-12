@@ -58,6 +58,8 @@ export const LixSchemaDefinition = {
 					type: "array",
 					items: {
 						type: "array",
+						minItems: 1,
+						uniqueItems: true,
 						items: {
 							type: "string",
 							format: "json-pointer",
@@ -73,6 +75,8 @@ export const LixSchemaDefinition = {
 				},
 				"x-lix-primary-key": {
 					type: "array",
+					minItems: 1,
+					uniqueItems: true,
 					items: {
 						type: "string",
 						format: "json-pointer",
@@ -94,6 +98,7 @@ export const LixSchemaDefinition = {
 									format: "json-pointer",
 									description: "JSON Pointer referencing the local field.",
 								},
+								uniqueItems: true,
 								description:
 									"Local JSON-schema property names that participate in the FK",
 							},
@@ -113,6 +118,7 @@ export const LixSchemaDefinition = {
 											format: "json-pointer",
 											description: "JSON Pointer referencing the remote field.",
 										},
+										uniqueItems: true,
 										description:
 											"Remote property names (same length as local properties)",
 									},
@@ -144,8 +150,9 @@ export const LixSchemaDefinition = {
 				},
 				"x-lix-key": {
 					type: "string",
+					pattern: "^[a-z][a-z0-9_]*$",
 					description:
-						"The key of the schema. The key is used to identify the schema. You must use a unique key for each schema.",
+						"The schema identifier. Must be snake_case (lowercase, underscores) to safely embed in SQL identifiers.",
 					examples: ["csv_plugin_cell"],
 				},
 				"x-lix-immutable": {
@@ -199,7 +206,7 @@ export const LixSchemaDefinition = {
 					},
 				},
 			},
-			required: ["x-lix-key", "x-lix-version"],
+			required: ["x-lix-key", "x-lix-version", "additionalProperties"],
 		},
 	],
 } as const;
@@ -514,12 +521,22 @@ export type LixSelectable<T> = {
 	[K in keyof T]: SelectType<T[K]>;
 };
 
+type IsNever<T> = [T] extends [never] ? true : false;
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
 /**
  * Transform object types with no properties from unknown to Record<string, any>
  */
-type TransformEmptyObject<T> = T extends { [x: string]: unknown }
-	? Record<string, any>
-	: T;
+type TransformEmptyObject<T> =
+	IsAny<T> extends true
+		? any
+		: IsNever<T> extends true
+			? never
+			: T extends object
+				? keyof T extends never
+					? Record<string, any>
+					: T
+				: T;
 
 /**
  * Check if a schema property is an empty object type (no properties defined)

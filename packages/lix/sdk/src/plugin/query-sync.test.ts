@@ -92,7 +92,7 @@ describe("querySync", () => {
 				entity_id: file.id,
 				schema_key: "lix_file_descriptor",
 				file_id: file.id,
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: {
 					id: file.id,
 					directory_id: file.directory_id,

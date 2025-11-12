@@ -35,10 +35,51 @@ test("a json change schema should be infer the properties", () => {
 	assertType<{
 		name: string;
 		age: number;
-		location: {
-			[x: string]: unknown;
-		};
+		location: Record<string, any>;
 	}>(snapshot);
+});
+
+test("FromLixSchemaDefinition preserves nested object property types", () => {
+	const schema = {
+		"x-lix-version": "1.0",
+		"x-lix-key": "location_example",
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			location: {
+				type: "object",
+				properties: {
+					city: { type: "string" },
+					country: { type: "string" },
+				},
+				required: ["city", "country"],
+			},
+			metadata: {
+				type: "object",
+			},
+		},
+		required: ["id", "location"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	type Snapshot = FromLixSchemaDefinition<typeof schema>;
+
+	const validSnapshot: Snapshot = {
+		id: "123",
+		location: { city: "Berlin", country: "DE" },
+		metadata: { extra: "value" },
+	};
+
+	assertType<{
+		id: string;
+		location: { city: string; country: string };
+		metadata?: Record<string, any>;
+	}>(validSnapshot);
+
+	// @ts-expect-error - city must remain a string
+	const invalidLocation: Snapshot["location"] = { city: 123, country: "DE" };
+
+	void invalidLocation;
 });
 
 test("x-lix-override-lixcols typing", () => {

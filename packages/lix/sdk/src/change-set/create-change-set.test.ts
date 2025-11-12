@@ -10,7 +10,7 @@ test("creating a change set should succeed", async () => {
 		.insertInto("stored_schema")
 		.values({
 			value: {
-				"x-lix-key": "mock-schema",
+				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
 				type: "object",
 				properties: {
@@ -27,7 +27,7 @@ test("creating a change set should succeed", async () => {
 		.values([
 			{
 				id: "change0",
-				schema_key: "mock-schema",
+				schema_key: "mock_schema",
 				schema_version: "1.0",
 				entity_id: "value1",
 				file_id: "mock",
@@ -36,7 +36,7 @@ test("creating a change set should succeed", async () => {
 			},
 			{
 				id: "change1",
-				schema_key: "mock-schema",
+				schema_key: "mock_schema",
 				schema_version: "1.0",
 				entity_id: "value2",
 				file_id: "mock",

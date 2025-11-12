@@ -6,7 +6,7 @@ import { openLix } from "../../lix/open-lix.js";
 const BENCH_SCHEMA_KEY = "bench_state_view";
 const BENCH_SCHEMA_VERSION = "1.0";
 const BENCH_FILE_ID = "bench-state-view-file";
-const BENCH_PLUGIN_KEY = "lix_own_entity";
+const BENCH_PLUGIN_KEY = "lix_sdk";
 const TRACKED_ENTITY_ID = "bench_state_tracked_anchor";
 const UNTRACKED_ENTITY_ID = "bench_state_untracked_anchor";
 const SELECT_ENTITY_LABEL = "state select • tracked entity";

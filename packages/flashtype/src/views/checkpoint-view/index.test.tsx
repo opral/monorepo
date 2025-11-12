@@ -14,7 +14,7 @@ async function countCommits(lix: Awaited<ReturnType<typeof openLix>>) {
 }
 
 describe("CheckpointView", () => {
-	test("creates a checkpoint and clears the message", async () => {
+	test("creates a checkpoint when clicking the button", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
 		const fileId = "checkpoint_view_test_file";
 
@@ -49,15 +49,9 @@ describe("CheckpointView", () => {
 
 		const { findByTestId } = utils!;
 
-		const textarea = (await findByTestId(
-			"checkpoint-message",
-		)) as HTMLTextAreaElement;
 		const button = (await findByTestId(
 			"checkpoint-submit",
 		)) as HTMLButtonElement;
-
-		fireEvent.change(textarea, { target: { value: "Integration checkpoint" } });
-		await waitFor(() => expect(button).not.toBeDisabled());
 
 		fireEvent.click(button);
 		await waitFor(() => expect(button).toBeDisabled());
@@ -65,10 +59,9 @@ describe("CheckpointView", () => {
 		await waitFor(async () => {
 			const after = await countCommits(lix);
 			expect(after).toBe(before + 1);
-			expect(textarea.value).toBe("");
 		});
 
-		await waitFor(() => expect(button).toBeDisabled());
+		await waitFor(() => expect(button).not.toBeDisabled());
 	});
 
 	test("updates tab badge count based on working changes", async () => {
@@ -116,5 +109,34 @@ describe("CheckpointView", () => {
 		await waitFor(() => expect(setTabBadgeCount).toHaveBeenCalledWith(1));
 		cleanup?.();
 		unmount();
+	});
+
+	test("invokes openHistoryView when clicking View checkpoints", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+		const openHistoryView = vi.fn();
+
+		let utils: ReturnType<typeof render>;
+		await act(async () => {
+			utils = render(
+				<LixProvider lix={lix}>
+					<Suspense fallback={null}>
+						<CheckpointView
+							context={{
+								openHistoryView,
+								setTabBadgeCount: () => {},
+								lix,
+							}}
+						/>
+					</Suspense>
+				</LixProvider>,
+			);
+		});
+
+		const button = (await utils!.findByRole("button", {
+			name: /view checkpoints/i,
+		})) as HTMLButtonElement;
+
+		fireEvent.click(button);
+		expect(openHistoryView).toHaveBeenCalledTimes(1);
 	});
 });

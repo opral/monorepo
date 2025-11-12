@@ -17,7 +17,7 @@ const diffEntitySchema = {
 } as const satisfies LixSchemaDefinition;
 
 const diffSchemaA = {
-	"x-lix-key": "test_schemaA",
+	"x-lix-key": "test_schema_a",
 	"x-lix-version": "1.0",
 	type: "object",
 	additionalProperties: false,
@@ -29,7 +29,7 @@ const diffSchemaA = {
 } as const satisfies LixSchemaDefinition;
 
 const diffSchemaB = {
-	"x-lix-key": "test_schemaB",
+	"x-lix-key": "test_schema_b",
 	"x-lix-version": "1.0",
 	type: "object",
 	additionalProperties: false,
@@ -564,7 +564,7 @@ simulationTest(
 
 		await storeDiffTestSchemas(lix);
 
-		// Seed common ancestor with an unchanged entity on file2/test_schemaA
+		// Seed common ancestor with an unchanged entity on file2/test_schema_a
 		const active = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "version.id", "active_version.version_id")
@@ -575,7 +575,7 @@ simulationTest(
 			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_same",
-				schema_key: "test_schemaA",
+				schema_key: "test_schema_a",
 				file_id: "file2",
 				version_id: active.id,
 				plugin_key: "test_plugin",
@@ -591,13 +591,13 @@ simulationTest(
 			from: active,
 		});
 
-		// file1/test_schemaA: deleted (source explicitly deletes, target has content later)
+		// file1/test_schema_a: deleted (source explicitly deletes, target has content later)
 		// Seed then delete in source before target exists (no common ancestor for this key)
 		await lix.db
 			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_del",
-				schema_key: "test_schemaA",
+				schema_key: "test_schema_a",
 				file_id: "file1",
 				version_id: sourceVersion.id,
 				plugin_key: "test_plugin",
@@ -609,7 +609,7 @@ simulationTest(
 		await lix.db
 			.deleteFrom("state_by_version")
 			.where("entity_id", "=", "e_del")
-			.where("schema_key", "=", "test_schemaA")
+			.where("schema_key", "=", "test_schema_a")
 			.where("file_id", "=", "file1")
 			.where("version_id", "=", sourceVersion.id)
 			.execute();
@@ -621,12 +621,12 @@ simulationTest(
 			from: active,
 		});
 
-		// file1/test_schemaA: created (only in source)
+		// file1/test_schema_a: created (only in source)
 		await lix.db
 			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_add",
-				schema_key: "test_schemaA",
+				schema_key: "test_schema_a",
 				file_id: "file1",
 				version_id: sourceVersion.id,
 				plugin_key: "test_plugin",
@@ -640,7 +640,7 @@ simulationTest(
 			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_del",
-				schema_key: "test_schemaA",
+				schema_key: "test_schema_a",
 				file_id: "file1",
 				version_id: targetVersion.id,
 				plugin_key: "test_plugin",
@@ -649,12 +649,12 @@ simulationTest(
 			})
 			.execute();
 
-		// file1/test_schemaB: updated (both present but different)
+		// file1/test_schema_b: updated (both present but different)
 		await lix.db
 			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_upd",
-				schema_key: "test_schemaB",
+				schema_key: "test_schema_b",
 				file_id: "file1",
 				version_id: targetVersion.id,
 				plugin_key: "test_plugin",
@@ -667,7 +667,7 @@ simulationTest(
 			.insertInto("state_by_version")
 			.values({
 				entity_id: "e_upd",
-				schema_key: "test_schemaB",
+				schema_key: "test_schema_b",
 				file_id: "file1",
 				version_id: sourceVersion.id,
 				plugin_key: "test_plugin",
@@ -687,8 +687,8 @@ simulationTest(
 		const key = (r: any) => `${r.file_id}|${r.schema_key}|${r.entity_id}`;
 		const map = new Map(diffs.map((r: any) => [key(r), r]));
 
-		// added (file1/test_schemaA/e_add)
-		const created = map.get("file1|test_schemaA|e_add");
+		// added (file1/test_schema_a/e_add)
+		const created = map.get("file1|test_schema_a|e_add");
 		expectDeterministic(created).toBeDefined();
 		expectDeterministic(created!.status).toBe("added");
 		expectDeterministic(created!.before_version_id).toBeNull();
@@ -696,8 +696,8 @@ simulationTest(
 		expectDeterministic(created!.before_change_id).toBeNull();
 		expectDeterministic(created!.after_change_id).toBeTruthy();
 
-		// removed (file1/test_schemaA/e_del): source tombstone vs target content
-		const deleted = map.get("file1|test_schemaA|e_del");
+		// removed (file1/test_schema_a/e_del): source tombstone vs target content
+		const deleted = map.get("file1|test_schema_a|e_del");
 		expectDeterministic(deleted).toBeDefined();
 		expectDeterministic(deleted!.status).toBe("removed");
 		expectDeterministic(deleted!.before_version_id).toBe(targetVersion.id);
@@ -705,8 +705,8 @@ simulationTest(
 		expectDeterministic(deleted!.after_change_id).toBeTruthy();
 		expectDeterministic(deleted!.before_change_id).toBeTruthy();
 
-		// modified (file1/test_schemaB/e_upd)
-		const updated = map.get("file1|test_schemaB|e_upd");
+		// modified (file1/test_schema_b/e_upd)
+		const updated = map.get("file1|test_schema_b|e_upd");
 		expectDeterministic(updated).toBeDefined();
 		expectDeterministic(updated!.status).toBe("modified");
 		expectDeterministic(updated!.before_version_id).toBe(targetVersion.id);
@@ -717,8 +717,8 @@ simulationTest(
 			updated!.before_change_id
 		);
 
-		// unchanged (file2/test_schemaA/e_same)
-		const unchanged = map.get("file2|test_schemaA|e_same");
+		// unchanged (file2/test_schema_a/e_same)
+		const unchanged = map.get("file2|test_schema_a|e_same");
 		expectDeterministic(unchanged).toBeDefined();
 		expectDeterministic(unchanged!.status).toBe("unchanged");
 		expectDeterministic(unchanged!.before_version_id).toBe(targetVersion.id);

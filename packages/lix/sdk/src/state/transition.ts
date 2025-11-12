@@ -226,7 +226,7 @@ WHERE rn = 1;
 			schema_key: LixChangeSetSchema["x-lix-key"],
 			schema_version: LixChangeSetSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			metadata: null,
 			snapshot_content: JSON.stringify({ id: changeSetId, metadata: null }),
 			created_at: now,
@@ -240,7 +240,7 @@ WHERE rn = 1;
 				schema_key: LixChangeSetElementSchema["x-lix-key"],
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				metadata: null,
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
@@ -261,7 +261,7 @@ WHERE rn = 1;
 			schema_key: LixCommitSchema["x-lix-key"],
 			schema_version: LixCommitSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: commitId,
@@ -290,7 +290,7 @@ WHERE rn = 1;
 				schema_key: LixChangeSetElementSchema["x-lix-key"],
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				metadata: null,
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
@@ -311,7 +311,7 @@ WHERE rn = 1;
 			schema_key: LixVersionTipSchema["x-lix-key"],
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			metadata: null,
 			snapshot_content: JSON.stringify({
 				id: version.id,
@@ -338,7 +338,7 @@ WHERE rn = 1;
 				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				metadata: null,
 				snapshot_content: JSON.stringify({
 					parent_id: sourceCommitId,
@@ -352,7 +352,7 @@ WHERE rn = 1;
 				schema_key: LixCommitEdgeSchema["x-lix-key"],
 				schema_version: LixCommitEdgeSchema["x-lix-version"],
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				metadata: null,
 				snapshot_content: JSON.stringify({
 					parent_id: args.to.id,

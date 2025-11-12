@@ -2,10 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test, vi, beforeEach } from "vitest";
 import { HistoryView } from "./index";
 
+const mockId = "cp-1";
 vi.mock("@lix-js/react-utils", () => ({
 	useQuery: vi.fn(() => [
 		{
-			id: "cp-1",
+			id: mockId,
 			added: 0,
 			removed: 0,
 			checkpoint_created_at: "2024-01-01T00:00:00.000Z",
@@ -18,7 +19,7 @@ describe("HistoryView", () => {
 		vi.clearAllMocks();
 	});
 
-	test("opens commit without stealing focus when the panel is focused", () => {
+	test("opens commit without stealing focus when the panel is focused", async () => {
 		const handleOpenCommit = vi.fn();
 
 		render(
@@ -32,17 +33,17 @@ describe("HistoryView", () => {
 			/>,
 		);
 
-		const commitButton = screen.getByRole("button", { name: /Checkpoint/ });
+		const commitButton = await screen.findByTestId(
+			`history-checkpoint-${mockId}`,
+		);
 		fireEvent.click(commitButton);
 
-		expect(handleOpenCommit).toHaveBeenCalledWith(
-			"cp-1",
-			expect.stringContaining("Checkpoint"),
-			{ focus: false },
-		);
+		expect(handleOpenCommit).toHaveBeenCalledWith(mockId, expect.any(String), {
+			focus: false,
+		});
 	});
 
-	test("falls back to default focusing when the panel is not focused", () => {
+	test("falls back to default focusing when the panel is not focused", async () => {
 		const handleOpenCommit = vi.fn();
 
 		render(
@@ -56,12 +57,14 @@ describe("HistoryView", () => {
 			/>,
 		);
 
-		const commitButton = screen.getByRole("button", { name: /Checkpoint/ });
+		const commitButton = await screen.findByTestId(
+			`history-checkpoint-${mockId}`,
+		);
 		fireEvent.click(commitButton);
 
 		expect(handleOpenCommit).toHaveBeenCalledWith(
-			"cp-1",
-			expect.stringContaining("Checkpoint"),
+			mockId,
+			expect.any(String),
 			undefined,
 		);
 	});

@@ -163,7 +163,7 @@ export function ErrorFallback(props: { error: unknown }) {
 						<Bug className="h-4 w-4" /> Report bug
 					</a>
 				</div>
-				<div className="mt-4 whitespace-pre-wrap text-xs opacity-80 border rounded p-3 bg-muted/20">
+				<div className="mt-4 text-xs opacity-80 border rounded p-3 bg-muted/20">
 					<div className="font-medium mb-2">Error details</div>
 					<pre>{formatError(props.error)}</pre>
 				</div>

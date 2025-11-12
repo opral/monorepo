@@ -40,7 +40,7 @@ This schema has two types of fields:
 
 **1. Lix-Specific Fields (Basic):**
 
-- **`x-lix-key`**: A globally unique string that identifies this schema. When a plugin reports a change, it references this key, telling Lix which schema to use for validation and interpretation.
+- **`x-lix-key`**: A globally unique string that identifies this schema. Keys must be snake_case (start with a lowercase letter, contain only lowercase letters, numbers, and underscores) so they can be safely embedded in SQL identifiers. When a plugin reports a change, it references this key, telling Lix which schema to use for validation and interpretation.
 - **`x-lix-version`**: A version number for the schema itself, allowing schemas to evolve over time.
 
 **2. Standard JSON Schema Fields:**
@@ -89,8 +89,8 @@ const AccountSchema: LixSchemaDefinition = {
 
 Here are the additional Lix-specific fields used in this advanced schema:
 
-- **`x-lix-primary-key`**: An array of property names that form the primary key for entities conforming to this schema. These properties uniquely identify an entity.
-- **`x-lix-unique`**: An array of arrays, where each inner array specifies a set of properties that must be unique across all entities of this schema.
+- **`x-lix-primary-key`**: An array of property names that form the primary key for entities conforming to this schema. The array must contain at least one pointer and cannot repeat the same property. These properties uniquely identify an entity.
+- **`x-lix-unique`**: An array of arrays, where each inner array specifies a set of properties that must be unique across all entities of this schema. Each inner array must list at least one pointer without duplicates.
 - **`x-lix-foreign-keys`**: An array of objects defining foreign key constraints. Each object specifies:
   - `properties`: The local properties that form the foreign key.
   - `references`: An object detailing the referenced schema (`schemaKey`) and its properties.

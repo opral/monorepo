@@ -50,6 +50,46 @@ test("x-key is required", () => {
 	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
+test("x-lix-key must be snake_case", () => {
+	const baseSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	};
+
+	const invalidKeys = [
+		"Invalid-Key!",
+		"also.invalid",
+		"123starts_with_number",
+		"contains space",
+		"camelCaseKey",
+		"UPPER_CASE",
+		"mixed-Case_Value",
+	];
+	for (const key of invalidKeys) {
+		const schema = {
+			...baseSchema,
+			"x-lix-key": key,
+		} as LixSchemaDefinition;
+
+		expect(() => validateLixSchemaDefinition(schema)).toThrow();
+	}
+
+	const validKeys = ["abc", "abc123", "abc_123", "a", "snake_case_key"];
+	for (const key of validKeys) {
+		const schema = {
+			...baseSchema,
+			"x-lix-key": key,
+		} as LixSchemaDefinition;
+
+		expect(() => validateLixSchemaDefinition(schema)).not.toThrow();
+	}
+});
+
 test("x-lix-unique is optional", () => {
 	const schema = {
 		type: "object",
@@ -98,6 +138,72 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 	};
 
 	expect(() => validateLixSchemaDefinition(schema)).toThrow();
+});
+
+test("x-lix-primary-key must include at least one unique pointer", () => {
+	const baseSchema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	};
+
+	const emptyPk = {
+		...baseSchema,
+		"x-lix-primary-key": [],
+	} as LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(emptyPk)).toThrow();
+
+	const duplicatePk = {
+		...baseSchema,
+		"x-lix-primary-key": ["/id", "/id"],
+	} as LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(duplicatePk)).toThrow();
+
+	const validPk = {
+		...baseSchema,
+		"x-lix-primary-key": ["/id"],
+	} as LixSchemaDefinition;
+
+	expect(() => validateLixSchemaDefinition(validPk)).not.toThrow();
+});
+
+test("x-lix-unique groups must include unique pointers", () => {
+	const baseSchema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			id: { type: "string" },
+			email: { type: "string" },
+		},
+		required: ["id", "email"],
+		additionalProperties: false,
+	};
+
+	const emptyGroup = {
+		...baseSchema,
+		"x-lix-unique": [[]],
+	} as LixSchemaDefinition;
+	expect(() => validateLixSchemaDefinition(emptyGroup)).toThrow();
+
+	const duplicatePointers = {
+		...baseSchema,
+		"x-lix-unique": [["/email", "/email"]],
+	} as LixSchemaDefinition;
+	expect(() => validateLixSchemaDefinition(duplicatePointers)).toThrow();
+
+	const validUnique = {
+		...baseSchema,
+		"x-lix-unique": [["/email"]],
+	} as LixSchemaDefinition;
+	expect(() => validateLixSchemaDefinition(validUnique)).not.toThrow();
 });
 
 test("x-lix-override-lixcols accepts cel expressions", () => {
@@ -307,6 +413,31 @@ test("x-lix-foreign-keys with valid structure", () => {
 	} as const satisfies LixSchemaDefinition;
 
 	expect(validateLixSchemaDefinition(schema)).toBe(true);
+});
+
+test("x-lix-foreign-keys reject duplicate pointers", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "invalid_fk_duplicates",
+		"x-lix-version": "1.0",
+		"x-lix-foreign-keys": [
+			{
+				// duplicates in local definition
+				properties: ["/local", "/local"],
+				references: {
+					schemaKey: "remote_schema",
+					properties: ["/id", "/version"],
+				},
+			},
+		],
+		properties: {
+			local: { type: "string" },
+		},
+		required: ["local"],
+		additionalProperties: false,
+	};
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow();
 });
 
 test("x-lix-foreign-keys with schemaVersion", () => {

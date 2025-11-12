@@ -11,7 +11,7 @@ const FILE_ID = "bench-file";
 const GLOBAL_VERSION_ID = "global";
 const ACTIVE_VERSION_ID = "bench_active_version";
 const SCHEMA_VERSION = "1.0";
-const PLUGIN_KEY = "lix_own_entity";
+const PLUGIN_KEY = "lix_sdk";
 
 const ENTITY_TXN = "bench_priority_transaction";
 const ENTITY_UNTRACKED = "bench_priority_untracked";

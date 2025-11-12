@@ -683,13 +683,13 @@ test("handles duplicate entity updates - last change wins", async () => {
 		],
 	});
 
-	await ensureCacheSchemas(lix, ["test-schema"]);
+	await ensureCacheSchemas(lix, ["test_schema"]);
 
 	// Create test changes for the same entity
 	const change1: MaterializedState = {
 		id: "change-1",
 		entity_id: "test-entity",
-		schema_key: "test-schema",
+		schema_key: "test_schema",
 		file_id: "test-file",
 		plugin_key: "test-plugin",
 		snapshot_content: JSON.stringify({ value: "first" }),
@@ -702,7 +702,7 @@ test("handles duplicate entity updates - last change wins", async () => {
 	const change2: MaterializedState = {
 		id: "change-2",
 		entity_id: "test-entity", // Same entity
-		schema_key: "test-schema",
+		schema_key: "test_schema",
 		file_id: "test-file",
 		plugin_key: "test-plugin",
 		snapshot_content: JSON.stringify({ value: "second" }),
@@ -755,14 +755,14 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 		],
 	});
 
-	await ensureCacheSchemas(lix, ["test-schema"]);
+	await ensureCacheSchemas(lix, ["test_schema"]);
 
 	// Create multiple changes for the same entity in a single batch
 	const changes: MaterializedState[] = [
 		{
 			id: "change-1",
 			entity_id: "test-entity",
-			schema_key: "test-schema",
+			schema_key: "test_schema",
 			file_id: "test-file",
 			plugin_key: "test-plugin",
 			snapshot_content: JSON.stringify({ value: "first" }),
@@ -774,7 +774,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 		{
 			id: "change-2",
 			entity_id: "test-entity", // Same entity
-			schema_key: "test-schema",
+			schema_key: "test_schema",
 			file_id: "test-file",
 			plugin_key: "test-plugin",
 			snapshot_content: JSON.stringify({ value: "second" }),
@@ -786,7 +786,7 @@ test("handles batch updates with duplicates - last in batch wins", async () => {
 		{
 			id: "change-3",
 			entity_id: "test-entity", // Same entity again
-			schema_key: "test-schema",
+			schema_key: "test_schema",
 			file_id: "test-file",
 			plugin_key: "test-plugin",
 			snapshot_content: JSON.stringify({ value: "third" }),
@@ -844,7 +844,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: {
 				id: childId,
 				change_set_id: changeSetId,
@@ -866,7 +866,7 @@ test("derived edge cache rows reference the commit change id", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -928,7 +928,7 @@ test("commit caching materializes its change set in cache", async () => {
 			schema_key: "lix_commit",
 			schema_version: "1.0",
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: {
 				id: childId,
 				change_set_id: changeSetId,
@@ -950,7 +950,7 @@ test("commit caching materializes its change set in cache", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -1001,7 +1001,7 @@ test("caches commit edges from commit.parent_commit_ids", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -1057,7 +1057,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,
@@ -1089,7 +1089,7 @@ test("clears cached edges when parent_commit_ids becomes empty", async () => {
 				schema_key: "lix_commit",
 				schema_version: "1.0",
 				file_id: "lix",
-				plugin_key: "lix_own_entity",
+				plugin_key: "lix_sdk",
 				snapshot_content: JSON.stringify({
 					id: childId,
 					change_set_id: changeSetId,

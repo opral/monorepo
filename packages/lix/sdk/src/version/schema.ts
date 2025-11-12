@@ -288,7 +288,7 @@ export function applyVersionDatabaseSchema(args: {
                 gen_id,
                 'lix_version_descriptor',
                 'lix',
-                'lix_own_entity',
+                'lix_sdk',
                 json_object(
                     'id', gen_id,
                     'name', COALESCE(NEW.name, human_id()),
@@ -307,7 +307,7 @@ export function applyVersionDatabaseSchema(args: {
                 gen_id,
                 'lix_version_tip',
                 'lix',
-                'lix_own_entity',
+                'lix_sdk',
                 json_object(
                     'id', gen_id,
                     'commit_id', tip_cid,
@@ -338,7 +338,7 @@ export function applyVersionDatabaseSchema(args: {
             UPDATE state_by_version
             SET 
                 file_id = 'lix',
-                plugin_key = 'lix_own_entity',
+                plugin_key = 'lix_sdk',
                 snapshot_content = json_object(
                     'id', NEW.id,
                     'name', COALESCE(NEW.name, (SELECT name FROM version WHERE id = NEW.id)),
@@ -356,7 +356,7 @@ export function applyVersionDatabaseSchema(args: {
             UPDATE state_by_version
             SET 
                 file_id = 'lix',
-                plugin_key = 'lix_own_entity',
+                plugin_key = 'lix_sdk',
                 snapshot_content = json_object(
                     'id', NEW.id,
                     'commit_id', NEW.commit_id,
@@ -428,7 +428,7 @@ export function applyVersionDatabaseSchema(args: {
 				inherited_from_version_id = NULL,
 				is_tombstone = 0,
 				file_id = 'lix',
-				plugin_key = 'lix_own_entity'
+				plugin_key = 'lix_sdk'
 			WHERE schema_key = 'lix_active_version'
 			  AND version_id = 'global';
 
@@ -450,7 +450,7 @@ export function applyVersionDatabaseSchema(args: {
 				'lix_active_version',
 				'lix',
 				'global',
-				'lix_own_entity',
+				'lix_sdk',
 				jsonb(json_object('id', generated.new_id, 'version_id', NEW.version_id)),
 				'${LixActiveVersionSchema["x-lix-version"]}',
 				generated.new_created_at,

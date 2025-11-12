@@ -104,7 +104,7 @@ export async function createCheckpoint(args: {
 			schema_key: LixVersionDescriptorSchema["x-lix-key"],
 			schema_version: LixVersionDescriptorSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: activeVersion.id,
 				name: activeVersion.name,
@@ -119,7 +119,7 @@ export async function createCheckpoint(args: {
 			schema_key: LixVersionTipSchema["x-lix-key"],
 			schema_version: LixVersionTipSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: activeVersion.id,
 				commit_id: checkpointCommitId,
@@ -150,7 +150,7 @@ export async function createCheckpoint(args: {
 			schema_key: LixCommitSchema["x-lix-key"],
 			schema_version: LixCommitSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: checkpointCommitId,
 				change_set_id: workingChangeSetId,
@@ -165,7 +165,7 @@ export async function createCheckpoint(args: {
 			schema_key: LixCommitSchema["x-lix-key"],
 			schema_version: LixCommitSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				id: newWorkingCommitId,
 				change_set_id: newWorkingChangeSetId,
@@ -180,7 +180,7 @@ export async function createCheckpoint(args: {
 			schema_key: LixEntityLabelSchema["x-lix-key"],
 			schema_version: LixEntityLabelSchema["x-lix-version"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			snapshot_content: JSON.stringify({
 				entity_id: checkpointCommitId,
 				schema_key: "lix_commit",

@@ -155,7 +155,7 @@ test("rewrites deletes for stored schema views", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -311,7 +311,7 @@ test("rewrites deletes for _by_version views", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -442,7 +442,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 			lixcol_version_id: '"global"',
 		},
 		"x-lix-entity-views": ["state"],
@@ -521,7 +521,7 @@ test("base view delete uses schema default version when omitted", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 			lixcol_version_id: '"global"',
 		},
 		type: "object",
@@ -618,7 +618,7 @@ test("rewrites delete with OR predicates", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -670,7 +670,7 @@ test("rewrites delete with NOT predicates", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -721,7 +721,7 @@ test("rewrites delete with inequality predicates", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {
@@ -771,7 +771,7 @@ test("rewrites delete with IS NULL predicates", async () => {
 		"x-lix-primary-key": ["/id"],
 		"x-lix-override-lixcols": {
 			lixcol_file_id: '"lix"',
-			lixcol_plugin_key: '"lix_own_entity"',
+			lixcol_plugin_key: '"lix_sdk"',
 		},
 		type: "object",
 		properties: {

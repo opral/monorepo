@@ -303,7 +303,7 @@ test("primary key validation ignores inherited entities", async () => {
 			entity_id: "entity-to-override",
 			schema_key: schema["x-lix-key"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			version_id: parentVersion.id,
 			snapshot_content: {
 				key: "entity-to-override",
@@ -435,7 +435,7 @@ test("immutable schemas reject repeated inserts", async () => {
 			entity_id: "1",
 			schema_key: schema["x-lix-key"],
 			file_id: "lix",
-			plugin_key: "lix_own_entity",
+			plugin_key: "lix_sdk",
 			version_id: activeVersion.version_id,
 			snapshot_content: { id: "1", name: "first" },
 			schema_version: schema["x-lix-version"],

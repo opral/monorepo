@@ -671,6 +671,32 @@ export function V2LayoutShell() {
 		[setPanelState],
 	);
 
+	const handleOpenHistory = useCallback(
+		(options?: { readonly focus?: boolean; readonly side?: PanelSide }) => {
+			const side = options?.side ?? "central";
+			const shouldFocus = options?.focus ?? true;
+			setPanelState(
+				side,
+				(panel) => {
+					const existingHistoryView = panel.views.find(
+						(view) => view.viewKey === "history",
+					);
+					if (existingHistoryView) {
+						return activatePanelView(panel, existingHistoryView.instanceKey);
+					}
+					const newView: ViewInstance = {
+						instanceKey: createViewInstanceKey("history"),
+						viewKey: "history" as ViewKey,
+						isPending: true,
+					};
+					return upsertPendingView(panel, newView);
+				},
+				{ focus: shouldFocus },
+			);
+		},
+		[setPanelState],
+	);
+
 	const handleOpenDiff = useCallback(
 		(
 			fileId: string,
@@ -901,25 +927,31 @@ export function V2LayoutShell() {
 	const leftViewContext = useMemo(
 		() => ({
 			...sharedViewContext,
+			openHistoryView: (options?: { readonly focus?: boolean }) =>
+				handleOpenHistory({ ...options, side: "left" }),
 			isPanelFocused: isLeftFocused,
 		}),
-		[sharedViewContext, isLeftFocused],
+		[sharedViewContext, handleOpenHistory, isLeftFocused],
 	);
 
 	const centralViewContext = useMemo(
 		() => ({
 			...sharedViewContext,
+			openHistoryView: (options?: { readonly focus?: boolean }) =>
+				handleOpenHistory({ ...options, side: "central" }),
 			isPanelFocused: isCentralFocused,
 		}),
-		[sharedViewContext, isCentralFocused],
+		[sharedViewContext, handleOpenHistory, isCentralFocused],
 	);
 
 	const rightViewContext = useMemo(
 		() => ({
 			...sharedViewContext,
+			openHistoryView: (options?: { readonly focus?: boolean }) =>
+				handleOpenHistory({ ...options, side: "right" }),
 			isPanelFocused: isRightFocused,
 		}),
-		[sharedViewContext, isRightFocused],
+		[sharedViewContext, handleOpenHistory, isRightFocused],
 	);
 
 	const schedulePanelAnimation = useCallback(() => {

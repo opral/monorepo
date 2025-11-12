@@ -240,7 +240,7 @@ test("cache segment projects snapshot_content even when not selected explicitly"
 });
 
 test("resolves cache table when schema key requires sanitization", () => {
-	const schemaKey = "delete-cache-schema";
+	const schemaKey = "delete_cache_schema";
 	const sanitizedKey = schemaKey.replace(/[^a-zA-Z0-9]/g, "_");
 	const cacheTable = `lix_internal_state_cache_v1_${sanitizedKey}`;
 	const rewritten = rewrite(
@@ -511,7 +511,7 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 		schema_key: "lix_version_descriptor",
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		created_at: timestamp,
 		snapshot_content: JSON.stringify({
 			id: versionId,
@@ -544,7 +544,7 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 		schema_key: schemaKey,
 		schema_version: "1.0",
 		file_id: "lix",
-		plugin_key: "lix_own_entity",
+		plugin_key: "lix_sdk",
 		created_at: timestamp,
 		snapshot_content: JSON.stringify({
 			id: "entity-recursive",

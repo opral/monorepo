@@ -36,11 +36,11 @@ type AgentViewProps = {
 };
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
-const DEFAULT_MODEL_ID = "google/gemini-2.5-flash";
+const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
 const AVAILABLE_MODELS = [
 	{ id: "anthropic/claude-4.5-sonnet", label: "Claude 4.5 Sonnet" },
 	{ id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-	{ id: DEFAULT_MODEL_ID, label: "Gemini 2.5 Flash" },
+	{ id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
 	{ id: "z-ai/glm-4.6", label: "GLM 4.6 by ZAI" },
 	{ id: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
 	{ id: "openai/gpt-5", label: "GPT-5" },
@@ -73,11 +73,15 @@ export function AgentView({ context }: AgentViewProps) {
 	const [apiKeyDraft, setApiKeyDraft] = useState(devApiKey ?? "");
 	const [keyLoaded, setKeyLoaded] = useState(usingDevApiKey);
 	const [storedModel, setStoredModel] = useKeyValue("flashtype_agent_model");
+	const [autoAcceptRaw, setAutoAccept] = useKeyValue(
+		"flashtype_auto_accept_session",
+	);
 	const selectedModelId = useMemo(() => {
 		if (!storedModel) return DEFAULT_MODEL_ID;
 		const match = AVAILABLE_MODELS.find((option) => option.id === storedModel);
 		return match ? match.id : DEFAULT_MODEL_ID;
 	}, [storedModel]);
+	const autoAcceptEnabled = Boolean(autoAcceptRaw);
 
 	useEffect(() => {
 		if (!storedModel) return;
@@ -122,6 +126,24 @@ export function AgentView({ context }: AgentViewProps) {
 		accept: () => Promise<void>;
 		reject: (reason?: string) => Promise<void>;
 	} | null>(null);
+	const [notice, setNotice] = useState<string | null>(null);
+	const handleAutoAcceptToggle = useCallback(
+		async (next: boolean) => {
+			await setAutoAccept(next);
+			setNotice(null);
+		},
+		[setAutoAccept, setNotice],
+	);
+
+	useEffect(() => {
+		if (!autoAcceptEnabled) return;
+		setPendingProposal((prev) => {
+			if (prev?.details?.fileId) {
+				context?.closeDiffView?.(prev.details.fileId);
+			}
+			return null;
+		});
+	}, [autoAcceptEnabled, context]);
 
 	const provider = useMemo(() => {
 		if (!storedApiKey) return null;
@@ -220,7 +242,6 @@ export function AgentView({ context }: AgentViewProps) {
 	// 	? "Current conversation"
 	// 	: "New conversation";
 
-	const [notice, setNotice] = useState<string | null>(null);
 	const [pendingMessage, setPendingMessage] =
 		useState<AgentConversationMessage | null>(null);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -275,6 +296,17 @@ export function AgentView({ context }: AgentViewProps) {
 		[pendingProposal, acceptPendingProposal],
 	);
 
+	const handleAcceptAlwaysDecision = useCallback(
+		(id: string) => {
+			if (!pendingProposal || pendingProposal.proposalId !== id) return;
+			void (async () => {
+				await acceptPendingProposal();
+				await handleAutoAcceptToggle(true);
+			})();
+		},
+		[pendingProposal, acceptPendingProposal, handleAutoAcceptToggle],
+	);
+
 	const handleRejectDecision = useCallback(
 		(id: string) => {
 			if (!pendingProposal || pendingProposal.proposalId !== id) return;
@@ -300,14 +332,14 @@ export function AgentView({ context }: AgentViewProps) {
 			try {
 				console.log("[agent] send", {
 					conversationId: conversationId!,
-					proposalMode: true,
+					proposalMode: !autoAcceptEnabled,
 				});
 				const turn = sendMessage({
 					agent,
 					prompt: fromPlainText(trimmed),
 					conversationId: conversationId!,
 					signal: opts?.signal,
-					proposalMode: true,
+					proposalMode: !autoAcceptEnabled,
 				});
 				const updatePending = () => {
 					setPendingMessage(structuredClone(turn.message));
@@ -346,6 +378,9 @@ export function AgentView({ context }: AgentViewProps) {
 							updatePending();
 							break;
 						case "proposal:open": {
+							if (autoAcceptEnabled) {
+								break;
+							}
 							const details = agent
 								? getChangeProposalSummary(agent, event.proposal.id)
 								: null;
@@ -377,6 +412,9 @@ export function AgentView({ context }: AgentViewProps) {
 							break;
 						}
 						case "proposal:closed": {
+							if (autoAcceptEnabled) {
+								break;
+							}
 							const details = activeProposal?.details;
 							if (context && details?.fileId) {
 								context.closeDiffView?.(details.fileId);
@@ -429,7 +467,7 @@ export function AgentView({ context }: AgentViewProps) {
 				setPending(false);
 			}
 		},
-		[agent, conversationId, context],
+		[agent, conversationId, context, autoAcceptEnabled],
 	);
 
 	const handleSlashCommand = useCallback(
@@ -528,6 +566,7 @@ export function AgentView({ context }: AgentViewProps) {
 						<ChangeDecisionOverlay
 							id={pendingProposal.proposalId}
 							onAccept={handleAcceptDecision}
+							onAcceptAlways={handleAcceptAlwaysDecision}
 							onReject={handleRejectDecision}
 						/>
 					) : (
@@ -536,6 +575,8 @@ export function AgentView({ context }: AgentViewProps) {
 							models={AVAILABLE_MODELS}
 							modelId={selectedModelId}
 							onModelChange={handleModelChange}
+							autoAcceptEnabled={autoAcceptEnabled}
+							onAutoAcceptToggle={handleAutoAcceptToggle}
 							commands={COMMANDS}
 							files={filePaths}
 							pending={pending}
@@ -601,7 +642,7 @@ function createProposalDiffConfig(args: {
 						.coalesce(
 							eb.ref("after.plugin_key"),
 							eb.ref("before.plugin_key"),
-							eb.val("lix_own_entity"),
+							eb.val("lix_sdk"),
 						)
 						.as("plugin_key"),
 				])

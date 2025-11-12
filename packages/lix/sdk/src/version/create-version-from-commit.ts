@@ -99,7 +99,7 @@ export async function createVersionFromCommit(args: {
 					schema_key: "lix_version_descriptor",
 					file_id: "lix",
 					version_id: "global",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: {
 						id: versionId,
 						name: versionName,
@@ -113,7 +113,7 @@ export async function createVersionFromCommit(args: {
 					schema_key: "lix_version_tip",
 					file_id: "lix",
 					version_id: "global",
-					plugin_key: "lix_own_entity",
+					plugin_key: "lix_sdk",
 					snapshot_content: {
 						id: versionId,
 						commit_id: args.commit.id,

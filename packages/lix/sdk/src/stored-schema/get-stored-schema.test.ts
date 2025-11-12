@@ -6,6 +6,7 @@ import { getStoredSchema, getAllStoredSchemas } from "./get-stored-schema.js";
 import { createVersion } from "../version/create-version.js";
 import { LixStoredSchemaSchema } from "./schema-definition.js";
 import { internalQueryBuilder } from "../engine/internal-query-builder.js";
+import type { StateCommitChange } from "../hooks/create-hooks.js";
 
 const ALL_STORED_SCHEMAS_SQL = internalQueryBuilder
 	.selectFrom("lix_internal_state_vtable")
@@ -35,6 +36,22 @@ const countCallsForSql = (
 	calls.filter(
 		([args]) => (args as { sql?: string } | undefined)?.sql === targetSql
 	).length;
+
+const createStoredSchemaHookChange = (): StateCommitChange => ({
+	id: "hook-change",
+	entity_id: "stored-schema",
+	schema_key: "lix_stored_schema",
+	schema_version: "1.0",
+	file_id: "lix",
+	plugin_key: "lix_own_entity",
+	created_at: "1970-01-01T00:00:00.000Z",
+	snapshot_content: null,
+	version_id: "global",
+	commit_id: "stored-schema-commit",
+	untracked: 0,
+	metadata: null,
+	writer_key: null,
+});
 
 test("returns null when no stored schema is found", async () => {
 	const lix = await openLix({});
@@ -194,7 +211,7 @@ test("getAllStoredSchemas invalidates cache on state commit", async () => {
 	spy.mockClear();
 
 	lix.engine!.hooks._emit("state_commit", {
-		changes: [{ schema_key: "lix_stored_schema" }],
+		changes: [createStoredSchemaHookChange()],
 	});
 
 	const afterInvalidate = getAllStoredSchemas({ engine: lix.engine! });
@@ -319,7 +336,7 @@ test("invalidates the cache when stored schemas change", async () => {
 	spy.mockClear();
 
 	lix.engine!.hooks._emit("state_commit", {
-		changes: [{ schema_key: "lix_stored_schema" }],
+		changes: [createStoredSchemaHookChange()],
 	});
 
 	const afterInvalidate = getStoredSchema({

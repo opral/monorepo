@@ -136,7 +136,7 @@ export function selectWorkingDiff(args: {
 			"=",
 			sql`(select change_set_id from wcs)` as any
 		)
-		.where("ch.file_id", "!=", "lix_own_change_control")
+		.where("ch.file_id", "!=", "lix_sdk")
 		.leftJoin("change_set_element as bcse", (join) =>
 			join
 				.onRef("bcse.entity_id", "=", "ch.entity_id")

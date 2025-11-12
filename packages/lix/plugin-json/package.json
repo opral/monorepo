@@ -11,29 +11,29 @@
 		".": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "tsc --build",
-		"test": "tsc --noEmit && vitest run",
-		"test:watch": "vitest",
-		"lint": "eslint src/**/* --fix",
-		"dev": "tsc --watch",
+		"build": "rolldown -c",
+		"typecheck": "tsc --noEmit",
+		"test": "pnpm typecheck && vitest run src",
+		"test:watch": "vitest src",
+		"lint": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --format stylish .",
+		"lint:fix": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --fix .",
+		"dev": "rolldown --watch -c",
 		"format": "prettier ./src --write"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
 	"dependencies": {
-		"@lix-js/sdk": "workspace:*",
-		"flat": "^6.0.1",
-		"lit": "^3.2.1"
+		"@jsonjoy.com/json-pointer": "^17.63.0",
+		"@lix-js/sdk": "workspace:*"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.12.0",
 		"@opral/tsconfig": "workspace:*",
-		"@types/papaparse": "^5.3.14",
-		"@vitest/coverage-v8": "^3.2.4",
-		"eslint": "^9.12.0",
+		"@vitest/coverage-v8": "^4.0.8",
+		"oxlint": "^1.14.0",
 		"prettier": "^3.3.3",
+		"rolldown": "1.0.0-beta.50",
+		"rolldown-plugin-dts": "^0.17.3",
 		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.9.0",
-		"vitest": "^3.2.4"
+		"vitest": "^4.0.8"
 	}
 }

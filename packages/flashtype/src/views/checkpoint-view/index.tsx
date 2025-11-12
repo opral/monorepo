@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Flag } from "lucide-react";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { createCheckpoint } from "@lix-js/sdk";
@@ -17,7 +17,6 @@ type CheckpointViewProps = {
 };
 
 export function CheckpointView({ context }: CheckpointViewProps) {
-	const [message, setMessage] = useState("");
 	const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 	const [isCreating, setIsCreating] = useState(false);
 	const lix = useLix();
@@ -67,14 +66,12 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 	};
 
 	const handleCreateCheckpoint = async () => {
-		const trimmed = message.trim();
-		if (!trimmed || isCreating) {
+		if (isCreating) {
 			return;
 		}
 		setIsCreating(true);
 		try {
 			await createCheckpoint({ lix });
-			setMessage("");
 			setSelectedFiles(new Set());
 		} catch (error) {
 			console.error("Failed to create checkpoint", error);
@@ -87,6 +84,10 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 		? (fileId: string, filePath: string) =>
 				context.openDiffView?.(fileId, decodeURIComponent(filePath))
 		: undefined;
+
+	const handleViewHistory = useCallback(() => {
+		context?.openHistoryView?.();
+	}, [context]);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col px-1 py-1">
@@ -102,15 +103,16 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 
 			<div className="sticky bottom-0 flex-shrink-0 bg-neutral-0">
 				<CheckpointForm
-					message={message}
-					onMessageChange={setMessage}
 					onCreateCheckpoint={handleCreateCheckpoint}
 					isSubmitting={isCreating}
 				/>
 
 				<div className="border-t border-border" />
 
-				<LatestCheckpoint checkpoint={latestCheckpoint} />
+				<LatestCheckpoint
+					checkpoint={latestCheckpoint}
+					onViewHistory={handleViewHistory}
+				/>
 			</div>
 		</div>
 	);

@@ -4,9 +4,16 @@
  * These are state-shaped (not low-level change rows) and include operational columns such as
  * `version_id`, `commit_id`, optional `untracked`, and `writer_key`.
  *
+ * Untracked rows (like derived change-set elements or log-style inserts) surface with
+ * `untracked: 1` and a sentinel `commit_id: "untracked"` because they do not belong to a
+ * materialized commit yet. Observers should treat the pair `(untracked === 1, commit_id === "untracked")`
+ * as “ephemeral” data and avoid dereferencing the commit.
+ *
  * The `writer_key` identifies the writer responsible for the materialized state row and enables
- * echo suppression in UIs (filter out your own writes while reacting to external ones). See the
- * writer key guide for patterns and pitfalls.
+ * echo suppression in UIs (filter out your own writes while reacting to external ones). When no
+ * explicit writer is provided (the default), the value is `null`.
+ *
+ * See the writer key guide for patterns and pitfalls.
  */
 export type StateCommitChange = {
 	id: string;
@@ -44,6 +51,12 @@ export type StateCommitChange = {
  * Hooks allow you to register callbacks that fire at specific points
  * in Lix's execution, such as when state changes are committed.
  */
+type HookEvents = {
+	state_commit: { changes: StateCommitChange[] };
+};
+
+type HookEventType = keyof HookEvents;
+
 export type LixHooks = {
 	/**
 	 * Listen to state commit events.
@@ -89,7 +102,7 @@ export type LixHooks = {
 	 * This method is for internal use only and should not be called directly.
 	 * Use this to emit events from state mutation functions.
 	 */
-	_emit: (eventType: string, data?: any) => void;
+	_emit: <T extends HookEventType>(eventType: T, data: HookEvents[T]) => void;
 };
 
 /**
@@ -135,7 +148,7 @@ export function createHooks(): LixHooks {
 				eventTarget.removeEventListener("state_commit", wrappedHandler);
 		},
 
-		_emit(eventType: string, data?: any): void {
+		_emit<T extends HookEventType>(eventType: T, data: HookEvents[T]): void {
 			eventTarget.dispatchEvent(new CustomEvent(eventType, { detail: data }));
 		},
 	};
