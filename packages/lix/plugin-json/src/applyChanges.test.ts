@@ -116,3 +116,30 @@ test("it applies a delete change", async () => {
 		new TextDecoder().decode(after),
 	);
 });
+
+test("it applies array changes using json pointers", async () => {
+	const before = new TextEncoder().encode(
+		JSON.stringify({
+			list: ["a", "b", "c"],
+		}),
+	);
+	const after = new TextEncoder().encode(
+		JSON.stringify({
+			list: ["a", "x", "c", "d"],
+		}),
+	);
+
+	const changes = mockChanges({
+		file: createMockFile({}),
+		fileUpdates: [before, after],
+	});
+
+	const { fileData: applied } = applyChanges({
+		file: createMockFile({ data: before }),
+		changes,
+	} as ApplyChangesArgs);
+
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(after),
+	);
+});

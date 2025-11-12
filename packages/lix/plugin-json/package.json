@@ -12,7 +12,8 @@
 	},
 	"scripts": {
 		"build": "tsc --build",
-		"test": "tsc --noEmit && vitest run",
+		"typecheck": "tsc --noEmit",
+		"test": "pnpm typecheck && vitest run",
 		"test:watch": "vitest",
 		"lint": "eslint src/**/* --fix",
 		"dev": "tsc --watch",
@@ -21,8 +22,8 @@
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
 	"dependencies": {
+		"@jsonjoy.com/json-pointer": "^17.63.0",
 		"@lix-js/sdk": "workspace:*",
-		"flat": "^6.0.1",
 		"lit": "^3.2.1"
 	},
 	"devDependencies": {
