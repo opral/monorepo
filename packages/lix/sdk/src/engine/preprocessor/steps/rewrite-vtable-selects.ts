@@ -1785,13 +1785,8 @@ function resolveColumnFromFunctionCall(
 		return null;
 	}
 	const pathExpression = pathArg as ExpressionNode | RawFragmentNode;
-	const path = extractLiteralString(pathExpression, context.parameters);
-	switch (path) {
-		case "$.id":
-			return "entity_id";
-		default:
-			return null;
-	}
+	extractLiteralString(pathExpression, context.parameters);
+	return null;
 }
 
 function extractLiteralString(
