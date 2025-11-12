@@ -98,8 +98,7 @@ const normalizeForeignKeys = (
 	}));
 };
 
-export function validateStateMutation(args: {
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
+type BaseStateMutationArgs = {
 	schema: LixSchemaDefinition | null;
 	schemaKey?: string;
 	snapshot_content: LixChange["snapshot_content"];
@@ -108,7 +107,14 @@ export function validateStateMutation(args: {
 	version_id: string;
 	untracked?: boolean;
 	inherited_from_version_id?: string | null;
-}): void {
+};
+
+export type ValidateStateMutationArgs = BaseStateMutationArgs & {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
+	existingVersionsCache?: Set<string>;
+};
+
+export function validateStateMutation(args: ValidateStateMutationArgs): void {
 	const attemptedInheritedOverride = args.inherited_from_version_id;
 	if (
 		attemptedInheritedOverride !== undefined &&
@@ -123,16 +129,21 @@ export function validateStateMutation(args: {
 		throw new Error("version_id is required");
 	}
 
-	const existingVersion = args.engine.executeSync(
-		internalQueryBuilder
-			.selectFrom("version")
-			.select("id")
-			.where("id", "=", args.version_id)
-			.compile()
-	).rows;
+	const versions = args.existingVersionsCache;
+	if (!versions || !versions.has(args.version_id)) {
+		const existingVersion = args.engine.executeSync(
+			internalQueryBuilder
+				.selectFrom("version")
+				.select("id")
+				.where("id", "=", args.version_id)
+				.compile()
+		).rows;
 
-	if (existingVersion.length === 0) {
-		throw new Error(`Version with id '${args.version_id}' does not exist`);
+		if (existingVersion.length === 0) {
+			throw new Error(`Version with id '${args.version_id}' does not exist`);
+		}
+
+		versions?.add(args.version_id);
 	}
 
 	let schemaKey =

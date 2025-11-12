@@ -13,6 +13,7 @@ import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import { withRuntimeCache } from "../../engine/with-runtime-cache.js";
 import { getStateCacheTables } from "../cache/schema.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
@@ -105,6 +106,13 @@ const STATE_VTAB_COLUMN_NAMES = [
 	"metadata",
 	"writer_key",
 ];
+
+const VERSION_CACHE_LIMIT = 100;
+const VERSION_CACHE_QUERY = internalQueryBuilder
+	.selectFrom("version")
+	.select("id")
+	.limit(VERSION_CACHE_LIMIT)
+	.compile();
 
 export function applyStateVTable(
 	engine: Pick<
@@ -662,6 +670,8 @@ export function applyStateVTable(
 
 					// Call validation function (same logic as triggers)
 					const schemaKey = String(schema_key);
+					const existingVersionsCache = withVersionCache(engine);
+
 					validateStateMutation({
 						engine: engine,
 						schema:
@@ -674,6 +684,7 @@ export function applyStateVTable(
 						entity_id: String(entity_id),
 						version_id: String(version_id),
 						untracked: Boolean(untracked),
+						existingVersionsCache,
 						...(inheritedFromValue !== null && inheritedFromValue !== undefined
 							? { inherited_from_version_id: String(inheritedFromValue) }
 							: {}),
@@ -1006,6 +1017,7 @@ export function handleStateDelete(
 		operation: "delete",
 		entity_id: String(entity_id),
 		version_id: String(version_id),
+		existingVersionsCache: withVersionCache(engine),
 	});
 
 	insertTransactionState({
@@ -1043,4 +1055,12 @@ function inferSourceTag(row: Record<string, unknown>): string | null {
 		return delimiterIndex === -1 ? pkValue : pkValue.slice(0, delimiterIndex);
 	}
 	return null;
+}
+
+function withVersionCache(
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">
+): Set<string> {
+	const result = withRuntimeCache(engine, VERSION_CACHE_QUERY);
+	const rows = (result.rows ?? []) as Array<{ id: string }>;
+	return new Set(rows.map((row) => String(row.id)));
 }
