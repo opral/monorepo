@@ -748,6 +748,80 @@ test("drops unused joins when expanded view projection prunes joined alias", () 
 	expect(readProjectionColumns(expandedSelect)).toEqual(["id"]);
 });
 
+test("drops unused joins when projection only uses json_extract over left table", () => {
+	const statements = parseStatements(`
+		SELECT v.id_path
+		FROM version_json AS v
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"version_json",
+					`
+						SELECT json_extract(d.payload, '$.id') AS id_path
+						FROM descriptor AS d
+						LEFT JOIN tip AS t ON t.id = d.id
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	const select = assertSingleSelect(rewritten);
+	const expanded = findExpandedSubquery(select, "v");
+	if (!expanded || expanded.statement.node_kind !== "select_statement") {
+		throw new Error("expected expanded version_json view");
+	}
+
+	const [from] = expanded.statement.from_clauses;
+	if (!from) {
+		throw new Error("expected FROM clause");
+	}
+	expect(from.joins.length).toBe(0);
+});
+
+test("retains left joins when view projection includes COUNT aggregator", () => {
+	const statements = parseStatements(`
+		SELECT vc.total
+		FROM version_counts AS vc
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"version_counts",
+					`
+						SELECT COUNT(*) AS total
+						FROM descriptor AS d
+						LEFT JOIN tip AS t ON t.id = d.id
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	const select = assertSingleSelect(rewritten);
+	const expanded = findExpandedSubquery(select, "vc");
+	if (!expanded || expanded.statement.node_kind !== "select_statement") {
+		throw new Error("expected expanded version_counts view");
+	}
+
+	const [from] = expanded.statement.from_clauses;
+	if (!from) {
+		throw new Error("expected FROM clause");
+	}
+	expect(from.joins.length).toBe(1);
+});
+
 test("preserves joins when joined alias contributes referenced columns", () => {
 	const statements = parseStatements(`
 		SELECT v.commit_id

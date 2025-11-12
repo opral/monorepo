@@ -10,6 +10,8 @@ import type {
 	WithClauseNode,
 	CommonTableExpressionNode,
 	IdentifierNode,
+	ExpressionNode,
+	RawFragmentNode,
 } from "../sql-parser/nodes.js";
 import { identifier } from "../sql-parser/nodes.js";
 import {
@@ -526,6 +528,9 @@ function pruneSelectProjection(
 function pruneUnusedLeftJoins(
 	select: SelectStatementNode
 ): SelectStatementNode {
+	if (!canPruneUnusedLeftJoins(select)) {
+		return select;
+	}
 	if (select.from_clauses.length === 0) {
 		return select;
 	}
@@ -566,6 +571,45 @@ function pruneUnusedLeftJoins(
 		...select,
 		from_clauses: rewrittenFrom,
 	};
+}
+
+function canPruneUnusedLeftJoins(select: SelectStatementNode): boolean {
+	if (select.distinct) {
+		return false;
+	}
+	if (select.group_by.length > 0) {
+		return false;
+	}
+	return isDirectColumnProjection(select);
+}
+
+function isDirectColumnProjection(select: SelectStatementNode): boolean {
+	if (select.projection.length === 0) {
+		return false;
+	}
+	return select.projection.every(
+		(item) =>
+			item.node_kind === "select_expression" &&
+			isAllowedProjectionExpression(item.expression)
+	);
+}
+
+function isAllowedProjectionExpression(
+	expression: ExpressionNode | RawFragmentNode
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "column_reference":
+			return true;
+		case "function_call": {
+			const functionName = normalizeIdentifierValue(expression.name.value);
+			return functionName === "json_extract";
+		}
+		default:
+			return false;
+	}
 }
 
 function aliasReferencedOutsideJoin(
