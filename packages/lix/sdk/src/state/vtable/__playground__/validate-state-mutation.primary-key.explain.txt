@@ -45,7 +45,7 @@ FROM (
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
-      WHERE unt.schema_key IN ('text_play_pk')
+      WHERE (unt.schema_key IN ('text_play_pk')) AND ((json_extract(unt.snapshot_content, '$.code') = 'code-new'))
 
           UNION ALL
 
@@ -61,7 +61,7 @@ FROM (
         3 AS priority
       FROM "lix_internal_state_cache_v1_text_play_pk" cache
       JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
-      WHERE cache.schema_key IN ('text_play_pk')
+      WHERE (cache.schema_key IN ('text_play_pk')) AND ((json_extract(cache.snapshot_content, '$.code') = 'code-new'))
   ) AS c
 ) AS w
 
@@ -128,45 +128,45 @@ WHERE "schema_key" = ? AND "version_id" = ? AND "inherited_from_version_id" IS N
     "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 55,
+    "id": 58,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 63,
-    "parent": 55,
+    "id": 66,
+    "parent": 58,
+    "notused": 47,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_pk_pk_version_id_json_extract_snapsho_4h2kdb (version_id=? AND <expr>=?)"
+  },
+  {
+    "id": 79,
+    "parent": 58,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 69,
-    "parent": 55,
-    "notused": 62,
-    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_pk_pk_version_id_json_extract_snapsho_4h2kdb (version_id=?)"
-  },
-  {
-    "id": 96,
+    "id": 100,
     "parent": 5,
-    "notused": 228,
+    "notused": 195,
     "detail": "SCAN c"
   },
   {
-    "id": 130,
+    "id": 134,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 163,
+    "id": 167,
     "parent": 2,
-    "notused": 208,
+    "notused": 175,
     "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 231,
+    "id": 235,
     "parent": 0,
-    "notused": 208,
+    "notused": 175,
     "detail": "SCAN w"
   }
 ]

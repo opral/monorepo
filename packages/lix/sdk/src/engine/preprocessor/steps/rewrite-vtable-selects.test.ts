@@ -153,6 +153,30 @@ test("pushes schema filters into derived state selects", () => {
 	expect(sql).not.toContain('"cache_other"');
 });
 
+test("pushes json_extract snapshot predicates into segment filters", () => {
+	const cacheTables = new Map([["demo_schema", '"cache_demo"']]);
+	const rewritten = rewrite(
+		`
+		SELECT snapshot_content
+		FROM lix_internal_state_vtable
+		WHERE schema_key = 'demo_schema'
+		  AND json_extract(snapshot_content, '$.id') = 'entity-demo'
+	`,
+		{ hasOpenTransaction: () => true, getCacheTables: () => cacheTables }
+	);
+
+	const normalizedSql = compileSql(rewritten).toLowerCase();
+	expect(normalizedSql).toContain(
+		"json_extract(txn.snapshot_content, '$.id') = 'entity-demo'"
+	);
+	expect(normalizedSql).toContain(
+		"json_extract(unt.snapshot_content, '$.id') = 'entity-demo'"
+	);
+	expect(normalizedSql).toContain(
+		"json_extract(cache.snapshot_content, '$.id') = 'entity-demo'"
+	);
+});
+
 test("limits base segments to requested versions while inherited segments see ancestors", () => {
 	const versionId = "01920000-0000-7000-8000-000000000026";
 	const ancestorId = "global";

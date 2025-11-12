@@ -45,7 +45,7 @@ FROM (
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
-      WHERE (unt.schema_key IN ('text_play_fk_target')) AND (unt.entity_id IN ('target-0'))
+      WHERE (unt.schema_key IN ('text_play_fk_target')) AND ((json_extract(unt.snapshot_content, '$.id') = 'target-0'))
 
           UNION ALL
 
@@ -61,7 +61,7 @@ FROM (
         3 AS priority
       FROM "lix_internal_state_cache_v1_text_play_fk_target" cache
       JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
-      WHERE (cache.schema_key IN ('text_play_fk_target')) AND (cache.entity_id IN ('target-0'))
+      WHERE (cache.schema_key IN ('text_play_fk_target')) AND ((json_extract(cache.snapshot_content, '$.id') = 'target-0'))
   ) AS c
 ) AS w
 
@@ -125,46 +125,46 @@ WHERE "schema_key" = ? AND "snapshot_content" IS NOT NULL AND json_extract(snaps
     "id": 33,
     "parent": 9,
     "notused": 61,
-    "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
+    "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 56,
+    "id": 58,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 64,
-    "parent": 56,
+    "id": 66,
+    "parent": 58,
     "notused": 47,
-    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_fk_target_version_id (version_id=? AND entity_id=?)"
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_fk_target_pk_version_id_json_extract_snapsho_4h2kdb (version_id=? AND <expr>=?)"
   },
   {
-    "id": 77,
-    "parent": 56,
+    "id": 79,
+    "parent": 58,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 98,
+    "id": 100,
     "parent": 5,
     "notused": 195,
     "detail": "SCAN c"
   },
   {
-    "id": 132,
+    "id": 134,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 165,
+    "id": 167,
     "parent": 2,
     "notused": 175,
     "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 233,
+    "id": 235,
     "parent": 0,
     "notused": 175,
     "detail": "SCAN w"

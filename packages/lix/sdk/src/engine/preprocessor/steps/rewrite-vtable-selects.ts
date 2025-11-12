@@ -48,6 +48,9 @@ const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
 const ORIGINAL_TABLE_KEY = DEFAULT_ALIAS_KEY;
 const HIDDEN_SEGMENT_COLUMNS = ["_pk"] as const;
 const HIDDEN_SEGMENT_COLUMN_SET = new Set<string>(HIDDEN_SEGMENT_COLUMNS);
+const SNAPSHOT_JSON_ENTITY_PATHS = new Set<string>(["$.id", "$.entity_id"]);
+// Guarded until we can reliably map JSON paths to concrete entity identifiers.
+const SNAPSHOT_ENTITY_FILTER_PUSH_ENABLED = false;
 
 type SelectedProjection = {
 	column: string;
@@ -58,6 +61,11 @@ type ColumnSelectionSummary = {
 	selectedColumns: SelectedProjection[] | null;
 	requestedHiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
+};
+
+type SnapshotJsonPredicate = {
+	path: string;
+	values: readonly string[];
 };
 
 type ColumnPredicateSummary = {
@@ -71,6 +79,8 @@ type PredicateVisitContext = {
 	allowUnqualified: boolean;
 };
 
+type SnapshotPredicateAccumulator = Map<string, Set<string>>;
+
 type TableReferenceInfo = {
 	relation: TableReferenceNode;
 	alias: string | null;
@@ -81,6 +91,7 @@ type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
 	entityIds: readonly string[];
+	snapshotFilters: readonly SnapshotJsonPredicate[];
 	versionIds: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
@@ -93,6 +104,7 @@ type SubqueryPredicateMetadata = {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
 	entityIds: readonly string[];
+	snapshotFilters: readonly SnapshotJsonPredicate[];
 	versionIds: readonly string[];
 	pruneInheritance: boolean;
 	pruneTransactionSegment: boolean;
@@ -164,7 +176,8 @@ function rewriteSelectStatement(
 	pushdownPruneTransactions = false,
 	pushdownFileIds: readonly string[] = [],
 	pushdownEntityIds: readonly string[] = [],
-	pushdownVersionIds: readonly string[] = []
+	pushdownVersionIds: readonly string[] = [],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[] = []
 ): SelectStatementNode {
 	const parameters = context.parameters ?? [];
 	const ctePredicateMap = collectCtePredicateMap(
@@ -175,7 +188,8 @@ function rewriteSelectStatement(
 		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownEntityIds,
-		pushdownVersionIds
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 	const selectWithRewrittenCtes = rewriteSelectWithClause(
 		select,
@@ -186,7 +200,8 @@ function rewriteSelectStatement(
 		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownEntityIds,
-		pushdownVersionIds
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 	const fallbackAliasNames = collectRelationAliasNames(selectWithRewrittenCtes);
 	const fallbackSchemaSummary = collectSchemaKeyPredicates(
@@ -225,6 +240,15 @@ function rewriteSelectStatement(
 		pushdownVersionIds,
 		fallbackVersionSummary.literals
 	);
+	const fallbackSnapshotSummary = collectSnapshotJsonPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackSnapshotFilters = mergeSnapshotFilters(
+		pushdownSnapshotFilters,
+		fallbackSnapshotSummary
+	);
 	const fallbackPruneInheritance =
 		pushdownPruneInheritance ||
 		shouldPruneInheritance(
@@ -247,7 +271,8 @@ function rewriteSelectStatement(
 		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownEntityIds,
-		pushdownVersionIds
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 	const withRewrittenSubqueries = visitSelectStatement(
 		selectWithRewrittenCtes,
@@ -273,6 +298,8 @@ function rewriteSelectStatement(
 				const nextEntityIds = predicateMetadata?.entityIds ?? fallbackEntityIds;
 				const nextVersionIds =
 					predicateMetadata?.versionIds ?? fallbackVersionIds;
+				const nextSnapshotFilters =
+					predicateMetadata?.snapshotFilters ?? fallbackSnapshotFilters;
 				const rewrittenStatement =
 					node.statement.node_kind === "compound_select"
 						? rewriteCompoundSelect(
@@ -283,7 +310,8 @@ function rewriteSelectStatement(
 								nextPruneTransactions,
 								nextFileIds,
 								nextEntityIds,
-								nextVersionIds
+								nextVersionIds,
+								nextSnapshotFilters
 							)
 						: rewriteSelectStatement(
 								node.statement,
@@ -293,7 +321,8 @@ function rewriteSelectStatement(
 								nextPruneTransactions,
 								nextFileIds,
 								nextEntityIds,
-								nextVersionIds
+								nextVersionIds,
+								nextSnapshotFilters
 							);
 				if (rewrittenStatement !== node.statement) {
 					return {
@@ -355,7 +384,8 @@ function rewriteSelectStatement(
 		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownEntityIds,
-		pushdownVersionIds
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 
 	const rewritten = visitSelectStatement(
@@ -384,7 +414,8 @@ function rewriteCompoundSelect(
 	pushdownPruneTransactions = false,
 	pushdownFileIds: readonly string[] = [],
 	pushdownEntityIds: readonly string[] = [],
-	pushdownVersionIds: readonly string[] = []
+	pushdownVersionIds: readonly string[] = [],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[] = []
 ): CompoundSelectNode {
 	const rewrittenWithClause = compound.with_clause
 		? rewriteWithClauseNode(
@@ -396,7 +427,8 @@ function rewriteCompoundSelect(
 				pushdownPruneTransactions,
 				pushdownFileIds,
 				pushdownEntityIds,
-				pushdownVersionIds
+				pushdownVersionIds,
+				pushdownSnapshotFilters
 			)
 		: null;
 	let changed = false;
@@ -408,7 +440,8 @@ function rewriteCompoundSelect(
 		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownEntityIds,
-		pushdownVersionIds
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 	if (first !== compound.first) {
 		changed = true;
@@ -423,7 +456,8 @@ function rewriteCompoundSelect(
 			pushdownPruneTransactions,
 			pushdownFileIds,
 			pushdownEntityIds,
-			pushdownVersionIds
+			pushdownVersionIds,
+			pushdownSnapshotFilters
 		);
 		if (rewritten !== branch.select) {
 			changed = true;
@@ -501,7 +535,8 @@ function collectSubqueryPredicateMap(
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownEntityIds: readonly string[],
-	pushdownVersionIds: readonly string[]
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
 ): Map<string, SubqueryPredicateMetadata> {
 	const map = new Map<string, SubqueryPredicateMetadata>();
 	const register = (
@@ -566,6 +601,21 @@ function collectSubqueryPredicateMap(
 			entityWhereSummary.literals,
 			entityJoinSummary.literals
 		);
+		const snapshotWhereSummary = collectSnapshotJsonPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const snapshotJoinSummary = collectSnapshotJsonPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localSnapshotFilters = mergeSnapshotFilters(
+			snapshotWhereSummary,
+			snapshotJoinSummary
+		);
 
 		const versionWhereSummary = collectVersionIdPredicates(
 			select.where_clause,
@@ -598,6 +648,11 @@ function collectSubqueryPredicateMap(
 			existing?.entityIds ?? [],
 			pushdownEntityIds,
 			localEntityIds
+		);
+		const mergedSnapshotFilters = mergeSnapshotFilters(
+			existing?.snapshotFilters ?? [],
+			pushdownSnapshotFilters,
+			localSnapshotFilters
 		);
 		const mergedVersionIds = mergeStringLiterals(
 			existing?.versionIds ?? [],
@@ -648,10 +703,17 @@ function collectSubqueryPredicateMap(
 		const finalEntityIds = shouldPushEntityFilter(merged, mergedEntityIds)
 			? mergedEntityIds
 			: [];
+		const finalSnapshotFilters = shouldPushSnapshotFilters(
+			merged,
+			mergedSnapshotFilters
+		)
+			? mergedSnapshotFilters
+			: [];
 		if (
 			merged.length > 0 ||
 			finalFileIds.length > 0 ||
 			finalEntityIds.length > 0 ||
+			finalSnapshotFilters.length > 0 ||
 			mergedVersionIds.length > 0 ||
 			combinedPrune ||
 			combinedTxnPrune
@@ -660,6 +722,7 @@ function collectSubqueryPredicateMap(
 				schemaKeys: merged,
 				fileIds: finalFileIds,
 				entityIds: finalEntityIds,
+				snapshotFilters: finalSnapshotFilters,
 				versionIds: mergedVersionIds,
 				pruneInheritance: combinedPrune,
 				pruneTransactionSegment: combinedTxnPrune,
@@ -712,7 +775,8 @@ function collectCtePredicateMap(
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownEntityIds: readonly string[],
-	pushdownVersionIds: readonly string[]
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
 ): Map<string, SubqueryPredicateMetadata> {
 	const withClause = select.with_clause;
 	if (!withClause || withClause.ctes.length === 0) {
@@ -789,6 +853,21 @@ function collectCtePredicateMap(
 			entityWhereSummary.literals,
 			entityJoinSummary.literals
 		);
+		const snapshotWhereSummary = collectSnapshotJsonPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const snapshotJoinSummary = collectSnapshotJsonPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localSnapshotFilters = mergeSnapshotFilters(
+			snapshotWhereSummary,
+			snapshotJoinSummary
+		);
 		const versionWhereSummary = collectVersionIdPredicates(
 			select.where_clause,
 			tableNames,
@@ -819,6 +898,11 @@ function collectCtePredicateMap(
 			existing?.entityIds ?? [],
 			pushdownEntityIds,
 			localEntityIds
+		);
+		const mergedSnapshotFilters = mergeSnapshotFilters(
+			existing?.snapshotFilters ?? [],
+			pushdownSnapshotFilters,
+			localSnapshotFilters
 		);
 		const mergedVersionIds = mergeStringLiterals(
 			existing?.versionIds ?? [],
@@ -872,10 +956,17 @@ function collectCtePredicateMap(
 		)
 			? mergedEntityIds
 			: [];
+		const finalSnapshotFilters = shouldPushSnapshotFilters(
+			mergedSchemaKeys,
+			mergedSnapshotFilters
+		)
+			? mergedSnapshotFilters
+			: [];
 		const entry = {
 			schemaKeys: mergedSchemaKeys,
 			fileIds: finalFileIds,
 			entityIds: finalEntityIds,
+			snapshotFilters: finalSnapshotFilters,
 			versionIds: mergedVersionIds,
 			pruneInheritance: combinedPrune,
 			pruneTransactionSegment: combinedTxnPrune,
@@ -906,7 +997,8 @@ function rewriteSelectWithClause(
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownEntityIds: readonly string[],
-	pushdownVersionIds: readonly string[]
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
 ): SelectStatementNode {
 	if (!select.with_clause) {
 		return select;
@@ -920,7 +1012,8 @@ function rewriteSelectWithClause(
 		pushdownPruneTransactions,
 		pushdownFileIds,
 		pushdownEntityIds,
-		pushdownVersionIds
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 	if (rewritten === select.with_clause) {
 		return select;
@@ -940,7 +1033,8 @@ function rewriteWithClauseNode(
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownEntityIds: readonly string[],
-	pushdownVersionIds: readonly string[]
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
 ): WithClauseNode {
 	let changed = false;
 	const rewrittenCtes = withClause.ctes.map((cte) => {
@@ -953,6 +1047,8 @@ function rewriteWithClauseNode(
 		const nextFileIds = metadata?.fileIds ?? pushdownFileIds;
 		const nextEntityIds = metadata?.entityIds ?? pushdownEntityIds;
 		const nextVersionIds = metadata?.versionIds ?? pushdownVersionIds;
+		const nextSnapshotFilters =
+			metadata?.snapshotFilters ?? pushdownSnapshotFilters;
 		const statement =
 			cte.statement.node_kind === "compound_select"
 				? rewriteCompoundSelect(
@@ -963,7 +1059,8 @@ function rewriteWithClauseNode(
 						nextPruneTransactions,
 						nextFileIds,
 						nextEntityIds,
-						nextVersionIds
+						nextVersionIds,
+						nextSnapshotFilters
 					)
 				: rewriteSelectStatement(
 						cte.statement,
@@ -973,7 +1070,8 @@ function rewriteWithClauseNode(
 						nextPruneTransactions,
 						nextFileIds,
 						nextEntityIds,
-						nextVersionIds
+						nextVersionIds,
+						nextSnapshotFilters
 					);
 		if (statement !== cte.statement) {
 			changed = true;
@@ -1002,7 +1100,8 @@ function buildInlineMetadata(
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
 	pushdownEntityIds: readonly string[],
-	pushdownVersionIds: readonly string[]
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -1051,6 +1150,15 @@ function buildInlineMetadata(
 			pushdownVersionIds,
 			versionSummary.literals
 		);
+		const snapshotSummary = collectSnapshotJsonPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedSnapshotFilters = mergeSnapshotFilters(
+			pushdownSnapshotFilters,
+			snapshotSummary
+		);
 		const fileIds = shouldPushFileFilter(schemaKeys, mergedFileIds)
 			? mergedFileIds
 			: [];
@@ -1058,6 +1166,12 @@ function buildInlineMetadata(
 			? mergedEntityIds
 			: [];
 		const columnSummary = collectSelectedColumns(select, tableNames);
+		const snapshotFilters = shouldPushSnapshotFilters(
+			schemaKeys,
+			mergedSnapshotFilters
+		)
+			? mergedSnapshotFilters
+			: [];
 		const pruneInheritance =
 			pushdownPruneInheritance ||
 			shouldPruneInheritance(select.where_clause, tableNames, parameters);
@@ -1072,6 +1186,7 @@ function buildInlineMetadata(
 			schemaKeys,
 			fileIds,
 			entityIds,
+			snapshotFilters,
 			versionIds: mergedVersionIds,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
@@ -1314,6 +1429,7 @@ function createInlineVisitor(
 				schemaKeys: metadataEntry.schemaKeys,
 				fileIds: metadataEntry.fileIds,
 				entityIds: metadataEntry.entityIds,
+				snapshotFilters: metadataEntry.snapshotFilters,
 				versionIds: metadataEntry.versionIds,
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
@@ -1453,6 +1569,188 @@ function collectVersionIdPredicatesFromExpression(
 		"version_id",
 		allowUnqualified
 	);
+}
+
+function collectSnapshotJsonPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): SnapshotJsonPredicate[] {
+	if (!whereClause) {
+		return [];
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	const summary: SnapshotPredicateAccumulator = new Map();
+	collectSnapshotPredicatesFromExpression(whereClause, context, summary);
+	return snapshotSummaryToPredicates(summary);
+}
+
+function collectSnapshotJsonPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): SnapshotJsonPredicate[] {
+	if (!expression) {
+		return [];
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	const summary: SnapshotPredicateAccumulator = new Map();
+	collectSnapshotPredicatesFromExpression(expression, context, summary);
+	return snapshotSummaryToPredicates(summary);
+}
+
+function collectSnapshotPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext,
+	summary: SnapshotPredicateAccumulator
+): void {
+	if ("sql_text" in expression) {
+		return;
+	}
+	switch (expression.node_kind) {
+		case "grouped_expression":
+			collectSnapshotPredicatesFromExpression(
+				expression.expression,
+				context,
+				summary
+			);
+			return;
+		case "binary_expression": {
+			if (isLogicalOperator(expression.operator)) {
+				collectSnapshotPredicatesFromExpression(
+					expression.left,
+					context,
+					summary
+				);
+				collectSnapshotPredicatesFromExpression(
+					expression.right,
+					context,
+					summary
+				);
+				return;
+			}
+			if (!isEqualityOperator(expression.operator)) {
+				return;
+			}
+			const leftPath = extractSnapshotJsonPath(expression.left, context);
+			if (leftPath) {
+				incrementSnapshotSummaryWithOperand(
+					summary,
+					leftPath,
+					expression.right,
+					context
+				);
+			}
+			const rightPath = extractSnapshotJsonPath(expression.right, context);
+			if (rightPath) {
+				incrementSnapshotSummaryWithOperand(
+					summary,
+					rightPath,
+					expression.left,
+					context
+				);
+			}
+			return;
+		}
+		case "in_list_expression": {
+			if (expression.negated) {
+				return;
+			}
+			const path = extractSnapshotJsonPath(expression.operand, context);
+			if (!path) {
+				return;
+			}
+			for (const item of expression.items) {
+				incrementSnapshotSummaryWithOperand(summary, path, item, context);
+			}
+			return;
+		}
+		case "unary_expression":
+			collectSnapshotPredicatesFromExpression(
+				expression.operand,
+				context,
+				summary
+			);
+			return;
+		default:
+			return;
+	}
+}
+
+function incrementSnapshotSummaryWithOperand(
+	summary: SnapshotPredicateAccumulator,
+	path: string,
+	operand: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
+): void {
+	const value = extractStringLiteral(operand, context);
+	if (typeof value !== "string") {
+		return;
+	}
+	const existing = summary.get(path) ?? new Set<string>();
+	existing.add(value);
+	summary.set(path, existing);
+}
+
+function snapshotSummaryToPredicates(
+	summary: SnapshotPredicateAccumulator
+): SnapshotJsonPredicate[] {
+	return Array.from(summary.entries()).map(([path, values]) => ({
+		path,
+		values: Array.from(values),
+	}));
+}
+
+function extractSnapshotJsonPath(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
+): string | null {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return null;
+	}
+	switch (node.node_kind) {
+		case "grouped_expression":
+			return extractSnapshotJsonPath(node.expression, context);
+		case "function_call": {
+			const functionName = node.name.value.toLowerCase();
+			if (functionName !== "json_extract") {
+				return null;
+			}
+			const [targetArg, pathArg] = node.arguments;
+			if (
+				!targetArg ||
+				!pathArg ||
+				targetArg.node_kind === "all_columns" ||
+				pathArg.node_kind === "all_columns"
+			) {
+				return null;
+			}
+			const referencedColumn = resolveReferencedColumn(
+				targetArg as ExpressionNode | RawFragmentNode,
+				context
+			);
+			if (referencedColumn !== "snapshot_content") {
+				return null;
+			}
+			return extractLiteralString(
+				pathArg as ExpressionNode | RawFragmentNode,
+				context.parameters
+			);
+		}
+		default:
+			return null;
+	}
 }
 
 function collectColumnPredicates(
@@ -1784,9 +2082,15 @@ function resolveColumnFromFunctionCall(
 	if (referencedColumn !== "snapshot_content") {
 		return null;
 	}
+	if (!SNAPSHOT_ENTITY_FILTER_PUSH_ENABLED) {
+		return null;
+	}
 	const pathExpression = pathArg as ExpressionNode | RawFragmentNode;
-	extractLiteralString(pathExpression, context.parameters);
-	return null;
+	const literalPath = extractLiteralString(pathExpression, context.parameters);
+	if (!literalPath) {
+		return null;
+	}
+	return mapSnapshotJsonColumnFromPath(literalPath);
 }
 
 function extractLiteralString(
@@ -1803,6 +2107,34 @@ function extractLiteralString(
 	if (node.node_kind === "parameter") {
 		const value = resolveParameterValue(node, parameters);
 		return typeof value === "string" ? value : null;
+	}
+	return null;
+}
+
+/**
+ * Maps recognized json_extract paths to their corresponding physical columns.
+ *
+ * @param path - JSON path literal extracted from a json_extract() call.
+ * @returns The name of the backing column or null when the path is unsupported.
+ *
+ * @example
+ * ```ts
+ * mapSnapshotJsonColumnFromPath("$.id");
+ * // => "entity_id"
+ * ```
+ */
+function mapSnapshotJsonColumnFromPath(path: string): string | null {
+	const trimmed = path.trim();
+	const candidates = new Set<string>([trimmed]);
+	const unquoted = trimmed.replace(
+		/\."([^"]+)"(?=\.|$)/g,
+		(_, segment: string) => `.${segment}`
+	);
+	candidates.add(unquoted);
+	for (const candidate of candidates) {
+		if (SNAPSHOT_JSON_ENTITY_PATHS.has(candidate)) {
+			return "entity_id";
+		}
 	}
 	return null;
 }
@@ -1849,6 +2181,35 @@ function mergeStringLiterals(
 		}
 	}
 	return merged;
+}
+
+function mergeSnapshotFilters(
+	...lists: readonly (readonly SnapshotJsonPredicate[] | undefined)[]
+): SnapshotJsonPredicate[] {
+	const merged = new Map<string, Set<string>>();
+	for (const list of lists) {
+		if (!list) {
+			continue;
+		}
+		for (const entry of list) {
+			if (!entry || typeof entry.path !== "string") {
+				continue;
+			}
+			const valueSet = merged.get(entry.path) ?? new Set<string>();
+			for (const value of entry.values ?? []) {
+				if (typeof value === "string") {
+					valueSet.add(value);
+				}
+			}
+			if (valueSet.size > 0) {
+				merged.set(entry.path, valueSet);
+			}
+		}
+	}
+	return Array.from(merged.entries()).map(([path, values]) => ({
+		path,
+		values: Array.from(values),
+	}));
 }
 
 function collectSelectedColumns(
@@ -2122,6 +2483,7 @@ function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
 	entityIds: readonly string[];
+	snapshotFilters: readonly SnapshotJsonPredicate[];
 	versionIds: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
@@ -2157,11 +2519,18 @@ function buildVtableSelectRewrite(options: {
 		options.entityIds && options.entityIds.length > 0
 			? buildEntityFilter(options.entityIds)
 			: null;
-	const txnFilter = combineFilters(schemaFilter, fileFilter, entityFilter);
+	const snapshotFilter = buildSnapshotContentFilter(options.snapshotFilters);
+	const txnFilter = combineFilters(
+		schemaFilter,
+		fileFilter,
+		entityFilter,
+		snapshotFilter
+	);
 	const inheritedFilter = combineFilters(
 		schemaFilter,
 		fileFilter,
-		entityFilter
+		entityFilter,
+		snapshotFilter
 	);
 	const buildVersionJoin = (alias: string, joinAlias: string) =>
 		buildWantedVersionJoinClause(wantedVersionsCteName, alias, joinAlias);
@@ -3038,6 +3407,39 @@ function buildEntityFilter(entityIds: readonly string[]): string | null {
 	return `txn.entity_id IN (${values})`;
 }
 
+function buildSnapshotContentFilter(
+	filters: readonly SnapshotJsonPredicate[]
+): string | null {
+	if (!filters || filters.length === 0) {
+		return null;
+	}
+	const clauses = filters
+		.map((filter) => buildSnapshotPredicateClause(filter))
+		.filter((clause): clause is string => typeof clause === "string");
+	if (clauses.length === 0) {
+		return null;
+	}
+	return clauses.map((clause) => `(${clause})`).join(" AND ");
+}
+
+function buildSnapshotPredicateClause(
+	filter: SnapshotJsonPredicate
+): string | null {
+	const uniqueValues = Array.from(new Set(filter.values));
+	if (uniqueValues.length === 0) {
+		return null;
+	}
+	const pathLiteral = `'${escapeSqlLiteral(filter.path)}'`;
+	if (uniqueValues.length === 1) {
+		const value = escapeSqlLiteral(uniqueValues[0]!);
+		return `json_extract(txn.snapshot_content, ${pathLiteral}) = '${value}'`;
+	}
+	const valueList = uniqueValues
+		.map((value) => `'${escapeSqlLiteral(value)}'`)
+		.join(", ");
+	return `json_extract(txn.snapshot_content, ${pathLiteral}) IN (${valueList})`;
+}
+
 /**
  * Builds an equi-join clause tying a table alias to the wanted versions CTE.
  *
@@ -3182,6 +3584,17 @@ function shouldPushEntityFilter(
 ): boolean {
 	if (!schemaKeys || schemaKeys.length === 0) return false;
 	if (!entityIds || entityIds.length === 0) return false;
+	return schemaKeys.every(
+		(key) => typeof key === "string" && !key.startsWith("lix_")
+	);
+}
+
+function shouldPushSnapshotFilters(
+	schemaKeys: readonly string[],
+	filters: readonly SnapshotJsonPredicate[]
+): boolean {
+	if (!schemaKeys || schemaKeys.length === 0) return false;
+	if (!filters || filters.length === 0) return false;
 	return schemaKeys.every(
 		(key) => typeof key === "string" && !key.startsWith("lix_")
 	);
