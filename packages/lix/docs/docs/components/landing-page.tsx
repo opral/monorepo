@@ -482,7 +482,7 @@ function LandingPage() {
               </a>
               <PackageInstaller />
               <a
-                href="https://prosemirror-example.onrender.com/"
+                href="https://flashtype.ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 border border-gray-300 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-300"
@@ -510,7 +510,7 @@ function LandingPage() {
                   npm
                 </span>
                 <span className="font-semibold text-sm text-gray-900">
-                  60k+ weekly downloads
+                  50k+ weekly downloads
                 </span>
               </a>
 
