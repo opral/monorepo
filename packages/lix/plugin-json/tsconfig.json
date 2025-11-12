@@ -7,7 +7,7 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"useDefineForClassFields": false,
-		"lib": ["ESNext"],
+		"lib": ["ESNext", "DOM"],
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"esModuleInterop": true,
