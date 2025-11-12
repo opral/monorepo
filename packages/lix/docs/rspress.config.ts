@@ -66,8 +66,8 @@ export default defineConfig({
   themeConfig: {
     darkMode: false,
     nav: [
-      { text: "Guide", link: "/guide/getting-started" },
-      { text: "Reference", link: "/api/" },
+      { text: "Docs", link: "/guide/getting-started" },
+      { text: "API Reference", link: "/api/" },
     ],
     sidebar: {
       "/guide/": [

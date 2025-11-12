@@ -628,14 +628,7 @@ function LandingPage() {
                     <span className="text-gray-900">:</span>{" "}
                     <span className="text-gray-900">[</span>
                     <span className="text-sky-700">json</span>
-                    <span className="text-gray-900">],</span>
-                    <br />
-                    {"  "}
-                    <span className="text-sky-700">blob</span>
-                    <span className="text-gray-900">:</span>{" "}
-                    <span className="text-indigo-600">await</span>{" "}
-                    <span className="text-sky-700">newLixFile</span>
-                    <span className="text-gray-900">(),</span>
+                    <span className="text-gray-900">]</span>
                     <br />
                     <span className="text-gray-900">{"});"}</span>
                     <br />
