@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { applyChanges } from "./applyChanges.js";
+import { applyChanges } from "./apply-changes.js";
 import { mockChanges } from "./utilities/mockChanges.js";
 import type { LixPlugin } from "@lix-js/sdk";
 
@@ -99,6 +99,33 @@ test("it applies a delete change", async () => {
 	const after = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Samuel",
+		}),
+	);
+
+	const changes = mockChanges({
+		file: createMockFile({}),
+		fileUpdates: [before, after],
+	});
+
+	const { fileData: applied } = applyChanges({
+		file: createMockFile({ data: before }),
+		changes,
+	} as ApplyChangesArgs);
+
+	expect(new TextDecoder().decode(applied)).toEqual(
+		new TextDecoder().decode(after),
+	);
+});
+
+test("it applies array changes using json pointers", async () => {
+	const before = new TextEncoder().encode(
+		JSON.stringify({
+			list: ["a", "b", "c"],
+		}),
+	);
+	const after = new TextEncoder().encode(
+		JSON.stringify({
+			list: ["a", "x", "c", "d"],
 		}),
 	);
 
