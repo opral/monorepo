@@ -2649,27 +2649,21 @@ importers:
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
-      '@eslint/js':
-        specifier: ^9.12.0
-        version: 9.29.0
       '@opral/tsconfig':
         specifier: workspace:*
         version: link:../../tsconfig
       '@vitest/coverage-v8':
         specifier: ^4.0.8
         version: 4.0.8(@vitest/browser@3.2.4)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(happy-dom@18.0.1)(jiti@2.5.1)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@24.10.0)(typescript@5.9.2))(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.5)(yaml@2.8.1))
-      eslint:
-        specifier: ^9.12.0
-        version: 9.29.0(jiti@2.5.1)
+      oxlint:
+        specifier: ^1.14.0
+        version: 1.26.0
       prettier:
         specifier: ^3.3.3
         version: 3.6.2
       typescript:
         specifier: ^5.5.4
         version: 5.9.2
-      typescript-eslint:
-        specifier: ^8.9.0
-        version: 8.35.0(eslint@9.29.0(jiti@2.5.1))(typescript@5.9.2)
       vitest:
         specifier: ^4.0.8
         version: 4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(happy-dom@18.0.1)(jiti@2.5.1)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@24.10.0)(typescript@5.9.2))(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.5)(yaml@2.8.1)

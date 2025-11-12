@@ -1,7 +1,4 @@
-import {
-	parseJsonPointer,
-	formatJsonPointer,
-} from "@jsonjoy.com/json-pointer";
+import { parseJsonPointer, formatJsonPointer } from "@jsonjoy.com/json-pointer";
 
 type JSONPrimitive = string | number | boolean | null;
 export type JSONValue =
@@ -14,14 +11,17 @@ export type JSONValue =
 const isObject = (value: unknown): value is Record<string, JSONValue> =>
 	typeof value === "object" && value !== null && !Array.isArray(value);
 
-const isContainer = (value: unknown): value is Record<string, JSONValue> | JSONValue[] =>
+const isContainer = (
+	value: unknown,
+): value is Record<string, JSONValue> | JSONValue[] =>
 	Array.isArray(value) || isObject(value);
 
 const isIndexToken = (token: string): boolean =>
 	token === "-" || /^[0-9]+$/.test(token);
 
-const createContainerForToken = (token: string): JSONValue[] | Record<string, JSONValue> =>
-	isIndexToken(token) ? [] : {};
+const createContainerForToken = (
+	token: string,
+): JSONValue[] | Record<string, JSONValue> => (isIndexToken(token) ? [] : {});
 
 const normaliseIndex = (
 	token: string,
@@ -91,7 +91,9 @@ export const setValueAtPointer = (
 		const nextToken = path[i + 1]!;
 
 		if (Array.isArray(current)) {
-			const index = normaliseIndex(token, current.length, { allowAppend: true });
+			const index = normaliseIndex(token, current.length, {
+				allowAppend: true,
+			});
 			const child = current[index];
 
 			if (!isContainer(child)) {
@@ -112,7 +114,9 @@ export const setValueAtPointer = (
 	const lastToken = path[path.length - 1]!;
 
 	if (Array.isArray(current)) {
-		const index = normaliseIndex(lastToken, current.length, { allowAppend: true });
+		const index = normaliseIndex(lastToken, current.length, {
+			allowAppend: true,
+		});
 
 		if (index === current.length) {
 			current.push(value);
@@ -158,7 +162,9 @@ export const removeValueAtPointer = (
 		const token = path[i]!;
 
 		if (Array.isArray(current)) {
-			const index = normaliseIndex(token, current.length, { allowAppend: false });
+			const index = normaliseIndex(token, current.length, {
+				allowAppend: false,
+			});
 			current = current[index];
 		} else if (isObject(current)) {
 			current = current[token];

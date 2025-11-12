@@ -8,7 +8,9 @@ import {
 const isObject = (value: unknown): value is Record<string, JSONValue> =>
 	typeof value === "object" && value !== null && !Array.isArray(value);
 
-const isContainer = (value: JSONValue | undefined): value is JSONValue[] | Record<string, JSONValue> =>
+const isContainer = (
+	value: JSONValue | undefined,
+): value is JSONValue[] | Record<string, JSONValue> =>
 	Array.isArray(value) || isObject(value);
 
 const areValuesEqual = (left: JSONValue, right: JSONValue): boolean =>
