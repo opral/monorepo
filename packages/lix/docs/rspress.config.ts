@@ -80,7 +80,6 @@ export default defineConfig({
               link: "/guide/ai-agent-collaboration",
             },
             { text: "Architecture", link: "/guide/architecture" },
-            { text: "How Lix Works", link: "/guide/how-lix-works" },
           ],
         },
         {
