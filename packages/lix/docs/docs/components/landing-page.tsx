@@ -1,11 +1,6 @@
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
 
-const prosemirrorScreenshot = new URL(
-  "../../../plugin-prosemirror/assets/prosemirror.png",
-  import.meta.url,
-).href;
-
 /**
  * Copy icon used for the install command interaction.
  *
@@ -356,7 +351,7 @@ function LandingPage() {
       category: "Real-time editors",
       description:
         "Collaborative publishing UI with branching proposals, inline reviews, and one-click merges.",
-      screenshot: prosemirrorScreenshot,
+      screenshot: "/prosemirror.png",
       fallback: "ProseMirror Demo",
       href: "https://github.com/opral/monorepo/tree/main/packages/lix/plugin-prosemirror",
       ctaLabel: "View code →",
