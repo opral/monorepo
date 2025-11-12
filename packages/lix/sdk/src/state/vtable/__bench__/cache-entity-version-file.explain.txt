@@ -77,7 +77,7 @@ FROM (
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
-      WHERE (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file'))
+      WHERE (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file')) AND (unt.entity_id IN ('bench_priority_cache'))
 
           UNION ALL
 
@@ -101,7 +101,7 @@ FROM (
         3 AS priority
       FROM "lix_internal_state_cache_v1_bench_vtable_schema" cache
       JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
-      WHERE (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file'))
+      WHERE (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file')) AND (cache.entity_id IN ('bench_priority_cache'))
   ) AS c
 ) AS w
 
@@ -168,67 +168,67 @@ LIMIT 1
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 30,
+    "id": 33,
     "parent": 9,
     "notused": 16,
     "detail": "SCAN wv_unt"
   },
   {
-    "id": 36,
+    "id": 39,
     "parent": 9,
     "notused": 47,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 71,
+    "id": 75,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 81,
-    "parent": 71,
+    "id": 88,
+    "parent": 75,
     "notused": 45,
     "detail": "SEARCH cache USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 94,
-    "parent": 71,
+    "id": 102,
+    "parent": 75,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 122,
+    "id": 130,
     "parent": 5,
-    "notused": 194,
+    "notused": 193,
     "detail": "SCAN c"
   },
   {
-    "id": 174,
+    "id": 182,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR LAST 7 TERMS OF ORDER BY"
   },
   {
-    "id": 219,
+    "id": 227,
     "parent": 2,
-    "notused": 174,
+    "notused": 173,
     "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 306,
+    "id": 314,
     "parent": 0,
-    "notused": 174,
+    "notused": 173,
     "detail": "SCAN w"
   },
   {
-    "id": 319,
+    "id": 327,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 332,
+    "id": 340,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"

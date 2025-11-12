@@ -76,7 +76,7 @@ FROM (
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
-      WHERE (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file'))
+      WHERE (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file')) AND (unt.entity_id IN ('bench_priority_untracked'))
 
           UNION ALL
 
@@ -100,7 +100,7 @@ FROM (
         3 AS priority
       FROM "lix_internal_state_cache_v1_bench_vtable_schema" cache
       JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
-      WHERE (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file'))
+      WHERE (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file')) AND (cache.entity_id IN ('bench_priority_untracked'))
 
           UNION ALL
 
@@ -128,7 +128,7 @@ FROM (
       		JOIN wanted_versions wv_vi ON wv_vi.version_id = vi.version_id
       		JOIN "lix_internal_state_cache_v1_bench_vtable_schema" cache ON cache.version_id = vi.ancestor_version_id
       		WHERE cache.is_tombstone = 0
-      		  AND cache.snapshot_content IS NOT NULL AND (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file'))
+      		  AND cache.snapshot_content IS NOT NULL AND (cache.schema_key IN ('bench_vtable_schema')) AND (cache.file_id IN ('bench-file')) AND (cache.entity_id IN ('bench_priority_untracked'))
 
           UNION ALL
 
@@ -156,7 +156,7 @@ FROM (
       		JOIN wanted_versions wv_vi ON wv_vi.version_id = vi.version_id
       		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
       		WHERE unt.is_tombstone = 0
-      		  AND unt.snapshot_content IS NOT NULL AND (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file'))
+      		  AND unt.snapshot_content IS NOT NULL AND (unt.schema_key IN ('bench_vtable_schema')) AND (unt.file_id IN ('bench-file')) AND (unt.entity_id IN ('bench_priority_untracked'))
   ) AS c
 ) AS w
 
@@ -222,139 +222,139 @@ WHERE schema_key = 'bench_vtable_schema' AND entity_id = ? AND version_id = ? AN
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 30,
+    "id": 33,
     "parent": 9,
     "notused": 16,
     "detail": "SCAN wv_unt"
   },
   {
-    "id": 36,
+    "id": 39,
     "parent": 9,
     "notused": 47,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 71,
+    "id": 75,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 81,
-    "parent": 71,
+    "id": 88,
+    "parent": 75,
     "notused": 45,
     "detail": "SEARCH cache USING PRIMARY KEY (entity_id=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 94,
-    "parent": 71,
+    "id": 102,
+    "parent": 75,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 120,
+    "id": 128,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 122,
-    "parent": 120,
+    "id": 130,
+    "parent": 128,
     "notused": 0,
     "detail": "CO-ROUTINE vi"
   },
   {
-    "id": 123,
-    "parent": 122,
+    "id": 131,
+    "parent": 130,
     "notused": 0,
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 145,
-    "parent": 120,
+    "id": 159,
+    "parent": 128,
     "notused": 16,
     "detail": "SCAN vi"
   },
   {
-    "id": 150,
-    "parent": 120,
+    "id": 164,
+    "parent": 128,
     "notused": 27,
     "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_vtable_schema_live_vfe (version_id=? AND file_id=? AND entity_id=?)"
   },
   {
-    "id": 167,
-    "parent": 120,
+    "id": 182,
+    "parent": 128,
     "notused": 216,
     "detail": "SCAN wv_vi"
   },
   {
-    "id": 194,
+    "id": 209,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 196,
-    "parent": 194,
+    "id": 211,
+    "parent": 209,
     "notused": 0,
     "detail": "CO-ROUTINE vi"
   },
   {
-    "id": 197,
-    "parent": 196,
+    "id": 212,
+    "parent": 211,
     "notused": 0,
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 219,
-    "parent": 194,
+    "id": 240,
+    "parent": 209,
     "notused": 16,
     "detail": "SCAN vi"
   },
   {
-    "id": 224,
-    "parent": 194,
+    "id": 245,
+    "parent": 209,
     "notused": 47,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=? AND file_id=? AND version_id=?)"
   },
   {
-    "id": 243,
-    "parent": 194,
+    "id": 265,
+    "parent": 209,
     "notused": 216,
     "detail": "SCAN wv_vi"
   },
   {
-    "id": 271,
+    "id": 293,
     "parent": 5,
-    "notused": 198,
+    "notused": 197,
     "detail": "SCAN c"
   },
   {
-    "id": 323,
+    "id": 345,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR LAST 7 TERMS OF ORDER BY"
   },
   {
-    "id": 368,
+    "id": 390,
     "parent": 2,
-    "notused": 178,
+    "notused": 177,
     "detail": "SCAN (subquery-11)"
   },
   {
-    "id": 454,
+    "id": 476,
     "parent": 0,
-    "notused": 178,
+    "notused": 177,
     "detail": "SCAN w"
   },
   {
-    "id": 467,
+    "id": 489,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 480,
+    "id": 502,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"

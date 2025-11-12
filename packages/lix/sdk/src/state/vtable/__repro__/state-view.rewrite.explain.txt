@@ -52,7 +52,7 @@ FROM (
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
-      WHERE unt.schema_key IN ('validate_state_mutation_repro')
+      WHERE (unt.schema_key IN ('validate_state_mutation_repro')) AND (unt.entity_id IN ('validate_state_mutation_repro-entity-0'))
 
           UNION ALL
 
@@ -73,7 +73,7 @@ FROM (
       		JOIN wanted_versions wv_vi ON wv_vi.version_id = vi.version_id
       		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
       		WHERE unt.is_tombstone = 0
-      		  AND unt.snapshot_content IS NOT NULL AND unt.schema_key IN ('validate_state_mutation_repro')
+      		  AND unt.snapshot_content IS NOT NULL AND (unt.schema_key IN ('validate_state_mutation_repro')) AND (unt.entity_id IN ('validate_state_mutation_repro-entity-0'))
   ) AS c
 ) AS w
 
@@ -143,91 +143,91 @@ WHERE "entity_id" = ?1 AND "schema_key" = ?2
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 27,
+    "id": 30,
     "parent": 9,
     "notused": 16,
     "detail": "SCAN wv_unt"
   },
   {
-    "id": 33,
+    "id": 36,
     "parent": 9,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
   },
   {
-    "id": 59,
+    "id": 62,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 61,
-    "parent": 59,
+    "id": 64,
+    "parent": 62,
     "notused": 0,
     "detail": "CO-ROUTINE vi"
   },
   {
-    "id": 62,
-    "parent": 61,
+    "id": 65,
+    "parent": 64,
     "notused": 0,
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 78,
-    "parent": 59,
+    "id": 87,
+    "parent": 62,
     "notused": 61,
     "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
   },
   {
-    "id": 94,
-    "parent": 59,
+    "id": 103,
+    "parent": 62,
     "notused": 0,
     "detail": "BLOOM FILTER ON wv_vi (version_id=?)"
   },
   {
-    "id": 109,
-    "parent": 59,
+    "id": 121,
+    "parent": 62,
     "notused": 53,
     "detail": "SEARCH wv_vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
   },
   {
-    "id": 115,
-    "parent": 59,
+    "id": 127,
+    "parent": 62,
     "notused": 16,
     "detail": "SCAN vi"
   },
   {
-    "id": 140,
+    "id": 152,
     "parent": 5,
-    "notused": 69,
+    "notused": 68,
     "detail": "SCAN c"
   },
   {
-    "id": 177,
+    "id": 189,
     "parent": 5,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 211,
+    "id": 223,
     "parent": 2,
-    "notused": 49,
+    "notused": 48,
     "detail": "SCAN (subquery-10)"
   },
   {
-    "id": 283,
+    "id": 295,
     "parent": 0,
-    "notused": 49,
+    "notused": 48,
     "detail": "SCAN w"
   },
   {
-    "id": 296,
+    "id": 308,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_dst USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"
   },
   {
-    "id": 309,
+    "id": 321,
     "parent": 0,
     "notused": 45,
     "detail": "SEARCH ws_src USING PRIMARY KEY (file_id=? AND version_id=? AND entity_id=? AND schema_key=?) LEFT-JOIN"

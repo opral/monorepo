@@ -80,6 +80,7 @@ type TableReferenceInfo = {
 type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
+	entityIds: readonly string[];
 	versionIds: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
@@ -91,6 +92,7 @@ type InlineRewriteMetadata = {
 type SubqueryPredicateMetadata = {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
+	entityIds: readonly string[];
 	versionIds: readonly string[];
 	pruneInheritance: boolean;
 	pruneTransactionSegment: boolean;
@@ -161,6 +163,7 @@ function rewriteSelectStatement(
 	pushdownPruneInheritance = false,
 	pushdownPruneTransactions = false,
 	pushdownFileIds: readonly string[] = [],
+	pushdownEntityIds: readonly string[] = [],
 	pushdownVersionIds: readonly string[] = []
 ): SelectStatementNode {
 	const parameters = context.parameters ?? [];
@@ -171,6 +174,7 @@ function rewriteSelectStatement(
 		pushdownPruneInheritance,
 		pushdownPruneTransactions,
 		pushdownFileIds,
+		pushdownEntityIds,
 		pushdownVersionIds
 	);
 	const selectWithRewrittenCtes = rewriteSelectWithClause(
@@ -181,6 +185,7 @@ function rewriteSelectStatement(
 		pushdownPruneInheritance,
 		pushdownPruneTransactions,
 		pushdownFileIds,
+		pushdownEntityIds,
 		pushdownVersionIds
 	);
 	const fallbackAliasNames = collectRelationAliasNames(selectWithRewrittenCtes);
@@ -201,6 +206,15 @@ function rewriteSelectStatement(
 	const fallbackFileIds = mergeStringLiterals(
 		pushdownFileIds,
 		fallbackFileSummary.literals
+	);
+	const fallbackEntitySummary = collectEntityIdPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackEntityIds = mergeStringLiterals(
+		pushdownEntityIds,
+		fallbackEntitySummary.literals
 	);
 	const fallbackVersionSummary = collectVersionIdPredicates(
 		selectWithRewrittenCtes.where_clause,
@@ -232,6 +246,7 @@ function rewriteSelectStatement(
 		pushdownPruneInheritance,
 		pushdownPruneTransactions,
 		pushdownFileIds,
+		pushdownEntityIds,
 		pushdownVersionIds
 	);
 	const withRewrittenSubqueries = visitSelectStatement(
@@ -255,6 +270,7 @@ function rewriteSelectStatement(
 					predicateMetadata?.pruneTransactionSegment ??
 					fallbackPruneTransactions;
 				const nextFileIds = predicateMetadata?.fileIds ?? fallbackFileIds;
+				const nextEntityIds = predicateMetadata?.entityIds ?? fallbackEntityIds;
 				const nextVersionIds =
 					predicateMetadata?.versionIds ?? fallbackVersionIds;
 				const rewrittenStatement =
@@ -266,6 +282,7 @@ function rewriteSelectStatement(
 								nextPrune,
 								nextPruneTransactions,
 								nextFileIds,
+								nextEntityIds,
 								nextVersionIds
 							)
 						: rewriteSelectStatement(
@@ -275,6 +292,7 @@ function rewriteSelectStatement(
 								nextPrune,
 								nextPruneTransactions,
 								nextFileIds,
+								nextEntityIds,
 								nextVersionIds
 							);
 				if (rewrittenStatement !== node.statement) {
@@ -336,6 +354,7 @@ function rewriteSelectStatement(
 		pushdownPruneInheritance,
 		pushdownPruneTransactions,
 		pushdownFileIds,
+		pushdownEntityIds,
 		pushdownVersionIds
 	);
 
@@ -364,6 +383,7 @@ function rewriteCompoundSelect(
 	pushdownPruneInheritance = false,
 	pushdownPruneTransactions = false,
 	pushdownFileIds: readonly string[] = [],
+	pushdownEntityIds: readonly string[] = [],
 	pushdownVersionIds: readonly string[] = []
 ): CompoundSelectNode {
 	const rewrittenWithClause = compound.with_clause
@@ -375,6 +395,7 @@ function rewriteCompoundSelect(
 				pushdownPruneInheritance,
 				pushdownPruneTransactions,
 				pushdownFileIds,
+				pushdownEntityIds,
 				pushdownVersionIds
 			)
 		: null;
@@ -386,6 +407,7 @@ function rewriteCompoundSelect(
 		pushdownPruneInheritance,
 		pushdownPruneTransactions,
 		pushdownFileIds,
+		pushdownEntityIds,
 		pushdownVersionIds
 	);
 	if (first !== compound.first) {
@@ -400,6 +422,7 @@ function rewriteCompoundSelect(
 			pushdownPruneInheritance,
 			pushdownPruneTransactions,
 			pushdownFileIds,
+			pushdownEntityIds,
 			pushdownVersionIds
 		);
 		if (rewritten !== branch.select) {
@@ -477,6 +500,7 @@ function collectSubqueryPredicateMap(
 	pushdownPruneInheritance: boolean,
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): Map<string, SubqueryPredicateMetadata> {
 	const map = new Map<string, SubqueryPredicateMetadata>();
@@ -527,6 +551,21 @@ function collectSubqueryPredicateMap(
 			fileWhereSummary.literals,
 			fileJoinSummary.literals
 		);
+		const entityWhereSummary = collectEntityIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const entityJoinSummary = collectEntityIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localEntityIds = mergeStringLiterals(
+			entityWhereSummary.literals,
+			entityJoinSummary.literals
+		);
 
 		const versionWhereSummary = collectVersionIdPredicates(
 			select.where_clause,
@@ -554,6 +593,11 @@ function collectSubqueryPredicateMap(
 			existing?.fileIds ?? [],
 			pushdownFileIds,
 			localFileIds
+		);
+		const mergedEntityIds = mergeStringLiterals(
+			existing?.entityIds ?? [],
+			pushdownEntityIds,
+			localEntityIds
 		);
 		const mergedVersionIds = mergeStringLiterals(
 			existing?.versionIds ?? [],
@@ -601,9 +645,13 @@ function collectSubqueryPredicateMap(
 		const finalFileIds = shouldPushFileFilter(merged, mergedFileIds)
 			? mergedFileIds
 			: [];
+		const finalEntityIds = shouldPushEntityFilter(merged, mergedEntityIds)
+			? mergedEntityIds
+			: [];
 		if (
 			merged.length > 0 ||
 			finalFileIds.length > 0 ||
+			finalEntityIds.length > 0 ||
 			mergedVersionIds.length > 0 ||
 			combinedPrune ||
 			combinedTxnPrune
@@ -611,6 +659,7 @@ function collectSubqueryPredicateMap(
 			map.set(normalizedAlias, {
 				schemaKeys: merged,
 				fileIds: finalFileIds,
+				entityIds: finalEntityIds,
 				versionIds: mergedVersionIds,
 				pruneInheritance: combinedPrune,
 				pruneTransactionSegment: combinedTxnPrune,
@@ -662,6 +711,7 @@ function collectCtePredicateMap(
 	pushdownPruneInheritance: boolean,
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): Map<string, SubqueryPredicateMetadata> {
 	const withClause = select.with_clause;
@@ -724,6 +774,21 @@ function collectCtePredicateMap(
 			fileWhereSummary.literals,
 			fileJoinSummary.literals
 		);
+		const entityWhereSummary = collectEntityIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const entityJoinSummary = collectEntityIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localEntityIds = mergeStringLiterals(
+			entityWhereSummary.literals,
+			entityJoinSummary.literals
+		);
 		const versionWhereSummary = collectVersionIdPredicates(
 			select.where_clause,
 			tableNames,
@@ -749,6 +814,11 @@ function collectCtePredicateMap(
 			existing?.fileIds ?? [],
 			pushdownFileIds,
 			localFileIds
+		);
+		const mergedEntityIds = mergeStringLiterals(
+			existing?.entityIds ?? [],
+			pushdownEntityIds,
+			localEntityIds
 		);
 		const mergedVersionIds = mergeStringLiterals(
 			existing?.versionIds ?? [],
@@ -796,9 +866,16 @@ function collectCtePredicateMap(
 		const finalFileIds = shouldPushFileFilter(mergedSchemaKeys, mergedFileIds)
 			? mergedFileIds
 			: [];
+		const finalEntityIds = shouldPushEntityFilter(
+			mergedSchemaKeys,
+			mergedEntityIds
+		)
+			? mergedEntityIds
+			: [];
 		const entry = {
 			schemaKeys: mergedSchemaKeys,
 			fileIds: finalFileIds,
+			entityIds: finalEntityIds,
 			versionIds: mergedVersionIds,
 			pruneInheritance: combinedPrune,
 			pruneTransactionSegment: combinedTxnPrune,
@@ -828,6 +905,7 @@ function rewriteSelectWithClause(
 	pushdownPruneInheritance: boolean,
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): SelectStatementNode {
 	if (!select.with_clause) {
@@ -841,6 +919,7 @@ function rewriteSelectWithClause(
 		pushdownPruneInheritance,
 		pushdownPruneTransactions,
 		pushdownFileIds,
+		pushdownEntityIds,
 		pushdownVersionIds
 	);
 	if (rewritten === select.with_clause) {
@@ -860,6 +939,7 @@ function rewriteWithClauseNode(
 	pushdownPruneInheritance: boolean,
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): WithClauseNode {
 	let changed = false;
@@ -871,6 +951,7 @@ function rewriteWithClauseNode(
 		const nextPruneTransactions =
 			metadata?.pruneTransactionSegment ?? pushdownPruneTransactions;
 		const nextFileIds = metadata?.fileIds ?? pushdownFileIds;
+		const nextEntityIds = metadata?.entityIds ?? pushdownEntityIds;
 		const nextVersionIds = metadata?.versionIds ?? pushdownVersionIds;
 		const statement =
 			cte.statement.node_kind === "compound_select"
@@ -881,6 +962,7 @@ function rewriteWithClauseNode(
 						nextPrune,
 						nextPruneTransactions,
 						nextFileIds,
+						nextEntityIds,
 						nextVersionIds
 					)
 				: rewriteSelectStatement(
@@ -890,6 +972,7 @@ function rewriteWithClauseNode(
 						nextPrune,
 						nextPruneTransactions,
 						nextFileIds,
+						nextEntityIds,
 						nextVersionIds
 					);
 		if (statement !== cte.statement) {
@@ -918,6 +1001,7 @@ function buildInlineMetadata(
 	pushdownPruneInheritance: boolean,
 	pushdownPruneTransactions: boolean,
 	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
 	pushdownVersionIds: readonly string[]
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
@@ -949,6 +1033,15 @@ function buildInlineMetadata(
 			pushdownFileIds,
 			fileSummary.literals
 		);
+		const entitySummary = collectEntityIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedEntityIds = mergeStringLiterals(
+			pushdownEntityIds,
+			entitySummary.literals
+		);
 		const versionSummary = collectVersionIdPredicates(
 			select.where_clause,
 			tableNames,
@@ -960,6 +1053,9 @@ function buildInlineMetadata(
 		);
 		const fileIds = shouldPushFileFilter(schemaKeys, mergedFileIds)
 			? mergedFileIds
+			: [];
+		const entityIds = shouldPushEntityFilter(schemaKeys, mergedEntityIds)
+			? mergedEntityIds
 			: [];
 		const columnSummary = collectSelectedColumns(select, tableNames);
 		const pruneInheritance =
@@ -975,6 +1071,7 @@ function buildInlineMetadata(
 		metadata.set(aliasKey, {
 			schemaKeys,
 			fileIds,
+			entityIds,
 			versionIds: mergedVersionIds,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
@@ -1216,6 +1313,7 @@ function createInlineVisitor(
 			const inlineSql = buildVtableSelectRewrite({
 				schemaKeys: metadataEntry.schemaKeys,
 				fileIds: metadataEntry.fileIds,
+				entityIds: metadataEntry.entityIds,
 				versionIds: metadataEntry.versionIds,
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
@@ -1293,6 +1391,36 @@ function collectFileIdPredicatesFromExpression(
 		tableNames,
 		parameters,
 		"file_id",
+		allowUnqualified
+	);
+}
+
+function collectEntityIdPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
+		tableNames,
+		parameters,
+		"entity_id",
+		allowUnqualified
+	);
+}
+
+function collectEntityIdPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"entity_id",
 		allowUnqualified
 	);
 }
@@ -1602,24 +1730,86 @@ function isColumnReference(
 	context: PredicateVisitContext,
 	expectedColumn: string
 ): boolean {
+	const column = resolveReferencedColumn(expression, context);
+	return column === expectedColumn;
+}
+
+function resolveReferencedColumn(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
+): string | null {
 	if ("sql_text" in expression) {
-		return false;
+		return null;
 	}
-	if (expression.node_kind === "column_reference") {
-		const qualifier = getColumnQualifier(expression);
-		const columnName = getColumnName(expression);
-		if (qualifier && context.tableNames.has(qualifier)) {
-			return columnName === expectedColumn;
+	switch (expression.node_kind) {
+		case "column_reference": {
+			const qualifier = getColumnQualifier(expression);
+			const columnName = getColumnName(expression);
+			if (qualifier && context.tableNames.has(qualifier)) {
+				return columnName;
+			}
+			if (!qualifier && context.allowUnqualified) {
+				return columnName;
+			}
+			return null;
 		}
-		if (!qualifier && context.allowUnqualified) {
-			return columnName === expectedColumn;
-		}
-		return false;
+		case "grouped_expression":
+			return resolveReferencedColumn(expression.expression, context);
+		case "function_call":
+			return resolveColumnFromFunctionCall(expression, context);
+		default:
+			return null;
 	}
-	if (expression.node_kind === "grouped_expression") {
-		return isColumnReference(expression.expression, context, expectedColumn);
+}
+
+function resolveColumnFromFunctionCall(
+	expression: Extract<ExpressionNode, { node_kind: "function_call" }>,
+	context: PredicateVisitContext
+): string | null {
+	const functionName = expression.name.value.toLowerCase();
+	if (functionName !== "json_extract") {
+		return null;
 	}
-	return false;
+	const [target, pathArg] = expression.arguments;
+	if (
+		!target ||
+		!pathArg ||
+		target.node_kind === "all_columns" ||
+		pathArg.node_kind === "all_columns"
+	) {
+		return null;
+	}
+	const targetExpr = target as ExpressionNode | RawFragmentNode;
+	const referencedColumn = resolveReferencedColumn(targetExpr, context);
+	if (referencedColumn !== "snapshot_content") {
+		return null;
+	}
+	const pathExpression = pathArg as ExpressionNode | RawFragmentNode;
+	const path = extractLiteralString(pathExpression, context.parameters);
+	switch (path) {
+		case "$.id":
+			return "entity_id";
+		default:
+			return null;
+	}
+}
+
+function extractLiteralString(
+	expression: ExpressionNode | RawFragmentNode,
+	parameters: ReadonlyArray<unknown>
+): string | null {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return null;
+	}
+	if (node.node_kind === "literal" && typeof node.value === "string") {
+		return node.value;
+	}
+	if (node.node_kind === "parameter") {
+		const value = resolveParameterValue(node, parameters);
+		return typeof value === "string" ? value : null;
+	}
+	return null;
 }
 
 function isLogicalOperator(
@@ -1936,6 +2126,7 @@ function buildTraceEntry(args: {
 function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
 	fileIds: readonly string[];
+	entityIds: readonly string[];
 	versionIds: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
@@ -1967,8 +2158,16 @@ function buildVtableSelectRewrite(options: {
 		options.fileIds && options.fileIds.length > 0
 			? buildFileFilter(options.fileIds)
 			: null;
-	const txnFilter = combineFilters(schemaFilter, fileFilter);
-	const inheritedFilter = combineFilters(schemaFilter, fileFilter);
+	const entityFilter =
+		options.entityIds && options.entityIds.length > 0
+			? buildEntityFilter(options.entityIds)
+			: null;
+	const txnFilter = combineFilters(schemaFilter, fileFilter, entityFilter);
+	const inheritedFilter = combineFilters(
+		schemaFilter,
+		fileFilter,
+		entityFilter
+	);
 	const buildVersionJoin = (alias: string, joinAlias: string) =>
 		buildWantedVersionJoinClause(wantedVersionsCteName, alias, joinAlias);
 	const txnVersionJoin = buildVersionJoin("txn", "wv_txn");
@@ -2834,6 +3033,16 @@ function buildFileFilter(fileIds: readonly string[]): string | null {
 	return `txn.file_id IN (${values})`;
 }
 
+function buildEntityFilter(entityIds: readonly string[]): string | null {
+	if (!entityIds || entityIds.length === 0) {
+		return null;
+	}
+	const values = entityIds
+		.map((entityId) => `'${escapeSqlLiteral(entityId)}'`)
+		.join(", ");
+	return `txn.entity_id IN (${values})`;
+}
+
 /**
  * Builds an equi-join clause tying a table alias to the wanted versions CTE.
  *
@@ -2967,6 +3176,17 @@ function shouldPushFileFilter(
 ): boolean {
 	if (!schemaKeys || schemaKeys.length === 0) return false;
 	if (!fileIds || fileIds.length === 0) return false;
+	return schemaKeys.every(
+		(key) => typeof key === "string" && !key.startsWith("lix_")
+	);
+}
+
+function shouldPushEntityFilter(
+	schemaKeys: readonly string[],
+	entityIds: readonly string[]
+): boolean {
+	if (!schemaKeys || schemaKeys.length === 0) return false;
+	if (!entityIds || entityIds.length === 0) return false;
 	return schemaKeys.every(
 		(key) => typeof key === "string" && !key.startsWith("lix_")
 	);
