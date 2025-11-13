@@ -1249,7 +1249,9 @@ function collectTableNames(
 		}
 	};
 
-	const visitStatement = (statement: SelectStatementNode | CompoundSelectNode) => {
+	const visitStatement = (
+		statement: SelectStatementNode | CompoundSelectNode
+	) => {
 		if (statement.node_kind === "select_statement") {
 			visitSelect(statement);
 		} else {
