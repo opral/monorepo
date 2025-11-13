@@ -137,7 +137,7 @@ High-level steps:
 1. Create or select a Google Cloud project.
 2. Enable the **Cloud Translation API (Basic)** for the project.
 3. Generate a credential of type **API key** under *APIs & Services → Credentials*.
-4. Copy the key and assign it to `INLANG_GOOGLE_TRANSLATE_API_KEY`.
+4. Copy the key and expose it as `INLANG_GOOGLE_TRANSLATE_API_KEY` env variable.
 
 **Migration**
 

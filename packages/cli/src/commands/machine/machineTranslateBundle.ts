@@ -16,7 +16,7 @@ type MachineTranslateArgs = {
   googleApiKey?: string;
 };
 
-type MachineTranslateResult = {
+export type MachineTranslateResult = {
   data?: NewBundleNested;
   error?: string;
 };
