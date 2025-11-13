@@ -432,13 +432,13 @@ function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-white pointer-events-none" />
           <div className="relative max-w-5xl mx-auto text-center">
-            <h1 className="text-gray-900 font-bold leading-tight text-4xl sm:text-5xl lg:text-6xl tracking-tight mb-8">
+            <h1 className="text-gray-900 font-bold leading-tight text-4xl sm:text-6xl tracking-tight mb-8">
               Change control SDK for
               <br />
               apps and <span style={{ color: "#0692B6" }}>AI agents</span>
             </h1>
 
-            <p className="text-gray-600 text-lg sm:text-xl max-w-3xl mx-auto leading-relaxed mt-12">
+            <p className="text-gray-600 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed mt-12">
               Lix is a JavaScript SDK that enables Git-like capabilities for
               apps and agents:
               <br />
@@ -587,7 +587,10 @@ function LandingPage() {
                       </h3>
                       <span className="relative inline-flex items-center text-sm font-medium text-[#0692B6]">
                         <span className="sr-only">{ctaLabel}</span>
-                        <span className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100" style={{ color: '#047497' }}>
+                        <span
+                          className="flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                          style={{ color: "#047497" }}
+                        >
                           Open
                           <span aria-hidden>→</span>
                         </span>
@@ -609,7 +612,7 @@ function LandingPage() {
               </h2>
             </div>
 
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,260px)_1fr]">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,260px)_1fr]">
               <div className="flex flex-col justify-between gap-4">
                 {howItWorksSteps.map(
                   ({ number, title, description, offsetClass }) => (
@@ -629,7 +632,7 @@ function LandingPage() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-white">
+              <div className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white">
                 <div className="flex items-center gap-2 rounded-t-2xl border-b border-gray-200 px-4 py-3 bg-gray-50">
                   <span className="flex h-3 w-3 rounded-full bg-red-400" />
                   <span className="flex h-3 w-3 rounded-full bg-yellow-300" />
@@ -638,7 +641,7 @@ function LandingPage() {
                     example.ts
                   </span>
                 </div>
-                <pre className="overflow-x-auto px-6 py-6 text-sm leading-7 text-gray-900 bg-white">
+                <pre className="w-full overflow-x-auto px-6 py-6 text-sm leading-7 text-gray-900 bg-white">
                   <code>
                     <span className="text-indigo-600">import</span>{" "}
                     <span className="text-gray-900">
@@ -774,10 +777,7 @@ function LandingPage() {
             <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
               {featureSpotlights.map(
                 ({ id, title, description, Illustration }) => (
-                  <div
-                    key={id}
-                    className="flex flex-col gap-6"
-                  >
+                  <div key={id} className="flex flex-col gap-6">
                     <div className="flex justify-center items-center h-40">
                       <Illustration />
                     </div>
