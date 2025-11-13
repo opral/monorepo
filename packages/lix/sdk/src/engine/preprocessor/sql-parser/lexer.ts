@@ -486,6 +486,11 @@ export const Percent: TokenType = createToken({
 	pattern: /%/,
 });
 
+export const Concat: TokenType = createToken({
+	name: "Concat",
+	pattern: /\|\|/,
+});
+
 const tokens: TokenType[] = [
 	LineComment,
 	Whitespace,
@@ -562,6 +567,7 @@ const tokens: TokenType[] = [
 	GreaterThan,
 	LessThan,
 	Equals,
+	Concat,
 	JsonExtractText,
 	JsonExtract,
 	Plus,

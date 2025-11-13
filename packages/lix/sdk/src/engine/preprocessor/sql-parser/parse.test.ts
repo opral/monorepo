@@ -785,6 +785,49 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses string concatenation operator", () => {
+		const ast = parseSelectStatement(
+			"SELECT '/' || name AS path FROM file_rows"
+		);
+		expect(ast.projection).toMatchObject([
+			{
+				expression: {
+					node_kind: "binary_expression",
+					operator: "||",
+					left: {
+						node_kind: "literal",
+						value: "/",
+					},
+					right: {
+						node_kind: "column_reference",
+						path: [id("name")],
+					},
+				},
+				alias: id("path"),
+			},
+		]);
+	});
+
+	test("prioritises concatenation ahead of multiplication", () => {
+		const ast = parseSelectStatement("SELECT 1 || 2 * 3 AS value");
+		expect(ast.projection).toMatchObject([
+			{
+				expression: {
+					node_kind: "binary_expression",
+					operator: "*",
+					left: {
+						node_kind: "binary_expression",
+						operator: "||",
+						left: lit(1),
+						right: lit(2),
+					},
+					right: lit(3),
+				},
+				alias: id("value"),
+			},
+		]);
+	});
+
 	test("parses not exists predicate", () => {
 		const ast = parseSelectStatement(
 			"SELECT id FROM conversation_message_by_version AS m1 WHERE NOT EXISTS (SELECT 1 FROM conversation_message_by_version AS m2 WHERE m2.parent_id = m1.id)"

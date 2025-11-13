@@ -79,6 +79,7 @@ import {
 	Minus,
 	Slash,
 	Percent,
+	Concat,
 	Values,
 	StringLiteral,
 	NumberLiteral,
@@ -688,12 +689,27 @@ class SqlParser extends CstParser {
 	private readonly multiplicative_expression: () => CstNode = this.RULE(
 		"multiplicative_expression",
 		() => {
-			this.SUBRULE(this.unary_expression, { LABEL: "operands" });
+			this.SUBRULE(this.concatenation_expression, { LABEL: "operands" });
 			this.MANY(() => {
 				this.OR([
 					{ ALT: () => this.CONSUME(Star, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Slash, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Percent, { LABEL: "operators" }) },
+				]);
+				this.SUBRULE1(this.concatenation_expression, {
+					LABEL: "operands",
+				});
+			});
+		}
+	);
+
+	private readonly concatenation_expression: () => CstNode = this.RULE(
+		"concatenation_expression",
+		() => {
+			this.SUBRULE(this.unary_expression, { LABEL: "operands" });
+			this.MANY(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(Concat, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(JsonExtract, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(JsonExtractText, { LABEL: "operators" }) },
 				]);

@@ -350,6 +350,7 @@ export type BinaryOperator =
 	| "not_like"
 	| "is"
 	| "is_not"
+	| "||"
 	| "+"
 	| "-"
 	| "*"
