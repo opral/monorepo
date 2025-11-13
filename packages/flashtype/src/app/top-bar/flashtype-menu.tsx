@@ -1,4 +1,6 @@
 import {
+	Circle,
+	CircleOff,
 	FileDown,
 	FilePlus,
 	FileUp,
@@ -21,6 +23,8 @@ import { useLix } from "@lix-js/react-utils";
 import { toggleLixInspector } from "@lix-js/inspector";
 import { seedMarkdownFiles } from "@/seed";
 import { OpfsSahEnvironment } from "@lix-js/sdk";
+import { useCallback } from "react";
+import { useKeyValue } from "@/hooks/key-value/use-key-value";
 
 /**
  * Dropdown launcher for flashtype developer utilities.
@@ -30,6 +34,22 @@ import { OpfsSahEnvironment } from "@lix-js/sdk";
  */
 export function FlashtypeMenu() {
 	const lix = useLix();
+	const [deterministicMode, setDeterministicMode] = useKeyValue(
+		"lix_deterministic_mode" as any,
+		{
+			defaultVersionId: "global",
+			untracked: true,
+		},
+	) as [
+		{ enabled?: boolean } | null,
+		(value: { enabled: boolean }) => Promise<void>,
+	];
+
+	const deterministicEnabled = Boolean(deterministicMode?.enabled);
+
+	const toggleDeterministicMode = useCallback(async () => {
+		await setDeterministicMode({ enabled: !deterministicEnabled });
+	}, [deterministicEnabled, setDeterministicMode]);
 
 	const handleOpenLix = async () => {
 		try {
@@ -179,6 +199,23 @@ export function FlashtypeMenu() {
 						>
 							<FilePlus className="h-3.5 w-3.5" />
 							<span>Seed Markdown files</span>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							className="gap-1.5 text-xs"
+							onSelect={() => {
+								void toggleDeterministicMode();
+							}}
+						>
+							{deterministicEnabled ? (
+								<CircleOff className="h-3.5 w-3.5" />
+							) : (
+								<Circle className="h-3.5 w-3.5" />
+							)}
+							<span>
+								{deterministicEnabled
+									? "Turn off deterministic mode"
+									: "Turn on deterministic mode"}
+							</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							className="gap-1.5 text-xs"
