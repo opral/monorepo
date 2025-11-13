@@ -52,6 +52,9 @@ import {
 	Exists,
 	Between,
 	Like,
+	Match,
+	Glob,
+	Regexp,
 	CaseKeyword,
 	WhenKeyword,
 	ThenKeyword,
@@ -622,6 +625,9 @@ class SqlParser extends CstParser {
 				},
 				{ ALT: () => this.CONSUME(GreaterThan, { LABEL: "operator" }) },
 				{ ALT: () => this.CONSUME(LessThan, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(Match, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(Glob, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(Regexp, { LABEL: "operator" }) },
 			]);
 		}
 	);

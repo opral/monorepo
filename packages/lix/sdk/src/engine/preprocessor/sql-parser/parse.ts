@@ -1271,9 +1271,14 @@ function mapComparisonOperator(image: string): BinaryOperator {
 		case "<":
 		case "<=":
 			return image as BinaryOperator;
-		default:
-			throw new Error(`unsupported comparison operator '${image}'`);
 	}
+
+	const keyword = image.toLowerCase();
+	if (keyword === "match" || keyword === "glob" || keyword === "regexp") {
+		return keyword as BinaryOperator;
+	}
+
+	throw new Error(`unsupported comparison operator '${image}'`);
 }
 
 function normalizeJoinType(value: string): JoinType {

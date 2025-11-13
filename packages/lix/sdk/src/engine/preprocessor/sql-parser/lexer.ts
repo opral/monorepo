@@ -272,6 +272,21 @@ export const Like: TokenType = createToken({
 	pattern: /like\b/i,
 });
 
+export const Match: TokenType = createToken({
+	name: "Match",
+	pattern: /match\b/i,
+});
+
+export const Glob: TokenType = createToken({
+	name: "Glob",
+	pattern: /glob\b/i,
+});
+
+export const Regexp: TokenType = createToken({
+	name: "Regexp",
+	pattern: /regexp\b/i,
+});
+
 export const CaseKeyword: TokenType = createToken({
 	name: "CaseKeyword",
 	pattern: /case\b/i,
@@ -358,6 +373,9 @@ export const Identifier: TokenType = createToken({
 		Exists,
 		Between,
 		Like,
+		Match,
+		Glob,
+		Regexp,
 		CaseKeyword,
 		WhenKeyword,
 		ThenKeyword,
@@ -545,6 +563,9 @@ const tokens: TokenType[] = [
 	Exists,
 	Between,
 	Like,
+	Match,
+	Glob,
+	Regexp,
 	CaseKeyword,
 	WhenKeyword,
 	ThenKeyword,

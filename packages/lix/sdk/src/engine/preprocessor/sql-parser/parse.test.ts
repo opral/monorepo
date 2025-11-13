@@ -543,6 +543,47 @@ describe("parse", () => {
 		});
 	});
 
+	test("parses MATCH, GLOB, and REGEXP operators", () => {
+		const matchAst = parseSelectStatement(
+			"SELECT * FROM documents WHERE title MATCH 'fts query'"
+		);
+		expect(matchAst.where_clause).toMatchObject({
+			node_kind: "binary_expression",
+			left: {
+				node_kind: "column_reference",
+				path: [id("title")],
+			},
+			operator: "match",
+			right: lit("fts query"),
+		});
+
+		const globAst = parseSelectStatement(
+			"SELECT * FROM documents WHERE path GLOB '*.md'"
+		);
+		expect(globAst.where_clause).toMatchObject({
+			node_kind: "binary_expression",
+			left: {
+				node_kind: "column_reference",
+				path: [id("path")],
+			},
+			operator: "glob",
+			right: lit("*.md"),
+		});
+
+		const regexpAst = parseSelectStatement(
+			"SELECT * FROM documents WHERE body REGEXP 'foo.*'"
+		);
+		expect(regexpAst.where_clause).toMatchObject({
+			node_kind: "binary_expression",
+			left: {
+				node_kind: "column_reference",
+				path: [id("body")],
+			},
+			operator: "regexp",
+			right: lit("foo.*"),
+		});
+	});
+
 	test("parses delete", () => {
 		const ast = parseDeleteStatement(
 			"DELETE FROM projects WHERE projects.id = 'obsolete'"

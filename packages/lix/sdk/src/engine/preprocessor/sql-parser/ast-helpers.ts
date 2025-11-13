@@ -179,6 +179,9 @@ export function getBinaryOperatorPrecedence(operator: BinaryOperator): number {
 		case "<=":
 		case "like":
 		case "not_like":
+		case "match":
+		case "glob":
+		case "regexp":
 		case "is":
 		case "is_not":
 			return 3;

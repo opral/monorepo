@@ -885,6 +885,9 @@ function rewritePredicateExpression(
 				"<=",
 				"like",
 				"not_like",
+				"match",
+				"glob",
+				"regexp",
 				"is",
 				"is_not",
 			]);
