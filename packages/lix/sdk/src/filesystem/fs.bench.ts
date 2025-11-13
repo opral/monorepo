@@ -247,7 +247,7 @@ describe("file reads with varying sizes", async () => {
 	});
 });
 
-describe("file read with path-based queries", async () => {
+describe("file read with path-based LIKE", async () => {
 	const NUM_FILES = 10;
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
