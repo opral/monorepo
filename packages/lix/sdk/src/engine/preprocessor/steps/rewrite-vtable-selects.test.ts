@@ -9,6 +9,9 @@ import { getTimestamp } from "../../functions/timestamp.js";
 import { updateStateCache } from "../../../state/cache/update-state-cache.js";
 import { schemaKeyToCacheTableName } from "../../../state/cache/create-schema-cache-table.js";
 import type { LixChangeRaw } from "../../../change/schema-definition.js";
+import { createExplainQuery } from "../../explain-query.js";
+import { createVersion } from "../../../version/create-version.js";
+import { getVersionInheritanceSnapshot } from "../inheritance/version-inheritance-cache.js";
 import { getColumnPath } from "../sql-parser/ast-helpers.js";
 import type {
 	SegmentedStatementNode,
@@ -16,12 +19,14 @@ import type {
 	SelectStatementNode,
 	StatementSegmentNode,
 } from "../sql-parser/nodes.js";
+import type { VersionInheritanceNode } from "../inheritance/version-inheritance-cache.js";
 
 const always = {
 	getStoredSchemas: () => new Map(),
 	getCacheTables: () => new Map(),
 	getSqlViews: () => new Map(),
 	hasOpenTransaction: () => false,
+	getVersionInheritance: () => new Map<string, VersionInheritanceNode>(),
 	trace: undefined as PreprocessorTraceEntry[] | undefined,
 	parameters: [] as ReadonlyArray<unknown>,
 } as const;
@@ -91,6 +96,129 @@ test("rewrites to inline vtable subquery", () => {
 	expect(sql).not.toMatch(/\bFROM\s+"lix_internal_state_vtable"\b/i);
 });
 
+test("json_extract projection tracks snapshot_content dependency", () => {
+	const trace: PreprocessorTraceEntry[] = [];
+	const rewritten = rewrite(
+		`
+		SELECT json_extract(snapshot_content, '$.value.enabled') AS enabled
+		FROM lix_internal_state_vtable
+		WHERE schema_key = 'lix_key_value'
+	`,
+		{ hasOpenTransaction: () => true, trace }
+	);
+
+	const payload = trace[0]?.payload as Record<string, unknown>;
+	expect(payload?.selected_columns).toEqual(["snapshot_content"]);
+
+	const projection = firstSelect(rewritten).projection;
+	expect(projection).toHaveLength(1);
+	const item = projection[0];
+	if (!item) {
+		throw new Error("missing projection item");
+	}
+	if (item.node_kind !== "select_expression") {
+		throw new Error("expected select expression");
+	}
+	expect(item.alias?.value.toLowerCase()).toBe("enabled");
+
+	const normalizedSql = compileSql(rewritten).toLowerCase();
+	expect(normalizedSql).not.toContain("lix_internal_state_writer");
+	expect(normalizedSql).not.toContain("lix_internal_change");
+});
+
+test("pushes schema filters into derived state selects", () => {
+	const cacheTables = new Map([
+		["demo_schema", '"cache_demo"'],
+		["other_schema", '"cache_other"'],
+	]);
+	const rewritten = rewrite(
+		`
+		WITH descriptor AS (
+			SELECT *
+			FROM (
+				SELECT entity_id, schema_key, file_id
+				FROM lix_internal_state_vtable
+			) AS state_with_tombstones
+			WHERE version_id = 'global'
+		)
+		SELECT *
+		FROM descriptor
+		WHERE schema_key = 'demo_schema'
+	`,
+		{ getCacheTables: () => cacheTables }
+	);
+
+	const sql = compileSql(rewritten);
+	expect(sql).toContain('"cache_demo"');
+	expect(sql).not.toContain('"cache_other"');
+});
+
+test("pushes json_extract snapshot predicates into segment filters", () => {
+	const cacheTables = new Map([["demo_schema", '"cache_demo"']]);
+	const rewritten = rewrite(
+		`
+		SELECT snapshot_content
+		FROM lix_internal_state_vtable
+		WHERE schema_key = 'demo_schema'
+		  AND json_extract(snapshot_content, '$.id') = 'entity-demo'
+	`,
+		{ hasOpenTransaction: () => true, getCacheTables: () => cacheTables }
+	);
+
+	const normalizedSql = compileSql(rewritten).toLowerCase();
+	expect(normalizedSql).toContain(
+		"json_extract(txn.snapshot_content, '$.id') = 'entity-demo'"
+	);
+	expect(normalizedSql).toContain(
+		"json_extract(unt.snapshot_content, '$.id') = 'entity-demo'"
+	);
+	expect(normalizedSql).toContain(
+		"json_extract(cache.snapshot_content, '$.id') = 'entity-demo'"
+	);
+});
+
+test("limits base segments to requested versions while inherited segments see ancestors", () => {
+	const versionId = "01920000-0000-7000-8000-000000000026";
+	const ancestorId = "global";
+	const cacheTables = new Map([["demo_schema", '"cache_demo"']]);
+	const inheritance = new Map<string, VersionInheritanceNode>([
+		[
+			ancestorId,
+			{ versionId: ancestorId, inheritsFromVersionId: null, ancestors: [] },
+		],
+		[
+			versionId,
+			{
+				versionId,
+				inheritsFromVersionId: ancestorId,
+				ancestors: [ancestorId],
+			},
+		],
+	]);
+	const rewritten = rewrite(
+		`
+		SELECT entity_id
+		FROM lix_internal_state_vtable
+		WHERE schema_key = 'demo_schema'
+		  AND version_id = '${versionId}'
+	`,
+		{
+			getCacheTables: () => cacheTables,
+			getVersionInheritance: () => inheritance,
+			hasOpenTransaction: () => true,
+		}
+	);
+	const sql = compileSql(rewritten);
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_cache\s+ON\s+wv_cache\.version_id\s*=\s*cache\.version_id/i
+	);
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_vi\s+ON\s+wv_vi\.version_id\s*=\s*vi\.version_id/i
+	);
+	expect(sql).toContain("cache.version_id = vi.ancestor_version_id");
+	expect(sql).toMatch(/'global'\s+as\s+ancestor_version_id/i);
+});
+
 test("cache segment projects snapshot_content even when not selected explicitly", () => {
 	const schemaKey = "lix_stored_schema";
 	const cacheTable = schemaKeyToCacheTableName(schemaKey);
@@ -158,6 +286,198 @@ test("propagates schema filters into derived vtable subqueries", () => {
 		new RegExp(`cache\\.schema_key\\s+IN\\s+\\('${schemaKey}'\\)`, "i")
 	);
 	expect(sql).toContain(`"${cacheTable}"`);
+});
+
+test("prunes inheritance segments when inherited rows are filtered out", () => {
+	const rewritten = rewrite(
+		`
+		SELECT *
+		FROM lix_internal_state_vtable
+		WHERE inherited_from_version_id IS NULL
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	expect(sql).not.toContain("version_inheritance");
+});
+
+test("prunes inheritance segments when filtering exclusively for a version without parents", () => {
+	const rootVersionId = "root_version";
+	const versionGraph = new Map<string, VersionInheritanceNode>([
+		[
+			rootVersionId,
+			{
+				versionId: rootVersionId,
+				inheritsFromVersionId: null,
+				ancestors: [],
+			},
+		],
+	]);
+	const rewritten = rewrite(
+		`
+		SELECT *
+		FROM lix_internal_state_vtable
+		WHERE version_id = '${rootVersionId}'
+	`,
+		{
+			hasOpenTransaction: () => true,
+			getVersionInheritance: () => versionGraph,
+		}
+	);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	expect(sql).not.toContain("version_inheritance");
+});
+
+test("prunes inheritance when version filters are parameterized", () => {
+	const rootVersionId = "root_version";
+	const versionGraph = new Map<string, VersionInheritanceNode>([
+		[
+			rootVersionId,
+			{
+				versionId: rootVersionId,
+				inheritsFromVersionId: null,
+				ancestors: [],
+			},
+		],
+	]);
+	const rewritten = rewrite(
+		`
+		SELECT *
+		FROM lix_internal_state_vtable
+		WHERE version_id = ?
+	`,
+		{
+			hasOpenTransaction: () => true,
+			parameters: [rootVersionId],
+			getVersionInheritance: () => versionGraph,
+		}
+	);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	expect(sql).not.toContain("version_inheritance");
+});
+
+test("collapses single-parent inheritance chains inline without recursion", () => {
+	const versionGraph = new Map<string, VersionInheritanceNode>([
+		[
+			"global",
+			{
+				versionId: "global",
+				inheritsFromVersionId: null,
+				ancestors: [],
+			},
+		],
+		[
+			"active_version",
+			{
+				versionId: "active_version",
+				inheritsFromVersionId: "global",
+				ancestors: ["global"],
+			},
+		],
+	]);
+
+	const rewritten = rewrite(
+		`
+		SELECT entity_id
+		FROM lix_internal_state_vtable
+		WHERE version_id = 'active_version'
+	`,
+		{
+			hasOpenTransaction: () => true,
+			getVersionInheritance: () => versionGraph,
+		}
+	);
+
+	const sql = compileSql(rewritten);
+	expect(sql.toLowerCase()).not.toContain("version_inheritance");
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_txn\s+ON\s+wv_txn\.version_id\s*=\s*txn\.version_id/i
+	);
+	expect(
+		sql
+			.replace(/\s+/g, " ")
+			.match(
+				/select 'active_version' as version_id, 'global' as ancestor_version_id/i
+			)
+	).not.toBeNull();
+});
+
+test("collapses multi-level single-parent inheritance chains inline", () => {
+	const versionGraph = new Map<string, VersionInheritanceNode>([
+		[
+			"global",
+			{
+				versionId: "global",
+				inheritsFromVersionId: null,
+				ancestors: [],
+			},
+		],
+		[
+			"active_version",
+			{
+				versionId: "active_version",
+				inheritsFromVersionId: "global",
+				ancestors: ["global"],
+			},
+		],
+		[
+			"feature_version",
+			{
+				versionId: "feature_version",
+				inheritsFromVersionId: "active_version",
+				ancestors: ["active_version", "global"],
+			},
+		],
+	]);
+
+	const rewritten = rewrite(
+		`
+		SELECT entity_id
+		FROM lix_internal_state_vtable
+		WHERE version_id = 'feature_version'
+	`,
+		{
+			hasOpenTransaction: () => true,
+			getVersionInheritance: () => versionGraph,
+		}
+	);
+
+	const sql = compileSql(rewritten);
+	const normalized = sql.toLowerCase();
+	expect(normalized).not.toContain("version_inheritance");
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_txn\s+ON\s+wv_txn\.version_id\s*=\s*txn\.version_id/i
+	);
+	expect(
+		sql
+			.replace(/\s+/g, " ")
+			.match(
+				/select 'feature_version' as version_id, 'global' as ancestor_version_id/i
+			)
+	).not.toBeNull();
+});
+
+test("retains version filters when inheritance map lacks the version", () => {
+	const missingVersionId = "missing_version";
+	const rewritten = rewrite(
+		`
+		SELECT entity_id
+		FROM lix_internal_state_vtable
+		WHERE version_id = '${missingVersionId}'
+	`,
+		{
+			hasOpenTransaction: () => true,
+			getVersionInheritance: () => new Map(),
+		}
+	);
+
+	const sql = compileSql(rewritten);
+	expect(sql).toMatch(
+		/JOIN\s+wanted_versions\s+wv_txn\s+ON\s+wv_txn\.version_id\s*=\s*txn\.version_id/i
+	);
 });
 
 test("resolves cache rows across recursive version inheritance chains", async () => {
@@ -240,6 +560,32 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 	});
 
 	const cacheTable = schemaKeyToCacheTableName(schemaKey);
+	const versionGraph = new Map<string, VersionInheritanceNode>([
+		[
+			"version-root",
+			{
+				versionId: "version-root",
+				inheritsFromVersionId: null,
+				ancestors: [],
+			},
+		],
+		[
+			"version-mid",
+			{
+				versionId: "version-mid",
+				inheritsFromVersionId: "version-root",
+				ancestors: ["version-root"],
+			},
+		],
+		[
+			"version-leaf",
+			{
+				versionId: "version-leaf",
+				inheritsFromVersionId: "version-mid",
+				ancestors: ["version-mid", "version-root"],
+			},
+		],
+	]);
 	const rewritten = rewrite(
 		`
 		SELECT v.schema_key, v.version_id, v.inherited_from_version_id, v.snapshot_content
@@ -250,11 +596,12 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 		{
 			getCacheTables: () => new Map([[schemaKey, cacheTable]]),
 			hasOpenTransaction: () => true,
+			getVersionInheritance: () => versionGraph,
 		}
 	);
 
 	const { sql: rewrittenSql, parameters } = compile(rewritten);
-	expect(rewrittenSql.toLowerCase()).toContain("version_inheritance");
+	expect(rewrittenSql.toLowerCase()).not.toContain("version_inheritance");
 
 	const rows = lix.engine!.sqlite.exec({
 		sql: rewrittenSql,
@@ -272,6 +619,42 @@ test("resolves cache rows across recursive version inheritance chains", async ()
 		id: "entity-recursive",
 		name: "Root Version Value",
 	});
+	await lix.close();
+});
+
+test("integration: parameterized version filters prune inheritance", async () => {
+	const lix = await openLix({});
+	await createVersion({
+		lix,
+		id: "integration_active_version",
+		inheritsFrom: { id: "global" },
+		name: "integration-version",
+	});
+
+	const snapshot = getVersionInheritanceSnapshot({ engine: lix.engine! });
+	expect(snapshot.get("integration_active_version")?.ancestors).toEqual([
+		"global",
+	]);
+
+	const explain = createExplainQuery({ engine: lix.engine! });
+	const report = explain({
+		sql: `
+			SELECT *
+			FROM lix_internal_state_vtable
+			WHERE schema_key = 'lix_key_value'
+			  AND version_id = ?
+		`,
+		parameters: ["integration_active_version"],
+	});
+
+	lix.engine!.executeSync({
+		sql: report.rewrittenSql!,
+		parameters: report.parameters,
+		preprocessMode: "none",
+	});
+	expect(report.rewrittenSql?.toLowerCase()).not.toContain(
+		"version_inheritance"
+	);
 	await lix.close();
 });
 
@@ -369,10 +752,13 @@ test("respects aliases when projecting columns", () => {
 	);
 
 	const payload = trace[0]!.payload as Record<string, unknown>;
-	expect(payload.selected_columns).toEqual(["schema_key_alias"]);
+	expect(payload.selected_columns).toEqual(["schema_key"]);
 
 	const sql = compileSql(rewritten);
-	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key_alias"');
+	expect(sql.toLowerCase()).toContain('"w"."schema_key" as "schema_key"');
+	expect(sql.toLowerCase()).toContain(
+		"select v.schema_key as schema_key_alias"
+	);
 	expect(sql.toLowerCase()).not.toContain('"w"."_pk" as "_pk"');
 });
 
@@ -458,6 +844,19 @@ test("includes hidden _pk when referenced in predicates", () => {
 
 	const sql = compileSql(rewritten);
 	expect(sql.toLowerCase()).toContain(" as _pk");
+});
+
+test("exposes source_tag column when selected", () => {
+	const rewritten = rewrite(
+		`
+		SELECT v.source_tag
+		FROM lix_internal_state_vtable AS v
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
+	const sql = compileSql(rewritten).toLowerCase();
+	expect(sql).toContain('"w"."source_tag" as "source_tag"');
 });
 
 test("retains writer joins when writer_key is selected", () => {
@@ -631,6 +1030,33 @@ test("prunes transaction segment when transaction closed", () => {
 	expect(upper).toContain("LIX_INTERNAL_STATE_ALL_UNTRACKED");
 	const unionCount = upper.match(/\bUNION ALL\b/g) ?? [];
 	expect(unionCount.length).toBe(2);
+});
+
+test("prunes transaction segments when filtering out transaction source_tag", () => {
+	const baseline = rewrite(
+		`
+		SELECT v.schema_key
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+	const baselineSql = compileSql(baseline).toUpperCase();
+	expect(baselineSql).toContain("LIX_INTERNAL_TRANSACTION_STATE");
+
+	const rewritten = rewrite(
+		`
+		SELECT v.schema_key
+		FROM lix_internal_state_vtable AS v
+		WHERE v.schema_key = 'test_schema_key'
+		  AND v.source_tag != 'T'
+	`,
+		{ hasOpenTransaction: () => true }
+	);
+
+	const sql = compileSql(rewritten).toUpperCase();
+	expect(sql).not.toContain("'T' AS SOURCE_TAG");
+	expect(sql).toContain("'TI' AS SOURCE_TAG");
 });
 
 test("unions all available cache tables when no schema filter is provided", () => {

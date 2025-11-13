@@ -4,6 +4,33 @@ import { internalQueryBuilder } from "../internal-query-builder.js";
 import { withRuntimeCache } from "../with-runtime-cache.js";
 
 const deterministicBootRefs = new WeakSet<object>();
+const stateViewReadyRefs = new WeakMap<object, boolean>();
+
+/**
+ * Tracks whether the state view exists for a given runtime. Guard queries run until the
+ * view is observed once, after which we skip the sqlite_schema probe.
+ *
+ * @param engine - Lix engine with a runtime cache reference and executeSync helper.
+ */
+function isStateViewReady(
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef">
+): boolean {
+	if (stateViewReadyRefs.get(engine.runtimeCacheRef) === true) {
+		return true;
+	}
+
+	const ready =
+		engine.executeSync({
+			sql: "SELECT 1 FROM sqlite_schema WHERE type = 'view' AND name = 'state' LIMIT 1",
+			preprocessMode: "none",
+		}).rows.length > 0;
+
+	if (ready) {
+		stateViewReadyRefs.set(engine.runtimeCacheRef, true);
+	}
+
+	return ready;
+}
 
 /**
  * Flag a runtime as being within deterministic engine boot.
@@ -56,10 +83,14 @@ export function isDeterministicModeSync(args: {
 		return true;
 	}
 
+	if (!isStateViewReady(engine)) {
+		return false;
+	}
+
 	const [row] = withRuntimeCache(
 		engine,
 		internalQueryBuilder
-			.selectFrom("lix_internal_state_vtable")
+			.selectFrom("state")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.where("snapshot_content", "is not", null)

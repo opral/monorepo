@@ -328,6 +328,73 @@ test("primary key validation ignores inherited entities", async () => {
 	).not.toThrow();
 });
 
+test("unique validation ignores inherited entities", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "unique_local_only",
+		"x-lix-unique": [["/slug"]],
+		properties: {
+			id: { type: "string" },
+			slug: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id", "slug", "value"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const parentVersion = await createVersion({ lix, id: "unique-parent" });
+	const childVersion = await createVersion({
+		lix,
+		id: "unique-child",
+		inheritsFrom: { id: parentVersion.id },
+	});
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "unique-parent-entity",
+			schema_key: schema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			version_id: parentVersion.id,
+			snapshot_content: {
+				id: "unique-parent-entity",
+				slug: "conflicting-slug",
+				value: "parent",
+			},
+			schema_version: schema["x-lix-version"],
+			untracked: false,
+		})
+		.execute();
+
+	expect(() =>
+		validateStateMutation({
+			engine: lix.engine!,
+			schema,
+			snapshot_content: {
+				id: "unique-child-entity",
+				slug: "conflicting-slug",
+				value: "child",
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).not.toThrow();
+});
+
 test("immutable schemas reject repeated inserts", async () => {
 	const lix = await openLix({});
 
@@ -389,7 +456,7 @@ test("immutable schemas reject repeated inserts", async () => {
 	await lix.close();
 });
 
-test("state_by_version: inserting same PK twice in one transaction overwrites without PK error", async () => {
+test("state_by_version: inserting same PK twice in one transaction rejects duplicate", async () => {
 	const lix = await openLix({});
 
 	// Define a mock schema with PK on 'key'
@@ -409,46 +476,38 @@ test("state_by_version: inserting same PK twice in one transaction overwrites wi
 	// Register schema
 	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
 
-	// Execute both inserts in a single DB transaction so that xUpdate/xCommit run once
-	await lix.db.transaction().execute(async (trx) => {
-		// First insert
-		await trx
-			.insertInto("state_by_version")
-			.values({
-				entity_id: "kv_vtab1",
-				file_id: "lix",
-				schema_key: "kv_mock_vtab",
-				plugin_key: "lix_sdk",
-				version_id: sql`(SELECT version_id FROM active_version)`,
-				snapshot_content: { key: "test", value: "A" },
-				schema_version: "1.0",
-			})
-			.execute();
+	// Execute both inserts in a single DB transaction so that the duplicate PK is detected
+	await expect(
+		lix.db.transaction().execute(async (trx) => {
+			await trx
+				.insertInto("state_by_version")
+				.values({
+					entity_id: "kv_vtab1",
+					file_id: "lix",
+					schema_key: "kv_mock_vtab",
+					plugin_key: "lix_own_entity",
+					version_id: sql`(SELECT version_id FROM active_version)`,
+					snapshot_content: { key: "test", value: "A" },
+					schema_version: "1.0",
+				})
+				.execute();
 
-		// Second insert with same PK in the same transaction → should overwrite, not error
-		await trx
-			.insertInto("state_by_version")
-			.values({
-				entity_id: "kv_vtab1",
-				file_id: "lix",
-				schema_key: "kv_mock_vtab",
-				plugin_key: "lix_sdk",
-				version_id: sql`(SELECT version_id FROM active_version)`,
-				snapshot_content: { key: "test", value: "B" },
-				schema_version: "1.0",
-			})
-			.execute();
-	});
+			await trx
+				.insertInto("state_by_version")
+				.values({
+					entity_id: "kv_vtab1",
+					file_id: "lix",
+					schema_key: "kv_mock_vtab",
+					plugin_key: "lix_own_entity",
+					version_id: sql`(SELECT version_id FROM active_version)`,
+					snapshot_content: { key: "test", value: "B" },
+					schema_version: "1.0",
+				})
+				.execute();
+		})
+	).rejects.toThrow(/Primary key constraint violation/);
 
-	// Verify the final materialized state reflects the second insert
-	const row = await lix.db
-		.selectFrom("state_by_version")
-		.where("schema_key", "=", "kv_mock_vtab")
-		.where("entity_id", "=", "kv_vtab1")
-		.selectAll()
-		.executeTakeFirst();
-
-	expect(row?.snapshot_content).toEqual({ key: "test", value: "B" });
+	await lix.close();
 });
 
 test("handles composite primary keys", async () => {

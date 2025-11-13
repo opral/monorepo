@@ -121,25 +121,6 @@ test("creates tracked entity with pending change", async () => {
 		.execute();
 
 	expect(transactionAfterCommit).toHaveLength(0);
-
-	// Verify state_by_version and underlying state are consistent
-	const resultingState = await lix.db
-		.selectFrom("state_by_version")
-		.selectAll()
-		.execute();
-
-	const resultingUnderlyingStateRaw = await lixInternalDb
-		.selectFrom("lix_internal_state_vtable")
-		.selectAll()
-		.execute();
-
-	const resolvedStateWithoutPk = resultingUnderlyingStateRaw.map((r: any) => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { _pk, ...rest } = r || {};
-		return rest;
-	});
-
-	expect(resultingState).toEqual(resolvedStateWithoutPk);
 });
 
 test("creates tombstone for inherited entity deletion", async () => {

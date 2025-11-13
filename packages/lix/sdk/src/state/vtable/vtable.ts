@@ -13,6 +13,7 @@ import { insertVTableLog } from "./insert-vtable-log.js";
 import { commit } from "./commit.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
+import { withRuntimeCache } from "../../engine/with-runtime-cache.js";
 import { getStateCacheTables } from "../cache/schema.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
@@ -47,6 +48,7 @@ export function hasOpenTransaction(
 // Type definition for the internal state virtual table
 export type InternalStateVTable = {
 	_pk: Generated<string>; // HIDDEN PRIMARY KEY
+	source_tag: Generated<string>;
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
@@ -67,6 +69,7 @@ export type InternalStateVTable = {
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
 	_pk HIDDEN TEXT NOT NULL PRIMARY KEY,
+	source_tag TEXT,
 	entity_id TEXT,
 	schema_key TEXT,
 	file_id TEXT,
@@ -86,6 +89,7 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 
 const STATE_VTAB_COLUMN_NAMES = [
 	"_pk",
+	"source_tag",
 	"entity_id",
 	"schema_key",
 	"file_id",
@@ -102,6 +106,13 @@ const STATE_VTAB_COLUMN_NAMES = [
 	"metadata",
 	"writer_key",
 ];
+
+const VERSION_CACHE_LIMIT = 100;
+const VERSION_CACHE_QUERY = internalQueryBuilder
+	.selectFrom("version")
+	.select("id")
+	.limit(VERSION_CACHE_LIMIT)
+	.compile();
 
 export function applyStateVTable(
 	engine: Pick<
@@ -467,6 +478,15 @@ export function applyStateVTable(
 					value = row[iCol];
 				} else {
 					const columnName = getColumnName(iCol);
+					if (columnName === "source_tag") {
+						const tag = inferSourceTag(row);
+						if (tag === null) {
+							capi.sqlite3_result_null(pContext);
+						} else {
+							capi.sqlite3_result_js(pContext, tag);
+						}
+						return capi.SQLITE_OK;
+					}
 					if (columnName === "writer_key") {
 						// Compute writer on demand from lix_internal_state_writer with inheritance fallback
 						try {
@@ -650,6 +670,8 @@ export function applyStateVTable(
 
 					// Call validation function (same logic as triggers)
 					const schemaKey = String(schema_key);
+					const existingVersionsCache = withVersionCache(engine);
+
 					validateStateMutation({
 						engine: engine,
 						schema:
@@ -662,6 +684,7 @@ export function applyStateVTable(
 						entity_id: String(entity_id),
 						version_id: String(version_id),
 						untracked: Boolean(untracked),
+						existingVersionsCache,
 						...(inheritedFromValue !== null && inheritedFromValue !== undefined
 							? { inherited_from_version_id: String(inheritedFromValue) }
 							: {}),
@@ -994,6 +1017,7 @@ export function handleStateDelete(
 		operation: "delete",
 		entity_id: String(entity_id),
 		version_id: String(version_id),
+		existingVersionsCache: withVersionCache(engine),
 	});
 
 	insertTransactionState({
@@ -1016,4 +1040,27 @@ export function handleStateDelete(
 
 function getColumnName(columnIndex: number): string {
 	return STATE_VTAB_COLUMN_NAMES[columnIndex] || "unknown";
+}
+
+function inferSourceTag(row: Record<string, unknown>): string | null {
+	if (!row) {
+		return null;
+	}
+	if (typeof row.source_tag === "string") {
+		return row.source_tag;
+	}
+	const pkValue = typeof row._pk === "string" ? row._pk : null;
+	if (typeof pkValue === "string" && pkValue.length > 0) {
+		const delimiterIndex = pkValue.indexOf("~");
+		return delimiterIndex === -1 ? pkValue : pkValue.slice(0, delimiterIndex);
+	}
+	return null;
+}
+
+function withVersionCache(
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">
+): Set<string> {
+	const result = withRuntimeCache(engine, VERSION_CACHE_QUERY);
+	const rows = (result.rows ?? []) as Array<{ id: string }>;
+	return new Set(rows.map((row) => String(row.id)));
 }

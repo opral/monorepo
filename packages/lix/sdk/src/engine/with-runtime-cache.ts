@@ -186,7 +186,7 @@ export function withRuntimeCache(
 
 	const result = engine.executeSync({
 		sql: compiled.sql,
-		parameters: (compiled.parameters as Readonly<unknown[]>) ?? [],
+		parameters: compiled.parameters,
 	});
 
 	const dependencies = computeDependencies(compiled);

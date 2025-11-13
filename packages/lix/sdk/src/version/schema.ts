@@ -27,63 +27,70 @@ export function applyVersionDatabaseSchema(args: {
 	args.engine.sqlite.exec(`
         CREATE VIEW IF NOT EXISTS version AS
         WITH descriptor AS (
-            SELECT 
-                json_extract(snapshot_content, '$.id') AS id,
-                json_extract(snapshot_content, '$.name') AS name,
-                json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
-                json_extract(snapshot_content, '$.hidden') AS hidden,
-                entity_id AS lixcol_entity_id,
-                file_id AS lixcol_file_id,
-                plugin_key AS lixcol_plugin_key,
-                schema_version AS lixcol_schema_version,
-                change_id AS d_change_id,
-                created_at AS d_created_at,
-                updated_at AS d_updated_at,
-                commit_id AS d_commit_id
-            FROM state_by_version s
-            WHERE s.schema_key = 'lix_version_descriptor' AND s.version_id = 'global'
-              AND s.updated_at = (
-                SELECT MAX(updated_at)
-                FROM state_by_version s2
-                WHERE s2.schema_key = 'lix_version_descriptor'
-                  AND s2.version_id = 'global'
-                  AND s2.entity_id = s.entity_id
-              )
-              AND s.change_id = (
-                SELECT MAX(change_id)
-                FROM state_by_version s3
-                WHERE s3.schema_key = 'lix_version_descriptor'
-                  AND s3.version_id = 'global'
-                  AND s3.entity_id = s.entity_id
-                  AND s3.updated_at = s.updated_at
-              )
+            SELECT
+                id,
+                name,
+                inherits_from_version_id,
+                hidden,
+                lixcol_entity_id,
+                lixcol_file_id,
+                lixcol_plugin_key,
+                lixcol_schema_version,
+                d_change_id,
+                d_created_at,
+                d_updated_at,
+                d_commit_id
+            FROM (
+                SELECT 
+                    json_extract(snapshot_content, '$.id') AS id,
+                    json_extract(snapshot_content, '$.name') AS name,
+                    json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
+                    json_extract(snapshot_content, '$.hidden') AS hidden,
+                    entity_id AS lixcol_entity_id,
+                    file_id AS lixcol_file_id,
+                    plugin_key AS lixcol_plugin_key,
+                    schema_version AS lixcol_schema_version,
+                    change_id AS d_change_id,
+                    created_at AS d_created_at,
+                    updated_at AS d_updated_at,
+                    commit_id AS d_commit_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY entity_id
+                        ORDER BY updated_at DESC, change_id DESC
+                    ) AS rn
+                FROM state_by_version s
+                WHERE s.schema_key = 'lix_version_descriptor'
+                  AND s.version_id = 'global'
+            )
+            WHERE rn = 1
         ),
         tip AS (
-            SELECT 
-                json_extract(snapshot_content, '$.id') AS id,
-                json_extract(snapshot_content, '$.commit_id') AS commit_id,
-                json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
-                change_id AS t_change_id,
-                created_at AS t_created_at,
-                updated_at AS t_updated_at,
-                commit_id AS t_commit_id
-            FROM state_by_version s
-            WHERE s.schema_key = 'lix_version_tip' AND s.version_id = 'global'
-              AND s.updated_at = (
-                SELECT MAX(updated_at)
-                FROM state_by_version s2
-                WHERE s2.schema_key = 'lix_version_tip'
-                  AND s2.version_id = 'global'
-                  AND s2.entity_id = s.entity_id
-              )
-              AND s.change_id = (
-                SELECT MAX(change_id)
-                FROM state_by_version s3
-                WHERE s3.schema_key = 'lix_version_tip'
-                  AND s3.version_id = 'global'
-                  AND s3.entity_id = s.entity_id
-                  AND s3.updated_at = s.updated_at
-              )
+            SELECT
+                id,
+                commit_id,
+                working_commit_id,
+                t_change_id,
+                t_created_at,
+                t_updated_at,
+                t_commit_id
+            FROM (
+                SELECT 
+                    json_extract(snapshot_content, '$.id') AS id,
+                    json_extract(snapshot_content, '$.commit_id') AS commit_id,
+                    json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
+                    change_id AS t_change_id,
+                    created_at AS t_created_at,
+                    updated_at AS t_updated_at,
+                    commit_id AS t_commit_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY entity_id
+                        ORDER BY updated_at DESC, change_id DESC
+                    ) AS rn
+                FROM state_by_version s
+                WHERE s.schema_key = 'lix_version_tip'
+                  AND s.version_id = 'global'
+            )
+            WHERE rn = 1
         )
         SELECT 
             d.id,
@@ -106,66 +113,74 @@ export function applyVersionDatabaseSchema(args: {
 
         CREATE VIEW IF NOT EXISTS version_by_version AS
         WITH descriptor AS (
-            SELECT 
-                json_extract(snapshot_content, '$.id') AS id,
-                json_extract(snapshot_content, '$.name') AS name,
-                json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
-                json_extract(snapshot_content, '$.hidden') AS hidden,
-                entity_id AS lixcol_entity_id,
-                file_id AS lixcol_file_id,
-                plugin_key AS lixcol_plugin_key,
-                schema_version AS lixcol_schema_version,
-                version_id AS lixcol_version_id,
-                inherited_from_version_id AS lixcol_inherited_from_version_id,
-                change_id AS d_change_id,
-                created_at AS d_created_at,
-                updated_at AS d_updated_at,
-                commit_id AS d_commit_id
-            FROM state_by_version s
-            WHERE s.schema_key = 'lix_version_descriptor'
-              AND s.updated_at = (
-                SELECT MAX(updated_at)
-                FROM state_by_version s2
-                WHERE s2.schema_key = 'lix_version_descriptor'
-                  AND s2.entity_id = s.entity_id
-                  AND s2.version_id = s.version_id
-              )
-              AND s.change_id = (
-                SELECT MAX(change_id)
-                FROM state_by_version s3
-                WHERE s3.schema_key = 'lix_version_descriptor'
-                  AND s3.entity_id = s.entity_id
-                  AND s3.version_id = s.version_id
-                  AND s3.updated_at = s.updated_at
-              )
+            SELECT
+                id,
+                name,
+                inherits_from_version_id,
+                hidden,
+                lixcol_entity_id,
+                lixcol_file_id,
+                lixcol_plugin_key,
+                lixcol_schema_version,
+                lixcol_version_id,
+                lixcol_inherited_from_version_id,
+                d_change_id,
+                d_created_at,
+                d_updated_at,
+                d_commit_id
+            FROM (
+                SELECT 
+                    json_extract(snapshot_content, '$.id') AS id,
+                    json_extract(snapshot_content, '$.name') AS name,
+                    json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
+                    json_extract(snapshot_content, '$.hidden') AS hidden,
+                    entity_id AS lixcol_entity_id,
+                    file_id AS lixcol_file_id,
+                    plugin_key AS lixcol_plugin_key,
+                    schema_version AS lixcol_schema_version,
+                    version_id AS lixcol_version_id,
+                    inherited_from_version_id AS lixcol_inherited_from_version_id,
+                    change_id AS d_change_id,
+                    created_at AS d_created_at,
+                    updated_at AS d_updated_at,
+                    commit_id AS d_commit_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY entity_id, version_id
+                        ORDER BY updated_at DESC, change_id DESC
+                    ) AS rn
+                FROM state_by_version s
+                WHERE s.schema_key = 'lix_version_descriptor'
+            )
+            WHERE rn = 1
         ),
         tip AS (
-            SELECT 
-                json_extract(snapshot_content, '$.id') AS id,
-                json_extract(snapshot_content, '$.commit_id') AS commit_id,
-                json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
-                version_id AS lixcol_version_id,
-                change_id AS t_change_id,
-                created_at AS t_created_at,
-                updated_at AS t_updated_at,
-                commit_id AS t_commit_id
-            FROM state_by_version s
-            WHERE s.schema_key = 'lix_version_tip'
-              AND s.updated_at = (
-                SELECT MAX(updated_at)
-                FROM state_by_version s2
-                WHERE s2.schema_key = 'lix_version_tip'
-                  AND s2.entity_id = s.entity_id
-                  AND s2.version_id = s.version_id
-              )
-              AND s.change_id = (
-                SELECT MAX(change_id)
-                FROM state_by_version s3
-                WHERE s3.schema_key = 'lix_version_tip'
-                  AND s3.entity_id = s.entity_id
-                  AND s3.version_id = s.version_id
-                  AND s3.updated_at = s.updated_at
-              )
+            SELECT
+                id,
+                commit_id,
+                working_commit_id,
+                lixcol_version_id,
+                t_change_id,
+                t_created_at,
+                t_updated_at,
+                t_commit_id
+            FROM (
+                SELECT 
+                    json_extract(snapshot_content, '$.id') AS id,
+                    json_extract(snapshot_content, '$.commit_id') AS commit_id,
+                    json_extract(snapshot_content, '$.working_commit_id') AS working_commit_id,
+                    version_id AS lixcol_version_id,
+                    change_id AS t_change_id,
+                    created_at AS t_created_at,
+                    updated_at AS t_updated_at,
+                    commit_id AS t_commit_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY entity_id, version_id
+                        ORDER BY updated_at DESC, change_id DESC
+                    ) AS rn
+                FROM state_by_version s
+                WHERE s.schema_key = 'lix_version_tip'
+            )
+            WHERE rn = 1
         )
         SELECT 
             d.id,

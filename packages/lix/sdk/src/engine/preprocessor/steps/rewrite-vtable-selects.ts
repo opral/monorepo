@@ -5,6 +5,7 @@ import {
 	type ExpressionNode,
 	type IdentifierNode,
 	type InListExpressionNode,
+	type ObjectNameNode,
 	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type SegmentedStatementNode,
@@ -12,6 +13,7 @@ import {
 	type SelectStatementNode,
 	type TableReferenceNode,
 	type RelationNode,
+	type WithClauseNode,
 } from "../sql-parser/nodes.js";
 import type {
 	PreprocessorStep,
@@ -36,12 +38,19 @@ import {
 	cacheTableNameToSchemaKey,
 	schemaKeyToCacheTableName,
 } from "../../../state/cache/create-schema-cache-table.js";
+import type {
+	VersionInheritanceMap,
+	VersionInheritanceNode,
+} from "../inheritance/version-inheritance-cache.js";
 
 export const INTERNAL_STATE_VTABLE = "lix_internal_state_vtable";
 const DEFAULT_ALIAS_KEY = normalizeIdentifierValue(INTERNAL_STATE_VTABLE);
 const ORIGINAL_TABLE_KEY = DEFAULT_ALIAS_KEY;
 const HIDDEN_SEGMENT_COLUMNS = ["_pk"] as const;
 const HIDDEN_SEGMENT_COLUMN_SET = new Set<string>(HIDDEN_SEGMENT_COLUMNS);
+const SNAPSHOT_JSON_ENTITY_PATHS = new Set<string>(["$.id", "$.entity_id"]);
+// Guarded until we can reliably map JSON paths to concrete entity identifiers.
+const SNAPSHOT_ENTITY_FILTER_PUSH_ENABLED = false;
 
 type SelectedProjection = {
 	column: string;
@@ -54,7 +63,12 @@ type ColumnSelectionSummary = {
 	supportColumns: ReadonlySet<string>;
 };
 
-type SchemaKeyPredicateSummary = {
+type SnapshotJsonPredicate = {
+	path: string;
+	values: readonly string[];
+};
+
+type ColumnPredicateSummary = {
 	count: number;
 	literals: string[];
 };
@@ -65,6 +79,8 @@ type PredicateVisitContext = {
 	allowUnqualified: boolean;
 };
 
+type SnapshotPredicateAccumulator = Map<string, Set<string>>;
+
 type TableReferenceInfo = {
 	relation: TableReferenceNode;
 	alias: string | null;
@@ -73,9 +89,25 @@ type TableReferenceInfo = {
 
 type InlineRewriteMetadata = {
 	schemaKeys: readonly string[];
+	fileIds: readonly string[];
+	entityIds: readonly string[];
+	snapshotFilters: readonly SnapshotJsonPredicate[];
+	versionIds: readonly string[];
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
+	pruneInheritance: boolean;
+	pruneTransactionSegment: boolean;
+};
+
+type SubqueryPredicateMetadata = {
+	schemaKeys: readonly string[];
+	fileIds: readonly string[];
+	entityIds: readonly string[];
+	snapshotFilters: readonly SnapshotJsonPredicate[];
+	versionIds: readonly string[];
+	pruneInheritance: boolean;
+	pruneTransactionSegment: boolean;
 };
 
 /**
@@ -139,38 +171,169 @@ function rewriteSegmentedStatement(
 function rewriteSelectStatement(
 	select: SelectStatementNode,
 	context: PreprocessorStepContext,
-	inheritedSchemaKeys: readonly string[] = []
+	pushdownSchemaKeys: readonly string[] = [],
+	pushdownPruneInheritance = false,
+	pushdownPruneTransactions = false,
+	pushdownFileIds: readonly string[] = [],
+	pushdownEntityIds: readonly string[] = [],
+	pushdownVersionIds: readonly string[] = [],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[] = []
 ): SelectStatementNode {
 	const parameters = context.parameters ?? [];
-	const subquerySchemaKeyMap = collectSubquerySchemaKeyMap(
+	const ctePredicateMap = collectCtePredicateMap(
 		select,
 		parameters,
-		inheritedSchemaKeys
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownPruneTransactions,
+		pushdownFileIds,
+		pushdownEntityIds,
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
-	const withRewrittenSubqueries = visitSelectStatement(select, {
-		subquery(node, visitContext) {
-			const parentKind = visitContext.parent?.node_kind;
-			const aliasValue = getIdentifierValue(node.alias);
-			const normalizedAlias = aliasValue
-				? normalizeIdentifierValue(aliasValue)
-				: DEFAULT_ALIAS_KEY;
-			const nextInherited =
-				parentKind === "from_clause" || parentKind === "join_clause"
-					? (subquerySchemaKeyMap.get(normalizedAlias) ?? inheritedSchemaKeys)
-					: inheritedSchemaKeys;
-			const rewrittenStatement =
-				node.statement.node_kind === "compound_select"
-					? rewriteCompoundSelect(node.statement, context, nextInherited)
-					: rewriteSelectStatement(node.statement, context, nextInherited);
-			if (rewrittenStatement !== node.statement) {
-				return {
-					...node,
-					statement: rewrittenStatement,
-				};
-			}
-			return node;
-		},
-	});
+	const selectWithRewrittenCtes = rewriteSelectWithClause(
+		select,
+		context,
+		ctePredicateMap,
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownPruneTransactions,
+		pushdownFileIds,
+		pushdownEntityIds,
+		pushdownVersionIds,
+		pushdownSnapshotFilters
+	);
+	const fallbackAliasNames = collectRelationAliasNames(selectWithRewrittenCtes);
+	const fallbackSchemaSummary = collectSchemaKeyPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackSchemaKeys = mergeStringLiterals(
+		pushdownSchemaKeys,
+		fallbackSchemaSummary.literals
+	);
+	const fallbackFileSummary = collectFileIdPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackFileIds = mergeStringLiterals(
+		pushdownFileIds,
+		fallbackFileSummary.literals
+	);
+	const fallbackEntitySummary = collectEntityIdPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackEntityIds = mergeStringLiterals(
+		pushdownEntityIds,
+		fallbackEntitySummary.literals
+	);
+	const fallbackVersionSummary = collectVersionIdPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackVersionIds = mergeStringLiterals(
+		pushdownVersionIds,
+		fallbackVersionSummary.literals
+	);
+	const fallbackSnapshotSummary = collectSnapshotJsonPredicates(
+		selectWithRewrittenCtes.where_clause,
+		fallbackAliasNames,
+		parameters
+	);
+	const fallbackSnapshotFilters = mergeSnapshotFilters(
+		pushdownSnapshotFilters,
+		fallbackSnapshotSummary
+	);
+	const fallbackPruneInheritance =
+		pushdownPruneInheritance ||
+		shouldPruneInheritance(
+			selectWithRewrittenCtes.where_clause,
+			fallbackAliasNames,
+			parameters
+		);
+	const fallbackPruneTransactions =
+		pushdownPruneTransactions ||
+		shouldPruneTransactionSegment(
+			selectWithRewrittenCtes.where_clause,
+			fallbackAliasNames,
+			parameters
+		);
+	const subqueryPredicateMap = collectSubqueryPredicateMap(
+		selectWithRewrittenCtes,
+		parameters,
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownPruneTransactions,
+		pushdownFileIds,
+		pushdownEntityIds,
+		pushdownVersionIds,
+		pushdownSnapshotFilters
+	);
+	const withRewrittenSubqueries = visitSelectStatement(
+		selectWithRewrittenCtes,
+		{
+			subquery(node, visitContext) {
+				const parentKind = visitContext.parent?.node_kind;
+				const aliasValue = getIdentifierValue(node.alias);
+				const normalizedAlias = aliasValue
+					? normalizeIdentifierValue(aliasValue)
+					: DEFAULT_ALIAS_KEY;
+				const predicateMetadata =
+					parentKind === "from_clause" || parentKind === "join_clause"
+						? subqueryPredicateMap.get(normalizedAlias)
+						: undefined;
+				const nextSchemaKeys =
+					predicateMetadata?.schemaKeys ?? fallbackSchemaKeys;
+				const nextPrune =
+					predicateMetadata?.pruneInheritance ?? fallbackPruneInheritance;
+				const nextPruneTransactions =
+					predicateMetadata?.pruneTransactionSegment ??
+					fallbackPruneTransactions;
+				const nextFileIds = predicateMetadata?.fileIds ?? fallbackFileIds;
+				const nextEntityIds = predicateMetadata?.entityIds ?? fallbackEntityIds;
+				const nextVersionIds =
+					predicateMetadata?.versionIds ?? fallbackVersionIds;
+				const nextSnapshotFilters =
+					predicateMetadata?.snapshotFilters ?? fallbackSnapshotFilters;
+				const rewrittenStatement =
+					node.statement.node_kind === "compound_select"
+						? rewriteCompoundSelect(
+								node.statement,
+								context,
+								nextSchemaKeys,
+								nextPrune,
+								nextPruneTransactions,
+								nextFileIds,
+								nextEntityIds,
+								nextVersionIds,
+								nextSnapshotFilters
+							)
+						: rewriteSelectStatement(
+								node.statement,
+								context,
+								nextSchemaKeys,
+								nextPrune,
+								nextPruneTransactions,
+								nextFileIds,
+								nextEntityIds,
+								nextVersionIds,
+								nextSnapshotFilters
+							);
+				if (rewrittenStatement !== node.statement) {
+					return {
+						...node,
+						statement: rewrittenStatement,
+					};
+				}
+				return node;
+			},
+		}
+	);
 
 	const references = collectInternalStateReferences(withRewrittenSubqueries);
 	if (references.length === 0) {
@@ -194,11 +357,11 @@ function rewriteSelectStatement(
 		tableNamesForTrace,
 		parameters
 	);
-	const mergedSchemaKeys = mergeSchemaKeyLiterals(
-		inheritedSchemaKeys,
+	const mergedSchemaKeys = mergeStringLiterals(
+		pushdownSchemaKeys,
 		schemaSummary.literals
 	);
-	const schemaSummaryForTrace: SchemaKeyPredicateSummary = {
+	const schemaSummaryForTrace: ColumnPredicateSummary = {
 		count: schemaSummary.count,
 		literals: mergedSchemaKeys,
 	};
@@ -216,7 +379,13 @@ function rewriteSelectStatement(
 		withRewrittenSubqueries,
 		references,
 		parameters,
-		inheritedSchemaKeys
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownPruneTransactions,
+		pushdownFileIds,
+		pushdownEntityIds,
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 
 	const rewritten = visitSelectStatement(
@@ -240,13 +409,39 @@ function rewriteSelectStatement(
 function rewriteCompoundSelect(
 	compound: CompoundSelectNode,
 	context: PreprocessorStepContext,
-	inheritedSchemaKeys: readonly string[] = []
+	pushdownSchemaKeys: readonly string[] = [],
+	pushdownPruneInheritance = false,
+	pushdownPruneTransactions = false,
+	pushdownFileIds: readonly string[] = [],
+	pushdownEntityIds: readonly string[] = [],
+	pushdownVersionIds: readonly string[] = [],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[] = []
 ): CompoundSelectNode {
+	const rewrittenWithClause = compound.with_clause
+		? rewriteWithClauseNode(
+				compound.with_clause,
+				context,
+				new Map(),
+				pushdownSchemaKeys,
+				pushdownPruneInheritance,
+				pushdownPruneTransactions,
+				pushdownFileIds,
+				pushdownEntityIds,
+				pushdownVersionIds,
+				pushdownSnapshotFilters
+			)
+		: null;
 	let changed = false;
 	const first = rewriteSelectStatement(
 		compound.first,
 		context,
-		inheritedSchemaKeys
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownPruneTransactions,
+		pushdownFileIds,
+		pushdownEntityIds,
+		pushdownVersionIds,
+		pushdownSnapshotFilters
 	);
 	if (first !== compound.first) {
 		changed = true;
@@ -256,7 +451,13 @@ function rewriteCompoundSelect(
 		const rewritten = rewriteSelectStatement(
 			branch.select,
 			context,
-			inheritedSchemaKeys
+			pushdownSchemaKeys,
+			pushdownPruneInheritance,
+			pushdownPruneTransactions,
+			pushdownFileIds,
+			pushdownEntityIds,
+			pushdownVersionIds,
+			pushdownSnapshotFilters
 		);
 		if (rewritten !== branch.select) {
 			changed = true;
@@ -269,13 +470,19 @@ function rewriteCompoundSelect(
 	});
 
 	if (!changed) {
-		return compound;
+		return rewrittenWithClause === compound.with_clause
+			? compound
+			: {
+					...compound,
+					with_clause: rewrittenWithClause,
+				};
 	}
 
 	return {
 		...compound,
 		first,
 		compounds: branches,
+		with_clause: rewrittenWithClause ?? compound.with_clause,
 	};
 }
 
@@ -320,12 +527,18 @@ function normalizeAlias(alias: IdentifierNode | null): string | null {
 	return value ? normalizeIdentifierValue(value) : null;
 }
 
-function collectSubquerySchemaKeyMap(
+function collectSubqueryPredicateMap(
 	select: SelectStatementNode,
 	parameters: ReadonlyArray<unknown>,
-	inheritedSchemaKeys: readonly string[]
-): Map<string, readonly string[]> {
-	const map = new Map<string, readonly string[]>();
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
+): Map<string, SubqueryPredicateMetadata> {
+	const map = new Map<string, SubqueryPredicateMetadata>();
 	const register = (
 		relation: RelationNode,
 		joinFilter: ExpressionNode | RawFragmentNode | null
@@ -354,18 +567,166 @@ function collectSubquerySchemaKeyMap(
 			parameters,
 			false
 		);
-		const localKeys = mergeSchemaKeyLiterals(
+		const localKeys = mergeStringLiterals(
 			whereSummary.literals,
 			joinSummary.literals
 		);
-		const existing = map.get(normalizedAlias) ?? [];
-		const merged = mergeSchemaKeyLiterals(
-			existing,
-			inheritedSchemaKeys,
+		const fileWhereSummary = collectFileIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const fileJoinSummary = collectFileIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localFileIds = mergeStringLiterals(
+			fileWhereSummary.literals,
+			fileJoinSummary.literals
+		);
+		const entityWhereSummary = collectEntityIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const entityJoinSummary = collectEntityIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localEntityIds = mergeStringLiterals(
+			entityWhereSummary.literals,
+			entityJoinSummary.literals
+		);
+		const snapshotWhereSummary = collectSnapshotJsonPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const snapshotJoinSummary = collectSnapshotJsonPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localSnapshotFilters = mergeSnapshotFilters(
+			snapshotWhereSummary,
+			snapshotJoinSummary
+		);
+
+		const versionWhereSummary = collectVersionIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const versionJoinSummary = collectVersionIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localVersionIds = mergeStringLiterals(
+			versionWhereSummary.literals,
+			versionJoinSummary.literals
+		);
+
+		const existing = map.get(normalizedAlias);
+		const merged = mergeStringLiterals(
+			existing?.schemaKeys ?? [],
+			pushdownSchemaKeys,
 			localKeys
 		);
-		if (merged.length > 0) {
-			map.set(normalizedAlias, merged);
+		const mergedFileIds = mergeStringLiterals(
+			existing?.fileIds ?? [],
+			pushdownFileIds,
+			localFileIds
+		);
+		const mergedEntityIds = mergeStringLiterals(
+			existing?.entityIds ?? [],
+			pushdownEntityIds,
+			localEntityIds
+		);
+		const mergedSnapshotFilters = mergeSnapshotFilters(
+			existing?.snapshotFilters ?? [],
+			pushdownSnapshotFilters,
+			localSnapshotFilters
+		);
+		const mergedVersionIds = mergeStringLiterals(
+			existing?.versionIds ?? [],
+			pushdownVersionIds,
+			localVersionIds
+		);
+		const pruneFromWhere = requiresNullPredicateForColumn(
+			select.where_clause,
+			tableNames,
+			parameters,
+			true
+		);
+		const pruneFromJoin = requiresNullPredicateForColumn(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const combinedPrune =
+			(existing?.pruneInheritance ?? false) ||
+			pushdownPruneInheritance ||
+			pruneFromWhere ||
+			pruneFromJoin;
+		const pruneTxnFromWhere = excludesColumnLiteralFromExpression(
+			select.where_clause,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			true
+		);
+		const pruneTxnFromJoin = excludesColumnLiteralFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			false
+		);
+		const combinedTxnPrune =
+			(existing?.pruneTransactionSegment ?? false) ||
+			pushdownPruneTransactions ||
+			pruneTxnFromWhere ||
+			pruneTxnFromJoin;
+		const finalFileIds = shouldPushFileFilter(merged, mergedFileIds)
+			? mergedFileIds
+			: [];
+		const finalEntityIds = shouldPushEntityFilter(merged, mergedEntityIds)
+			? mergedEntityIds
+			: [];
+		const finalSnapshotFilters = shouldPushSnapshotFilters(
+			merged,
+			mergedSnapshotFilters
+		)
+			? mergedSnapshotFilters
+			: [];
+		if (
+			merged.length > 0 ||
+			finalFileIds.length > 0 ||
+			finalEntityIds.length > 0 ||
+			finalSnapshotFilters.length > 0 ||
+			mergedVersionIds.length > 0 ||
+			combinedPrune ||
+			combinedTxnPrune
+		) {
+			map.set(normalizedAlias, {
+				schemaKeys: merged,
+				fileIds: finalFileIds,
+				entityIds: finalEntityIds,
+				snapshotFilters: finalSnapshotFilters,
+				versionIds: mergedVersionIds,
+				pruneInheritance: combinedPrune,
+				pruneTransactionSegment: combinedTxnPrune,
+			});
 		}
 	};
 
@@ -379,11 +740,368 @@ function collectSubquerySchemaKeyMap(
 	return map;
 }
 
+function collectRelationAliasNames(select: SelectStatementNode): Set<string> {
+	const aliases = new Set<string>([DEFAULT_ALIAS_KEY, ORIGINAL_TABLE_KEY]);
+	const addAlias = (alias: IdentifierNode | null) => {
+		const value = getIdentifierValue(alias);
+		if (value) {
+			aliases.add(normalizeIdentifierValue(value));
+		}
+	};
+	for (const clause of select.from_clauses) {
+		addAlias(extractRelationAlias(clause.relation));
+		for (const join of clause.joins) {
+			addAlias(extractRelationAlias(join.relation));
+		}
+	}
+	return aliases;
+}
+
+function extractRelationAlias(relation: RelationNode): IdentifierNode | null {
+	if ("alias" in relation) {
+		const alias = (
+			relation as Extract<RelationNode, { alias?: IdentifierNode | null }>
+		).alias;
+		return alias ?? null;
+	}
+	return null;
+}
+
+function collectCtePredicateMap(
+	select: SelectStatementNode,
+	parameters: ReadonlyArray<unknown>,
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
+): Map<string, SubqueryPredicateMetadata> {
+	const withClause = select.with_clause;
+	if (!withClause || withClause.ctes.length === 0) {
+		return new Map();
+	}
+	const cteNames = new Set(
+		withClause.ctes
+			.map((cte) => normalizeIdentifierValue(cte.name.value))
+			.filter((name): name is string => !!name)
+	);
+	if (cteNames.size === 0) {
+		return new Map();
+	}
+	const map = new Map<string, SubqueryPredicateMetadata>();
+	const register = (
+		table: TableReferenceNode,
+		joinFilter: ExpressionNode | RawFragmentNode | null
+	) => {
+		const normalizedName = normalizeObjectName(table.name);
+		if (!normalizedName || !cteNames.has(normalizedName)) {
+			return;
+		}
+		const aliasValue = getIdentifierValue(table.alias);
+		const tableNames = new Set<string>([
+			normalizedName,
+			DEFAULT_ALIAS_KEY,
+			ORIGINAL_TABLE_KEY,
+		]);
+		if (aliasValue) {
+			tableNames.add(normalizeIdentifierValue(aliasValue));
+		}
+		const whereSummary = collectSchemaKeyPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const joinSummary = collectSchemaKeyPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localKeys = mergeStringLiterals(
+			whereSummary.literals,
+			joinSummary.literals
+		);
+		const fileWhereSummary = collectFileIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const fileJoinSummary = collectFileIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localFileIds = mergeStringLiterals(
+			fileWhereSummary.literals,
+			fileJoinSummary.literals
+		);
+		const entityWhereSummary = collectEntityIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const entityJoinSummary = collectEntityIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localEntityIds = mergeStringLiterals(
+			entityWhereSummary.literals,
+			entityJoinSummary.literals
+		);
+		const snapshotWhereSummary = collectSnapshotJsonPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const snapshotJoinSummary = collectSnapshotJsonPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localSnapshotFilters = mergeSnapshotFilters(
+			snapshotWhereSummary,
+			snapshotJoinSummary
+		);
+		const versionWhereSummary = collectVersionIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const versionJoinSummary = collectVersionIdPredicatesFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const localVersionIds = mergeStringLiterals(
+			versionWhereSummary.literals,
+			versionJoinSummary.literals
+		);
+		const existing = map.get(normalizedName);
+		const mergedSchemaKeys = mergeStringLiterals(
+			existing?.schemaKeys ?? [],
+			pushdownSchemaKeys,
+			localKeys
+		);
+		const mergedFileIds = mergeStringLiterals(
+			existing?.fileIds ?? [],
+			pushdownFileIds,
+			localFileIds
+		);
+		const mergedEntityIds = mergeStringLiterals(
+			existing?.entityIds ?? [],
+			pushdownEntityIds,
+			localEntityIds
+		);
+		const mergedSnapshotFilters = mergeSnapshotFilters(
+			existing?.snapshotFilters ?? [],
+			pushdownSnapshotFilters,
+			localSnapshotFilters
+		);
+		const mergedVersionIds = mergeStringLiterals(
+			existing?.versionIds ?? [],
+			pushdownVersionIds,
+			localVersionIds
+		);
+		const pruneFromWhere = requiresNullPredicateForColumn(
+			select.where_clause,
+			tableNames,
+			parameters,
+			true
+		);
+		const pruneFromJoin = requiresNullPredicateForColumn(
+			joinFilter,
+			tableNames,
+			parameters,
+			false
+		);
+		const combinedPrune =
+			(existing?.pruneInheritance ?? false) ||
+			pushdownPruneInheritance ||
+			pruneFromWhere ||
+			pruneFromJoin;
+		const pruneTxnFromWhere = excludesColumnLiteralFromExpression(
+			select.where_clause,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			true
+		);
+		const pruneTxnFromJoin = excludesColumnLiteralFromExpression(
+			joinFilter,
+			tableNames,
+			parameters,
+			"source_tag",
+			"T",
+			false
+		);
+		const combinedTxnPrune =
+			(existing?.pruneTransactionSegment ?? false) ||
+			pushdownPruneTransactions ||
+			pruneTxnFromWhere ||
+			pruneTxnFromJoin;
+		const finalFileIds = shouldPushFileFilter(mergedSchemaKeys, mergedFileIds)
+			? mergedFileIds
+			: [];
+		const finalEntityIds = shouldPushEntityFilter(
+			mergedSchemaKeys,
+			mergedEntityIds
+		)
+			? mergedEntityIds
+			: [];
+		const finalSnapshotFilters = shouldPushSnapshotFilters(
+			mergedSchemaKeys,
+			mergedSnapshotFilters
+		)
+			? mergedSnapshotFilters
+			: [];
+		const entry = {
+			schemaKeys: mergedSchemaKeys,
+			fileIds: finalFileIds,
+			entityIds: finalEntityIds,
+			snapshotFilters: finalSnapshotFilters,
+			versionIds: mergedVersionIds,
+			pruneInheritance: combinedPrune,
+			pruneTransactionSegment: combinedTxnPrune,
+		};
+		map.set(normalizedName, entry);
+	};
+
+	for (const clause of select.from_clauses) {
+		if (clause.relation.node_kind === "table_reference") {
+			register(clause.relation, null);
+		}
+		for (const join of clause.joins) {
+			if (join.relation.node_kind === "table_reference") {
+				register(join.relation, join.on_expression);
+			}
+		}
+	}
+
+	return map;
+}
+
+function rewriteSelectWithClause(
+	select: SelectStatementNode,
+	context: PreprocessorStepContext,
+	predicateMap: Map<string, SubqueryPredicateMetadata>,
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
+): SelectStatementNode {
+	if (!select.with_clause) {
+		return select;
+	}
+	const rewritten = rewriteWithClauseNode(
+		select.with_clause,
+		context,
+		predicateMap,
+		pushdownSchemaKeys,
+		pushdownPruneInheritance,
+		pushdownPruneTransactions,
+		pushdownFileIds,
+		pushdownEntityIds,
+		pushdownVersionIds,
+		pushdownSnapshotFilters
+	);
+	if (rewritten === select.with_clause) {
+		return select;
+	}
+	return {
+		...select,
+		with_clause: rewritten,
+	};
+}
+
+function rewriteWithClauseNode(
+	withClause: WithClauseNode,
+	context: PreprocessorStepContext,
+	predicateMap: Map<string, SubqueryPredicateMetadata>,
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
+): WithClauseNode {
+	let changed = false;
+	const rewrittenCtes = withClause.ctes.map((cte) => {
+		const cteName = normalizeIdentifierValue(cte.name.value);
+		const metadata = cteName ? predicateMap.get(cteName) : undefined;
+		const nextSchemaKeys = metadata?.schemaKeys ?? pushdownSchemaKeys;
+		const nextPrune = metadata?.pruneInheritance ?? pushdownPruneInheritance;
+		const nextPruneTransactions =
+			metadata?.pruneTransactionSegment ?? pushdownPruneTransactions;
+		const nextFileIds = metadata?.fileIds ?? pushdownFileIds;
+		const nextEntityIds = metadata?.entityIds ?? pushdownEntityIds;
+		const nextVersionIds = metadata?.versionIds ?? pushdownVersionIds;
+		const nextSnapshotFilters =
+			metadata?.snapshotFilters ?? pushdownSnapshotFilters;
+		const statement =
+			cte.statement.node_kind === "compound_select"
+				? rewriteCompoundSelect(
+						cte.statement,
+						context,
+						nextSchemaKeys,
+						nextPrune,
+						nextPruneTransactions,
+						nextFileIds,
+						nextEntityIds,
+						nextVersionIds,
+						nextSnapshotFilters
+					)
+				: rewriteSelectStatement(
+						cte.statement,
+						context,
+						nextSchemaKeys,
+						nextPrune,
+						nextPruneTransactions,
+						nextFileIds,
+						nextEntityIds,
+						nextVersionIds,
+						nextSnapshotFilters
+					);
+		if (statement !== cte.statement) {
+			changed = true;
+			return {
+				...cte,
+				statement,
+			};
+		}
+		return cte;
+	});
+	if (!changed) {
+		return withClause;
+	}
+	return {
+		...withClause,
+		ctes: rewrittenCtes,
+	};
+}
+
 function buildInlineMetadata(
 	select: SelectStatementNode,
 	references: readonly TableReferenceInfo[],
 	parameters: ReadonlyArray<unknown>,
-	inheritedSchemaKeys: readonly string[]
+	pushdownSchemaKeys: readonly string[],
+	pushdownPruneInheritance: boolean,
+	pushdownPruneTransactions: boolean,
+	pushdownFileIds: readonly string[],
+	pushdownEntityIds: readonly string[],
+	pushdownVersionIds: readonly string[],
+	pushdownSnapshotFilters: readonly SnapshotJsonPredicate[]
 ): Map<string, InlineRewriteMetadata> {
 	const metadata = new Map<string, InlineRewriteMetadata>();
 	for (const reference of references) {
@@ -401,19 +1119,289 @@ function buildInlineMetadata(
 			tableNames,
 			parameters
 		);
-		const schemaKeys = mergeSchemaKeyLiterals(
-			inheritedSchemaKeys,
+		const schemaKeys = mergeStringLiterals(
+			pushdownSchemaKeys,
 			summary.literals
 		);
+		const fileSummary = collectFileIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedFileIds = mergeStringLiterals(
+			pushdownFileIds,
+			fileSummary.literals
+		);
+		const entitySummary = collectEntityIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedEntityIds = mergeStringLiterals(
+			pushdownEntityIds,
+			entitySummary.literals
+		);
+		const versionSummary = collectVersionIdPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedVersionIds = mergeStringLiterals(
+			pushdownVersionIds,
+			versionSummary.literals
+		);
+		const snapshotSummary = collectSnapshotJsonPredicates(
+			select.where_clause,
+			tableNames,
+			parameters
+		);
+		const mergedSnapshotFilters = mergeSnapshotFilters(
+			pushdownSnapshotFilters,
+			snapshotSummary
+		);
+		const fileIds = shouldPushFileFilter(schemaKeys, mergedFileIds)
+			? mergedFileIds
+			: [];
+		const entityIds = shouldPushEntityFilter(schemaKeys, mergedEntityIds)
+			? mergedEntityIds
+			: [];
 		const columnSummary = collectSelectedColumns(select, tableNames);
+		const snapshotFilters = shouldPushSnapshotFilters(
+			schemaKeys,
+			mergedSnapshotFilters
+		)
+			? mergedSnapshotFilters
+			: [];
+		const pruneInheritance =
+			pushdownPruneInheritance ||
+			shouldPruneInheritance(select.where_clause, tableNames, parameters);
+		const pruneTransactionSegment =
+			pushdownPruneTransactions ||
+			shouldPruneTransactionSegment(
+				select.where_clause,
+				tableNames,
+				parameters
+			);
 		metadata.set(aliasKey, {
 			schemaKeys,
+			fileIds,
+			entityIds,
+			snapshotFilters,
+			versionIds: mergedVersionIds,
 			selectedColumns: columnSummary.selectedColumns,
 			hiddenColumns: new Set(columnSummary.requestedHiddenColumns),
 			supportColumns: new Set(columnSummary.supportColumns),
+			pruneInheritance,
+			pruneTransactionSegment,
 		});
 	}
 	return metadata;
+}
+
+function shouldPruneInheritance(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>
+): boolean {
+	return requiresNullPredicateForColumn(
+		whereClause,
+		tableNames,
+		parameters,
+		true
+	);
+}
+
+function shouldPruneTransactionSegment(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>
+): boolean {
+	return excludesColumnLiteralFromExpression(
+		whereClause,
+		tableNames,
+		parameters,
+		"source_tag",
+		"T",
+		true
+	);
+}
+
+function requiresNullPredicateForColumn(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): boolean {
+	if (!expression) {
+		return false;
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	return expressionRequiresNullForColumn(
+		expression,
+		"inherited_from_version_id",
+		context
+	);
+}
+
+function excludesColumnLiteralFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	columnName: string,
+	literal: string,
+	allowUnqualified: boolean
+): boolean {
+	if (!expression) {
+		return false;
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	return expressionExcludesColumnLiteral(
+		expression,
+		columnName,
+		literal,
+		context
+	);
+}
+
+function expressionExcludesColumnLiteral(
+	expression: ExpressionNode | RawFragmentNode,
+	columnName: string,
+	literal: string,
+	context: PredicateVisitContext
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "grouped_expression":
+			return expressionExcludesColumnLiteral(
+				expression.expression,
+				columnName,
+				literal,
+				context
+			);
+		case "binary_expression":
+			if (expression.operator === "and") {
+				return (
+					expressionExcludesColumnLiteral(
+						expression.left,
+						columnName,
+						literal,
+						context
+					) ||
+					expressionExcludesColumnLiteral(
+						expression.right,
+						columnName,
+						literal,
+						context
+					)
+				);
+			}
+			if (expression.operator === "or") {
+				return (
+					expressionExcludesColumnLiteral(
+						expression.left,
+						columnName,
+						literal,
+						context
+					) &&
+					expressionExcludesColumnLiteral(
+						expression.right,
+						columnName,
+						literal,
+						context
+					)
+				);
+			}
+			return (
+				columnComparisonExcludes(
+					expression,
+					expression.left,
+					expression.right,
+					columnName,
+					literal,
+					context
+				) ||
+				columnComparisonExcludes(
+					expression,
+					expression.right,
+					expression.left,
+					columnName,
+					literal,
+					context
+				)
+			);
+		case "in_list_expression": {
+			if (!isColumnReference(expression.operand, context, columnName)) {
+				return false;
+			}
+			const values = expression.items
+				.map((item) => extractStringLiteral(item, context))
+				.filter((value): value is string => typeof value === "string");
+			if (values.length === 0) {
+				return false;
+			}
+			if (expression.negated) {
+				return values.includes(literal);
+			}
+			return !values.includes(literal);
+		}
+		default:
+			return false;
+	}
+}
+
+function columnComparisonExcludes(
+	expression: BinaryExpressionNode,
+	columnSide: ExpressionNode | RawFragmentNode,
+	valueSide: ExpressionNode | RawFragmentNode,
+	columnName: string,
+	literal: string,
+	context: PredicateVisitContext
+): boolean {
+	if (!isColumnReference(columnSide, context, columnName)) {
+		return false;
+	}
+	const value = extractStringLiteral(valueSide, context);
+	if (typeof value !== "string") {
+		return false;
+	}
+	switch (expression.operator) {
+		case "=":
+		case "is":
+			return value !== literal;
+		case "!=":
+		case "<>":
+		case "is_not":
+			return value === literal;
+		default:
+			return false;
+	}
+}
+
+function extractStringLiteral(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
+): string | null {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return null;
+	}
+	if (node.node_kind === "literal") {
+		return typeof node.value === "string" ? node.value : null;
+	}
+	if (node.node_kind === "parameter") {
+		return resolveParameterSchemaLiteral(node, context.parameters);
+	}
+	return null;
 }
 
 function createInlineVisitor(
@@ -439,11 +1427,20 @@ function createInlineVisitor(
 				INTERNAL_STATE_VTABLE;
 			const inlineSql = buildVtableSelectRewrite({
 				schemaKeys: metadataEntry.schemaKeys,
+				fileIds: metadataEntry.fileIds,
+				entityIds: metadataEntry.entityIds,
+				snapshotFilters: metadataEntry.snapshotFilters,
+				versionIds: metadataEntry.versionIds,
 				cacheTables: context.getCacheTables!(),
 				selectedColumns: metadataEntry.selectedColumns,
 				hiddenColumns: metadataEntry.hiddenColumns,
 				supportColumns: metadataEntry.supportColumns,
 				hasOpenTransaction: context.hasOpenTransaction!(),
+				pruneInheritance: metadataEntry.pruneInheritance,
+				pruneTransactionSegment: metadataEntry.pruneTransactionSegment,
+				versionInheritance: context.getVersionInheritance
+					? context.getVersionInheritance()
+					: undefined,
 			}).trimEnd();
 			const fragment: RawFragmentNode = {
 				node_kind: "raw_fragment",
@@ -459,18 +1456,14 @@ function collectSchemaKeyPredicates(
 	tableNames: Set<string>,
 	parameters: ReadonlyArray<unknown>,
 	allowUnqualified = true
-): SchemaKeyPredicateSummary {
-	if (!whereClause) {
-		return { count: 0, literals: [] };
-	}
-
-	const context: PredicateVisitContext = {
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
 		tableNames,
 		parameters,
-		allowUnqualified,
-	};
-
-	return visitExpression(whereClause, context);
+		"schema_key",
+		allowUnqualified
+	);
 }
 
 function collectSchemaKeyPredicatesFromExpression(
@@ -478,7 +1471,313 @@ function collectSchemaKeyPredicatesFromExpression(
 	tableNames: Set<string>,
 	parameters: ReadonlyArray<unknown>,
 	allowUnqualified: boolean
-): SchemaKeyPredicateSummary {
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"schema_key",
+		allowUnqualified
+	);
+}
+
+function collectFileIdPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
+		tableNames,
+		parameters,
+		"file_id",
+		allowUnqualified
+	);
+}
+
+function collectFileIdPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"file_id",
+		allowUnqualified
+	);
+}
+
+function collectEntityIdPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
+		tableNames,
+		parameters,
+		"entity_id",
+		allowUnqualified
+	);
+}
+
+function collectEntityIdPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"entity_id",
+		allowUnqualified
+	);
+}
+
+function collectVersionIdPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	return collectColumnPredicates(
+		whereClause,
+		tableNames,
+		parameters,
+		"version_id",
+		allowUnqualified
+	);
+}
+
+function collectVersionIdPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
+	return collectColumnPredicatesFromExpression(
+		expression,
+		tableNames,
+		parameters,
+		"version_id",
+		allowUnqualified
+	);
+}
+
+function collectSnapshotJsonPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified = true
+): SnapshotJsonPredicate[] {
+	if (!whereClause) {
+		return [];
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	const summary: SnapshotPredicateAccumulator = new Map();
+	collectSnapshotPredicatesFromExpression(whereClause, context, summary);
+	return snapshotSummaryToPredicates(summary);
+}
+
+function collectSnapshotJsonPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	allowUnqualified: boolean
+): SnapshotJsonPredicate[] {
+	if (!expression) {
+		return [];
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	const summary: SnapshotPredicateAccumulator = new Map();
+	collectSnapshotPredicatesFromExpression(expression, context, summary);
+	return snapshotSummaryToPredicates(summary);
+}
+
+function collectSnapshotPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext,
+	summary: SnapshotPredicateAccumulator
+): void {
+	if ("sql_text" in expression) {
+		return;
+	}
+	switch (expression.node_kind) {
+		case "grouped_expression":
+			collectSnapshotPredicatesFromExpression(
+				expression.expression,
+				context,
+				summary
+			);
+			return;
+		case "binary_expression": {
+			if (isLogicalOperator(expression.operator)) {
+				collectSnapshotPredicatesFromExpression(
+					expression.left,
+					context,
+					summary
+				);
+				collectSnapshotPredicatesFromExpression(
+					expression.right,
+					context,
+					summary
+				);
+				return;
+			}
+			if (!isEqualityOperator(expression.operator)) {
+				return;
+			}
+			const leftPath = extractSnapshotJsonPath(expression.left, context);
+			if (leftPath) {
+				incrementSnapshotSummaryWithOperand(
+					summary,
+					leftPath,
+					expression.right,
+					context
+				);
+			}
+			const rightPath = extractSnapshotJsonPath(expression.right, context);
+			if (rightPath) {
+				incrementSnapshotSummaryWithOperand(
+					summary,
+					rightPath,
+					expression.left,
+					context
+				);
+			}
+			return;
+		}
+		case "in_list_expression": {
+			if (expression.negated) {
+				return;
+			}
+			const path = extractSnapshotJsonPath(expression.operand, context);
+			if (!path) {
+				return;
+			}
+			for (const item of expression.items) {
+				incrementSnapshotSummaryWithOperand(summary, path, item, context);
+			}
+			return;
+		}
+		case "unary_expression":
+			collectSnapshotPredicatesFromExpression(
+				expression.operand,
+				context,
+				summary
+			);
+			return;
+		default:
+			return;
+	}
+}
+
+function incrementSnapshotSummaryWithOperand(
+	summary: SnapshotPredicateAccumulator,
+	path: string,
+	operand: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
+): void {
+	const value = extractStringLiteral(operand, context);
+	if (typeof value !== "string") {
+		return;
+	}
+	const existing = summary.get(path) ?? new Set<string>();
+	existing.add(value);
+	summary.set(path, existing);
+}
+
+function snapshotSummaryToPredicates(
+	summary: SnapshotPredicateAccumulator
+): SnapshotJsonPredicate[] {
+	return Array.from(summary.entries()).map(([path, values]) => ({
+		path,
+		values: Array.from(values),
+	}));
+}
+
+function extractSnapshotJsonPath(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext
+): string | null {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return null;
+	}
+	switch (node.node_kind) {
+		case "grouped_expression":
+			return extractSnapshotJsonPath(node.expression, context);
+		case "function_call": {
+			const functionName = node.name.value.toLowerCase();
+			if (functionName !== "json_extract") {
+				return null;
+			}
+			const [targetArg, pathArg] = node.arguments;
+			if (
+				!targetArg ||
+				!pathArg ||
+				targetArg.node_kind === "all_columns" ||
+				pathArg.node_kind === "all_columns"
+			) {
+				return null;
+			}
+			const referencedColumn = resolveReferencedColumn(
+				targetArg as ExpressionNode | RawFragmentNode,
+				context
+			);
+			if (referencedColumn !== "snapshot_content") {
+				return null;
+			}
+			return extractLiteralString(
+				pathArg as ExpressionNode | RawFragmentNode,
+				context.parameters
+			);
+		}
+		default:
+			return null;
+	}
+}
+
+function collectColumnPredicates(
+	whereClause: SelectStatementNode["where_clause"],
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	columnName: string,
+	allowUnqualified = true
+): ColumnPredicateSummary {
+	if (!whereClause) {
+		return { count: 0, literals: [] };
+	}
+	const context: PredicateVisitContext = {
+		tableNames,
+		parameters,
+		allowUnqualified,
+	};
+	return visitExpression(whereClause, context, columnName);
+}
+
+function collectColumnPredicatesFromExpression(
+	expression: ExpressionNode | RawFragmentNode | null,
+	tableNames: Set<string>,
+	parameters: ReadonlyArray<unknown>,
+	columnName: string,
+	allowUnqualified: boolean
+): ColumnPredicateSummary {
 	if (!expression) {
 		return { count: 0, literals: [] };
 	}
@@ -487,28 +1786,91 @@ function collectSchemaKeyPredicatesFromExpression(
 		parameters,
 		allowUnqualified,
 	};
-	return visitExpression(expression, context);
+	return visitExpression(expression, context, columnName);
+}
+
+function expressionRequiresNullForColumn(
+	expression: ExpressionNode | RawFragmentNode,
+	columnName: string,
+	context: PredicateVisitContext
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "grouped_expression":
+			return expressionRequiresNullForColumn(
+				expression.expression,
+				columnName,
+				context
+			);
+		case "binary_expression":
+			if (expression.operator === "and") {
+				return (
+					expressionRequiresNullForColumn(
+						expression.left,
+						columnName,
+						context
+					) ||
+					expressionRequiresNullForColumn(expression.right, columnName, context)
+				);
+			}
+			if (expression.operator === "or") {
+				return (
+					expressionRequiresNullForColumn(
+						expression.left,
+						columnName,
+						context
+					) &&
+					expressionRequiresNullForColumn(expression.right, columnName, context)
+				);
+			}
+			if (expression.operator === "is") {
+				const leftMatches = isColumnReference(
+					expression.left,
+					context,
+					columnName
+				);
+				const rightMatches = isColumnReference(
+					expression.right,
+					context,
+					columnName
+				);
+				if (
+					(leftMatches &&
+						isNullLiteralExpression(expression.right, context.parameters)) ||
+					(rightMatches &&
+						isNullLiteralExpression(expression.left, context.parameters))
+				) {
+					return true;
+				}
+			}
+			return false;
+		default:
+			return false;
+	}
 }
 
 function visitExpression(
 	expression: ExpressionNode | RawFragmentNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
 	if ("sql_text" in expression) {
 		return { count: 0, literals: [] };
 	}
 
 	switch (expression.node_kind) {
 		case "grouped_expression":
-			return visitExpression(expression.expression, context);
+			return visitExpression(expression.expression, context, columnName);
 		case "binary_expression":
-			return visitBinaryExpression(expression, context);
+			return visitBinaryExpression(expression, context, columnName);
 		case "unary_expression":
-			return visitExpression(expression.operand, context);
+			return visitExpression(expression.operand, context, columnName);
 		case "in_list_expression":
-			return visitInListExpression(expression, context);
+			return visitInListExpression(expression, context, columnName);
 		case "between_expression":
-			return visitBetweenExpression(expression, context);
+			return visitBetweenExpression(expression, context, columnName);
 		case "column_reference":
 		case "literal":
 		case "parameter":
@@ -519,12 +1881,13 @@ function visitExpression(
 
 function visitBinaryExpression(
 	expression: BinaryExpressionNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
 	if (isLogicalOperator(expression.operator)) {
 		return mergeSummaries(
-			visitExpression(expression.left, context),
-			visitExpression(expression.right, context)
+			visitExpression(expression.left, context, columnName),
+			visitExpression(expression.right, context, columnName)
 		);
 	}
 
@@ -532,18 +1895,18 @@ function visitBinaryExpression(
 		return { count: 0, literals: [] };
 	}
 
-	let summary: SchemaKeyPredicateSummary = {
+	let summary: ColumnPredicateSummary = {
 		count: 0,
 		literals: [],
 	};
 
-	const leftIsSchema = isSchemaKeyReference(expression.left, context);
-	const rightIsSchema = isSchemaKeyReference(expression.right, context);
+	const leftMatches = isColumnReference(expression.left, context, columnName);
+	const rightMatches = isColumnReference(expression.right, context, columnName);
 
-	if (leftIsSchema) {
+	if (leftMatches) {
 		summary = incrementSummaryWithOperand(summary, expression.right, context);
 	}
-	if (rightIsSchema) {
+	if (rightMatches) {
 		summary = incrementSummaryWithOperand(summary, expression.left, context);
 	}
 
@@ -552,12 +1915,13 @@ function visitBinaryExpression(
 
 function visitInListExpression(
 	expression: InListExpressionNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, context)) {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
+	if (!isColumnReference(expression.operand, context, columnName)) {
 		return { count: 0, literals: [] };
 	}
-	let summary: SchemaKeyPredicateSummary = {
+	let summary: ColumnPredicateSummary = {
 		count: 1,
 		literals: [],
 	};
@@ -569,12 +1933,13 @@ function visitInListExpression(
 
 function visitBetweenExpression(
 	expression: BetweenExpressionNode,
-	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
-	if (!isSchemaKeyReference(expression.operand, context)) {
+	context: PredicateVisitContext,
+	columnName: string
+): ColumnPredicateSummary {
+	if (!isColumnReference(expression.operand, context, columnName)) {
 		return { count: 0, literals: [] };
 	}
-	let summary: SchemaKeyPredicateSummary = {
+	let summary: ColumnPredicateSummary = {
 		count: 1,
 		literals: [],
 	};
@@ -584,10 +1949,10 @@ function visitBetweenExpression(
 }
 
 function incrementSummaryWithOperand(
-	summary: SchemaKeyPredicateSummary,
+	summary: ColumnPredicateSummary,
 	operand: ExpressionNode | RawFragmentNode,
 	context: PredicateVisitContext
-): SchemaKeyPredicateSummary {
+): ColumnPredicateSummary {
 	const next = { ...summary };
 	const node = unwrapExpression(operand);
 	switch (node.node_kind) {
@@ -610,16 +1975,40 @@ function incrementSummaryWithOperand(
 	return next;
 }
 
+function isNullLiteralExpression(
+	expression: ExpressionNode | RawFragmentNode,
+	parameters: ReadonlyArray<unknown>
+): boolean {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return false;
+	}
+	if (node.node_kind === "literal") {
+		return node.value === null;
+	}
+	if (node.node_kind === "parameter") {
+		return resolveParameterValue(node, parameters) === null;
+	}
+	return false;
+}
+
 function resolveParameterSchemaLiteral(
 	parameter: ParameterExpressionNode,
 	parameters: ReadonlyArray<unknown>
 ): string | null {
+	const value = resolveParameterValue(parameter, parameters);
+	return typeof value === "string" ? value : null;
+}
+
+function resolveParameterValue(
+	parameter: ParameterExpressionNode,
+	parameters: ReadonlyArray<unknown>
+): unknown {
 	const index = parameter.position;
 	if (typeof index === "number" && index >= 0 && index < parameters.length) {
-		const value = parameters[index];
-		return typeof value === "string" ? value : null;
+		return parameters[index];
 	}
-	return null;
+	return undefined;
 }
 
 function unwrapExpression(
@@ -634,28 +2023,120 @@ function unwrapExpression(
 	return expression;
 }
 
-function isSchemaKeyReference(
+function isColumnReference(
+	expression: ExpressionNode | RawFragmentNode,
+	context: PredicateVisitContext,
+	expectedColumn: string
+): boolean {
+	const column = resolveReferencedColumn(expression, context);
+	return column === expectedColumn;
+}
+
+function resolveReferencedColumn(
 	expression: ExpressionNode | RawFragmentNode,
 	context: PredicateVisitContext
-): boolean {
+): string | null {
 	if ("sql_text" in expression) {
-		return false;
+		return null;
 	}
-	if (expression.node_kind === "column_reference") {
-		const qualifier = getColumnQualifier(expression);
-		const columnName = getColumnName(expression);
-		if (qualifier && context.tableNames.has(qualifier)) {
-			return columnName === "schema_key";
+	switch (expression.node_kind) {
+		case "column_reference": {
+			const qualifier = getColumnQualifier(expression);
+			const columnName = getColumnName(expression);
+			if (qualifier && context.tableNames.has(qualifier)) {
+				return columnName;
+			}
+			if (!qualifier && context.allowUnqualified) {
+				return columnName;
+			}
+			return null;
 		}
-		if (!qualifier && context.allowUnqualified) {
-			return columnName === "schema_key";
+		case "grouped_expression":
+			return resolveReferencedColumn(expression.expression, context);
+		case "function_call":
+			return resolveColumnFromFunctionCall(expression, context);
+		default:
+			return null;
+	}
+}
+
+function resolveColumnFromFunctionCall(
+	expression: Extract<ExpressionNode, { node_kind: "function_call" }>,
+	context: PredicateVisitContext
+): string | null {
+	const functionName = expression.name.value.toLowerCase();
+	if (functionName !== "json_extract") {
+		return null;
+	}
+	const [target, pathArg] = expression.arguments;
+	if (
+		!target ||
+		!pathArg ||
+		target.node_kind === "all_columns" ||
+		pathArg.node_kind === "all_columns"
+	) {
+		return null;
+	}
+	const targetExpr = target as ExpressionNode | RawFragmentNode;
+	const referencedColumn = resolveReferencedColumn(targetExpr, context);
+	if (referencedColumn !== "snapshot_content") {
+		return null;
+	}
+	if (!SNAPSHOT_ENTITY_FILTER_PUSH_ENABLED) {
+		return null;
+	}
+	const pathExpression = pathArg as ExpressionNode | RawFragmentNode;
+	const literalPath = extractLiteralString(pathExpression, context.parameters);
+	if (!literalPath) {
+		return null;
+	}
+	return mapSnapshotJsonColumnFromPath(literalPath);
+}
+
+function extractLiteralString(
+	expression: ExpressionNode | RawFragmentNode,
+	parameters: ReadonlyArray<unknown>
+): string | null {
+	const node = unwrapExpression(expression);
+	if ("sql_text" in node) {
+		return null;
+	}
+	if (node.node_kind === "literal" && typeof node.value === "string") {
+		return node.value;
+	}
+	if (node.node_kind === "parameter") {
+		const value = resolveParameterValue(node, parameters);
+		return typeof value === "string" ? value : null;
+	}
+	return null;
+}
+
+/**
+ * Maps recognized json_extract paths to their corresponding physical columns.
+ *
+ * @param path - JSON path literal extracted from a json_extract() call.
+ * @returns The name of the backing column or null when the path is unsupported.
+ *
+ * @example
+ * ```ts
+ * mapSnapshotJsonColumnFromPath("$.id");
+ * // => "entity_id"
+ * ```
+ */
+function mapSnapshotJsonColumnFromPath(path: string): string | null {
+	const trimmed = path.trim();
+	const candidates = new Set<string>([trimmed]);
+	const unquoted = trimmed.replace(
+		/\."([^"]+)"(?=\.|$)/g,
+		(_, segment: string) => `.${segment}`
+	);
+	candidates.add(unquoted);
+	for (const candidate of candidates) {
+		if (SNAPSHOT_JSON_ENTITY_PATHS.has(candidate)) {
+			return "entity_id";
 		}
-		return false;
 	}
-	if (expression.node_kind === "grouped_expression") {
-		return isSchemaKeyReference(expression.expression, context);
-	}
-	return false;
+	return null;
 }
 
 function isLogicalOperator(
@@ -671,9 +2152,9 @@ function isEqualityOperator(
 }
 
 function mergeSummaries(
-	...summaries: SchemaKeyPredicateSummary[]
-): SchemaKeyPredicateSummary {
-	return summaries.reduce<SchemaKeyPredicateSummary>(
+	...summaries: ColumnPredicateSummary[]
+): ColumnPredicateSummary {
+	return summaries.reduce<ColumnPredicateSummary>(
 		(accumulator, current) => {
 			accumulator.count += current.count;
 			accumulator.literals.push(...current.literals);
@@ -683,7 +2164,7 @@ function mergeSummaries(
 	);
 }
 
-function mergeSchemaKeyLiterals(
+function mergeStringLiterals(
 	...lists: readonly (readonly string[])[]
 ): string[] {
 	const seen = new Set<string>();
@@ -700,6 +2181,35 @@ function mergeSchemaKeyLiterals(
 		}
 	}
 	return merged;
+}
+
+function mergeSnapshotFilters(
+	...lists: readonly (readonly SnapshotJsonPredicate[] | undefined)[]
+): SnapshotJsonPredicate[] {
+	const merged = new Map<string, Set<string>>();
+	for (const list of lists) {
+		if (!list) {
+			continue;
+		}
+		for (const entry of list) {
+			if (!entry || typeof entry.path !== "string") {
+				continue;
+			}
+			const valueSet = merged.get(entry.path) ?? new Set<string>();
+			for (const value of entry.values ?? []) {
+				if (typeof value === "string") {
+					valueSet.add(value);
+				}
+			}
+			if (valueSet.size > 0) {
+				merged.set(entry.path, valueSet);
+			}
+		}
+	}
+	return Array.from(merged.entries()).map(([path, values]) => ({
+		path,
+		values: Array.from(values),
+	}));
 }
 
 function collectSelectedColumns(
@@ -886,8 +2396,51 @@ function extractColumnFromExpression(
 		}
 		case "grouped_expression":
 			return extractColumnFromExpression(expression.expression, tableNames);
+		case "function_call":
+			return extractColumnFromFunctionCall(expression, tableNames);
 		default:
 			return null;
+	}
+}
+
+function extractColumnFromFunctionCall(
+	expression: Extract<ExpressionNode, { node_kind: "function_call" }>,
+	tableNames: Set<string>
+): string | null {
+	let referencedColumn: string | null = null;
+	for (const argument of expression.arguments) {
+		if (argument.node_kind === "all_columns") {
+			return null;
+		}
+		const extracted = extractColumnFromExpression(argument, tableNames);
+		if (extracted) {
+			if (referencedColumn && referencedColumn !== extracted) {
+				return null;
+			}
+			referencedColumn = extracted;
+			continue;
+		}
+		if (!isLiteralOrParameter(argument)) {
+			return null;
+		}
+	}
+	return referencedColumn;
+}
+
+function isLiteralOrParameter(
+	expression: ExpressionNode | RawFragmentNode
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "literal":
+		case "parameter":
+			return true;
+		case "grouped_expression":
+			return isLiteralOrParameter(expression.expression);
+		default:
+			return false;
 	}
 }
 
@@ -906,7 +2459,7 @@ function determineProjectionKind(
 function buildTraceEntry(args: {
 	aliasList: readonly string[];
 	projectionKind: "selectAll" | "partial";
-	schemaSummary: SchemaKeyPredicateSummary;
+	schemaSummary: ColumnPredicateSummary;
 	selectedColumns: SelectedProjection[] | null;
 }): PreprocessorTraceEntry {
 	const { aliasList, schemaSummary, projectionKind, selectedColumns } = args;
@@ -920,7 +2473,7 @@ function buildTraceEntry(args: {
 			schema_key_predicates: schemaSummary.count,
 			schema_key_literals: schemaSummary.literals,
 			selected_columns: selectedColumns
-				? selectedColumns.map((entry) => entry.alias ?? entry.column)
+				? selectedColumns.map((entry) => entry.column)
 				: null,
 		},
 	};
@@ -928,13 +2481,23 @@ function buildTraceEntry(args: {
 
 function buildVtableSelectRewrite(options: {
 	schemaKeys: readonly string[];
+	fileIds: readonly string[];
+	entityIds: readonly string[];
+	snapshotFilters: readonly SnapshotJsonPredicate[];
+	versionIds: readonly string[];
 	cacheTables: Map<string, unknown>;
 	selectedColumns: SelectedProjection[] | null;
 	hiddenColumns: ReadonlySet<string>;
 	supportColumns: ReadonlySet<string>;
 	hasOpenTransaction: boolean;
+	pruneInheritance: boolean;
+	pruneTransactionSegment: boolean;
+	versionInheritance?: VersionInheritanceMap;
 }): string {
 	const schemaFilterList = options.schemaKeys ?? [];
+	const requestedVersionIds = Array.from(new Set(options.versionIds ?? []));
+	const wantedVersionsCteName =
+		requestedVersionIds.length > 0 ? "wanted_versions" : null;
 	const { candidateColumns, rankedColumns } = buildProjectionColumnSet(
 		options.selectedColumns,
 		options.hiddenColumns,
@@ -942,12 +2505,40 @@ function buildVtableSelectRewrite(options: {
 	);
 	candidateColumns.add("priority");
 	rankedColumns.add("priority");
+	const inheritancePlan = determineInheritancePlan({
+		requestedVersionIds: options.versionIds,
+		versionInheritance: options.versionInheritance,
+		forcedPrune: options.pruneInheritance,
+	});
 	const schemaFilter = buildSchemaFilter(schemaFilterList);
-	const cacheSource = buildCacheSource(
-		schemaFilterList,
-		options.cacheTables,
-		candidateColumns
+	const fileFilter =
+		options.fileIds && options.fileIds.length > 0
+			? buildFileFilter(options.fileIds)
+			: null;
+	const entityFilter =
+		options.entityIds && options.entityIds.length > 0
+			? buildEntityFilter(options.entityIds)
+			: null;
+	const snapshotFilter = buildSnapshotContentFilter(options.snapshotFilters);
+	const txnFilter = combineFilters(
+		schemaFilter,
+		fileFilter,
+		entityFilter,
+		snapshotFilter
 	);
+	const inheritedFilter = combineFilters(
+		schemaFilter,
+		fileFilter,
+		entityFilter,
+		snapshotFilter
+	);
+	const buildVersionJoin = (alias: string, joinAlias: string) =>
+		buildWantedVersionJoinClause(wantedVersionsCteName, alias, joinAlias);
+	const txnVersionJoin = buildVersionJoin("txn", "wv_txn");
+	const untrackedVersionJoin = buildVersionJoin("unt", "wv_unt");
+	const cacheVersionJoin = buildVersionJoin("cache", "wv_cache");
+	const inheritanceVersionJoin = buildVersionJoin("vi", "wv_vi");
+	const parentVersionJoin = buildVersionJoin("vi", "wv_parent");
 	const needsWriterJoin = candidateColumns.has("writer_key");
 	if (needsWriterJoin) {
 		candidateColumns.add("inherited_from_version_id");
@@ -959,6 +2550,11 @@ function buildVtableSelectRewrite(options: {
 		needsWriterJoin,
 		candidateColumns,
 	});
+	const cacheSource = buildCacheSource(
+		schemaFilterList,
+		options.cacheTables,
+		candidateColumns
+	);
 	const rankingOrder = [
 		"c.priority",
 		"c.created_at DESC",
@@ -969,38 +2565,70 @@ function buildVtableSelectRewrite(options: {
 		"c.change_id",
 	];
 	const segments: string[] = [];
-	if (options.hasOpenTransaction !== false) {
-		segments.push(buildTransactionSegment(schemaFilter, candidateColumns));
+	if (
+		options.hasOpenTransaction !== false &&
+		!options.pruneTransactionSegment
+	) {
+		segments.push(
+			buildTransactionSegment(txnFilter, candidateColumns, txnVersionJoin)
+		);
 	}
-	segments.push(buildUntrackedSegment(schemaFilter, candidateColumns));
+	segments.push(
+		buildUntrackedSegment(txnFilter, candidateColumns, untrackedVersionJoin)
+	);
 	const cacheSegment = buildCacheSegment(
 		cacheSource,
-		schemaFilter,
-		candidateColumns
+		txnFilter,
+		candidateColumns,
+		cacheVersionJoin
 	);
 	if (cacheSegment) {
 		segments.push(cacheSegment);
 	}
-	const inheritedSegments: string[] = [];
-	if (cacheSegment) {
-		const inheritedCache = buildInheritedCacheSegment(
-			cacheSource,
-			schemaFilter,
-			candidateColumns
+	const shouldPruneInheritance = inheritancePlan.mode === "pruned";
+	let inheritanceJoinSource = "version_inheritance vi";
+	let parentJoinSource = "version_parent vi";
+	if (inheritancePlan.mode === "inline") {
+		inheritanceJoinSource = buildInlineInheritanceSource(
+			inheritancePlan.versionAncestorPairs
 		);
-		if (inheritedCache) {
-			inheritedSegments.push(inheritedCache);
+		parentJoinSource = buildInlineParentSource(inheritancePlan.parentPairs);
+	}
+	let allSegments = segments;
+	if (!shouldPruneInheritance) {
+		const inheritedSegments: string[] = [];
+		if (cacheSegment) {
+			const inheritedCache = buildInheritedCacheSegment(
+				cacheSource,
+				inheritedFilter,
+				candidateColumns,
+				inheritanceJoinSource,
+				inheritanceVersionJoin
+			);
+			if (inheritedCache) {
+				inheritedSegments.push(inheritedCache);
+			}
 		}
-	}
-	inheritedSegments.push(
-		buildInheritedUntrackedSegment(schemaFilter, candidateColumns)
-	);
-	if (options.hasOpenTransaction !== false) {
 		inheritedSegments.push(
-			buildInheritedTransactionSegment(schemaFilter, candidateColumns)
+			buildInheritedUntrackedSegment(
+				inheritedFilter,
+				candidateColumns,
+				inheritanceJoinSource,
+				inheritanceVersionJoin
+			)
 		);
+		if (options.hasOpenTransaction !== false) {
+			inheritedSegments.push(
+				buildInheritedTransactionSegment(
+					inheritedFilter,
+					candidateColumns,
+					parentJoinSource,
+					parentVersionJoin
+				)
+			);
+		}
+		allSegments = segments.concat(inheritedSegments);
 	}
-	const allSegments = segments.concat(inheritedSegments);
 	const candidates = allSegments.join(`\n\n    UNION ALL\n\n`);
 
 	const writerJoinSql = needsWriterJoin
@@ -1025,31 +2653,34 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id`
 			? `
 LEFT JOIN lix_internal_transaction_state itx ON itx.id = w.change_id`
 			: "";
-	const rankedSql = buildRankedSegment(rankedColumns, rankingOrder);
+	const rankedSql = buildRankedSegment({
+		projectionColumns: rankedColumns,
+		rankingOrder,
+		candidatesSql: candidates,
+	});
 	const withClauses: string[] = [];
-	if (allSegments.length > 0) {
-		withClauses.push(buildVersionDescriptorCte());
-		withClauses.push(buildVersionInheritanceCte());
-		withClauses.push(buildVersionParentCte());
+	if (wantedVersionsCteName) {
+		withClauses.push(
+			buildWantedVersionsCte(wantedVersionsCteName, requestedVersionIds)
+		);
 	}
-	withClauses.push(
-		stripIndent(`
-	candidates AS (
-${indent(candidates, 4)}
-	)`).trim()
-	);
-	withClauses.push(
-		stripIndent(`
-	ranked AS (
-${indent(rankedSql, 4)}
-	)`).trim()
-	);
-
-	const body = `WITH
+	if (inheritancePlan.mode === "recursive") {
+		withClauses.push(buildVersionDescriptorCte());
+		withClauses.push(buildVersionInheritanceCte(wantedVersionsCteName));
+		withClauses.push(buildVersionParentCte(wantedVersionsCteName));
+	}
+	const withPrefix =
+		withClauses.length > 0
+			? `WITH
 ${withClauses.map((clause) => indent(clause, 2)).join(",\n")}
-SELECT
+`
+			: "";
+
+	const body = `${withPrefix}SELECT
 ${indent(projectionSql, 2)}
-FROM ranked w
+FROM (
+${indent(rankedSql, 2)}
+) AS w
 ${writerJoinSql}
 ${changeJoinSql}
 ${transactionJoinSql}
@@ -1108,9 +2739,9 @@ function buildRewriteProjectionSql(
 									eb.ref("ws_src.writer_key"),
 									eb.ref("w.writer_key")
 								)
-								.as(entry.alias ?? entry.column) as unknown as any;
+								.as(entry.column) as unknown as any;
 						}
-						return eb.ref(`w.${entry.column}`).as(entry.alias ?? entry.column);
+						return eb.ref(`w.${entry.column}`).as(entry.column);
 					})
 				);
 
@@ -1210,6 +2841,7 @@ const NEWLINE = "\n";
 
 const ALL_SEGMENT_COLUMNS = [
 	"_pk",
+	"source_tag",
 	"entity_id",
 	"schema_key",
 	"file_id",
@@ -1261,15 +2893,18 @@ const PROJECTION_COLUMN_ORDER = ALL_SEGMENT_COLUMNS.filter(
 const INTERNAL_ONLY_COLUMN_SET = new Set<string>(["priority", "rn"]);
 
 function buildTransactionSegment(
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	versionJoinClause: string
 ): string {
-	const filterClause = schemaFilter ? `WHERE ${schemaFilter}` : "";
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "txn");
+	const filterClause = rewrittenFilter ? `WHERE ${rewrittenFilter}` : "";
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
 			`'T' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(txn.version_id) AS _pk`,
 		],
+		["source_tag", "'T' AS source_tag"],
 		["entity_id", "txn.entity_id AS entity_id"],
 		["schema_key", "txn.schema_key AS schema_key"],
 		["file_id", "txn.file_id AS file_id"],
@@ -1291,26 +2926,27 @@ function buildTransactionSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM lix_internal_transaction_state txn
+		FROM lix_internal_transaction_state txn${joinClause}
 		${filterClause}
 	`).trimEnd();
 }
 
 function buildUntrackedSegment(
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	versionJoinClause: string
 ): string {
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "unt.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "unt");
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
 			`'U' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(unt.version_id) AS _pk`,
 		],
+		["source_tag", "'U' AS source_tag"],
 		["entity_id", "unt.entity_id AS entity_id"],
 		["schema_key", "unt.schema_key AS schema_key"],
 		["file_id", "unt.file_id AS file_id"],
@@ -1332,25 +2968,25 @@ function buildUntrackedSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM lix_internal_state_all_untracked unt
+		FROM lix_internal_state_all_untracked unt${joinClause}
 		${rewrittenFilter ? `WHERE ${rewrittenFilter}` : ""}
 	`).trimEnd();
 }
 
 function buildCacheSegment(
 	cacheSource: string | null,
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	versionJoinClause: string
 ): string | null {
 	if (!cacheSource) {
 		return null;
 	}
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "cache.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "cache");
 	const sourceKeyword = cacheSource.trim().toLowerCase();
 	const sourceSql = sourceKeyword.startsWith("select")
 		? `(${cacheSource})`
@@ -1360,6 +2996,7 @@ function buildCacheSegment(
 			"_pk",
 			`'C' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(cache.version_id) AS _pk`,
 		],
+		["source_tag", "'C' AS source_tag"],
 		["entity_id", "cache.entity_id AS entity_id"],
 		["schema_key", "cache.schema_key AS schema_key"],
 		["file_id", "cache.file_id AS file_id"],
@@ -1384,16 +3021,12 @@ function buildCacheSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const conditions: string[] = [];
-	if (rewrittenFilter) {
-		conditions.push(rewrittenFilter);
-	}
-	const whereClause =
-		conditions.length > 0 ? `\n\t\tWHERE ${conditions.join(" AND ")}` : "";
+	const whereClause = rewrittenFilter ? `\n\t\tWHERE ${rewrittenFilter}` : "";
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM ${sourceSql} cache${whereClause}
+		FROM ${sourceSql} cache${joinClause}${whereClause}
 	`).trimEnd();
 }
 
@@ -1422,20 +3055,25 @@ function buildVersionDescriptorCte(): string {
 /**
  * Builds the recursive CTE that unfolds the full inheritance chain.
  *
+ * @param seedCteName - Optional wanted version CTE that limits recursion seeds.
  * @returns SQL fragment for the version inheritance CTE.
  *
  * @example
  * ```ts
- * const sql = buildVersionInheritanceCte();
+ * const sql = buildVersionInheritanceCte("wanted_versions");
  * ```
  */
-function buildVersionInheritanceCte(): string {
+function buildVersionInheritanceCte(seedCteName: string | null): string {
+	const seedJoin = seedCteName
+		? `
+	  JOIN ${seedCteName} wv ON wv.version_id = vdb.version_id`
+		: "";
 	return stripIndent(`
 	version_inheritance(version_id, ancestor_version_id) AS (
 	  SELECT
 	    vdb.version_id,
 	    vdb.inherits_from_version_id
-	  FROM version_descriptor_base vdb
+	  FROM version_descriptor_base vdb${seedJoin}
 	  WHERE vdb.inherits_from_version_id IS NOT NULL
 
 	  UNION ALL
@@ -1452,22 +3090,52 @@ function buildVersionInheritanceCte(): string {
 /**
  * Builds the CTE mapping each version to its direct parent version.
  *
+ * @param seedCteName - Optional wanted version CTE limiting descriptors.
  * @returns SQL fragment for the version parent CTE.
  *
  * @example
  * ```ts
- * const sql = buildVersionParentCte();
+ * const sql = buildVersionParentCte("wanted_versions");
  * ```
  */
-function buildVersionParentCte(): string {
+function buildVersionParentCte(seedCteName: string | null): string {
+	const seedJoin = seedCteName
+		? `
+	  JOIN ${seedCteName} wv ON wv.version_id = vdb.version_id`
+		: "";
 	return stripIndent(`
 	version_parent AS (
 	  SELECT
 	    vdb.version_id,
 	    vdb.inherits_from_version_id AS parent_version_id
-	  FROM version_descriptor_base vdb
+	  FROM version_descriptor_base vdb${seedJoin}
 	  WHERE vdb.inherits_from_version_id IS NOT NULL
 	)`).trim();
+}
+
+/**
+ * Builds a CTE enumerating the requested versions for join-based filters.
+ *
+ * @param cteName - The identifier assigned to the CTE.
+ * @param versionIds - Ordered list of version identifiers to include.
+ * @returns SQL fragment for the wanted versions CTE.
+ *
+ * @example
+ * ```ts
+ * const sql = buildWantedVersionsCte("wanted_versions", ["v1", "v2"]);
+ * ```
+ */
+function buildWantedVersionsCte(
+	cteName: string,
+	versionIds: readonly string[]
+): string {
+	const selects = versionIds
+		.map((versionId) => `SELECT '${escapeSqlLiteral(versionId)}' AS version_id`)
+		.join("\nUNION ALL\n");
+	return stripIndent(`
+${cteName} AS (
+${indent(selects, 2)}
+)`).trim();
 }
 
 /**
@@ -1475,26 +3143,33 @@ function buildVersionParentCte(): string {
  * the target schema version.
  *
  * @param cacheSource - The SQL producing the cache rows.
- * @param schemaFilter - Optional schema predicate scoped to the cache alias.
+ * @param segmentFilter - Optional predicate scoped to the cache alias.
  * @param projectionColumns - Columns required for the projection.
+ * @param versionJoinClause - SQL equi-join tying descendants to wanted versions.
  * @returns SQL fragment or null when no cache source exists.
  *
  * @example
  * ```ts
- * const sql = buildInheritedCacheSegment('"cache_table"', "txn.schema_key = 'demo'", new Set());
+ * const sql = buildInheritedCacheSegment(
+ *   '"cache_table"',
+ *   "txn.schema_key = 'demo'",
+ *   new Set(),
+ *   "version_inheritance vi",
+ *   "JOIN wanted_versions wv ON wv.version_id = vi.version_id"
+ * );
  * ```
  */
 function buildInheritedCacheSegment(
 	cacheSource: string | null,
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	inheritanceJoin: string,
+	versionJoinClause: string
 ): string | null {
 	if (!cacheSource) {
 		return null;
 	}
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "cache.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "cache");
 	const sourceKeyword = cacheSource.trim().toLowerCase();
 	const sourceSql = sourceKeyword.startsWith("select")
 		? `(${cacheSource})`
@@ -1504,6 +3179,7 @@ function buildInheritedCacheSegment(
 			"_pk",
 			`'CI' || '~' || lix_encode_pk_part(cache.file_id) || '~' || lix_encode_pk_part(cache.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
 		],
+		["source_tag", "'CI' AS source_tag"],
 		["entity_id", "cache.entity_id AS entity_id"],
 		["schema_key", "cache.schema_key AS schema_key"],
 		["file_id", "cache.file_id AS file_id"],
@@ -1528,10 +3204,11 @@ function buildInheritedCacheSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM version_inheritance vi
+		FROM ${inheritanceJoin}${joinClause}
 		JOIN ${sourceSql} cache ON cache.version_id = vi.ancestor_version_id
 		WHERE cache.is_tombstone = 0
 		  AND cache.snapshot_content IS NOT NULL${
@@ -1543,27 +3220,34 @@ ${indent(columnSql, 4)}
 /**
  * Builds the inherited segment sourcing data from `lix_internal_state_all_untracked`.
  *
- * @param schemaFilter - Optional schema predicate scoped to the untracked alias.
+ * @param segmentFilter - Optional predicate scoped to the untracked alias.
  * @param projectionColumns - Columns required for the projection.
+ * @param versionJoinClause - SQL equi-join tying descendants to wanted versions.
  * @returns SQL fragment selecting inherited untracked rows.
  *
  * @example
  * ```ts
- * const sql = buildInheritedUntrackedSegment(null, new Set(["entity_id"]));
+ * const sql = buildInheritedUntrackedSegment(
+ *   null,
+ *   new Set(["entity_id"]),
+ *   "version_inheritance vi",
+ *   "JOIN wanted_versions wv ON wv.version_id = vi.version_id"
+ * );
  * ```
  */
 function buildInheritedUntrackedSegment(
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	inheritanceJoin: string,
+	versionJoinClause: string
 ): string {
-	const rewrittenFilter = schemaFilter
-		? schemaFilter.replace(/txn\./g, "unt.")
-		: null;
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "unt");
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
 			`'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
 		],
+		["source_tag", "'UI' AS source_tag"],
 		["entity_id", "unt.entity_id AS entity_id"],
 		["schema_key", "unt.schema_key AS schema_key"],
 		["file_id", "unt.file_id AS file_id"],
@@ -1588,10 +3272,11 @@ function buildInheritedUntrackedSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM version_inheritance vi
+		FROM ${inheritanceJoin}${joinClause}
 		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
 		WHERE unt.is_tombstone = 0
 		  AND unt.snapshot_content IS NOT NULL${
@@ -1604,24 +3289,33 @@ ${indent(columnSql, 4)}
  * Builds the inherited segment that projects transaction rows onto descendant
  * versions.
  *
- * @param schemaFilter - Optional schema predicate scoped to the transaction alias.
+ * @param segmentFilter - Optional predicate scoped to the transaction alias.
  * @param projectionColumns - Columns required for the projection.
+ * @param versionJoinClause - SQL equi-join tying descendants to wanted versions.
  * @returns SQL fragment selecting inherited transaction rows.
  *
  * @example
  * ```ts
- * const sql = buildInheritedTransactionSegment("txn.schema_key = 'demo'", new Set(["change_id"]));
+ * const sql = buildInheritedTransactionSegment(
+ *   "txn.schema_key = 'demo'",
+ *   new Set(["change_id"]),
+ *   "version_parent vi",
+ *   "JOIN wanted_versions wv ON wv.version_id = vi.version_id"
+ * );
  * ```
  */
 function buildInheritedTransactionSegment(
-	schemaFilter: string | null,
-	projectionColumns: Set<string>
+	segmentFilter: string | null,
+	projectionColumns: Set<string>,
+	parentJoinSource: string,
+	versionJoinClause: string
 ): string {
 	const columns: Array<[string, string]> = [
 		[
 			"_pk",
 			`'TI' || '~' || lix_encode_pk_part(txn.file_id) || '~' || lix_encode_pk_part(txn.entity_id) || '~' || lix_encode_pk_part(vi.version_id) AS _pk`,
 		],
+		["source_tag", "'TI' AS source_tag"],
 		["entity_id", "txn.entity_id AS entity_id"],
 		["schema_key", "txn.schema_key AS schema_key"],
 		["file_id", "txn.file_id AS file_id"],
@@ -1646,11 +3340,12 @@ function buildInheritedTransactionSegment(
 		.filter(([column]) => projectionColumns.has(column))
 		.map(([, sql]) => sql)
 		.join(",\n");
-	const rewrittenFilter = schemaFilter ?? null;
+	const rewrittenFilter = rewriteFilterForAlias(segmentFilter, "txn");
+	const joinClause = versionJoinClause ? `\n\t\t${versionJoinClause}` : "";
 	return stripIndent(`
 		SELECT
 ${indent(columnSql, 4)}
-		FROM version_parent vi
+		FROM ${parentJoinSource}${joinClause}
 		JOIN lix_internal_transaction_state txn ON txn.version_id = vi.parent_version_id
 		WHERE vi.parent_version_id IS NOT NULL
 		  AND txn.snapshot_content IS NOT NULL${
@@ -1659,23 +3354,28 @@ ${indent(columnSql, 4)}
 	`).trimEnd();
 }
 
-function buildRankedSegment(
-	projectionColumns: Set<string>,
-	rankingOrder: string[]
-): string {
+function buildRankedSegment(options: {
+	projectionColumns: Set<string>;
+	rankingOrder: string[];
+	candidatesSql: string;
+}): string {
 	const columns = ALL_SEGMENT_COLUMNS.filter((column) =>
-		projectionColumns.has(column)
+		options.projectionColumns.has(column)
 	).map((column) => `c.${column} AS ${column}`);
-	const orderClause = rankingOrder.join(", ");
+	const orderClause = options.rankingOrder.join(", ");
+	const selectEntries = [
+		...columns,
+		`ROW_NUMBER() OVER (
+        PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+        ORDER BY ${orderClause}
+      ) AS rn`,
+	];
 	return stripIndent(`
 		SELECT
-${indent(columns.join(",\n"), 4)}${
-		columns.length > 0 ? ",\n" : ""
-	}  ROW_NUMBER() OVER (
-		    PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-		    ORDER BY ${orderClause}
-		  ) AS rn
-		FROM candidates c
+${indent(selectEntries.join(",\n"), 4)}
+		FROM (
+${indent(options.candidatesSql, 6)}
+		) AS c
 	`).trimEnd();
 }
 
@@ -1685,6 +3385,83 @@ function buildSchemaFilter(schemaKeys: readonly string[]): string | null {
 	}
 	const values = schemaKeys.map((key) => `'${key}'`).join(", ");
 	return `txn.schema_key IN (${values})`;
+}
+
+function buildFileFilter(fileIds: readonly string[]): string | null {
+	if (!fileIds || fileIds.length === 0) {
+		return null;
+	}
+	const values = fileIds
+		.map((fileId) => `'${escapeSqlLiteral(fileId)}'`)
+		.join(", ");
+	return `txn.file_id IN (${values})`;
+}
+
+function buildEntityFilter(entityIds: readonly string[]): string | null {
+	if (!entityIds || entityIds.length === 0) {
+		return null;
+	}
+	const values = entityIds
+		.map((entityId) => `'${escapeSqlLiteral(entityId)}'`)
+		.join(", ");
+	return `txn.entity_id IN (${values})`;
+}
+
+function buildSnapshotContentFilter(
+	filters: readonly SnapshotJsonPredicate[]
+): string | null {
+	if (!filters || filters.length === 0) {
+		return null;
+	}
+	const clauses = filters
+		.map((filter) => buildSnapshotPredicateClause(filter))
+		.filter((clause): clause is string => typeof clause === "string");
+	if (clauses.length === 0) {
+		return null;
+	}
+	return clauses.map((clause) => `(${clause})`).join(" AND ");
+}
+
+function buildSnapshotPredicateClause(
+	filter: SnapshotJsonPredicate
+): string | null {
+	const uniqueValues = Array.from(new Set(filter.values));
+	if (uniqueValues.length === 0) {
+		return null;
+	}
+	const pathLiteral = `'${escapeSqlLiteral(filter.path)}'`;
+	if (uniqueValues.length === 1) {
+		const value = escapeSqlLiteral(uniqueValues[0]!);
+		return `json_extract(txn.snapshot_content, ${pathLiteral}) = '${value}'`;
+	}
+	const valueList = uniqueValues
+		.map((value) => `'${escapeSqlLiteral(value)}'`)
+		.join(", ");
+	return `json_extract(txn.snapshot_content, ${pathLiteral}) IN (${valueList})`;
+}
+
+/**
+ * Builds an equi-join clause tying a table alias to the wanted versions CTE.
+ *
+ * @param cteName - Name of the wanted versions CTE.
+ * @param targetAlias - Table alias exposing a `version_id` column.
+ * @param joinAlias - Alias assigned to the join for readability.
+ * @returns SQL JOIN clause or an empty string when no CTE is provided.
+ *
+ * @example
+ * ```ts
+ * const joinSql = buildWantedVersionJoinClause("wanted_versions", "txn", "wv_txn");
+ * ```
+ */
+function buildWantedVersionJoinClause(
+	cteName: string | null,
+	targetAlias: string,
+	joinAlias: string
+): string {
+	if (!cteName) {
+		return "";
+	}
+	return `JOIN ${cteName} ${joinAlias} ON ${joinAlias}.version_id = ${targetAlias}.version_id`;
 }
 
 function buildCacheSource(
@@ -1788,4 +3565,187 @@ function indent(value: string, spaces: number): string {
 
 function quoteIdentifier(identifier: string): string {
 	return `"${identifier.replace(/"/g, '""')}"`;
+}
+
+function shouldPushFileFilter(
+	schemaKeys: readonly string[],
+	fileIds: readonly string[]
+): boolean {
+	if (!schemaKeys || schemaKeys.length === 0) return false;
+	if (!fileIds || fileIds.length === 0) return false;
+	return schemaKeys.every(
+		(key) => typeof key === "string" && !key.startsWith("lix_")
+	);
+}
+
+function shouldPushEntityFilter(
+	schemaKeys: readonly string[],
+	entityIds: readonly string[]
+): boolean {
+	if (!schemaKeys || schemaKeys.length === 0) return false;
+	if (!entityIds || entityIds.length === 0) return false;
+	return schemaKeys.every(
+		(key) => typeof key === "string" && !key.startsWith("lix_")
+	);
+}
+
+function shouldPushSnapshotFilters(
+	schemaKeys: readonly string[],
+	filters: readonly SnapshotJsonPredicate[]
+): boolean {
+	if (!schemaKeys || schemaKeys.length === 0) return false;
+	if (!filters || filters.length === 0) return false;
+	return schemaKeys.every(
+		(key) => typeof key === "string" && !key.startsWith("lix_")
+	);
+}
+
+function combineFilters(
+	...filters: Array<string | null | undefined>
+): string | null {
+	const active = filters.filter(
+		(filter): filter is string =>
+			typeof filter === "string" && filter.length > 0
+	);
+	if (active.length === 0) {
+		return null;
+	}
+	if (active.length === 1) {
+		return active[0]!;
+	}
+	return active.map((filter) => `(${filter})`).join(" AND ");
+}
+
+function rewriteFilterForAlias(
+	filter: string | null,
+	alias: string
+): string | null {
+	if (!filter) {
+		return null;
+	}
+	return filter.replace(/txn\./g, `${alias}.`);
+}
+
+function normalizeObjectName(objectName: ObjectNameNode): string | null {
+	if (objectName.parts.length === 0) {
+		return null;
+	}
+	const last = objectName.parts[objectName.parts.length - 1]!;
+	return normalizeIdentifierValue(last.value);
+}
+
+function escapeSqlLiteral(value: string): string {
+	return value.replace(/'/g, "''");
+}
+
+type InheritancePlan =
+	| { mode: "pruned" }
+	| { mode: "recursive" }
+	| {
+			mode: "inline";
+			versionAncestorPairs: Array<{ versionId: string; ancestorId: string }>;
+			parentPairs: Array<{ versionId: string; parentId: string }>;
+	  };
+
+function determineInheritancePlan(args: {
+	requestedVersionIds: readonly string[];
+	versionInheritance?: VersionInheritanceMap;
+	forcedPrune: boolean;
+}): InheritancePlan {
+	const requested = Array.from(new Set(args.requestedVersionIds ?? []));
+
+	if (args.forcedPrune) {
+		return { mode: "pruned" };
+	}
+
+	if (requested.length === 0) {
+		return args.versionInheritance ? { mode: "recursive" } : { mode: "pruned" };
+	}
+
+	if (!args.versionInheritance || args.versionInheritance.size === 0) {
+		return { mode: "pruned" };
+	}
+
+	const ancestorPairs: Array<{ versionId: string; ancestorId: string }> = [];
+	const parentPairs: Array<{ versionId: string; parentId: string }> = [];
+	const ancestorSeen = new Set<string>();
+	const parentSeen = new Set<string>();
+
+	for (const versionId of requested) {
+		let current = versionId;
+		const chainVisited = new Set<string>([current]);
+		while (true) {
+			const node = args.versionInheritance.get(current);
+			if (!node) {
+				return {
+					mode: "recursive",
+				};
+			}
+			const parentId = node.inheritsFromVersionId;
+			if (!parentId) {
+				break;
+			}
+			if (chainVisited.has(parentId)) {
+				return {
+					mode: "recursive",
+				};
+			}
+			chainVisited.add(parentId);
+
+			const ancestorKey = `${versionId}::${parentId}`;
+			if (!ancestorSeen.has(ancestorKey)) {
+				ancestorSeen.add(ancestorKey);
+				ancestorPairs.push({ versionId, ancestorId: parentId });
+			}
+
+			const parentKey = `${current}::${parentId}`;
+			if (!parentSeen.has(parentKey)) {
+				parentSeen.add(parentKey);
+				parentPairs.push({ versionId: current, parentId });
+			}
+
+			current = parentId;
+		}
+	}
+
+	if (ancestorPairs.length === 0) {
+		return { mode: "pruned" };
+	}
+
+	return {
+		mode: "inline",
+		versionAncestorPairs: ancestorPairs,
+		parentPairs,
+	};
+}
+
+function buildInlineInheritanceSource(
+	pairs: Array<{ versionId: string; ancestorId: string }>
+): string {
+	return buildInlineValueSource(
+		pairs.map(({ versionId, ancestorId }) => [versionId, ancestorId]),
+		["version_id", "ancestor_version_id"]
+	);
+}
+
+function buildInlineParentSource(
+	pairs: Array<{ versionId: string; parentId: string }>
+): string {
+	return buildInlineValueSource(
+		pairs.map(({ versionId, parentId }) => [versionId, parentId]),
+		["version_id", "parent_version_id"]
+	);
+}
+
+function buildInlineValueSource(
+	rows: Array<[string, string]>,
+	columns: [string, string]
+): string {
+	const selects = rows
+		.map(
+			([left, right]) =>
+				`SELECT '${escapeSqlLiteral(left)}' AS ${columns[0]}, '${escapeSqlLiteral(right)}' AS ${columns[1]}`
+		)
+		.join("\nUNION ALL\n");
+	return `(\n${selects}\n) AS vi`;
 }

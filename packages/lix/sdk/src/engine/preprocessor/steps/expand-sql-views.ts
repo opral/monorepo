@@ -2,6 +2,7 @@ import type {
 	SegmentedStatementNode,
 	CompoundSelectNode,
 	SelectStatementNode,
+	SelectItemNode,
 	StatementNode,
 	StatementSegmentNode,
 	TableReferenceNode,
@@ -9,12 +10,24 @@ import type {
 	WithClauseNode,
 	CommonTableExpressionNode,
 	IdentifierNode,
+	ExpressionNode,
+	RawFragmentNode,
 } from "../sql-parser/nodes.js";
 import { identifier } from "../sql-parser/nodes.js";
-import { normalizeIdentifierValue } from "../sql-parser/ast-helpers.js";
+import {
+	getColumnName,
+	getIdentifierValue,
+	normalizeIdentifierValue,
+} from "../sql-parser/ast-helpers.js";
 import { visitStatement, type AstVisitor } from "../sql-parser/visitor.js";
 import { parse, normalizeSegmentedStatement } from "../sql-parser/parse.js";
 import type { PreprocessorStep, PreprocessorTraceEntry } from "../types.js";
+import {
+	collectTableColumnUsage,
+	resolveRelationAlias,
+	type ColumnUsageSummary,
+	type TableColumnUsageMap,
+} from "../sql-parser/column-usage.js";
 
 type ViewDefinition = {
 	readonly name: string;
@@ -69,12 +82,13 @@ function expandSegmentedStatement(
 	const updatedSegments: StatementSegmentNode[] = statement.segments.map(
 		(segment) => {
 			if (segment.node_kind === "select_statement") {
+				const usage = collectTableColumnUsage(segment);
 				const state: ExpandState = {
 					stack: [],
 					expandedViews: [],
 				};
 
-				const expanded = expandStatementNode(segment, views, state);
+				const expanded = expandStatementNode(segment, views, state, usage);
 				if (state.expandedViews.length === 0) {
 					return segment;
 				}
@@ -117,19 +131,23 @@ function expandCompoundSelect(
 	let viewNames: string[] = [];
 
 	const firstState: ExpandState = { stack: [], expandedViews: [] };
+	const firstUsage = collectTableColumnUsage(statement.first);
 	const expandedFirst = expandStatementNode(
 		statement.first,
 		views,
-		firstState
+		firstState,
+		firstUsage
 	) as SelectStatementNode;
 	viewNames = viewNames.concat(firstState.expandedViews);
 
 	const expandedBranches = statement.compounds.map((branch) => {
 		const branchState: ExpandState = { stack: [], expandedViews: [] };
+		const branchUsage = collectTableColumnUsage(branch.select);
 		const expandedSelect = expandStatementNode(
 			branch.select,
 			views,
-			branchState
+			branchState,
+			branchUsage
 		) as SelectStatementNode;
 		if (branchState.expandedViews.length === 0) {
 			return branch;
@@ -169,23 +187,63 @@ function buildViewMap(
 function expandStatementNode(
 	statement: StatementNode,
 	views: Map<string, ViewDefinition>,
-	state: ExpandState
+	state: ExpandState,
+	usage: TableColumnUsageMap
 ): StatementNode {
-	return visitStatement(statement, createVisitor(views, state));
+	return visitStatement(
+		statement,
+		createVisitor(views, state, usage, statement)
+	);
 }
 
 function createVisitor(
 	views: Map<string, ViewDefinition>,
-	state: ExpandState
+	state: ExpandState,
+	rootUsage: TableColumnUsageMap,
+	rootStatement: StatementNode
 ): AstVisitor {
+	const usageCache = new WeakMap<SelectStatementNode, TableColumnUsageMap>();
+	if (rootStatement.node_kind === "select_statement") {
+		usageCache.set(rootStatement, rootUsage);
+	}
+	const selectStack: SelectStatementNode[] = [];
 	return {
+		select_statement(node) {
+			selectStack.push(node);
+		},
+		select_statement_exit() {
+			selectStack.pop();
+		},
 		table_reference(node) {
 			const match = matchView(node, views);
 			if (!match) {
 				return;
 			}
 
-			const expanded = expandView(match, views, state);
+			const currentSelect =
+				selectStack[selectStack.length - 1] ??
+				(rootStatement.node_kind === "select_statement" ? rootStatement : null);
+			let currentUsage: TableColumnUsageMap;
+			if (currentSelect) {
+				currentUsage =
+					usageCache.get(currentSelect) ??
+					(currentSelect === rootStatement &&
+					rootStatement.node_kind === "select_statement"
+						? rootUsage
+						: undefined) ??
+					collectTableColumnUsage(currentSelect);
+				usageCache.set(currentSelect, currentUsage);
+			} else {
+				currentUsage = rootUsage;
+			}
+			if (!currentUsage) {
+				currentUsage = new Map<string, ColumnUsageSummary>();
+			}
+			const aliasKey =
+				resolveRelationAlias(node) ?? normalizeIdentifierValue(match.name);
+			const requirements = currentUsage.get(aliasKey);
+
+			const expanded = expandView(match, views, state, requirements);
 			if (!expanded) {
 				return;
 			}
@@ -221,7 +279,8 @@ function matchView(
 function expandView(
 	view: ViewDefinition,
 	views: Map<string, ViewDefinition>,
-	state: ExpandState
+	state: ExpandState,
+	requirements: ColumnUsageSummary | undefined
 ): SelectStatementNode | CompoundSelectNode | null {
 	if (state.stack.includes(view.normalized)) {
 		return null;
@@ -232,10 +291,8 @@ function expandView(
 		const parsedStatements = parse(view.sql);
 		const directStatement = getSingleSelectableStatement(parsedStatements);
 		if (directStatement) {
-			const expanded = expandStatementNode(directStatement, views, state);
-			if (isSelectableStatement(expanded)) {
-				return expanded;
-			}
+			const pruned = pruneExpandedStatement(directStatement, requirements);
+			return expandSelectableStatement(pruned, views, state);
 		}
 
 		const body = extractViewBody(view.sql);
@@ -251,8 +308,8 @@ function expandView(
 			if (!parsedCte) {
 				return null;
 			}
-			const expandedCte = expandStatementNode(parsedCte, views, state);
-			if (!isSelectableStatement(expandedCte)) {
+			const expandedCte = expandSelectableStatement(parsedCte, views, state);
+			if (!expandedCte || !isSelectableStatement(expandedCte)) {
 				return null;
 			}
 			ctes.push({
@@ -267,25 +324,44 @@ function expandView(
 		if (!mainStatement) {
 			return null;
 		}
-		const expandedMain = expandStatementNode(mainStatement, views, state);
-		if (!isSelectableStatement(expandedMain)) {
+		const expandedMain = expandSelectableStatement(mainStatement, views, state);
+		if (!expandedMain || !isSelectableStatement(expandedMain)) {
 			return null;
 		}
 
-		if (ctes.length === 0 && !withParsed.recursive) {
-			return expandedMain;
+		const statementWithWithClause =
+			ctes.length === 0 && !withParsed.recursive
+				? expandedMain
+				: attachWithClause(expandedMain, {
+						node_kind: "with_clause",
+						recursive: withParsed.recursive,
+						ctes,
+					});
+		if (!statementWithWithClause) {
+			return null;
 		}
-
-		const withClause: WithClauseNode = {
-			node_kind: "with_clause",
-			recursive: withParsed.recursive,
-			ctes,
-		};
-
-		return attachWithClause(expandedMain, withClause);
+		const pruned = pruneExpandedStatement(
+			statementWithWithClause,
+			requirements
+		);
+		return expandSelectableStatement(pruned, views, state);
 	} finally {
 		state.stack.pop();
 	}
+}
+
+function expandSelectableStatement(
+	statement: SelectStatementNode | CompoundSelectNode,
+	views: Map<string, ViewDefinition>,
+	state: ExpandState
+): SelectStatementNode | CompoundSelectNode | null {
+	if (statement.node_kind === "select_statement") {
+		const usage = collectTableColumnUsage(statement);
+		const expanded = expandStatementNode(statement, views, state, usage);
+		return isSelectableStatement(expanded) ? expanded : null;
+	}
+	const expandedCompound = expandCompoundSelect(statement, views);
+	return expandedCompound.node;
 }
 
 function pushTrace(
@@ -378,6 +454,325 @@ function attachWithClause(
 		...statement,
 		with_clause: mergeWithClauses(withClause, existing),
 	};
+}
+
+function pruneExpandedStatement(
+	statement: SelectStatementNode | CompoundSelectNode,
+	requirements: ColumnUsageSummary | undefined
+): SelectStatementNode | CompoundSelectNode {
+	if (!requirements || requirements.requiresAllColumns) {
+		return statement;
+	}
+	if (requirements.columns.size === 0) {
+		return statement;
+	}
+	if (statement.node_kind === "select_statement") {
+		return pruneSelectStatement(statement, requirements);
+	}
+	return statement;
+}
+
+function pruneSelectStatement(
+	statement: SelectStatementNode,
+	requirements: ColumnUsageSummary
+): SelectStatementNode {
+	let current = statement;
+	const prunedProjection = pruneSelectProjection(current, requirements);
+	let changed = prunedProjection !== current;
+	current = prunedProjection;
+	const prunedJoins = pruneUnusedLeftJoins(current);
+	if (prunedJoins !== current) {
+		changed = true;
+		current = prunedJoins;
+	}
+	const prunedWithClause = pruneUnusedCommonTableExpressions(current);
+	if (prunedWithClause !== current) {
+		changed = true;
+		current = prunedWithClause;
+	}
+	return changed ? current : statement;
+}
+
+function pruneSelectProjection(
+	statement: SelectStatementNode,
+	requirements: ColumnUsageSummary
+): SelectStatementNode {
+	if (statement.distinct) {
+		return statement;
+	}
+	const neededColumns = requirements.columns;
+	let changed = false;
+	const filtered = statement.projection.filter((item) => {
+		if (item.node_kind !== "select_expression") {
+			return true;
+		}
+		const column = extractProjectedColumnName(item);
+		if (!column) {
+			return true;
+		}
+		if (!neededColumns.has(column)) {
+			changed = true;
+			return false;
+		}
+		return neededColumns.has(column);
+	});
+	if (!changed || filtered.length === 0) {
+		return statement;
+	}
+	return {
+		...statement,
+		projection: filtered,
+	};
+}
+
+function pruneUnusedLeftJoins(
+	select: SelectStatementNode
+): SelectStatementNode {
+	if (!canPruneUnusedLeftJoins(select)) {
+		return select;
+	}
+	if (select.from_clauses.length === 0) {
+		return select;
+	}
+	let changed = false;
+	const rewrittenFrom = select.from_clauses.map((clause, clauseIndex) => {
+		if (clause.joins.length === 0) {
+			return clause;
+		}
+		const filteredJoins = clause.joins.filter((join, joinIndex) => {
+			if (join.join_type !== "left") {
+				return true;
+			}
+			if (join.relation.node_kind === "raw_fragment") {
+				return true;
+			}
+			const alias = resolveRelationAlias(join.relation);
+			if (!alias) {
+				return true;
+			}
+			if (aliasReferencedOutsideJoin(select, clauseIndex, joinIndex, alias)) {
+				return true;
+			}
+			changed = true;
+			return false;
+		});
+		if (filteredJoins.length === clause.joins.length) {
+			return clause;
+		}
+		return {
+			...clause,
+			joins: filteredJoins,
+		};
+	});
+	if (!changed) {
+		return select;
+	}
+	return {
+		...select,
+		from_clauses: rewrittenFrom,
+	};
+}
+
+function canPruneUnusedLeftJoins(select: SelectStatementNode): boolean {
+	if (select.distinct) {
+		return false;
+	}
+	if (select.group_by.length > 0) {
+		return false;
+	}
+	return isDirectColumnProjection(select);
+}
+
+function isDirectColumnProjection(select: SelectStatementNode): boolean {
+	if (select.projection.length === 0) {
+		return false;
+	}
+	return select.projection.every(
+		(item) =>
+			item.node_kind === "select_expression" &&
+			isAllowedProjectionExpression(item.expression)
+	);
+}
+
+function isAllowedProjectionExpression(
+	expression: ExpressionNode | RawFragmentNode
+): boolean {
+	if ("sql_text" in expression) {
+		return false;
+	}
+	switch (expression.node_kind) {
+		case "column_reference":
+			return true;
+		case "function_call": {
+			const functionName = normalizeIdentifierValue(expression.name.value);
+			return functionName === "json_extract";
+		}
+		default:
+			return false;
+	}
+}
+
+function aliasReferencedOutsideJoin(
+	select: SelectStatementNode,
+	clauseIndex: number,
+	joinIndex: number,
+	alias: string
+): boolean {
+	const strippedSelect: SelectStatementNode = {
+		...select,
+		from_clauses: select.from_clauses.map((clause, currentClauseIndex) => {
+			if (currentClauseIndex !== clauseIndex) {
+				return clause;
+			}
+			return {
+				...clause,
+				joins: clause.joins.map((join, currentJoinIndex) => {
+					if (currentJoinIndex !== joinIndex) {
+						return join;
+					}
+					if (!join.on_expression) {
+						return join;
+					}
+					return {
+						...join,
+						on_expression: null,
+					};
+				}),
+			};
+		}),
+	};
+	const usage = collectTableColumnUsage(strippedSelect);
+	const summary = usage.get(alias);
+	return !!summary && (summary.requiresAllColumns || summary.columns.size > 0);
+}
+
+function pruneUnusedCommonTableExpressions(
+	select: SelectStatementNode
+): SelectStatementNode {
+	const withClause = select.with_clause;
+	if (!withClause || withClause.ctes.length === 0) {
+		return select;
+	}
+	const cteNames = withClause.ctes
+		.map((cte) => normalizeIdentifierValue(cte.name.value))
+		.filter((name): name is string => Boolean(name));
+	if (cteNames.length === 0) {
+		return select;
+	}
+	const targetNames = new Set(cteNames);
+	const dependencyMap = new Map<string, Set<string>>();
+	const rootReferences = collectReferencedCtes(select, targetNames);
+	if (rootReferences.hasRawReferences) {
+		return select;
+	}
+	dependencyMap.set("__root__", rootReferences.references);
+	for (const cte of withClause.ctes) {
+		const normalized = normalizeIdentifierValue(cte.name.value);
+		if (!normalized) {
+			continue;
+		}
+		const references = collectReferencedCtes(cte.statement, targetNames);
+		if (references.hasRawReferences) {
+			return select;
+		}
+		dependencyMap.set(normalized, references.references);
+	}
+
+	const needed = new Set<string>();
+	const queue: string[] = Array.from(dependencyMap.get("__root__") ?? []);
+	while (queue.length > 0) {
+		const current = queue.pop();
+		if (!current || needed.has(current)) {
+			continue;
+		}
+		needed.add(current);
+		const deps = dependencyMap.get(current);
+		if (!deps) {
+			continue;
+		}
+		for (const dep of deps) {
+			queue.push(dep);
+		}
+	}
+
+	if (needed.size === targetNames.size) {
+		return select;
+	}
+	if (needed.size === 0) {
+		return {
+			...select,
+			with_clause: null,
+		};
+	}
+	const filteredCtes = withClause.ctes.filter((cte) => {
+		const normalized = normalizeIdentifierValue(cte.name.value);
+		if (!normalized) {
+			return true;
+		}
+		return needed.has(normalized);
+	});
+	if (filteredCtes.length === withClause.ctes.length) {
+		return select;
+	}
+	return {
+		...select,
+		with_clause:
+			filteredCtes.length === 0
+				? null
+				: {
+						...withClause,
+						ctes: filteredCtes,
+					},
+	};
+}
+
+function collectReferencedCtes(
+	statement: SelectStatementNode | CompoundSelectNode,
+	targetNames: ReadonlySet<string>
+): { references: Set<string>; hasRawReferences: boolean } {
+	const references = new Set<string>();
+	let hasRawReferences = false;
+	const visitor: AstVisitor = {
+		table_reference(node) {
+			const normalized = normalizeObjectName(node.name);
+			if (normalized && targetNames.has(normalized)) {
+				references.add(normalized);
+			}
+			return node;
+		},
+		raw_fragment() {
+			hasRawReferences = true;
+		},
+	};
+	visitStatement(statement, visitor);
+	return { references, hasRawReferences };
+}
+
+function normalizeObjectName(
+	object: TableReferenceNode["name"]
+): string | null {
+	const last = object.parts[object.parts.length - 1];
+	if (!last) {
+		return null;
+	}
+	return normalizeIdentifierValue(last.value);
+}
+
+function extractProjectedColumnName(
+	item: Extract<SelectItemNode, { node_kind: "select_expression" }>
+): string | null {
+	const aliasValue = getIdentifierValue(item.alias);
+	if (aliasValue) {
+		return aliasValue;
+	}
+	const expression = item.expression;
+	if ("sql_text" in expression) {
+		return null;
+	}
+	if (expression.node_kind !== "column_reference") {
+		return null;
+	}
+	return getColumnName(expression);
 }
 
 function mergeWithClauses(

@@ -66,7 +66,16 @@ const STATE_DELETE_SQL = `DELETE FROM state
       WHERE entity_id = ? AND schema_key = ? AND file_id = ?`;
 
 const readyCtx: Promise<BenchCtx> = (async () => {
-	const lix = await openLix({});
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
 
 	await registerBenchSchema(lix);
 

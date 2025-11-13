@@ -71,15 +71,20 @@ describe("transition with 100 additions", async () => {
 describe("transition with 100 deletions", async () => {
 	const lix = await openLix({});
 
-	for (let i = 0; i < N; i++) {
-		await lix.db
-			.insertInto("key_value")
-			.values({ key: `del_${i}`, value: String(i) })
-			.execute();
+	const deletionEntries = Array.from({ length: N }, (_, i) => ({
+		key: `del_${i}`,
+		value: String(i),
+	}));
+	const deletionKeys = deletionEntries.map((entry) => entry.key);
+	for (const entry of deletionEntries) {
+		await lix.db.insertInto("key_value").values(entry).execute();
 	}
 	const fullCp = await createCheckpoint({ lix });
 
-	await lix.db.deleteFrom("key_value").execute();
+	await lix.db
+		.deleteFrom("key_value")
+		.where("key", "in", deletionKeys)
+		.execute();
 	const emptyCp = await createCheckpoint({ lix });
 
 	const version = await createVersionFromCommit({

@@ -191,3 +191,85 @@ test("rewrites inner joins on views", async () => {
 
 	await lix.close();
 });
+
+test("state filter on inherited_from_version_id=NULL prunes inheritance rewrites", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const query = `
+		SELECT st.entity_id
+		FROM state AS st
+		WHERE st.file_id = ?
+		  AND st.inherited_from_version_id IS NULL
+	`;
+
+	const result = preprocess({
+		sql: query,
+		parameters: ["file-1"],
+	});
+
+	const upper = result.sql.toUpperCase();
+	expect(upper).toContain("LIX_INTERNAL_STATE_VTABLE");
+	expect(upper).not.toContain("VERSION_INHERITANCE");
+	expect(upper).not.toContain("VERSION_DESCRIPTOR_BASE");
+
+	await lix.close();
+});
+
+test("version view rewrite prunes cache unions", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const result = preprocess({
+		sql: `
+			SELECT id
+			FROM version
+			WHERE id = ?
+		`,
+		parameters: ["global"],
+		trace: true,
+	});
+
+	const normalizedSql = result.sql.toLowerCase();
+	expect(normalizedSql).toContain(
+		`"lix_internal_state_cache_v1_lix_version_descriptor"`
+	);
+	// Ensure cache unions are pruned down to descriptor/tip tables.
+	expect(normalizedSql).not.toContain(
+		`"lix_internal_state_cache_v1_lix_stored_schema"`
+	);
+
+	const rewriteTrace =
+		result.trace?.filter((entry) => entry.step === "rewrite_vtable_selects") ??
+		[];
+	expect(rewriteTrace.length).toBeGreaterThan(0);
+	expect(
+		rewriteTrace.some((entry) =>
+			(entry.payload?.schema_key_literals ?? []).includes(
+				"lix_version_descriptor"
+			)
+		)
+	).toBe(true);
+
+	await lix.close();
+});
+
+test("state file_id predicate is pushed into vtable rewrite for markdown schemas", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const result = preprocess({
+		sql: `
+		SELECT st.entity_id
+		FROM state AS st
+		WHERE st.file_id = ?
+		  AND st.schema_key IN ('markdown_wc_paragraph')
+		`,
+		parameters: ["file-xyz"],
+	});
+
+	const normalized = result.sql.toLowerCase();
+	expect(normalized).toContain("unt.file_id in ('file-xyz')");
+
+	await lix.close();
+});

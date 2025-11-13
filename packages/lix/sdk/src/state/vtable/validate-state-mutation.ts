@@ -98,8 +98,7 @@ const normalizeForeignKeys = (
 	}));
 };
 
-export function validateStateMutation(args: {
-	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
+type BaseStateMutationArgs = {
 	schema: LixSchemaDefinition | null;
 	schemaKey?: string;
 	snapshot_content: LixChange["snapshot_content"];
@@ -108,7 +107,14 @@ export function validateStateMutation(args: {
 	version_id: string;
 	untracked?: boolean;
 	inherited_from_version_id?: string | null;
-}): void {
+};
+
+export type ValidateStateMutationArgs = BaseStateMutationArgs & {
+	engine: Pick<LixEngine, "executeSync" | "runtimeCacheRef" | "hooks">;
+	existingVersionsCache?: Set<string>;
+};
+
+export function validateStateMutation(args: ValidateStateMutationArgs): void {
 	const attemptedInheritedOverride = args.inherited_from_version_id;
 	if (
 		attemptedInheritedOverride !== undefined &&
@@ -123,16 +129,21 @@ export function validateStateMutation(args: {
 		throw new Error("version_id is required");
 	}
 
-	const existingVersion = args.engine.executeSync(
-		internalQueryBuilder
-			.selectFrom("version")
-			.select("id")
-			.where("id", "=", args.version_id)
-			.compile()
-	).rows;
+	const versions = args.existingVersionsCache;
+	if (!versions || !versions.has(args.version_id)) {
+		const existingVersion = args.engine.executeSync(
+			internalQueryBuilder
+				.selectFrom("version")
+				.select("id")
+				.where("id", "=", args.version_id)
+				.compile()
+		).rows;
 
-	if (existingVersion.length === 0) {
-		throw new Error(`Version with id '${args.version_id}' does not exist`);
+		if (existingVersion.length === 0) {
+			throw new Error(`Version with id '${args.version_id}' does not exist`);
+		}
+
+		versions?.add(args.version_id);
 	}
 
 	let schemaKey =
@@ -375,9 +386,7 @@ function validatePrimaryKeyConstraints(args: {
 		primaryKeyValues.push(value);
 	}
 
-	// Query existing resolved state (including cache/untracked/inherited) to check for duplicates,
-	// but ignore transaction rows (tag 'T' in _pk) so that multiple inserts within the same
-	// transaction can overwrite without tripping PK validation.
+	// Query existing resolved state (including cache/untracked/inherited) to check for duplicates.
 	const db =
 		internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 	let query = db
@@ -394,8 +403,9 @@ function validatePrimaryKeyConstraints(args: {
 	// Exclude tombstones
 	query = query.where("snapshot_content", "is not", null);
 
-	// Exclude transaction-state rows: _pk starting with 'T~'
-	query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
+	// Retain transaction rows so tombstones (source_tag 'T') can mask prior snapshots
+	// during validation. Dropping them would resurface the cached row we just deleted
+	// within the same statement, causing spurious primary-key violations.
 
 	// For updates, exclude the current entity from the check
 	if (args.operation === "update" && args.entity_id) {
@@ -462,7 +472,8 @@ function validateUniqueConstraints(args: {
 			continue;
 		}
 
-		// Query existing resolved state for duplicates, excluding transaction-state rows (tag 'T')
+		// Query existing resolved state for duplicates. Keep transaction rows so
+		// in-flight tombstones still suppress cached snapshots during validation.
 		const db =
 			internalQueryBuilder as unknown as Kysely<LixInternalDatabaseSchema>;
 		let query = db
@@ -471,9 +482,9 @@ function validateUniqueConstraints(args: {
 			.where("schema_key", "=", args.schema["x-lix-key"]);
 
 		query = query.where("version_id", "=", args.version_id);
+		query = query.where("inherited_from_version_id", "is", null);
 		// Exclude tombstones
 		query = query.where("snapshot_content", "is not", null);
-		query = query.where(sql`_pk NOT LIKE 'T~%'` as any);
 
 		// For updates, exclude the current entity from the check
 		if (args.operation === "update" && args.entity_id) {

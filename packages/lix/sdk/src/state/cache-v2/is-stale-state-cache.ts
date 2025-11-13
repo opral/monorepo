@@ -34,6 +34,7 @@ function readStaleFlag(engine: Pick<LixEngine, "executeSync">): boolean {
 			.where("entity_id", "=", CACHE_STALE_KEY)
 			.where("schema_key", "=", CACHE_SCHEMA_KEY)
 			.where("version_id", "=", "global")
+			.where("inherited_from_version_id", "is", null)
 			.where("snapshot_content", "is not", null)
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
 			.compile()
