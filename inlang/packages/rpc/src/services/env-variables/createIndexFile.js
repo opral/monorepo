@@ -20,7 +20,7 @@ await fs.writeFile(
 	dirname + "/index.js",
 	`
 export const PUBLIC_ENV_VARIABLES = {
-	PUBLIC_SERVER_BASE_URL: ${ifDefined(process.env.PUBLIC_SERVER_BASE_URL)},
+	PUBLIC_SERVER_BASE_URL: "https://inlang.com",
 	PUBLIC_ALLOWED_AUTH_URLS: ${ifDefined(process.env.PUBLIC_ALLOWED_AUTH_URLS)},
 }
 `

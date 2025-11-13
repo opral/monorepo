@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Command } from "commander";
+import { rpc } from "@inlang/rpc";
 import { getInlangProject } from "../../utilities/getInlangProject.js";
 import { log, logError } from "../../utilities/log.js";
 import {
@@ -11,7 +12,10 @@ import {
 import { projectOption } from "../../utilities/globalFlags.js";
 import progessBar from "cli-progress";
 import fs from "node:fs/promises";
-import { machineTranslateBundle } from "./machineTranslateBundle.js";
+import {
+  machineTranslateBundle,
+  type MachineTranslateResult,
+} from "./machineTranslateBundle.js";
 
 export const translate = new Command()
   .command("translate")
@@ -67,33 +71,45 @@ export async function translateCommandAction(args: { project: InlangProject }) {
     }
 
     const googleApiKey = process.env.INLANG_GOOGLE_TRANSLATE_API_KEY;
+    const useRpcFallback = !googleApiKey;
 
-    if (!googleApiKey) {
-      log.error(
-        "Set the INLANG_GOOGLE_TRANSLATE_API_KEY environment variable before running machine translate."
+    if (useRpcFallback) {
+      log.warn(
+        [
+          "No INLANG_GOOGLE_TRANSLATE_API_KEY detected.",
+          "Falling back to the inlang RPC translation service.",
+          "BYOK will soon be required. The machine translate command can fail at any time without your own API key.",
+        ].join("\n")
       );
-      return;
     }
 
     bar?.start(bundles.length, 0);
 
-    const promises: Promise<
-      Awaited<ReturnType<typeof machineTranslateBundle>>
-    >[] = [];
+    const promises: Promise<MachineTranslateResult>[] = [];
     const errors: string[] = [];
 
     for (const bundle of bundles) {
-      promises.push(
-        machineTranslateBundle({
-          bundle,
-          sourceLocale: settings.baseLocale,
-          targetLocales: targetLocales,
-          googleApiKey,
-        }).then((result) => {
-          bar?.increment();
-          return result;
-        })
-      );
+      const translationPromise = useRpcFallback
+        ? rpc.machineTranslateBundle({
+            bundle,
+            sourceLocale: settings.baseLocale,
+            targetLocales: targetLocales,
+          })
+        : machineTranslateBundle({
+            bundle,
+            sourceLocale: settings.baseLocale,
+            targetLocales: targetLocales,
+            googleApiKey,
+          });
+
+      const trackedPromise = (
+        translationPromise as Promise<MachineTranslateResult>
+      ).then((result) => {
+        bar?.increment();
+        return result;
+      });
+
+      promises.push(trackedPromise);
     }
 
     const updatedBundles = await Promise.all(promises);
