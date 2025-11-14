@@ -153,13 +153,15 @@ WITH
       s.change_id AS after_change_id,
       s.commit_id AS after_commit_id,
       CASE
-        -- Explicit delete in source (tombstone takes precedence)
-        WHEN s.snapshot_content IS NULL THEN 'removed'
+        -- Explicit delete in source (tombstone) only matters if the target had the entity.
+        -- Longer term we should derive this from the true lowest common ancestor, but until then
+        -- checking for a target change_id approximates the same intent.
+        WHEN s.snapshot_content IS NULL AND t.change_id IS NOT NULL THEN 'removed'
         -- Added in source only (live row)
         WHEN t.change_id IS NULL AND s.snapshot_content IS NOT NULL THEN 'added'
         -- Both present and different (live row in source)
         WHEN t.change_id IS NOT NULL AND s.snapshot_content IS NOT NULL AND s.change_id != t.change_id THEN 'modified'
-        -- Both present and same (live row in source)
+        -- Both present and same (live row in source), or tombstone without a target baseline
         ELSE 'unchanged'
       END AS status
     FROM s

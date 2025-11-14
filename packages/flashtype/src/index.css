@@ -159,12 +159,8 @@
 
 .lix-diff-content .diff-removed {
 	color: #d1242f;
-	text-decoration: none;
-	outline: none;
-}
-
-.lix-diff-content [data-diff-mode="words"] .diff-removed {
 	text-decoration: line-through;
+	text-decoration-color: currentColor;
 }
 
 .dark {

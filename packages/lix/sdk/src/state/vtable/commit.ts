@@ -15,6 +15,10 @@ import { updateUntrackedState } from "../untracked/update-untracked-state.js";
 import { generateCommit } from "./generate-commit.js";
 import { setHasOpenTransaction } from "./vtable.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import {
+	refreshWorkingChangeSet,
+	type WorkingChange,
+} from "../working-change-set/refresh-working-change-set.js";
 
 /**
  * Commits all transaction changes to permanent storage.
@@ -210,306 +214,29 @@ export function commit(args: {
 
 	// Step 4: Handle working changeset updates for each version
 	for (const [version_id, changes] of trackedChangesByVersion) {
-		/**
-		 * IMPORTANT: Skip updating working change set elements for the global version.
-		 *
-		 * See https://github.com/opral/lix-sdk/issues/364#issuecomment-3218464923
-		 *
-		 * Rationale:
-		 * - We will make working CSE materialization lazy in a future iteration.
-		 * - For now, avoid mutating global working CSE at commit-time to keep the
-		 *   commit path simpler and cheaper.
-		 * - If someone needs working CSE for global and to checkpoint global, this
-		 *   will be supported by the lazy materializer later.
-		 */
-		if (version_id === "global") {
-			continue;
-		}
-		if (changes.length === 0) continue;
-
-		// Get version data to access working_commit_id (from local snapshot map)
+		if (version_id === "global" || changes.length === 0) continue;
 		const versionData = versionSnapshots.get(version_id)!;
-
-		const [workingCommitRow] = engine.executeSync(
-			db
-				.selectFrom("lix_internal_state_vtable")
-				.where("schema_key", "=", "lix_commit")
-				.where("entity_id", "=", versionData.working_commit_id)
-				.where("snapshot_content", "is not", null)
-				.select("snapshot_content")
-				.limit(1)
-				.compile()
-		).rows as Array<{ snapshot_content: string }>;
-
-		if (workingCommitRow?.snapshot_content) {
-			const workingCommit = JSON.parse(
-				workingCommitRow.snapshot_content
-			) as any;
-			const workingChangeSetId = workingCommit.change_set_id;
-
-			// Filter out lix internal entities for working changeset
-			const userChanges = changes.filter(
-				(change) =>
-					change.schema_key !== "lix_change_set" &&
-					change.schema_key !== "lix_change_set_edge" &&
-					change.schema_key !== "lix_change_set_element" &&
-					change.schema_key !== "lix_version"
-			);
-
-			if (userChanges.length > 0) {
-				// Handle deletions and updates for working changeset elements
-				// Parse snapshot_content exactly once per change and split in one pass
-				const deletionChanges: typeof userChanges = [];
-				const nonDeletionChanges: typeof userChanges = [];
-				for (const change of userChanges) {
-					let isDeletion = true;
-					if (change.snapshot_content) {
-						const parsed = JSON.parse(change.snapshot_content);
-						isDeletion = parsed?.snapshot_id === "no-content";
-					}
-					if (isDeletion) {
-						deletionChanges.push(change);
-					} else {
-						nonDeletionChanges.push(change);
-					}
-				}
-
-				// Check for entities at checkpoint (for deletions)
-				const entitiesAtCheckpoint = new Set<string>();
-				if (deletionChanges.length > 0) {
-					const checkpointCommitResult = engine.executeSync(
-						db
-							.selectFrom("commit")
-							.innerJoin("entity_label", (join) =>
-								join
-									.onRef("entity_label.entity_id", "=", "commit.id")
-									.on("entity_label.schema_key", "=", "lix_commit")
-							)
-							.innerJoin("label", "label.id", "entity_label.label_id")
-							.where("label.name", "=", "checkpoint")
-							.where(
-								commitIsAncestorOf(
-									{ id: versionData.commit_id },
-									{ includeSelf: true, depth: 1 }
-								)
-							)
-							.select("commit.id")
-							.limit(1)
-							.compile()
-					).rows as Array<{ id: string }>;
-
-					const checkpointCommitId = checkpointCommitResult[0]?.id;
-					if (checkpointCommitId) {
-						const checkpointEntities = engine.executeSync(
-							db
-								.selectFrom("state_history")
-								.where("depth", "=", 0)
-								.where("commit_id", "=", checkpointCommitId)
-								.where((eb) =>
-									eb.or(
-										deletionChanges.map((change) =>
-											eb.and([
-												eb("entity_id", "=", change.entity_id),
-												eb("schema_key", "=", change.schema_key),
-												eb("file_id", "=", change.file_id),
-											])
-										)
-									)
-								)
-								.select(["entity_id", "schema_key", "file_id"])
-								.compile()
-						).rows as Array<{
-							entity_id: string;
-							schema_key: string;
-							file_id: string;
-						}>;
-
-						for (const entity of checkpointEntities) {
-							entitiesAtCheckpoint.add(
-								`${entity.entity_id}|${entity.schema_key}|${entity.file_id}`
-							);
-						}
-					}
-				}
-
-				// Find existing working change set elements to delete
-				const uniqueTargetEntities: Array<{
-					entity_id: string;
-					schema_key: string;
-					file_id: string;
-				}> = [];
-				const seenTargetKeys = new Set<string>();
-				for (const change of userChanges) {
-					const key = `${change.entity_id}~${change.schema_key}~${change.file_id}`;
-					if (seenTargetKeys.has(key)) {
-						continue;
-					}
-					seenTargetKeys.add(key);
-					uniqueTargetEntities.push({
-						entity_id: change.entity_id,
-						schema_key: change.schema_key,
-						file_id: change.file_id,
-					});
-				}
-
-				type WorkingChangeSetElement = {
-					_pk: string;
-					entity_id: string;
-					element_entity_id: string;
-					element_schema_key: string;
-					element_file_id: string;
-				};
-
-				let existingEntities: WorkingChangeSetElement[] = [];
-
-				if (uniqueTargetEntities.length > 0) {
-					// Build a literal table of all target entities so SQLite can join once
-					// instead of evaluating an OR per change.
-					const targetEntities = sql<{
-						entity_id: string;
-						schema_key: string;
-						file_id: string;
-					}>`
-						(${sql.join(
-							uniqueTargetEntities.map(
-								(target) =>
-									sql`SELECT ${target.entity_id} AS entity_id, ${target.schema_key} AS schema_key, ${target.file_id} AS file_id`
-							),
-							sql` UNION ALL `
-						)})
-						target_entities
-					`;
-
-					// Join working change set rows against the literal target table to locate
-					// existing elements that match the user changes (same entity/schema/file).
-					const cleanupQuery = db
-						.selectFrom("lix_internal_state_vtable as cse")
-						.select([
-							sql`cse."_pk"`.as("_pk"),
-							sql`cse."entity_id"`.as("entity_id"),
-							sql`json_extract(cse.snapshot_content, '$.entity_id')`.as(
-								"element_entity_id"
-							),
-							sql`json_extract(cse.snapshot_content, '$.schema_key')`.as(
-								"element_schema_key"
-							),
-							sql`json_extract(cse.snapshot_content, '$.file_id')`.as(
-								"element_file_id"
-							),
-						])
-						.where("cse.entity_id", "like", `${workingChangeSetId}~%`)
-						.where("cse.schema_key", "=", "lix_change_set_element")
-						.where("cse.file_id", "=", "lix")
-						.where("cse.version_id", "=", "global")
-						.innerJoin(targetEntities as any, (join) =>
-							join
-								.on(
-									sql`json_extract(cse.snapshot_content, '$.entity_id')`,
-									"=",
-									sql`target_entities.entity_id`
-								)
-								.on(
-									sql`json_extract(cse.snapshot_content, '$.schema_key')`,
-									"=",
-									sql`target_entities.schema_key`
-								)
-								.on(
-									sql`json_extract(cse.snapshot_content, '$.file_id')`,
-									"=",
-									sql`target_entities.file_id`
-								)
-						)
-						.compile();
-
-					existingEntities = engine.executeSync(cleanupQuery)
-						.rows as WorkingChangeSetElement[];
-				}
-
-				// Collect batched untracked updates for working CSE
-				const workingUntrackedBatch: Array<{
-					id?: string;
-					entity_id: string;
-					schema_key: string;
-					file_id: string;
-					plugin_key: string;
-					snapshot_content: string | null;
-					schema_version: string;
-					created_at: string;
-					lixcol_version_id: string;
-				}> = [];
-
-				// Delete existing working change set elements as untracked changes
-				for (const existing of existingEntities) {
-					// The entity_id for a change_set_element is "${change_set_id}~${change_id}"
-					// We already queried for entity_id LIKE '${workingChangeSetId}~%'
-					// So existing.entity_id already contains the correct format
-					const entityIdForDeletion = existing.entity_id;
-					workingUntrackedBatch.push({
-						id: uuidV7Sync({ engine: engine }),
-						entity_id: entityIdForDeletion,
-						schema_key: "lix_change_set_element",
-						file_id: "lix",
-						plugin_key: "lix_sdk",
-						snapshot_content: null,
-						schema_version: LixChangeSetElementSchema["x-lix-version"],
-						created_at: transactionTimestamp,
-						lixcol_version_id: "global",
-					});
-				}
-
-				// Add deletion changes that existed at checkpoint as untracked
-				for (const deletion of deletionChanges) {
-					const key = `${deletion.entity_id}|${deletion.schema_key}|${deletion.file_id}`;
-					if (entitiesAtCheckpoint.has(key)) {
-						workingUntrackedBatch.push({
-							id: uuidV7Sync({ engine: engine }),
-							entity_id: `${workingChangeSetId}~${deletion.id}`,
-							schema_key: "lix_change_set_element",
-							file_id: "lix",
-							plugin_key: "lix_sdk",
-							snapshot_content: JSON.stringify({
-								change_set_id: workingChangeSetId,
-								change_id: deletion.id,
-								entity_id: deletion.entity_id,
-								schema_key: deletion.schema_key,
-								file_id: deletion.file_id,
-							} satisfies LixChangeSetElement),
-							schema_version: LixChangeSetElementSchema["x-lix-version"],
-							created_at: transactionTimestamp,
-							lixcol_version_id: "global",
-						});
-					}
-				}
-
-				// Add all non-deletions as untracked
-				for (const change of nonDeletionChanges) {
-					workingUntrackedBatch.push({
-						id: uuidV7Sync({ engine: engine }),
-						entity_id: `${workingChangeSetId}~${change.id}`,
-						schema_key: "lix_change_set_element",
-						file_id: "lix",
-						plugin_key: "lix_sdk",
-						snapshot_content: JSON.stringify({
-							change_set_id: workingChangeSetId,
-							change_id: change.id,
-							entity_id: change.entity_id,
-							schema_key: change.schema_key,
-							file_id: change.file_id,
-						} satisfies LixChangeSetElement),
-						schema_version: LixChangeSetElementSchema["x-lix-version"],
-						created_at: transactionTimestamp,
-						lixcol_version_id: "global",
-					});
-				}
-
-				if (workingUntrackedBatch.length > 0) {
-					updateUntrackedState({
-						engine: args.engine,
-						changes: workingUntrackedBatch,
-					});
-				}
-			}
-		}
+		const workingChanges: WorkingChange[] = changes.map((change) => ({
+			id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+			snapshot_content:
+				change.snapshot_content === null ||
+				typeof change.snapshot_content === "string"
+					? change.snapshot_content
+					: JSON.stringify(change.snapshot_content),
+		}));
+		refreshWorkingChangeSet({
+			engine: args.engine,
+			version: {
+				id: version_id,
+				commit_id: versionData.commit_id ?? null,
+				working_commit_id: versionData.working_commit_id ?? null,
+			},
+			timestamp: transactionTimestamp,
+			changes: workingChanges,
+		});
 	}
 
 	// Step 5: Generate all commit rows and materialized cache payload

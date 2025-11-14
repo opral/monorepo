@@ -11,7 +11,7 @@ hero:
       link: /guide/
     - theme: alt
       text: GitHub
-      link: https://github.com/opral/monorepo/tree/main/packages/lix/lix-html-diff
+      link: https://github.com/opral/monorepo/tree/main/packages/lix/html-diff
 features:
   - title: Universal
     details: Works for any app that renders to HTML (which is most apps!) using the "HTML trick"

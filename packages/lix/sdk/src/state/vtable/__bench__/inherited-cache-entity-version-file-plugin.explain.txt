@@ -7,7 +7,7 @@ SELECT * FROM lix_internal_state_vtable
           AND entity_id = ?
           AND version_id = ?
           AND file_id = 'bench-file'
-          AND plugin_key = 'lix_own_entity'
+          AND plugin_key = 'lix_sdk'
 
 -- rewritten SQL --
 SELECT *
@@ -176,7 +176,7 @@ LEFT JOIN lix_internal_change chc ON chc.id = w.change_id
 
 WHERE w.rn = 1
 ) AS "lix_internal_state_vtable"
-WHERE schema_key = 'bench_vtable_schema' AND entity_id = ? AND version_id = ? AND file_id = 'bench-file' AND plugin_key = 'lix_own_entity'
+WHERE schema_key = 'bench_vtable_schema' AND entity_id = ? AND version_id = ? AND file_id = 'bench-file' AND plugin_key = 'lix_sdk'
 
 -- plan --
 [

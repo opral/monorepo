@@ -12,6 +12,10 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { LixChangeRaw } from "../change/schema-definition.js";
 import { updateStateCache } from "../state/cache/update-state-cache.js";
 import { markStateCacheAsFresh } from "../state/cache/mark-state-cache-as-stale.js";
+import {
+	refreshWorkingChangeSet,
+	type WorkingChange,
+} from "../state/working-change-set/refresh-working-change-set.js";
 export async function mergeVersion(args: {
 	lix: Lix;
 	source: Pick<LixVersion, "id">;
@@ -71,6 +75,7 @@ export async function mergeVersion(args: {
 			plugin_key: string;
 			schema_version: string;
 		}> = [];
+		const workingChangesForRefresh: WorkingChange[] = [];
 
 		for (const d of diffs) {
 			if (d.status === "added" || d.status === "modified") {
@@ -218,6 +223,13 @@ export async function mergeVersion(args: {
 				schema_version: del.schema_version,
 				snapshot_content: null,
 				created_at: now,
+			});
+			workingChangesForRefresh.push({
+				id: delChangeId,
+				entity_id: del.entity_id,
+				schema_key: del.schema_key,
+				file_id: del.file_id,
+				snapshot_content: null,
 			});
 		}
 
@@ -445,6 +457,19 @@ export async function mergeVersion(args: {
 					lixcol_version_id: target.id,
 					lixcol_commit_id: targetCommitId,
 				} as Mat);
+				const normalizedSnapshot =
+					r.snapshot_content === null ||
+					r.snapshot_content === undefined ||
+					typeof r.snapshot_content === "string"
+						? (r.snapshot_content ?? null)
+						: JSON.stringify(r.snapshot_content);
+				workingChangesForRefresh.push({
+					id: r.id,
+					entity_id: r.entity_id,
+					schema_key: r.schema_key,
+					file_id: r.file_id,
+					snapshot_content: normalizedSnapshot,
+				});
 			}
 		}
 		for (const del of deletionChanges) {
@@ -503,6 +528,16 @@ export async function mergeVersion(args: {
 			// Delegate cache updates to engine via router when engine is not exposed
 			await lix.call("lix_update_state_cache", { changes: cacheBatch });
 			await lix.call("lix_mark_state_cache_as_fresh");
+		}
+
+		if (workingChangesForRefresh.length > 0) {
+			await lix.call("lix_refresh_working_change_set", {
+				versionId: target.id,
+				commitId: targetCommitId,
+				workingCommitId: targetVersion.working_commit_id,
+				timestamp: now,
+				changes: workingChangesForRefresh,
+			});
 		}
 	});
 }
