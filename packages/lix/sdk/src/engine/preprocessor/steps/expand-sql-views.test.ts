@@ -434,6 +434,60 @@ test("fully expands file view and file_by_version view definitions", () => {
 	expect(hasTableReference(rewritten, "file_by_version")).toBe(false);
 });
 
+test("expands views when derived tables include nested WITH clauses", () => {
+	const statements = parseStatements(`
+		SELECT o.inner_id
+		FROM outer_view AS o
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"outer_view",
+					`
+						WITH wrapped AS (
+							SELECT inner_id
+							FROM wrapper_view
+						)
+						SELECT inner_id
+						FROM wrapped
+					`,
+				],
+				[
+					"wrapper_view",
+					`
+						SELECT nested.inner_id
+						FROM (
+							WITH state_rows AS (
+								SELECT inner_id
+								FROM base_view
+							)
+							SELECT inner_id
+							FROM state_rows
+						) AS nested
+					`,
+				],
+				[
+					"base_view",
+					`
+						SELECT inner_id
+						FROM core_table
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	expect(hasTableReference(rewritten, "outer_view")).toBe(false);
+	expect(hasTableReference(rewritten, "wrapper_view")).toBe(false);
+	expect(hasTableReference(rewritten, "base_view")).toBe(false);
+	expect(hasTableReference(rewritten, "core_table")).toBe(true);
+});
+
 test("expands views referenced inside NOT EXISTS predicates", () => {
 	const statements = parseStatements(`
 		SELECT m1.id

@@ -1066,6 +1066,83 @@ FROM "foo";
 		expect(cteStatement.compounds[0]?.select.with_clause).toBeNull();
 	});
 
+	test("parses derived table that starts with WITH clause", () => {
+		const sql = `
+SELECT outer_table.id
+FROM (
+	WITH nested AS (
+		SELECT id
+		FROM base_table
+	)
+	SELECT id
+	FROM nested
+) AS outer_table
+		`.trim();
+
+		const statement = parseSelectStatement(sql);
+		const fromClause = statement.from_clauses[0];
+		if (!fromClause) {
+			throw new Error("expected FROM clause");
+		}
+		const relation = fromClause.relation;
+		if (!relation || relation.node_kind !== "subquery") {
+			throw new Error("expected derived table relation");
+		}
+		const subqueryStatement = relation.statement;
+		if (
+			!subqueryStatement ||
+			subqueryStatement.node_kind !== "select_statement"
+		) {
+			throw new Error("expected select statement inside derived table");
+		}
+		const withClause = subqueryStatement.with_clause;
+		expect(withClause).not.toBeNull();
+		if (!withClause) {
+			throw new Error("expected with clause on derived table");
+		}
+		expect(withClause.recursive).toBe(false);
+		expect(withClause.ctes).toHaveLength(1);
+		const [cte] = withClause.ctes;
+		if (!cte) {
+			throw new Error("missing nested CTE definition");
+		}
+		expect(cte.statement.node_kind).toBe("select_statement");
+	});
+
+	test("parses scalar subquery expression with WITH clause", () => {
+		const sql = `
+SELECT (
+	WITH nested AS (
+		SELECT 1 AS depth
+	)
+	SELECT depth FROM nested
+) AS resolved_depth
+		`.trim();
+
+		const statement = parseSelectStatement(sql);
+		const projection = statement.projection[0];
+		if (!projection || projection.node_kind !== "select_expression") {
+			throw new Error("expected select expression in projection");
+		}
+		const expr = projection.expression;
+		if (!expr || expr.node_kind !== "subquery_expression") {
+			throw new Error("expected subquery expression");
+		}
+		const subqueryStatement = expr.statement;
+		if (
+			!subqueryStatement ||
+			subqueryStatement.node_kind !== "select_statement"
+		) {
+			throw new Error("expected select statement inside scalar subquery");
+		}
+		const withClause = subqueryStatement.with_clause;
+		expect(withClause).not.toBeNull();
+		if (!withClause) {
+			throw new Error("expected with clause on scalar subquery");
+		}
+		expect(withClause.ctes).toHaveLength(1);
+	});
+
 	test("parses searched CASE expression", () => {
 		const sql = `
 	SELECT
