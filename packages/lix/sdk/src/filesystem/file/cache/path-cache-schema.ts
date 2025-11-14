@@ -26,7 +26,7 @@ export function applyFilePathCacheSchema(args: {
     ) strict;
 
     CREATE INDEX IF NOT EXISTS idx_lix_internal_file_path_cache_version_path
-      ON lix_internal_file_path_cache (version_id, path);
+      ON lix_internal_file_path_cache (version_id, path, file_id);
 
     CREATE INDEX IF NOT EXISTS idx_lix_internal_file_path_cache_version_directory
       ON lix_internal_file_path_cache (version_id, directory_id);
