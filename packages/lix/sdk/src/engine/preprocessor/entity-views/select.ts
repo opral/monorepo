@@ -62,6 +62,14 @@ export const rewriteEntityViewSelect: PreprocessorStep = (context) => {
 	return anyChanges ? rewritten : context.statements;
 };
 
+export function rewriteSelectStatementTree(
+	statement: SelectStatementNode | CompoundSelectNode,
+	context: PreprocessorStepContext,
+	storedSchemas: Map<string, LixSchemaDefinition>
+): SelectStatementNode | CompoundSelectNode {
+	return rewriteStatementNode(statement, context, storedSchemas);
+}
+
 type EntityViewVariant = "base" | "by_version" | "history";
 function rewriteSegmentedStatement(
 	statement: SegmentedStatementNode,

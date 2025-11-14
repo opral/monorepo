@@ -4,11 +4,13 @@ import {
 	columnReference,
 	identifier,
 	type ColumnReferenceNode,
+	type CompoundSelectNode,
 	type ExpressionNode,
 	type FunctionCallExpressionNode,
 	type FunctionCallArgumentNode,
 	type LiteralNode,
 	type RawFragmentNode,
+	type SelectStatementNode,
 	type OrderByItemNode,
 	type WindowSpecificationNode,
 	type WindowReferenceNode,
@@ -857,6 +859,9 @@ export function rewriteViewWhereClause(
 		stateTableAlias: string;
 		pointerAliasToPath?: Map<string, readonly string[]>;
 		pushdownableJsonProperties?: ReadonlySet<string>;
+		rewriteSubqueryStatement?: (
+			statement: SelectStatementNode | CompoundSelectNode
+		) => SelectStatementNode | CompoundSelectNode;
 	}
 ): PredicateRewriteResult | null {
 	if (!whereClause) {
@@ -880,7 +885,8 @@ export function rewriteViewWhereClause(
 		options.stateTableAlias,
 		pointerFlags,
 		options.pointerAliasToPath,
-		options.pushdownableJsonProperties
+		options.pushdownableJsonProperties,
+		options.rewriteSubqueryStatement
 	);
 	if (!rewritten) {
 		return null;
@@ -904,7 +910,10 @@ function rewritePredicateExpression(
 	stateTableAlias: string,
 	flags: PredicateRewriteFlags,
 	pointerAliasToPath?: Map<string, readonly string[]>,
-	pushdownableJsonProperties?: ReadonlySet<string>
+	pushdownableJsonProperties?: ReadonlySet<string>,
+	rewriteSubqueryStatement?: (
+		statement: SelectStatementNode | CompoundSelectNode
+	) => SelectStatementNode | CompoundSelectNode
 ): ExpressionNode | null {
 	switch (expression.node_kind) {
 		case "binary_expression": {
@@ -916,7 +925,8 @@ function rewritePredicateExpression(
 					stateTableAlias,
 					flags,
 					pointerAliasToPath,
-					pushdownableJsonProperties
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!left) return null;
 				const right = rewritePredicateExpression(
@@ -925,7 +935,8 @@ function rewritePredicateExpression(
 					stateTableAlias,
 					flags,
 					pointerAliasToPath,
-					pushdownableJsonProperties
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!right) return null;
 				return {
@@ -962,7 +973,8 @@ function rewritePredicateExpression(
 				stateTableAlias,
 				flags,
 				pointerAliasToPath,
-				pushdownableJsonProperties
+				pushdownableJsonProperties,
+				rewriteSubqueryStatement
 			);
 			if (!left) return null;
 			const right = rewritePredicateExpression(
@@ -971,7 +983,8 @@ function rewritePredicateExpression(
 				stateTableAlias,
 				flags,
 				pointerAliasToPath,
-				pushdownableJsonProperties
+				pushdownableJsonProperties,
+				rewriteSubqueryStatement
 			);
 			if (!right) return null;
 			return {
@@ -989,7 +1002,8 @@ function rewritePredicateExpression(
 					stateTableAlias,
 					flags,
 					pointerAliasToPath,
-					pushdownableJsonProperties
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!operand) return null;
 				return {
@@ -1007,7 +1021,8 @@ function rewritePredicateExpression(
 				stateTableAlias,
 				flags,
 				pointerAliasToPath,
-				pushdownableJsonProperties
+				pushdownableJsonProperties,
+				rewriteSubqueryStatement
 			);
 			if (!rewritten) return null;
 			return {
@@ -1037,7 +1052,8 @@ function rewritePredicateExpression(
 					stateTableAlias,
 					flags,
 					pointerAliasToPath,
-					pushdownableJsonProperties
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!rewritten) return null;
 				args.push(rewritten);
@@ -1066,7 +1082,10 @@ function rewritePredicateExpression(
 				expression.operand,
 				propertyLowerToActual,
 				stateTableAlias,
-				flags
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!operand) return null;
 			const items: ExpressionNode[] = [];
@@ -1075,7 +1094,10 @@ function rewritePredicateExpression(
 					item,
 					propertyLowerToActual,
 					stateTableAlias,
-					flags
+					flags,
+					undefined,
+					undefined,
+					rewriteSubqueryStatement
 				);
 				if (!rewritten) return null;
 				items.push(rewritten);
@@ -1092,21 +1114,30 @@ function rewritePredicateExpression(
 				expression.operand,
 				propertyLowerToActual,
 				stateTableAlias,
-				flags
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!operand) return null;
 			const start = rewritePredicateExpression(
 				expression.start,
 				propertyLowerToActual,
 				stateTableAlias,
-				flags
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!start) return null;
 			const end = rewritePredicateExpression(
 				expression.end,
 				propertyLowerToActual,
 				stateTableAlias,
-				flags
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!end) return null;
 			return {
@@ -1119,8 +1150,20 @@ function rewritePredicateExpression(
 		}
 		case "literal":
 		case "parameter":
-		case "subquery_expression":
 			return expression;
+		case "subquery_expression": {
+			if (!rewriteSubqueryStatement) {
+				return expression;
+			}
+			const statement = rewriteSubqueryStatement(expression.statement);
+			if (statement === expression.statement) {
+				return expression;
+			}
+			return {
+				...expression,
+				statement,
+			};
+		}
 		default:
 			return null;
 	}

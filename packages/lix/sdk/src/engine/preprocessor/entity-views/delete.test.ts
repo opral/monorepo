@@ -763,6 +763,113 @@ test("rewrites delete with inequality predicates", async () => {
 	await lix.close();
 });
 
+test("rewrites delete with subquery predicates referencing other views", async () => {
+	const lix = await openLix({});
+	const messageSchema = {
+		"x-lix-key": "delete_message_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			bundleId: { type: "string" },
+		},
+		required: ["id", "bundleId"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	const variantSchema = {
+		"x-lix-key": "delete_variant_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			messageId: { type: "string" },
+		},
+		required: ["id", "messageId"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: messageSchema }, { value: variantSchema }])
+		.execute();
+
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const sql = `
+		DELETE FROM ${variantSchema["x-lix-key"]}
+		WHERE messageId IN (
+			SELECT id FROM ${messageSchema["x-lix-key"]}
+			WHERE bundleId = ?
+		)
+	`;
+
+	const rewritten = preprocess({
+		sql,
+		parameters: ["bundle.cleanup"],
+		trace: true,
+	});
+
+	const ast = getDeleteAst(rewritten);
+	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+
+	const trace = rewritten.trace ?? [];
+	expect(
+		trace.some(
+			(entry: PreprocessorTraceEntry) =>
+				entry.step === "rewrite_entity_view_delete"
+		)
+	).toBe(true);
+
+	const predicate = getOriginalPredicate(ast.where_clause);
+	if (!predicate || predicate.node_kind !== "in_list_expression") {
+		throw new Error("expected IN predicate");
+	}
+
+	expect(isJsonExtractForProperty(predicate.operand, "messageId")).toBe(true);
+	expect(predicate.items).toHaveLength(1);
+
+	const [subqueryItem] = predicate.items;
+	if (!subqueryItem || subqueryItem.node_kind !== "subquery_expression") {
+		throw new Error("expected nested subquery expression");
+	}
+
+	const subqueryStatement = subqueryItem.statement;
+	if (!subqueryStatement) {
+		throw new Error("expected nested select statement");
+	}
+
+	const expectStateSource = (selectStatement: any) => {
+		const fromClause = selectStatement.from_clauses[0];
+		if (!fromClause) {
+			throw new Error("expected FROM clause in nested select");
+		}
+		const relation = fromClause.relation;
+		if (relation.node_kind === "table_reference") {
+			expect(relation.name.parts[0]?.value).toBe("state_by_version");
+			return;
+		}
+		if (relation.node_kind === "subquery") {
+			const nested = relation.statement;
+			if (nested.node_kind !== "select_statement") {
+				throw new Error("unexpected nested relation type");
+			}
+			return expectStateSource(nested);
+		}
+		throw new Error("unexpected relation type in nested select");
+	};
+
+	if (subqueryStatement.node_kind === "select_statement") {
+		expectStateSource(subqueryStatement);
+	} else {
+		expectStateSource(subqueryStatement.first);
+	}
+
+	await lix.close();
+});
+
 test("rewrites delete with IS NULL predicates", async () => {
 	const lix = await openLix({});
 	const schema = {
