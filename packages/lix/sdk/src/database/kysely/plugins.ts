@@ -1,7 +1,7 @@
 import { ParseJSONResultsPlugin, type KyselyPlugin } from "kysely";
 import { JSONColumnPlugin } from "./plugins/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./plugins/view-insert-returning-error-plugin.js";
-import { buildJsonColumnConfig } from "../../lix/json-column-config.js";
+import { buildJsonColumnConfig } from "./json-column-config.js";
 import { LixSchemaViewMap } from "../schema-view-map.js";
 
 export function createDefaultPlugins(): KyselyPlugin[] {

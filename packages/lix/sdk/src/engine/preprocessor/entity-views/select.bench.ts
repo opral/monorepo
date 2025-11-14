@@ -64,8 +64,7 @@ describe("entity view select pushdown", async () => {
 
 	const preprocess = createPreprocessor({ engine: lix.engine! });
 	const selectAllSql = "SELECT foo FROM bench_entity_view";
-	const selectWithFilterSql =
-		"SELECT foo FROM bench_entity_view WHERE id = ?";
+	const selectWithFilterSql = "SELECT foo FROM bench_entity_view WHERE id = ?";
 
 	const idParameters = Array.from({ length: 20 }, (_, index) => [
 		`entity_${index}`,
