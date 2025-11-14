@@ -7,7 +7,7 @@ const BENCH_OUTPUT_DIR = decodeURIComponent(
 	new URL("./__bench__", import.meta.url).pathname
 );
 
-describe("entity view select pushdown", async () => {
+describe("entity view select rewrite", async () => {
 	const ENTITY_SCHEMA = {
 		"x-lix-key": "bench_entity_view",
 		"x-lix-version": "1.0",
@@ -157,9 +157,9 @@ async function exportExplain(args: {
 		"-- label --",
 		args.label,
 		"\n-- original SQL --",
-		explain.originalSql,
+		args.sql,
 		"\n-- rewritten SQL --",
-		explain.rewrittenSql ?? "<unchanged>",
+		rewritten.sql,
 		"\n-- plan --",
 		JSON.stringify(explain.plan, null, 2),
 		"",

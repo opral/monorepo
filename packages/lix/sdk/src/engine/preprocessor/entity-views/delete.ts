@@ -18,6 +18,7 @@ import {
 	normalizeOverrideValue,
 	rewriteViewWhereClause,
 	combineWithAnd,
+	collectPointerColumnDescriptors,
 } from "./shared.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
@@ -149,8 +150,20 @@ function buildEntityViewDelete(
 		celEnvironment,
 	} = args;
 
+	const pointerDescriptors = collectPointerColumnDescriptors({ schema });
+	const pointerAliasToPath = new Map(
+		pointerDescriptors.map((descriptor) => [
+			descriptor.alias.toLowerCase(),
+			descriptor.path,
+		])
+	);
+	const pointerSet = new Set(pointerAliasToPath.keys());
+
 	const rewrite = rewriteViewWhereClause(statement.where_clause, {
 		propertyLowerToActual,
+		stateTableAlias: "state_by_version",
+		pointerAliasToPath,
+		pushdownableJsonProperties: pointerSet,
 	});
 	if (!rewrite) {
 		return null;

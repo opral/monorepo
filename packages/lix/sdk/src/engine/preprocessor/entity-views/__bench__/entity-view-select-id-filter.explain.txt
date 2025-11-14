@@ -2,6 +2,9 @@
 entity view select • id filter
 
 -- original SQL --
+SELECT foo FROM bench_entity_view WHERE id = ?
+
+-- rewritten SQL --
 SELECT foo
 FROM (SELECT
   json_extract(sa.snapshot_content, '$.foo') AS foo,
@@ -107,87 +110,6 @@ WHERE w.rn = 1
 WHERE snapshot_content IS NOT NULL) AS sa
 WHERE sa.schema_key = 'bench_entity_view' AND sa.version_id = 'boot_0000000000') AS bench_entity_view
 WHERE id = ?
-
--- rewritten SQL --
-SELECT foo
-FROM (SELECT
-  json_extract(sa.snapshot_content, '$.foo') AS foo,
-  json_extract(sa.snapshot_content, '$.id') AS id
-FROM (SELECT
-  schema_key,
-  version_id,
-  snapshot_content
-FROM (WITH wanted_versions AS (
-  SELECT 'boot_0000000000' AS version_id
-)
-SELECT
-  "w"."schema_key" AS "schema_key",
-  "w"."version_id" AS "version_id",
-  "w"."snapshot_content" AS "snapshot_content"
-FROM (SELECT
-  c.entity_id AS entity_id,
-  c.schema_key AS schema_key,
-  c.file_id AS file_id,
-  c.snapshot_content AS snapshot_content,
-  c.version_id AS version_id,
-  c.created_at AS created_at,
-  c.change_id AS change_id,
-  c.priority AS priority,
-  ROW_NUMBER() OVER (PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id) AS rn
-FROM (SELECT
-  unt.entity_id AS entity_id,
-  unt.schema_key AS schema_key,
-  unt.file_id AS file_id,
-  json(unt.snapshot_content) AS snapshot_content,
-  unt.version_id AS version_id,
-  unt.created_at AS created_at,
-  'untracked' AS change_id,
-  2 AS priority
-FROM lix_internal_state_all_untracked AS unt INNER JOIN wanted_versions AS wv_unt ON wv_unt.version_id = unt.version_id
-WHERE unt.schema_key IN ('bench_entity_view')
-UNION ALL
-SELECT
-  cache.entity_id AS entity_id,
-  cache.schema_key AS schema_key,
-  cache.file_id AS file_id,
-  json(cache.snapshot_content) AS snapshot_content,
-  cache.version_id AS version_id,
-  cache.created_at AS created_at,
-  cache.change_id AS change_id,
-  3 AS priority
-FROM "lix_internal_state_cache_v1_bench_entity_view" AS cache INNER JOIN wanted_versions AS wv_cache ON wv_cache.version_id = cache.version_id
-WHERE cache.schema_key IN ('bench_entity_view')
-UNION ALL
-SELECT
-  cache.entity_id AS entity_id,
-  cache.schema_key AS schema_key,
-  cache.file_id AS file_id,
-  json(cache.snapshot_content) AS snapshot_content,
-  vi.version_id AS version_id,
-  cache.created_at AS created_at,
-  cache.change_id AS change_id,
-  4 AS priority
-FROM (SELECT
-  'boot_0000000000' AS version_id,
-  'global' AS ancestor_version_id) AS vi INNER JOIN wanted_versions AS wv_vi ON wv_vi.version_id = vi.version_id INNER JOIN "lix_internal_state_cache_v1_bench_entity_view" AS cache ON cache.version_id = vi.ancestor_version_id
-WHERE cache.is_tombstone = 0 AND cache.snapshot_content IS NOT NULL AND cache.schema_key IN ('bench_entity_view')
-UNION ALL
-SELECT
-  unt.entity_id AS entity_id,
-  unt.schema_key AS schema_key,
-  unt.file_id AS file_id,
-  json(unt.snapshot_content) AS snapshot_content,
-  vi.version_id AS version_id,
-  unt.created_at AS created_at,
-  'untracked' AS change_id,
-  5 AS priority
-FROM (SELECT
-  'boot_0000000000' AS version_id,
-  'global' AS ancestor_version_id) AS vi INNER JOIN wanted_versions AS wv_vi ON wv_vi.version_id = vi.version_id INNER JOIN lix_internal_state_all_untracked AS unt ON unt.version_id = vi.ancestor_version_id
-WHERE unt.is_tombstone = 0 AND unt.snapshot_content IS NOT NULL AND unt.schema_key IN ('bench_entity_view')) AS c) AS w
-WHERE w.rn = 1) AS "lix_internal_state_vtable"
-WHERE snapshot_content IS NOT NULL) AS sa
-WHERE sa.schema_key = 'bench_entity_view' AND sa.version_id = 'boot_0000000000' AND json_extract(sa.snapshot_content, '$.id') = ?) AS bench_entity_view
 
 -- plan --
 [

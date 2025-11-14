@@ -28,6 +28,7 @@ import {
 	resolveEntityView,
 	combineWithAnd,
 	rewriteViewWhereClause,
+	collectPointerColumnDescriptors,
 } from "./shared.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
@@ -269,8 +270,20 @@ function buildEntityViewUpdate(args: BuildUpdateArgs): StatementSegmentNode {
 		createSetClause("untracked", untrackedExpr),
 	];
 
+	const pointerDescriptors = collectPointerColumnDescriptors({ schema });
+	const pointerAliasToPath = new Map(
+		pointerDescriptors.map((descriptor) => [
+			descriptor.alias.toLowerCase(),
+			descriptor.path,
+		])
+	);
+	const pointerAliases = new Set(pointerAliasToPath.keys());
+
 	const rewriteResult = rewriteViewWhereClause(update.where_clause, {
 		propertyLowerToActual,
+		stateTableAlias: "state_by_version",
+		pointerAliasToPath,
+		pushdownableJsonProperties: pointerAliases,
 	});
 	const { expression: basePredicate, hasVersionReference } =
 		rewriteResult ?? fail("WHERE clause contains unsupported expressions");
