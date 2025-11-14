@@ -115,6 +115,38 @@ export function applyStateHistoryDatabaseSchema(args: {
 export const STATE_HISTORY_VIEW_SQL = `
 CREATE VIEW IF NOT EXISTS state_history AS
 WITH
+	-- Inline entity views to avoid preprocessor dependencies
+	_commit_by_version AS (
+		SELECT 
+			json_extract(s.snapshot_content, '$.id') AS id,
+			json_extract(s.snapshot_content, '$.change_set_id') AS change_set_id,
+			s.version_id AS lixcol_version_id
+		FROM state_by_version AS s
+		WHERE s.schema_key = 'lix_commit'
+			AND s.snapshot_content IS NOT NULL
+	),
+	_change_set_element_by_version AS (
+		SELECT
+			json_extract(s.snapshot_content, '$.change_set_id') AS change_set_id,
+			json_extract(s.snapshot_content, '$.change_id') AS change_id,
+			json_extract(s.snapshot_content, '$.entity_id') AS entity_id,
+			json_extract(s.snapshot_content, '$.schema_key') AS schema_key,
+			json_extract(s.snapshot_content, '$.file_id') AS file_id,
+			s.version_id AS lixcol_version_id
+		FROM state_by_version AS s
+		WHERE s.schema_key = 'lix_change_set_element'
+			AND s.snapshot_content IS NOT NULL
+	),
+	_commit_edge_by_version AS (
+		SELECT
+			json_extract(s.snapshot_content, '$.parent_id') AS parent_id,
+			json_extract(s.snapshot_content, '$.child_id') AS child_id,
+			s.version_id AS lixcol_version_id
+		FROM state_by_version AS s
+		WHERE s.schema_key = 'lix_commit_edge'
+			AND s.snapshot_content IS NOT NULL
+	),
+
 	-- Get all changes with their snapshots
 	all_changes_with_snapshots AS (
 		SELECT ic.id, ic.entity_id, ic.schema_key, ic.file_id, ic.plugin_key,
@@ -145,8 +177,8 @@ WITH
 			c.id AS origin_commit_id,
 			c.id AS root_commit_id,
 			0 AS commit_depth
-		FROM change_set_element_by_version cse
-		JOIN commit_by_version c 
+		FROM _change_set_element_by_version cse
+		JOIN _commit_by_version c 
 			ON cse.change_set_id = c.change_set_id 
 			AND c.lixcol_version_id = 'global'
 		JOIN all_changes_with_snapshots chg 
@@ -157,14 +189,14 @@ WITH
 	-- General path for depth > 0 (recursive, ancestors of requested commits)
 	requested_commits AS (
 		SELECT DISTINCT c.id as commit_id
-		FROM commit_by_version c
+		FROM _commit_by_version c
 	),
 	reachable_commits_from_requested(id, root_commit_id, depth) AS (
 		SELECT commit_id, commit_id as root_commit_id, 0 as depth 
 		FROM requested_commits
 		UNION
 		SELECT ce.parent_id, r.root_commit_id, r.depth + 1
-		FROM commit_edge_by_version ce 
+		FROM _commit_edge_by_version ce 
 		JOIN reachable_commits_from_requested r ON ce.child_id = r.id
 		WHERE ce.lixcol_version_id = 'global'
 	),
@@ -174,7 +206,7 @@ WITH
 			c.change_set_id as change_set_id,
 			rc.root_commit_id,
 			rc.depth as commit_depth
-		FROM commit_by_version c
+		FROM _commit_by_version c
 		JOIN reachable_commits_from_requested rc ON c.id = rc.id
 		WHERE c.lixcol_version_id = 'global'
 	),
@@ -188,7 +220,7 @@ WITH
 			   cc.root_commit_id,
 			   cc.commit_depth,
 			   cc.commit_id as depth_commit_id
-		FROM change_set_element_by_version cse
+		FROM _change_set_element_by_version cse
 		JOIN commit_changesets cc ON cse.change_set_id = cc.change_set_id
 		WHERE cse.lixcol_version_id = 'global'
 	),
