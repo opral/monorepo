@@ -10,6 +10,10 @@ import {
 } from "./sequence.js";
 import { updateStateCache } from "../../state/cache/update-state-cache.js";
 import { markStateCacheAsFresh } from "../../state/cache/mark-state-cache-as-stale.js";
+import {
+	refreshWorkingChangeSet,
+	type WorkingChange,
+} from "../../state/working-change-set/refresh-working-change-set.js";
 import type { LixEngine } from "../boot.js";
 import { createExplainQuery } from "../explain-query.js";
 
@@ -110,6 +114,30 @@ export function registerBuiltinFunctions({
 		name: "lix_mark_state_cache_as_fresh",
 		handler: (ctx) => {
 			markStateCacheAsFresh({ engine: ctx.engine });
+			return null;
+		},
+	});
+
+	register({
+		name: "lix_refresh_working_change_set",
+		handler: (ctx, args) => {
+			const payload = (args ?? {}) as {
+				versionId: string;
+				commitId: string | null;
+				workingCommitId: string | null;
+				timestamp: string;
+				changes: WorkingChange[];
+			};
+			refreshWorkingChangeSet({
+				engine: ctx.engine,
+				version: {
+					id: payload.versionId,
+					commit_id: payload.commitId ?? null,
+					working_commit_id: payload.workingCommitId ?? null,
+				},
+				timestamp: payload.timestamp,
+				changes: payload.changes ?? [],
+			});
 			return null;
 		},
 	});

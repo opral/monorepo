@@ -1,9 +1,14 @@
-import { test } from "vitest";
+import { expect, test } from "vitest";
 import { sql } from "kysely";
 import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
 import { createVersion } from "./create-version.js";
 import { mergeVersion } from "./merge-version.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { createCheckpoint } from "../state/create-checkpoint.js";
+import { selectWorkingDiff } from "../diff/select-working-diff.js";
+import { insertTransactionState } from "../state/transaction/insert-transaction-state.js";
+import { commit } from "../state/vtable/commit.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("simulationTest discovery", () => {});
 
@@ -392,6 +397,82 @@ simulationTest(
 		expectDeterministic(after.commit_id).toBe(before.commit_id);
 	}
 );
+
+test("merge refreshes working diff for deletions", async () => {
+	const lix = await openLix({});
+
+	await storeMergeTestSchemas(lix);
+
+	const activeBefore = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Seed baseline via transaction+commit so checkpoint sees it
+	const timestamp = new Date().toISOString();
+	insertTransactionState({
+		engine: lix.engine!,
+		data: [
+			{
+				entity_id: "wc_entity",
+				schema_key: "test_entity",
+				file_id: "fileWC",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: activeBefore.id,
+				snapshot_content: JSON.stringify({ v: "baseline" }),
+				metadata: null,
+				untracked: false,
+			},
+		],
+		timestamp,
+	});
+	commit({ engine: lix.engine! });
+	await createCheckpoint({ lix });
+
+	const active = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	const source = await createVersion({
+		lix,
+		name: "source-working",
+		from: active,
+	});
+
+	await lix.db
+		.deleteFrom("state_by_version")
+		.where("entity_id", "=", "wc_entity")
+		.where("schema_key", "=", "test_entity")
+		.where("file_id", "=", "fileWC")
+		.where("version_id", "=", source.id)
+		.execute();
+
+	await mergeVersion({ lix, source, target: active });
+
+	const diffs = await selectWorkingDiff({ lix })
+		.where("diff.file_id", "=", "fileWC")
+		.leftJoin("change as after", "after.id", "diff.after_change_id")
+		.leftJoin("change as before", "before.id", "diff.before_change_id")
+		.select((eb) => [
+			eb.ref("diff.entity_id").as("entity_id"),
+			eb.ref("diff.status").as("status"),
+			eb.ref("before.snapshot_content").as("before_snapshot_content"),
+			eb.ref("after.snapshot_content").as("after_snapshot_content"),
+		])
+		.execute();
+
+	const removal = diffs.find((row: any) => row.entity_id === "wc_entity");
+	expect(removal).toBeTruthy();
+	expect(removal?.status).toBe("removed");
+	expect(removal?.before_snapshot_content).toEqual({ v: "baseline" });
+	expect(removal?.after_snapshot_content).toBeNull();
+
+	await lix.close();
+});
 
 simulationTest(
 	"no-op merge returns current target tip when no changes",
