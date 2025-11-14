@@ -156,3 +156,38 @@ test("additional properties must be false", () => {
 		"Data validation failed"
 	);
 });
+
+test("validateLixSchemaDefinition rejects missing primary key properties", () => {
+	const schema = {
+		"x-lix-key": "missing_pk",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			value: { type: "string" },
+		},
+		required: ["value"],
+		"x-lix-primary-key": ["/entity_id"],
+		additionalProperties: false,
+	};
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow(
+		"x-lix-primary-key references missing property"
+	);
+});
+
+test("validateLixSchemaDefinition rejects missing unique constraint properties", () => {
+	const schema = {
+		"x-lix-key": "missing_unique",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			value: { type: "string" },
+		},
+		"x-lix-unique": [["/entity_id", "/value"]],
+		additionalProperties: false,
+	};
+
+	expect(() => validateLixSchemaDefinition(schema)).toThrow(
+		"x-lix-unique references missing property"
+	);
+});
