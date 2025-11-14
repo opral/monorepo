@@ -728,3 +728,78 @@ simulationTest(
 		);
 	}
 );
+
+simulationTest(
+	"unchanged: source tombstone without target baseline is ignored",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await storeDiffTestSchemas(lix);
+
+		const ancestor = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "version.id", "active_version.version_id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
+
+		const sourceVersion = await createVersion({
+			lix,
+			name: "source",
+			from: ancestor,
+		});
+
+		const targetVersion = await createVersion({
+			lix,
+			name: "target",
+			from: ancestor,
+		});
+
+		// Source adds then deletes an entity before target ever sees it.
+		await lix.db
+			.insertInto("state_by_version")
+			.values({
+				entity_id: "e_local",
+				schema_key: "test_schema_a",
+				file_id: "file_local",
+				version_id: sourceVersion.id,
+				plugin_key: "test_plugin",
+				snapshot_content: { v: "temp" },
+				schema_version: "1.0",
+			})
+			.execute();
+
+		await lix.db
+			.deleteFrom("state_by_version")
+			.where("version_id", "=", sourceVersion.id)
+			.where("file_id", "=", "file_local")
+			.where("schema_key", "=", "test_schema_a")
+			.where("entity_id", "=", "e_local")
+			.execute();
+
+		const diffs = await selectVersionDiff({
+			lix,
+			source: sourceVersion,
+			target: targetVersion,
+		})
+			.where("diff.file_id", "=", "file_local")
+			.where("diff.schema_key", "=", "test_schema_a")
+			.where("diff.entity_id", "=", "e_local")
+			.execute();
+
+		expectDeterministic(diffs).toHaveLength(1);
+		const row = diffs[0]!;
+		expectDeterministic(row.status).toBe("unchanged");
+		expectDeterministic(row.before_version_id).toBeNull();
+		expectDeterministic(row.before_change_id).toBeNull();
+		expectDeterministic(row.after_version_id).toBe(sourceVersion.id);
+		expectDeterministic(row.after_change_id).toBeTruthy(); // tombstone entry still recorded
+	}
+);
