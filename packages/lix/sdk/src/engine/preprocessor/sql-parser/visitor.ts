@@ -79,6 +79,7 @@ type NodeKindMap = {
 	readonly join_clause: JoinClauseNode;
 	readonly table_reference: TableReferenceNode;
 	readonly subquery: SubqueryNode;
+	readonly subquery_expression: SubqueryExpressionNode;
 	readonly order_by_item: OrderByItemNode;
 	readonly set_clause: SetClauseNode;
 	readonly column_reference: ColumnReferenceNode;
