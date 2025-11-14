@@ -10,73 +10,79 @@ DELETE FROM "file" WHERE "path" = ?
 -- plan --
 [
   {
-    "id": 5,
+    "id": 7,
     "parent": 0,
     "notused": 183,
     "detail": "SCAN lix_internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id"
   },
   {
-    "id": 10,
+    "id": 12,
     "parent": 0,
     "notused": 0,
     "detail": "LIST SUBQUERY 11"
   },
   {
-    "id": 14,
-    "parent": 10,
+    "id": 16,
+    "parent": 12,
     "notused": 61,
     "detail": "SEARCH lix_internal_state_all_untracked USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 27,
-    "parent": 10,
+    "id": 29,
+    "parent": 12,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   },
   {
-    "id": 44,
+    "id": 46,
     "parent": 0,
     "notused": 47,
     "detail": "SEARCH file_path_cache USING INDEX sqlite_autoindex_lix_internal_file_path_cache_1 (file_id=? AND version_id=?) LEFT-JOIN"
   },
   {
-    "id": 158,
+    "id": 68,
+    "parent": 0,
+    "notused": 47,
+    "detail": "SEARCH cache USING INDEX sqlite_autoindex_lix_internal_file_lixcol_cache_1 (file_id=? AND version_id=?) LEFT-JOIN"
+  },
+  {
+    "id": 244,
     "parent": 0,
     "notused": 0,
     "detail": "CORRELATED SCALAR SUBQUERY 8"
   },
   {
-    "id": 160,
-    "parent": 158,
+    "id": 246,
+    "parent": 244,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 161,
-    "parent": 160,
+    "id": 247,
+    "parent": 246,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 165,
-    "parent": 161,
+    "id": 251,
+    "parent": 247,
     "notused": 46,
     "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
   },
   {
-    "id": 177,
-    "parent": 160,
+    "id": 263,
+    "parent": 246,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 180,
-    "parent": 177,
+    "id": 266,
+    "parent": 263,
     "notused": 39,
     "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
   },
   {
-    "id": 206,
+    "id": 296,
     "parent": 0,
     "notused": 216,
     "detail": "SCAN file"
