@@ -405,27 +405,27 @@ file_rows AS (
   FROM file_lixcol AS fl LEFT JOIN directory_paths AS dp ON dp.directory_id = json_extract(fl.snapshot_content, '$.directory_id') AND dp.version_id = fl.version_id
 )
 SELECT
-  id,
-  directory_id,
-  name,
-  extension,
-  composed_path AS path,
-  select_file_data(id, composed_path, version_id, metadata, directory_id, name, extension, hidden) AS data,
-  metadata,
-  hidden,
-  entity_id AS lixcol_entity_id,
+  file_rows.id,
+  file_rows.directory_id,
+  file_rows.name,
+  file_rows.extension,
+  COALESCE(file_path_cache.path, composed_path) AS path,
+  select_file_data(file_rows.id, composed_path, file_rows.version_id, file_rows.metadata, file_rows.directory_id, file_rows.name, file_rows.extension, file_rows.hidden) AS data,
+  file_rows.metadata,
+  file_rows.hidden,
+  file_rows.entity_id AS lixcol_entity_id,
   'lix_file_descriptor' AS lixcol_schema_key,
-  entity_id AS lixcol_file_id,
-  version_id AS lixcol_version_id,
-  inherited_from_version_id AS lixcol_inherited_from_version_id,
-  json_extract(lixcol_json, '$.latest_change_id') AS lixcol_change_id,
-  json_extract(lixcol_json, '$.created_at') AS lixcol_created_at,
-  json_extract(lixcol_json, '$.updated_at') AS lixcol_updated_at,
-  json_extract(lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
-  json_extract(lixcol_json, '$.writer_key') AS lixcol_writer_key,
-  untracked AS lixcol_untracked,
-  change_metadata AS lixcol_metadata
-FROM file_rows) AS file_by_version
+  file_rows.entity_id AS lixcol_file_id,
+  file_rows.version_id AS lixcol_version_id,
+  file_rows.inherited_from_version_id AS lixcol_inherited_from_version_id,
+  json_extract(file_rows.lixcol_json, '$.latest_change_id') AS lixcol_change_id,
+  json_extract(file_rows.lixcol_json, '$.created_at') AS lixcol_created_at,
+  json_extract(file_rows.lixcol_json, '$.updated_at') AS lixcol_updated_at,
+  json_extract(file_rows.lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
+  json_extract(file_rows.lixcol_json, '$.writer_key') AS lixcol_writer_key,
+  file_rows.untracked AS lixcol_untracked,
+  file_rows.change_metadata AS lixcol_metadata
+FROM file_rows LEFT JOIN lix_internal_file_path_cache AS file_path_cache ON file_path_cache.file_id = file_rows.id AND file_path_cache.version_id = file_rows.version_id) AS file_by_version
 WHERE lixcol_version_id IN (SELECT version_id
 FROM (SELECT json_extract(snapshot_content, '$.version_id') AS version_id
 FROM lix_internal_state_all_untracked
@@ -710,74 +710,80 @@ WHERE schema_key = 'lix_active_version' AND version_id = 'global') AS active_ver
     "detail": "SCAN (subquery-36)"
   },
   {
-    "id": 701,
+    "id": 703,
     "parent": 0,
     "notused": 230,
     "detail": "SCAN w"
   },
   {
-    "id": 713,
+    "id": 715,
     "parent": 0,
     "notused": 0,
     "detail": "LIST SUBQUERY 32"
   },
   {
-    "id": 717,
-    "parent": 713,
+    "id": 719,
+    "parent": 715,
     "notused": 61,
     "detail": "SEARCH lix_internal_state_all_untracked USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 730,
-    "parent": 713,
+    "id": 732,
+    "parent": 715,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   },
   {
-    "id": 743,
+    "id": 745,
     "parent": 0,
     "notused": 0,
     "detail": "BLOOM FILTER ON w (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 768,
+    "id": 770,
     "parent": 0,
     "notused": 54,
     "detail": "SEARCH w USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND schema_key=? AND version_id=?) LEFT-JOIN"
   },
   {
-    "id": 978,
+    "id": 790,
+    "parent": 0,
+    "notused": 47,
+    "detail": "SEARCH file_path_cache USING INDEX sqlite_autoindex_lix_internal_file_path_cache_1 (file_id=? AND version_id=?) LEFT-JOIN"
+  },
+  {
+    "id": 997,
     "parent": 0,
     "notused": 0,
     "detail": "CORRELATED SCALAR SUBQUERY 3"
   },
   {
-    "id": 980,
-    "parent": 978,
+    "id": 999,
+    "parent": 997,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 981,
-    "parent": 980,
+    "id": 1000,
+    "parent": 999,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 985,
-    "parent": 981,
+    "id": 1004,
+    "parent": 1000,
     "notused": 46,
     "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
   },
   {
-    "id": 997,
-    "parent": 980,
+    "id": 1016,
+    "parent": 999,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1000,
-    "parent": 997,
+    "id": 1019,
+    "parent": 1016,
     "notused": 39,
     "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
   }

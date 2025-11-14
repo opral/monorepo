@@ -280,37 +280,41 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	                ON dp.directory_id = json_extract(fl.snapshot_content, '$.directory_id')
 	               AND dp.version_id = fl.version_id
 	        )
-	        SELECT
-	                id,
-	                directory_id,
-	                name,
-	                extension,
-	                composed_path AS path,
-	                select_file_data(
-	                        id,
-	                        composed_path,
-	                        version_id,
-	                        metadata,
-	                        directory_id,
-	                        name,
-	                        extension,
-	                        hidden
-	                ) AS data,
-	                metadata,
-	                hidden,
-	                entity_id AS lixcol_entity_id,
-	                'lix_file_descriptor' AS lixcol_schema_key,
-	                entity_id AS lixcol_file_id,
-	                version_id AS lixcol_version_id,
-	                inherited_from_version_id AS lixcol_inherited_from_version_id,
-	                json_extract(lixcol_json, '$.latest_change_id') AS lixcol_change_id,
-	                json_extract(lixcol_json, '$.created_at') AS lixcol_created_at,
-	                json_extract(lixcol_json, '$.updated_at') AS lixcol_updated_at,
-	                json_extract(lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
-	                json_extract(lixcol_json, '$.writer_key') AS lixcol_writer_key,
-	                untracked AS lixcol_untracked,
-	                change_metadata AS lixcol_metadata
-	        FROM file_rows;
+        SELECT
+                file_rows.id,
+                file_rows.directory_id,
+                file_rows.name,
+                file_rows.extension,
+                COALESCE(file_path_cache.path, composed_path) AS path,
+                file_path_cache.path AS cached_path,
+                select_file_data(
+                        file_rows.id,
+                        composed_path,
+                        file_rows.version_id,
+                        file_rows.metadata,
+                        file_rows.directory_id,
+                        file_rows.name,
+                        file_rows.extension,
+                        file_rows.hidden
+                ) AS data,
+                file_rows.metadata,
+                file_rows.hidden,
+                file_rows.entity_id AS lixcol_entity_id,
+                'lix_file_descriptor' AS lixcol_schema_key,
+                file_rows.entity_id AS lixcol_file_id,
+                file_rows.version_id AS lixcol_version_id,
+                file_rows.inherited_from_version_id AS lixcol_inherited_from_version_id,
+                json_extract(file_rows.lixcol_json, '$.latest_change_id') AS lixcol_change_id,
+                json_extract(file_rows.lixcol_json, '$.created_at') AS lixcol_created_at,
+                json_extract(file_rows.lixcol_json, '$.updated_at') AS lixcol_updated_at,
+                json_extract(file_rows.lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
+                json_extract(file_rows.lixcol_json, '$.writer_key') AS lixcol_writer_key,
+                file_rows.untracked AS lixcol_untracked,
+                file_rows.change_metadata AS lixcol_metadata
+        FROM file_rows
+        LEFT JOIN lix_internal_file_path_cache AS file_path_cache
+          ON file_path_cache.file_id = file_rows.id
+         AND file_path_cache.version_id = file_rows.version_id;
 
 
   CREATE TRIGGER IF NOT EXISTS file_insert
@@ -346,6 +350,11 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
   BEGIN
       -- Clear the file data cache
       DELETE FROM lix_internal_file_data_cache
+      WHERE file_id = OLD.id
+        AND version_id = (SELECT version_id FROM active_version);
+
+      -- Clear the file path cache
+      DELETE FROM lix_internal_file_path_cache
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version);
         
@@ -401,6 +410,11 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
   BEGIN
       -- Clear the file data cache
       DELETE FROM lix_internal_file_data_cache
+      WHERE file_id = OLD.id
+        AND version_id = OLD.lixcol_version_id;
+
+      -- Clear the file path cache
+      DELETE FROM lix_internal_file_path_cache
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id;
         

@@ -334,6 +334,36 @@ directory_paths AS (
             UNION ALL
 
         SELECT
+          cache.entity_id AS entity_id,
+          cache.schema_key AS schema_key,
+          cache.file_id AS file_id,
+          json(cache.snapshot_content) AS snapshot_content,
+          cache.version_id AS version_id,
+          cache.created_at AS created_at,
+          cache.change_id AS change_id,
+          3 AS priority
+        FROM "lix_internal_state_cache_v1_lix_directory_descriptor" cache
+        WHERE cache.schema_key IN ('lix_directory_descriptor')
+
+            UNION ALL
+
+        SELECT
+          cache.entity_id AS entity_id,
+          cache.schema_key AS schema_key,
+          cache.file_id AS file_id,
+          json(cache.snapshot_content) AS snapshot_content,
+          vi.version_id AS version_id,
+          cache.created_at AS created_at,
+          cache.change_id AS change_id,
+          4 AS priority
+        FROM version_inheritance vi
+        JOIN "lix_internal_state_cache_v1_lix_directory_descriptor" cache ON cache.version_id = vi.ancestor_version_id
+        WHERE cache.is_tombstone = 0
+          AND cache.snapshot_content IS NOT NULL AND cache.schema_key IN ('lix_directory_descriptor')
+
+            UNION ALL
+
+        SELECT
           unt.entity_id AS entity_id,
           unt.schema_key AS schema_key,
           unt.file_id AS file_id,
@@ -375,27 +405,27 @@ file_rows AS (
   FROM file_lixcol AS fl LEFT JOIN directory_paths AS dp ON dp.directory_id = json_extract(fl.snapshot_content, '$.directory_id') AND dp.version_id = fl.version_id
 )
 SELECT
-  id,
-  directory_id,
-  name,
-  extension,
-  composed_path AS path,
-  select_file_data(id, composed_path, version_id, metadata, directory_id, name, extension, hidden) AS data,
-  metadata,
-  hidden,
-  entity_id AS lixcol_entity_id,
+  file_rows.id,
+  file_rows.directory_id,
+  file_rows.name,
+  file_rows.extension,
+  COALESCE(file_path_cache.path, composed_path) AS path,
+  select_file_data(file_rows.id, composed_path, file_rows.version_id, file_rows.metadata, file_rows.directory_id, file_rows.name, file_rows.extension, file_rows.hidden) AS data,
+  file_rows.metadata,
+  file_rows.hidden,
+  file_rows.entity_id AS lixcol_entity_id,
   'lix_file_descriptor' AS lixcol_schema_key,
-  entity_id AS lixcol_file_id,
-  version_id AS lixcol_version_id,
-  inherited_from_version_id AS lixcol_inherited_from_version_id,
-  json_extract(lixcol_json, '$.latest_change_id') AS lixcol_change_id,
-  json_extract(lixcol_json, '$.created_at') AS lixcol_created_at,
-  json_extract(lixcol_json, '$.updated_at') AS lixcol_updated_at,
-  json_extract(lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
-  json_extract(lixcol_json, '$.writer_key') AS lixcol_writer_key,
-  untracked AS lixcol_untracked,
-  change_metadata AS lixcol_metadata
-FROM file_rows) AS file_by_version
+  file_rows.entity_id AS lixcol_file_id,
+  file_rows.version_id AS lixcol_version_id,
+  file_rows.inherited_from_version_id AS lixcol_inherited_from_version_id,
+  json_extract(file_rows.lixcol_json, '$.latest_change_id') AS lixcol_change_id,
+  json_extract(file_rows.lixcol_json, '$.created_at') AS lixcol_created_at,
+  json_extract(file_rows.lixcol_json, '$.updated_at') AS lixcol_updated_at,
+  json_extract(file_rows.lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
+  json_extract(file_rows.lixcol_json, '$.writer_key') AS lixcol_writer_key,
+  file_rows.untracked AS lixcol_untracked,
+  file_rows.change_metadata AS lixcol_metadata
+FROM file_rows LEFT JOIN lix_internal_file_path_cache AS file_path_cache ON file_path_cache.file_id = file_rows.id AND file_path_cache.version_id = file_rows.version_id) AS file_by_version
 WHERE lixcol_version_id IN (SELECT version_id
 FROM (SELECT json_extract(snapshot_content, '$.version_id') AS version_id
 FROM lix_internal_state_all_untracked
@@ -414,7 +444,7 @@ WHERE "path" = ?
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-33)"
+    "detail": "CO-ROUTINE (subquery-35)"
   },
   {
     "id": 7,
@@ -540,7 +570,7 @@ WHERE "path" = ?
     "id": 301,
     "parent": 2,
     "notused": 230,
-    "detail": "SCAN (subquery-33)"
+    "detail": "SCAN (subquery-35)"
   },
   {
     "id": 387,
@@ -552,7 +582,7 @@ WHERE "path" = ?
     "id": 390,
     "parent": 387,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-34)"
+    "detail": "CO-ROUTINE (subquery-36)"
   },
   {
     "id": 392,
@@ -585,146 +615,176 @@ WHERE "path" = ?
     "detail": "UNION ALL"
   },
   {
-    "id": 416,
+    "id": 419,
     "parent": 414,
-    "notused": 0,
-    "detail": "CO-ROUTINE version_inheritance"
+    "notused": 216,
+    "detail": "SCAN cache"
   },
   {
-    "id": 419,
-    "parent": 416,
+    "id": 434,
+    "parent": 393,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 437,
+    "parent": 434,
+    "notused": 0,
+    "detail": "MATERIALIZE version_inheritance"
+  },
+  {
+    "id": 441,
+    "parent": 437,
     "notused": 0,
     "detail": "SETUP"
   },
   {
-    "id": 422,
-    "parent": 419,
+    "id": 444,
+    "parent": 441,
     "notused": 24,
     "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
   },
   {
-    "id": 448,
-    "parent": 416,
+    "id": 472,
+    "parent": 437,
     "notused": 0,
     "detail": "RECURSIVE STEP"
   },
   {
-    "id": 451,
-    "parent": 448,
+    "id": 475,
+    "parent": 472,
     "notused": 62,
     "detail": "SCAN desc USING INDEX idx_lix_internal_state_cache_v1_lix_version_descriptor_live_vfe"
   },
   {
-    "id": 460,
-    "parent": 448,
+    "id": 484,
+    "parent": 472,
     "notused": 216,
     "detail": "SCAN vi"
   },
   {
-    "id": 479,
-    "parent": 414,
+    "id": 506,
+    "parent": 434,
     "notused": 247,
     "detail": "SCAN vi"
   },
   {
-    "id": 484,
-    "parent": 414,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON unt (is_tombstone=? AND schema_key=?)"
-  },
-  {
     "id": 508,
-    "parent": 414,
-    "notused": 53,
-    "detail": "SEARCH unt USING AUTOMATIC PARTIAL COVERING INDEX (is_tombstone=? AND schema_key=?)"
+    "parent": 434,
+    "notused": 27,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_lix_directory_descriptor_live_vfe (version_id=?)"
   },
   {
-    "id": 535,
+    "id": 532,
+    "parent": 393,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 540,
+    "parent": 532,
+    "notused": 216,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 542,
+    "parent": 532,
+    "notused": 61,
+    "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
+  },
+  {
+    "id": 569,
     "parent": 390,
-    "notused": 290,
+    "notused": 250,
     "detail": "SCAN c"
   },
   {
-    "id": 566,
+    "id": 600,
     "parent": 390,
     "notused": 0,
     "detail": "USE TEMP B-TREE FOR ORDER BY"
   },
   {
-    "id": 599,
+    "id": 633,
     "parent": 387,
-    "notused": 270,
-    "detail": "SCAN (subquery-34)"
+    "notused": 230,
+    "detail": "SCAN (subquery-36)"
   },
   {
-    "id": 667,
+    "id": 703,
     "parent": 0,
     "notused": 230,
     "detail": "SCAN w"
   },
   {
-    "id": 679,
+    "id": 715,
     "parent": 0,
     "notused": 0,
-    "detail": "LIST SUBQUERY 30"
+    "detail": "LIST SUBQUERY 32"
   },
   {
-    "id": 683,
-    "parent": 679,
+    "id": 719,
+    "parent": 715,
     "notused": 61,
     "detail": "SEARCH lix_internal_state_all_untracked USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 696,
-    "parent": 679,
+    "id": 732,
+    "parent": 715,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   },
   {
-    "id": 709,
+    "id": 745,
     "parent": 0,
     "notused": 0,
     "detail": "BLOOM FILTER ON w (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 734,
+    "id": 770,
     "parent": 0,
-    "notused": 55,
+    "notused": 54,
     "detail": "SEARCH w USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND schema_key=? AND version_id=?) LEFT-JOIN"
   },
   {
-    "id": 1001,
+    "id": 790,
+    "parent": 0,
+    "notused": 47,
+    "detail": "SEARCH file_path_cache USING INDEX sqlite_autoindex_lix_internal_file_path_cache_1 (file_id=? AND version_id=?) LEFT-JOIN"
+  },
+  {
+    "id": 1057,
     "parent": 0,
     "notused": 0,
     "detail": "CORRELATED SCALAR SUBQUERY 3"
   },
   {
-    "id": 1003,
-    "parent": 1001,
+    "id": 1059,
+    "parent": 1057,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1004,
-    "parent": 1003,
+    "id": 1060,
+    "parent": 1059,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 1008,
-    "parent": 1004,
+    "id": 1064,
+    "parent": 1060,
     "notused": 46,
     "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
   },
   {
-    "id": 1020,
-    "parent": 1003,
+    "id": 1076,
+    "parent": 1059,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1023,
-    "parent": 1020,
+    "id": 1079,
+    "parent": 1076,
     "notused": 39,
     "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
   }

@@ -36,10 +36,7 @@ describe("sequential file reads - unique files", async () => {
 	await lix.db.insertInto("file").values(files).execute();
 
 	const selectFileByIdQuery = (id: string) =>
-		lix.db
-			.selectFrom("file")
-			.where("id", "=", id)
-			.selectAll();
+		lix.db.selectFrom("file").where("id", "=", id).selectAll();
 
 	await exportExplainPlan({
 		lix,
@@ -148,10 +145,7 @@ describe("mixed file read pattern - 80/20 distribution", async () => {
 	const coldFileIds = files.slice(4).map((f) => f.id);
 
 	const selectMixedFileQuery = (id: string) =>
-		lix.db
-			.selectFrom("file")
-			.where("id", "=", id)
-			.selectAll();
+		lix.db.selectFrom("file").where("id", "=", id).selectAll();
 
 	await exportExplainPlan({
 		lix,
@@ -208,10 +202,7 @@ describe("batch file reads - select multiple files", async () => {
 	await lix.db.insertInto("file").values(files).execute();
 
 	const selectBatchQuery = (fileIds: string[]) =>
-		lix.db
-			.selectFrom("file")
-			.where("id", "in", fileIds)
-			.selectAll();
+		lix.db.selectFrom("file").where("id", "in", fileIds).selectAll();
 
 	await exportExplainPlan({
 		lix,
@@ -270,10 +261,7 @@ describe("file reads with varying sizes", async () => {
 	await lix.db.insertInto("file").values(files).execute();
 
 	const selectSizedFileQuery = (fileId: string) =>
-		lix.db
-			.selectFrom("file")
-			.where("id", "=", fileId)
-			.selectAll();
+		lix.db.selectFrom("file").where("id", "=", fileId).selectAll();
 
 	await exportExplainPlan({
 		lix,
@@ -548,15 +536,13 @@ describe("file insert operations", async () => {
 
 	const buildInsertFileQuery = (identifier: string | number) => {
 		const suffix = String(identifier);
-		return lix.db
-			.insertInto("file")
-			.values({
-				id: `insert_bench_${suffix}`,
-				path: `/bench-insert/file-${suffix}.json`,
-				data: new TextEncoder().encode(
-					JSON.stringify({ greeting: `insert ${suffix}` })
-				),
-			});
+		return lix.db.insertInto("file").values({
+			id: `insert_bench_${suffix}`,
+			path: `/bench-insert/file-${suffix}.json`,
+			data: new TextEncoder().encode(
+				JSON.stringify({ greeting: `insert ${suffix}` })
+			),
+		});
 	};
 
 	await exportExplainPlan({
@@ -595,15 +581,13 @@ describe("file delete operations", async () => {
 		path: string;
 		greeting: string;
 	}) =>
-		lix.db
-			.insertInto("file")
-			.values({
-				id: args.id,
-				path: args.path,
-				data: new TextEncoder().encode(
-					JSON.stringify({ greeting: args.greeting })
-				),
-			});
+		lix.db.insertInto("file").values({
+			id: args.id,
+			path: args.path,
+			data: new TextEncoder().encode(
+				JSON.stringify({ greeting: args.greeting })
+			),
+		});
 
 	const buildDeleteQuery = (path: string) =>
 		lix.db.deleteFrom("file").where("path", "=", path);
