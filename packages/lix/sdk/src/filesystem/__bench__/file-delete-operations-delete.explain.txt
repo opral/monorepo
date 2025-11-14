@@ -10,79 +10,73 @@ DELETE FROM "file" WHERE "path" = ?
 -- plan --
 [
   {
-    "id": 6,
+    "id": 5,
     "parent": 0,
     "notused": 183,
     "detail": "SCAN lix_internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id"
   },
   {
-    "id": 11,
+    "id": 10,
     "parent": 0,
     "notused": 0,
-    "detail": "LIST SUBQUERY 16"
+    "detail": "LIST SUBQUERY 11"
   },
   {
-    "id": 15,
-    "parent": 11,
+    "id": 14,
+    "parent": 10,
     "notused": 61,
     "detail": "SEARCH lix_internal_state_all_untracked USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 28,
-    "parent": 11,
+    "id": 27,
+    "parent": 10,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   },
   {
-    "id": 45,
-    "parent": 0,
-    "notused": 183,
-    "detail": "SCAN lix_internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id LEFT-JOIN"
-  },
-  {
-    "id": 69,
+    "id": 44,
     "parent": 0,
     "notused": 47,
     "detail": "SEARCH file_path_cache USING INDEX sqlite_autoindex_lix_internal_file_path_cache_1 (file_id=? AND version_id=?) LEFT-JOIN"
   },
   {
-    "id": 336,
+    "id": 158,
     "parent": 0,
     "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 7"
+    "detail": "CORRELATED SCALAR SUBQUERY 8"
   },
   {
-    "id": 338,
-    "parent": 336,
+    "id": 160,
+    "parent": 158,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 339,
-    "parent": 338,
+    "id": 161,
+    "parent": 160,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 343,
-    "parent": 339,
+    "id": 165,
+    "parent": 161,
     "notused": 46,
     "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
   },
   {
-    "id": 355,
-    "parent": 338,
+    "id": 177,
+    "parent": 160,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 358,
-    "parent": 355,
+    "id": 180,
+    "parent": 177,
     "notused": 39,
     "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
   },
   {
-    "id": 388,
+    "id": 206,
     "parent": 0,
     "notused": 216,
     "detail": "SCAN file"

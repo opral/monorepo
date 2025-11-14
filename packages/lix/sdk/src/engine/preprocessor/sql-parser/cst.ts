@@ -403,8 +403,7 @@ class SqlParser extends CstParser {
 				{
 					GATE: () =>
 						this.LA(1).tokenType === LeftParen &&
-						(this.LA(2).tokenType === Select ||
-							this.LA(2).tokenType === With),
+						(this.LA(2).tokenType === Select || this.LA(2).tokenType === With),
 					ALT: () => {
 						this.CONSUME2(LeftParen, { LABEL: "selectLParen" });
 						this.SUBRULE(this.select_compound, { LABEL: "select" });
@@ -801,8 +800,7 @@ class SqlParser extends CstParser {
 				},
 				{
 					GATE: () =>
-						this.LA(2).tokenType === Select ||
-						this.LA(2).tokenType === With,
+						this.LA(2).tokenType === Select || this.LA(2).tokenType === With,
 					ALT: () => {
 						this.CONSUME1(LeftParen);
 						this.SUBRULE(this.select_compound, { LABEL: "subselect" });
@@ -811,8 +809,7 @@ class SqlParser extends CstParser {
 				},
 				{
 					GATE: () =>
-						this.LA(2).tokenType !== Select &&
-						this.LA(2).tokenType !== With,
+						this.LA(2).tokenType !== Select && this.LA(2).tokenType !== With,
 					ALT: () => {
 						this.CONSUME2(LeftParen);
 						this.SUBRULE(this.expression, { LABEL: "inner" });

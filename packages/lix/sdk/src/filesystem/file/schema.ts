@@ -8,10 +8,7 @@ import {
 	composeFilePathFromDescriptor,
 	composeFilePathAtCommit,
 } from "./descriptor-utils.js";
-import {
-	LixFileDescriptorSchema,
-	type LixFileDescriptor,
-} from "./schema-definition.js";
+import { type LixFileDescriptor } from "./schema-definition.js";
 
 export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	const engine = args.engine;
@@ -239,13 +236,6 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	            FROM state_by_version fd
 	            WHERE fd.schema_key = 'lix_file_descriptor'
 	        ),
-	        directory_paths AS (
-	            SELECT
-	                id AS directory_id,
-	                lixcol_version_id AS version_id,
-	                path AS dir_path
-	            FROM directory_by_version
-	        ),
 	        file_rows AS (
 	            SELECT
 	                json_extract(fl.snapshot_content, '$.id') AS id,
@@ -259,62 +249,54 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	                fl.inherited_from_version_id,
 	                fl.untracked,
 	                fl.change_metadata,
-	                fl.lixcol_json,
-	                dp.dir_path,
-	                CASE
-	                    WHEN json_extract(fl.snapshot_content, '$.directory_id') IS NULL THEN
-	                        CASE
-	                            WHEN json_extract(fl.snapshot_content, '$.extension') IS NULL OR json_extract(fl.snapshot_content, '$.extension') = ''
-	                                THEN '/' || json_extract(fl.snapshot_content, '$.name')
-	                            ELSE '/' || json_extract(fl.snapshot_content, '$.name') || '.' || json_extract(fl.snapshot_content, '$.extension')
-	                        END
-	                    ELSE
-	                        CASE
-	                            WHEN json_extract(fl.snapshot_content, '$.extension') IS NULL OR json_extract(fl.snapshot_content, '$.extension') = ''
-	                                THEN COALESCE(dp.dir_path, '/') || json_extract(fl.snapshot_content, '$.name')
-	                            ELSE COALESCE(dp.dir_path, '/') || json_extract(fl.snapshot_content, '$.name') || '.' || json_extract(fl.snapshot_content, '$.extension')
-	                        END
-	                END AS composed_path
+	                fl.lixcol_json
 	            FROM file_lixcol fl
-	            LEFT JOIN directory_paths dp
-	                ON dp.directory_id = json_extract(fl.snapshot_content, '$.directory_id')
-	               AND dp.version_id = fl.version_id
+	        ),
+	        file_rows_with_paths AS (
+	            SELECT
+	                file_rows.*,
+	                file_path_cache.path AS cached_path,
+	                COALESCE(
+	                    file_path_cache.path,
+	                    compose_file_path(file_rows.id, file_rows.version_id)
+	                ) AS resolved_path
+	            FROM file_rows
+	            LEFT JOIN lix_internal_file_path_cache AS file_path_cache
+	              ON file_path_cache.file_id = file_rows.id
+	             AND file_path_cache.version_id = file_rows.version_id
 	        )
-        SELECT
-                file_rows.id,
-                file_rows.directory_id,
-                file_rows.name,
-                file_rows.extension,
-                COALESCE(file_path_cache.path, composed_path) AS path,
-                file_path_cache.path AS cached_path,
-                select_file_data(
-                        file_rows.id,
-                        composed_path,
-                        file_rows.version_id,
-                        file_rows.metadata,
-                        file_rows.directory_id,
-                        file_rows.name,
-                        file_rows.extension,
-                        file_rows.hidden
-                ) AS data,
-                file_rows.metadata,
-                file_rows.hidden,
-                file_rows.entity_id AS lixcol_entity_id,
-                'lix_file_descriptor' AS lixcol_schema_key,
-                file_rows.entity_id AS lixcol_file_id,
-                file_rows.version_id AS lixcol_version_id,
-                file_rows.inherited_from_version_id AS lixcol_inherited_from_version_id,
-                json_extract(file_rows.lixcol_json, '$.latest_change_id') AS lixcol_change_id,
-                json_extract(file_rows.lixcol_json, '$.created_at') AS lixcol_created_at,
-                json_extract(file_rows.lixcol_json, '$.updated_at') AS lixcol_updated_at,
-                json_extract(file_rows.lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
-                json_extract(file_rows.lixcol_json, '$.writer_key') AS lixcol_writer_key,
-                file_rows.untracked AS lixcol_untracked,
-                file_rows.change_metadata AS lixcol_metadata
-        FROM file_rows
-        LEFT JOIN lix_internal_file_path_cache AS file_path_cache
-          ON file_path_cache.file_id = file_rows.id
-         AND file_path_cache.version_id = file_rows.version_id;
+	    SELECT
+	            file_rows_with_paths.id,
+	            file_rows_with_paths.directory_id,
+	            file_rows_with_paths.name,
+	            file_rows_with_paths.extension,
+	            file_rows_with_paths.resolved_path AS path,
+	            file_rows_with_paths.cached_path,
+	            select_file_data(
+	                    file_rows_with_paths.id,
+	                    file_rows_with_paths.resolved_path,
+	                    file_rows_with_paths.version_id,
+	                    file_rows_with_paths.metadata,
+	                    file_rows_with_paths.directory_id,
+	                    file_rows_with_paths.name,
+	                    file_rows_with_paths.extension,
+	                    file_rows_with_paths.hidden
+	            ) AS data,
+	            file_rows_with_paths.metadata,
+	            file_rows_with_paths.hidden,
+	            file_rows_with_paths.entity_id AS lixcol_entity_id,
+	            'lix_file_descriptor' AS lixcol_schema_key,
+	            file_rows_with_paths.entity_id AS lixcol_file_id,
+	            file_rows_with_paths.version_id AS lixcol_version_id,
+	            file_rows_with_paths.inherited_from_version_id AS lixcol_inherited_from_version_id,
+	            json_extract(file_rows_with_paths.lixcol_json, '$.latest_change_id') AS lixcol_change_id,
+	            json_extract(file_rows_with_paths.lixcol_json, '$.created_at') AS lixcol_created_at,
+	            json_extract(file_rows_with_paths.lixcol_json, '$.updated_at') AS lixcol_updated_at,
+	            json_extract(file_rows_with_paths.lixcol_json, '$.latest_commit_id') AS lixcol_commit_id,
+	            json_extract(file_rows_with_paths.lixcol_json, '$.writer_key') AS lixcol_writer_key,
+	            file_rows_with_paths.untracked AS lixcol_untracked,
+	            file_rows_with_paths.change_metadata AS lixcol_metadata
+	    FROM file_rows_with_paths;
 
 
   CREATE TRIGGER IF NOT EXISTS file_insert
