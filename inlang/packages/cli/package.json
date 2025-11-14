@@ -40,8 +40,9 @@
     "clean": "rm -rf ./dist ./node_modules"
   },
   "dependencies": {
-    "esbuild-wasm": "^0.19.2",
-    "@inlang/sdk": "workspace:*"
+    "@inlang/rpc": "workspace:*",
+    "@inlang/sdk": "workspace:*",
+    "esbuild-wasm": "^0.19.2"
   },
   "devDependencies": {
     "@sentry/node": "^7.64.0",

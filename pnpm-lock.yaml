@@ -26,6 +26,9 @@ importers:
 
   inlang/packages/cli:
     dependencies:
+      '@inlang/rpc':
+        specifier: workspace:*
+        version: link:../rpc
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
