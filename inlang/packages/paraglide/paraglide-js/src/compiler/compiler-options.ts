@@ -39,8 +39,13 @@ export type CompilerOptions = {
 	 * + outdir: "./src/paraglide"
 	 * })
 	 * ```
-	 */
-	outdir: string;
+	 *
+         * @remarks
+         * Setting `outdir` to a path that resolves to the project root (for example `"./"`)
+         * will throw to prevent accidental project deletion.
+         * See https://github.com/opral/inlang-sdk/issues/245.
+         */
+        outdir: string;
 	/**
 	 * The strategy to use for getting the locale.
 	 *
