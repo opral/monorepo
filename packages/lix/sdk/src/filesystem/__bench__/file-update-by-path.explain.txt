@@ -1,0 +1,84 @@
+-- label --
+file update by path
+
+-- original SQL --
+update "file" set "data" = ? where "path" = ?
+
+-- rewritten SQL --
+UPDATE "file" SET "data" = ? WHERE "path" = ?
+
+-- plan --
+[
+  {
+    "id": 4,
+    "parent": 0,
+    "notused": 183,
+    "detail": "SCAN lix_internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id"
+  },
+  {
+    "id": 9,
+    "parent": 0,
+    "notused": 0,
+    "detail": "LIST SUBQUERY 16"
+  },
+  {
+    "id": 13,
+    "parent": 9,
+    "notused": 61,
+    "detail": "SEARCH lix_internal_state_all_untracked USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
+  },
+  {
+    "id": 26,
+    "parent": 9,
+    "notused": 0,
+    "detail": "CREATE BLOOM FILTER"
+  },
+  {
+    "id": 43,
+    "parent": 0,
+    "notused": 183,
+    "detail": "SCAN lix_internal_state_vtable VIRTUAL TABLE INDEX 0:schema_key,version_id LEFT-JOIN"
+  },
+  {
+    "id": 314,
+    "parent": 0,
+    "notused": 0,
+    "detail": "CORRELATED SCALAR SUBQUERY 7"
+  },
+  {
+    "id": 316,
+    "parent": 314,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 317,
+    "parent": 316,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 321,
+    "parent": 317,
+    "notused": 46,
+    "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
+  },
+  {
+    "id": 333,
+    "parent": 316,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 336,
+    "parent": 333,
+    "notused": 39,
+    "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
+  },
+  {
+    "id": 363,
+    "parent": 0,
+    "notused": 216,
+    "detail": "SCAN file"
+  }
+]

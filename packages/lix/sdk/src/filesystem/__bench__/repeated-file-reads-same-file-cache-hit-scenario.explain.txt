@@ -1,8 +1,8 @@
 -- label --
-file read • path LIKE module_0
+repeated file reads - same file (cache hit scenario)
 
 -- original SQL --
-select * from "file" where "path" like ?
+select * from "file" where "id" = ?
 
 -- rewritten SQL --
 SELECT *
@@ -427,55 +427,10 @@ SELECT
   change_metadata AS lixcol_metadata
 FROM file_rows) AS file_by_version
 WHERE lixcol_version_id IN (SELECT version_id
-FROM (SELECT json_extract(sa.snapshot_content, '$.version_id') AS version_id
-FROM (SELECT
-  schema_key,
-  version_id,
-  snapshot_content
-FROM (
-WITH
-  wanted_versions AS (
-    SELECT 'global' AS version_id
-  )
-SELECT
-  "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."snapshot_content" as "snapshot_content"
-FROM (
-  SELECT
-    c.entity_id AS entity_id,
-    c.schema_key AS schema_key,
-    c.file_id AS file_id,
-    c.snapshot_content AS snapshot_content,
-    c.version_id AS version_id,
-    c.created_at AS created_at,
-    c.change_id AS change_id,
-    c.priority AS priority,
-    ROW_NUMBER() OVER (
-            PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
-            ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
-          ) AS rn
-  FROM (
-      SELECT
-        unt.entity_id AS entity_id,
-        unt.schema_key AS schema_key,
-        unt.file_id AS file_id,
-        json(unt.snapshot_content) AS snapshot_content,
-        unt.version_id AS version_id,
-        unt.created_at AS created_at,
-        'untracked' AS change_id,
-        2 AS priority
-      FROM lix_internal_state_all_untracked unt
-      JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
-      WHERE unt.schema_key IN ('lix_active_version')
-  ) AS c
-) AS w
-
-
-
-WHERE w.rn = 1
-) AS "lix_internal_state_vtable"
-WHERE snapshot_content IS NOT NULL) AS sa
-WHERE sa.schema_key = 'lix_active_version' AND sa.version_id = 'global') AS active_version)) AS file
-WHERE "path" LIKE ?
+FROM (SELECT json_extract(snapshot_content, '$.version_id') AS version_id
+FROM lix_internal_state_all_untracked
+WHERE schema_key = 'lix_active_version' AND version_id = 'global') AS active_version)) AS file
+WHERE "id" = ?
 
 -- plan --
 [
@@ -489,7 +444,7 @@ WHERE "path" LIKE ?
     "id": 5,
     "parent": 2,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-40)"
+    "detail": "CO-ROUTINE (subquery-35)"
   },
   {
     "id": 7,
@@ -615,7 +570,7 @@ WHERE "path" LIKE ?
     "id": 301,
     "parent": 2,
     "notused": 230,
-    "detail": "SCAN (subquery-40)"
+    "detail": "SCAN (subquery-35)"
   },
   {
     "id": 387,
@@ -627,7 +582,7 @@ WHERE "path" LIKE ?
     "id": 390,
     "parent": 387,
     "notused": 0,
-    "detail": "CO-ROUTINE (subquery-41)"
+    "detail": "CO-ROUTINE (subquery-36)"
   },
   {
     "id": 392,
@@ -753,7 +708,7 @@ WHERE "path" LIKE ?
     "id": 633,
     "parent": 387,
     "notused": 230,
-    "detail": "SCAN (subquery-41)"
+    "detail": "SCAN (subquery-36)"
   },
   {
     "id": 701,
@@ -765,119 +720,65 @@ WHERE "path" LIKE ?
     "id": 713,
     "parent": 0,
     "notused": 0,
-    "detail": "LIST SUBQUERY 37"
+    "detail": "LIST SUBQUERY 32"
   },
   {
-    "id": 716,
+    "id": 717,
     "parent": 713,
-    "notused": 0,
-    "detail": "CO-ROUTINE w"
-  },
-  {
-    "id": 719,
-    "parent": 716,
-    "notused": 0,
-    "detail": "CO-ROUTINE (subquery-42)"
-  },
-  {
-    "id": 722,
-    "parent": 719,
-    "notused": 0,
-    "detail": "MATERIALIZE wanted_versions"
-  },
-  {
-    "id": 724,
-    "parent": 722,
-    "notused": 0,
-    "detail": "SCAN CONSTANT ROW"
-  },
-  {
-    "id": 738,
-    "parent": 719,
-    "notused": 64,
-    "detail": "SCAN wv_unt"
-  },
-  {
-    "id": 744,
-    "parent": 719,
     "notused": 61,
-    "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
+    "detail": "SEARCH lix_internal_state_all_untracked USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
   },
   {
-    "id": 784,
-    "parent": 719,
-    "notused": 0,
-    "detail": "USE TEMP B-TREE FOR ORDER BY"
-  },
-  {
-    "id": 816,
-    "parent": 716,
-    "notused": 124,
-    "detail": "SCAN (subquery-42)"
-  },
-  {
-    "id": 884,
-    "parent": 713,
-    "notused": 0,
-    "detail": "BLOOM FILTER ON w (rn=? AND schema_key=? AND version_id=?)"
-  },
-  {
-    "id": 911,
-    "parent": 713,
-    "notused": 51,
-    "detail": "SEARCH w USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND schema_key=? AND version_id=?)"
-  },
-  {
-    "id": 926,
+    "id": 730,
     "parent": 713,
     "notused": 0,
     "detail": "CREATE BLOOM FILTER"
   },
   {
-    "id": 939,
+    "id": 746,
     "parent": 0,
     "notused": 0,
     "detail": "BLOOM FILTER ON w (rn=? AND schema_key=? AND version_id=?)"
   },
   {
-    "id": 964,
+    "id": 771,
     "parent": 0,
     "notused": 54,
     "detail": "SEARCH w USING AUTOMATIC PARTIAL COVERING INDEX (rn=? AND schema_key=? AND version_id=?) LEFT-JOIN"
   },
   {
-    "id": 1233,
+    "id": 981,
     "parent": 0,
     "notused": 0,
     "detail": "CORRELATED SCALAR SUBQUERY 3"
   },
   {
-    "id": 1235,
-    "parent": 1233,
+    "id": 983,
+    "parent": 981,
     "notused": 0,
     "detail": "COMPOUND QUERY"
   },
   {
-    "id": 1236,
-    "parent": 1235,
+    "id": 984,
+    "parent": 983,
     "notused": 0,
     "detail": "LEFT-MOST SUBQUERY"
   },
   {
-    "id": 1240,
-    "parent": 1236,
+    "id": 988,
+    "parent": 984,
     "notused": 46,
     "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
   },
   {
-    "id": 1252,
-    "parent": 1235,
+    "id": 1000,
+    "parent": 983,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 1255,
-    "parent": 1252,
+    "id": 1003,
+    "parent": 1000,
     "notused": 39,
     "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
   }

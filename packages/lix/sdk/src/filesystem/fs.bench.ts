@@ -1,6 +1,11 @@
+import { promises as fs } from "fs";
 import { bench, describe } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+
+const BENCH_OUTPUT_DIR = decodeURIComponent(
+	new URL("./__bench__", import.meta.url).pathname
+);
 
 describe("sequential file reads - unique files", async () => {
 	const NUM_FILES = 10;
@@ -30,14 +35,22 @@ describe("sequential file reads - unique files", async () => {
 
 	await lix.db.insertInto("file").values(files).execute();
 
+	const selectFileByIdQuery = (id: string) =>
+		lix.db
+			.selectFrom("file")
+			.where("id", "=", id)
+			.selectAll();
+
+	await exportExplainPlan({
+		lix,
+		label: "sequential file reads - unique files",
+		query: selectFileByIdQuery("file_0").compile(),
+	});
+
 	bench("", async () => {
 		try {
 			for (let i = 0; i < NUM_FILES; i++) {
-				await lix.db
-					.selectFrom("file")
-					.where("id", "=", `file_${i}`)
-					.selectAll()
-					.executeTakeFirst();
+				await selectFileByIdQuery(`file_${i}`).executeTakeFirst();
 			}
 		} catch (error) {
 			console.error(
@@ -78,14 +91,21 @@ describe("repeated file reads - same file (cache hit scenario)", async () => {
 		})
 		.execute();
 
+	const selectCachedFileQuery = lix.db
+		.selectFrom("file")
+		.where("id", "=", "cached_file")
+		.selectAll();
+
+	await exportExplainPlan({
+		lix,
+		label: "repeated file reads - same file (cache hit scenario)",
+		query: selectCachedFileQuery.compile(),
+	});
+
 	bench("", async () => {
 		try {
 			for (let i = 0; i < NUM_READS; i++) {
-				await lix.db
-					.selectFrom("file")
-					.where("id", "=", "cached_file")
-					.selectAll()
-					.executeTakeFirst();
+				await selectCachedFileQuery.executeTakeFirst();
 			}
 		} catch (error) {
 			console.error(
@@ -127,6 +147,18 @@ describe("mixed file read pattern - 80/20 distribution", async () => {
 	const hotFileIds = files.slice(0, 4).map((f) => f.id);
 	const coldFileIds = files.slice(4).map((f) => f.id);
 
+	const selectMixedFileQuery = (id: string) =>
+		lix.db
+			.selectFrom("file")
+			.where("id", "=", id)
+			.selectAll();
+
+	await exportExplainPlan({
+		lix,
+		label: "mixed file read pattern - 80/20 distribution",
+		query: selectMixedFileQuery(hotFileIds[0]!).compile(),
+	});
+
 	bench("", async () => {
 		let toggle = 0;
 
@@ -136,11 +168,7 @@ describe("mixed file read pattern - 80/20 distribution", async () => {
 					toggle % 5 !== 0
 						? hotFileIds[(toggle / 5) % hotFileIds.length]!
 						: coldFileIds[(toggle / 5) % coldFileIds.length]!;
-				await lix.db
-					.selectFrom("file")
-					.where("id", "=", fileId)
-					.selectAll()
-					.executeTakeFirst();
+				await selectMixedFileQuery(fileId).executeTakeFirst();
 				toggle++;
 			}
 		} catch (error) {
@@ -179,6 +207,20 @@ describe("batch file reads - select multiple files", async () => {
 
 	await lix.db.insertInto("file").values(files).execute();
 
+	const selectBatchQuery = (fileIds: string[]) =>
+		lix.db
+			.selectFrom("file")
+			.where("id", "in", fileIds)
+			.selectAll();
+
+	await exportExplainPlan({
+		lix,
+		label: "batch file reads - select multiple files",
+		query: selectBatchQuery(
+			Array.from({ length: 10 }, (_, j) => `batch_file_${j}`)
+		).compile(),
+	});
+
 	bench("", async () => {
 		try {
 			for (let i = 0; i < Math.max(NUM_FILES, 50); i += 10) {
@@ -186,11 +228,7 @@ describe("batch file reads - select multiple files", async () => {
 					{ length: 10 },
 					(_, j) => `batch_file_${i + j}`
 				);
-				await lix.db
-					.selectFrom("file")
-					.where("id", "in", fileIds)
-					.selectAll()
-					.execute();
+				await selectBatchQuery(fileIds).execute();
 			}
 		} catch (error) {
 			console.error(
@@ -231,14 +269,22 @@ describe("file reads with varying sizes", async () => {
 
 	await lix.db.insertInto("file").values(files).execute();
 
+	const selectSizedFileQuery = (fileId: string) =>
+		lix.db
+			.selectFrom("file")
+			.where("id", "=", fileId)
+			.selectAll();
+
+	await exportExplainPlan({
+		lix,
+		label: "file reads with varying sizes",
+		query: selectSizedFileQuery("sized_file_0").compile(),
+	});
+
 	bench("", async () => {
 		try {
 			for (const file of files) {
-				await lix.db
-					.selectFrom("file")
-					.where("id", "=", file.id)
-					.selectAll()
-					.executeTakeFirst();
+				await selectSizedFileQuery(file.id).executeTakeFirst();
 			}
 		} catch (error) {
 			console.error("Bench 'file reads with varying sizes' failed", error);
@@ -273,14 +319,22 @@ describe("file read with path-based LIKE", async () => {
 
 	await lix.db.insertInto("file").values(files).execute();
 
+	const selectPathLikeQuery = (moduleIndex: number) =>
+		lix.db
+			.selectFrom("file")
+			.where("path", "like", `/project/src/module_${moduleIndex}/%`)
+			.selectAll();
+
+	await exportExplainPlan({
+		lix,
+		label: "file read with path-based LIKE",
+		query: selectPathLikeQuery(0).compile(),
+	});
+
 	bench("", async () => {
 		try {
 			for (let i = 0; i < 10; i++) {
-				await lix.db
-					.selectFrom("file")
-					.where("path", "like", `/project/src/module_${i}/%`)
-					.selectAll()
-					.execute();
+				await selectPathLikeQuery(i).execute();
 			}
 		} catch (error) {
 			console.error("Bench 'file read with path-based queries' failed", error);
@@ -314,13 +368,20 @@ describe("file read by exact path", async () => {
 		})
 		.execute();
 
+	const selectExactPathQuery = lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "=", targetPath);
+
+	await exportExplainPlan({
+		lix,
+		label: "file read by exact path",
+		query: selectExactPathQuery.compile(),
+	});
+
 	bench("", async () => {
 		try {
-			await lix.db
-				.selectFrom("file")
-				.selectAll()
-				.where("path", "=", targetPath)
-				.executeTakeFirst();
+			await selectExactPathQuery.executeTakeFirst();
 		} catch (error) {
 			console.error("Bench 'file read by exact path' failed", error);
 			throw error;
@@ -356,13 +417,20 @@ describe("file read excluding file path via NOT LIKE", async () => {
 		])
 		.execute();
 
+	const selectNotLikeQuery = lix.db
+		.selectFrom("file")
+		.where("path", "not like", "%db.sqlite")
+		.select(["path", "data", "lixcol_writer_key"]);
+
+	await exportExplainPlan({
+		lix,
+		label: "file read excluding file path via NOT LIKE",
+		query: selectNotLikeQuery.compile(),
+	});
+
 	bench("", async () => {
 		try {
-			await lix.db
-				.selectFrom("file")
-				.where("path", "not like", "%db.sqlite")
-				.select(["path", "data", "lixcol_writer_key"])
-				.execute();
+			await selectNotLikeQuery.execute();
 		} catch (error) {
 			console.error(
 				"Bench 'file read excluding file path via NOT LIKE' failed",
@@ -396,9 +464,17 @@ describe("file table full scan", async () => {
 		)
 		.execute();
 
+	const selectFullScanQuery = lix.db.selectFrom("file").selectAll();
+
+	await exportExplainPlan({
+		lix,
+		label: "file table full scan",
+		query: selectFullScanQuery.compile(),
+	});
+
 	bench("", async () => {
 		try {
-			await lix.db.selectFrom("file").selectAll().execute();
+			await selectFullScanQuery.execute();
 		} catch (error) {
 			console.error("Bench 'file table full scan' failed", error);
 			throw error;
@@ -429,17 +505,26 @@ describe("file update by path", async () => {
 		})
 		.execute();
 
+	const updatedData = new TextEncoder().encode(
+		JSON.stringify({ greeting: "updated" })
+	);
+
+	const updateByPathQuery = lix.db
+		.updateTable("file")
+		.set({
+			data: updatedData,
+		})
+		.where("path", "=", targetPath);
+
+	await exportExplainPlan({
+		lix,
+		label: "file update by path",
+		query: updateByPathQuery.compile(),
+	});
+
 	bench("", async () => {
 		try {
-			await lix.db
-				.updateTable("file")
-				.set({
-					data: new TextEncoder().encode(
-						JSON.stringify({ greeting: "updated" })
-					),
-				})
-				.where("path", "=", targetPath)
-				.execute();
+			await updateByPathQuery.execute();
 		} catch (error) {
 			console.error("Bench 'file update by path' failed", error);
 			throw error;
@@ -461,19 +546,29 @@ describe("file insert operations", async () => {
 
 	let insertCounter = 0;
 
+	const buildInsertFileQuery = (identifier: string | number) => {
+		const suffix = String(identifier);
+		return lix.db
+			.insertInto("file")
+			.values({
+				id: `insert_bench_${suffix}`,
+				path: `/bench-insert/file-${suffix}.json`,
+				data: new TextEncoder().encode(
+					JSON.stringify({ greeting: `insert ${suffix}` })
+				),
+			});
+	};
+
+	await exportExplainPlan({
+		lix,
+		label: "file insert operations",
+		query: buildInsertFileQuery("plan").compile(),
+	});
+
 	bench("", async () => {
 		try {
 			const index = insertCounter++;
-			await lix.db
-				.insertInto("file")
-				.values({
-					id: `insert_bench_${index}`,
-					path: `/bench-insert/file-${index}.json`,
-					data: new TextEncoder().encode(
-						JSON.stringify({ greeting: `insert ${index}` })
-					),
-				})
-				.execute();
+			await buildInsertFileQuery(index).execute();
 		} catch (error) {
 			console.error("Bench 'file insert operations' failed", error);
 			throw error;
@@ -495,26 +590,88 @@ describe("file delete operations", async () => {
 
 	let deleteCounter = 0;
 
+	const buildDeleteInsertQuery = (args: {
+		id: string;
+		path: string;
+		greeting: string;
+	}) =>
+		lix.db
+			.insertInto("file")
+			.values({
+				id: args.id,
+				path: args.path,
+				data: new TextEncoder().encode(
+					JSON.stringify({ greeting: args.greeting })
+				),
+			});
+
+	const buildDeleteQuery = (path: string) =>
+		lix.db.deleteFrom("file").where("path", "=", path);
+
+	await exportExplainPlan({
+		lix,
+		label: "file delete operations - insert",
+		query: buildDeleteInsertQuery({
+			id: "delete_bench_plan",
+			path: `/bench-delete/file-plan.json`,
+			greeting: "delete plan",
+		}).compile(),
+	});
+
+	await exportExplainPlan({
+		lix,
+		label: "file delete operations - delete",
+		query: buildDeleteQuery(`/bench-delete/file-plan.json`).compile(),
+	});
+
 	bench("", async () => {
 		try {
 			const index = deleteCounter++;
 			const targetPath = `/bench-delete/file-${index}.json`;
 
-			await lix.db
-				.insertInto("file")
-				.values({
-					id: `delete_bench_${index}`,
-					path: targetPath,
-					data: new TextEncoder().encode(
-						JSON.stringify({ greeting: `delete ${index}` })
-					),
-				})
-				.execute();
+			await buildDeleteInsertQuery({
+				id: `delete_bench_${index}`,
+				path: targetPath,
+				greeting: `delete ${index}`,
+			}).execute();
 
-			await lix.db.deleteFrom("file").where("path", "=", targetPath).execute();
+			await buildDeleteQuery(targetPath).execute();
 		} catch (error) {
 			console.error("Bench 'file delete operations' failed", error);
 			throw error;
 		}
 	});
 });
+
+async function exportExplainPlan(args: {
+	lix: Awaited<ReturnType<typeof openLix>>;
+	label: string;
+	query: { sql: string; parameters: readonly unknown[] };
+}) {
+	await fs.mkdir(BENCH_OUTPUT_DIR, { recursive: true });
+	const slug = args.label
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "");
+	const outputPath = `${BENCH_OUTPUT_DIR}/${slug}.explain.txt`;
+	const explain = (await args.lix.call("lix_explain_query", {
+		sql: args.query.sql,
+		parameters: [...args.query.parameters],
+	})) as {
+		originalSql: string;
+		rewrittenSql: string | null;
+		plan: unknown;
+	};
+	const payload = [
+		"-- label --",
+		args.label,
+		"\n-- original SQL --",
+		explain.originalSql,
+		"\n-- rewritten SQL --",
+		explain.rewrittenSql ?? "<unchanged>",
+		"\n-- plan --",
+		JSON.stringify(explain.plan, null, 2),
+		"",
+	].join("\n");
+	await fs.writeFile(outputPath, payload, "utf8");
+}
