@@ -159,8 +159,8 @@ describe("code block", () => {
 		const ast = parseMarkdown(input)
 		const out = serializeAst(ast)
 
-		const code = expectNodeType(ast.children[0], "code")
-		expect(code.lang).toBe(null)
+	const code = expectNodeType(ast.children[0], "code")
+	expect(code.lang).toBeUndefined()
 		expect(code.value).toBe("plain code")
 
 		expect(validateAst(ast)).toBe(true)
