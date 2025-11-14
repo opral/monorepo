@@ -25,32 +25,14 @@ type RefreshArgs = {
 	changes: WorkingChange[];
 };
 
-const INTERNAL_SCHEMA_KEYS = new Set([
-	"lix_change_set",
-	"lix_change_set_edge",
-	"lix_change_set_element",
-	"lix_version",
-]);
-
-const db = internalQueryBuilder;
-
 export function refreshWorkingChangeSet(args: RefreshArgs): void {
 	const { engine, version, timestamp } = args;
 	if (version.id === "global") return;
 	if (!version.working_commit_id) return;
 	if (args.changes.length === 0) return;
 
-	// Debug log for inspecting refresh calls during bug reproductions.
-	console.log("[refreshWorkingChangeSet]", {
-		versionId: version.id,
-		commitId: version.commit_id,
-		workingCommitId: version.working_commit_id,
-		changeCount: args.changes.length,
-		timestamp,
-	});
-
 	const workingCommitRow = engine.executeSync(
-		db
+		internalQueryBuilder
 			.selectFrom("lix_internal_state_vtable")
 			.where("schema_key", "=", "lix_commit")
 			.where("entity_id", "=", version.working_commit_id)
@@ -66,15 +48,12 @@ export function refreshWorkingChangeSet(args: RefreshArgs): void {
 	const workingChangeSetId = workingCommit?.change_set_id as string | undefined;
 	if (!workingChangeSetId) return;
 
-	const userChanges = args.changes.filter(
-		(change) => !INTERNAL_SCHEMA_KEYS.has(change.schema_key)
-	);
-	if (userChanges.length === 0) return;
+	if (args.changes.length === 0) return;
 
 	const deletionChanges: WorkingChange[] = [];
 	const nonDeletionChanges: WorkingChange[] = [];
 
-	for (const change of userChanges) {
+	for (const change of args.changes) {
 		let isDeletion = true;
 		if (change.snapshot_content) {
 			try {
@@ -97,7 +76,7 @@ export function refreshWorkingChangeSet(args: RefreshArgs): void {
 		version.working_commit_id.length > 0
 	) {
 		const checkpointCommitResult = engine.executeSync(
-			db
+			internalQueryBuilder
 				.selectFrom("commit")
 				.innerJoin("entity_label", (join) =>
 					join
@@ -120,7 +99,7 @@ export function refreshWorkingChangeSet(args: RefreshArgs): void {
 		const checkpointCommitId = checkpointCommitResult[0]?.id;
 		if (checkpointCommitId) {
 			const checkpointRows = engine.executeSync(
-				db
+				internalQueryBuilder
 					.selectFrom("state_history")
 					.where("depth", "=", 0)
 					.where("commit_id", "=", checkpointCommitId)
@@ -156,7 +135,7 @@ export function refreshWorkingChangeSet(args: RefreshArgs): void {
 		file_id: string;
 	}> = [];
 	const seen = new Set<string>();
-	for (const change of userChanges) {
+	for (const change of args.changes) {
 		const key = `${change.entity_id}~${change.schema_key}~${change.file_id}`;
 		if (seen.has(key)) continue;
 		seen.add(key);
@@ -192,7 +171,7 @@ export function refreshWorkingChangeSet(args: RefreshArgs): void {
 			target_entities
 		`;
 
-		const cleanupQuery = db
+		const cleanupQuery = internalQueryBuilder
 			.selectFrom("lix_internal_state_vtable as cse")
 			.select([
 				sql`cse."_pk"`.as("_pk"),
@@ -211,7 +190,7 @@ export function refreshWorkingChangeSet(args: RefreshArgs): void {
 			.where("cse.schema_key", "=", "lix_change_set_element")
 			.where("cse.file_id", "=", "lix")
 			.where("cse.version_id", "=", "global")
-			.innerJoin(literalTable as any, (join) =>
+			.innerJoin(literalTable as any, (join: any) =>
 				join
 					.on(
 						sql`json_extract(cse.snapshot_content, '$.entity_id')`,
