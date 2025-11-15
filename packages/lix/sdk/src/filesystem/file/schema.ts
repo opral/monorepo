@@ -423,51 +423,157 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
         AND version_id = OLD.lixcol_version_id;
   END;
 
-  CREATE VIEW IF NOT EXISTS file_history AS
-  SELECT
-    json_extract(snapshot_content, '$.id') AS id,
-    json_extract(snapshot_content, '$.directory_id') AS directory_id,
-    json_extract(snapshot_content, '$.name') AS name,
-    json_extract(snapshot_content, '$.extension') AS extension,
-    compose_file_path_at_commit(
-      json_extract(snapshot_content, '$.directory_id'),
-      json_extract(snapshot_content, '$.name'),
-      json_extract(snapshot_content, '$.extension'),
-      root_commit_id,
-      depth
-    ) AS path,
-    materialize_file_data_at_commit(
-      json_extract(snapshot_content, '$.id'),
+	  CREATE VIEW IF NOT EXISTS file_history AS
+	  WITH descriptor_history AS (
+    SELECT
+      json_extract(snapshot_content, '$.id') AS id,
+      json_extract(snapshot_content, '$.directory_id') AS directory_id,
+      json_extract(snapshot_content, '$.name') AS name,
+      json_extract(snapshot_content, '$.extension') AS extension,
       compose_file_path_at_commit(
         json_extract(snapshot_content, '$.directory_id'),
         json_extract(snapshot_content, '$.name'),
         json_extract(snapshot_content, '$.extension'),
         root_commit_id,
         depth
-      ),
+      ) AS path,
+      materialize_file_data_at_commit(
+        json_extract(snapshot_content, '$.id'),
+        compose_file_path_at_commit(
+          json_extract(snapshot_content, '$.directory_id'),
+          json_extract(snapshot_content, '$.name'),
+          json_extract(snapshot_content, '$.extension'),
+          root_commit_id,
+          depth
+        ),
+        root_commit_id,
+        depth,
+        json_extract(snapshot_content, '$.metadata'),
+        json_extract(snapshot_content, '$.directory_id'),
+        json_extract(snapshot_content, '$.name'),
+        json_extract(snapshot_content, '$.extension'),
+        json_extract(snapshot_content, '$.hidden')
+      ) AS data,
+      json_extract(snapshot_content, '$.metadata') AS metadata,
+      json_extract(snapshot_content, '$.hidden') AS hidden,
+      entity_id AS lixcol_entity_id,
+      'lix_file_descriptor' AS lixcol_schema_key,
+      'global' AS lixcol_version_id,
+      file_id AS lixcol_file_id,
+      plugin_key AS lixcol_plugin_key,
+      schema_version AS lixcol_schema_version,
+      change_id AS lixcol_change_id,
+      commit_id AS lixcol_commit_id,
+      root_commit_id AS lixcol_root_commit_id,
+      depth AS lixcol_depth,
+      metadata AS lixcol_metadata
+    FROM state_history
+    WHERE schema_key = 'lix_file_descriptor'
+  ),
+  file_changes AS (
+    SELECT
+      c.id AS commit_id,
+      c.id AS root_commit_id,
+      cse.file_id AS file_id,
+      cse.change_id AS change_id,
+      cse.schema_key AS schema_key,
+      ch.created_at AS created_at,
+      ROW_NUMBER() OVER (
+        PARTITION BY c.id, cse.file_id
+        ORDER BY ch.created_at DESC
+      ) AS rn,
+      SUM(CASE WHEN cse.schema_key = 'lix_file_descriptor' THEN 1 ELSE 0 END)
+        OVER (PARTITION BY c.id, cse.file_id) AS descriptor_change_count
+    FROM commit_by_version c
+    JOIN change_set_element_by_version cse
+      ON c.change_set_id = cse.change_set_id
+      AND cse.lixcol_version_id = 'global'
+    JOIN change ch ON ch.id = cse.change_id
+    WHERE c.lixcol_version_id = 'global'
+      AND cse.file_id IS NOT NULL
+      AND cse.file_id != 'lix'
+  ),
+	  content_commits AS (
+    SELECT
+      commit_id,
       root_commit_id,
-      depth,
-      json_extract(snapshot_content, '$.metadata'),
-      json_extract(snapshot_content, '$.directory_id'),
-      json_extract(snapshot_content, '$.name'),
-      json_extract(snapshot_content, '$.extension'),
-      json_extract(snapshot_content, '$.hidden')
-    ) AS data,
-    json_extract(snapshot_content, '$.metadata') AS metadata,
-    json_extract(snapshot_content, '$.hidden') AS hidden,
-    entity_id AS lixcol_entity_id,
-    'lix_file_descriptor' AS lixcol_schema_key,
-    'global' AS lixcol_version_id,
-    file_id AS lixcol_file_id,
-    plugin_key AS lixcol_plugin_key,
-    schema_version AS lixcol_schema_version,
-    change_id AS lixcol_change_id,
-    commit_id AS lixcol_commit_id,
-    root_commit_id AS lixcol_root_commit_id,
-    depth AS lixcol_depth,
-    metadata AS lixcol_metadata
-  FROM state_history
-  WHERE schema_key = 'lix_file_descriptor';
+      file_id,
+      change_id
+    FROM file_changes
+    WHERE descriptor_change_count = 0
+      AND rn = 1
+  ),
+	  latest_descriptor AS (
+    SELECT *
+    FROM (
+      SELECT
+        sh.entity_id,
+        sh.file_id,
+        sh.plugin_key,
+        sh.schema_version,
+        sh.snapshot_content,
+        sh.metadata,
+        sh.root_commit_id,
+        ROW_NUMBER() OVER (
+          PARTITION BY sh.file_id, sh.root_commit_id
+          ORDER BY sh.depth ASC
+        ) AS rn
+      FROM state_history sh
+      WHERE sh.schema_key = 'lix_file_descriptor'
+    )
+    WHERE rn = 1
+  ),
+	  content_history AS (
+    SELECT
+      json_extract(ld.snapshot_content, '$.id') AS id,
+      json_extract(ld.snapshot_content, '$.directory_id') AS directory_id,
+      json_extract(ld.snapshot_content, '$.name') AS name,
+      json_extract(ld.snapshot_content, '$.extension') AS extension,
+      compose_file_path_at_commit(
+        json_extract(ld.snapshot_content, '$.directory_id'),
+        json_extract(ld.snapshot_content, '$.name'),
+        json_extract(ld.snapshot_content, '$.extension'),
+        sc.root_commit_id,
+        0
+      ) AS path,
+      materialize_file_data_at_commit(
+        json_extract(ld.snapshot_content, '$.id'),
+        compose_file_path_at_commit(
+          json_extract(ld.snapshot_content, '$.directory_id'),
+          json_extract(ld.snapshot_content, '$.name'),
+          json_extract(ld.snapshot_content, '$.extension'),
+          sc.root_commit_id,
+          0
+        ),
+        sc.root_commit_id,
+        0,
+        json_extract(ld.snapshot_content, '$.metadata'),
+        json_extract(ld.snapshot_content, '$.directory_id'),
+        json_extract(ld.snapshot_content, '$.name'),
+        json_extract(ld.snapshot_content, '$.extension'),
+        json_extract(ld.snapshot_content, '$.hidden')
+      ) AS data,
+      json_extract(ld.snapshot_content, '$.metadata') AS metadata,
+      json_extract(ld.snapshot_content, '$.hidden') AS hidden,
+      sc.file_id AS lixcol_entity_id,
+      'lix_file_descriptor' AS lixcol_schema_key,
+      'global' AS lixcol_version_id,
+      sc.file_id AS lixcol_file_id,
+      ld.plugin_key AS lixcol_plugin_key,
+      ld.schema_version AS lixcol_schema_version,
+      sc.change_id AS lixcol_change_id,
+      sc.commit_id AS lixcol_commit_id,
+      sc.root_commit_id AS lixcol_root_commit_id,
+      0 AS lixcol_depth,
+      ld.metadata AS lixcol_metadata
+	    FROM content_commits sc
+    JOIN latest_descriptor ld
+      ON ld.file_id = sc.file_id
+      AND ld.root_commit_id = sc.root_commit_id
+  )
+	  SELECT * FROM descriptor_history
+	  UNION ALL
+	  SELECT * FROM content_history;
 `);
 
 	// lix_internal_state_vtable is a virtual table; SQLite cannot attach indexes directly to it.

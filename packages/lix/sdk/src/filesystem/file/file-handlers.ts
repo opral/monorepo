@@ -23,6 +23,36 @@ type FileMutationInput = {
 	hidden?: boolean;
 };
 
+const normalizeMetadataValue = (value: unknown): unknown => {
+	if (value === null || value === undefined) {
+		return null;
+	}
+
+	if (Array.isArray(value)) {
+		return value.map((item) => normalizeMetadataValue(item));
+	}
+
+	if (typeof value === "object") {
+		return Object.keys(value as Record<string, unknown>)
+			.sort()
+			.reduce<Record<string, unknown>>((acc, key) => {
+				acc[key] = normalizeMetadataValue(
+					(value as Record<string, unknown>)[key]
+				);
+				return acc;
+			}, {});
+	}
+
+	return value;
+};
+
+const metadataEquals = (left: unknown, right: unknown): boolean => {
+	return (
+		JSON.stringify(normalizeMetadataValue(left)) ===
+		JSON.stringify(normalizeMetadataValue(right))
+	);
+};
+
 export function handleFileInsert(args: {
 	engine: Pick<LixEngine, "hooks" | "getAllPluginsSync" | "executeSync">;
 	file: FileMutationInput;
@@ -325,29 +355,55 @@ export function handleFileUpdate(args: {
 		data: args.file.data,
 	};
 
-	// Update the file metadata in state table FIRST
-	args.engine.executeSync(
+	// Only fetch descriptor-related columns to determine if descriptor needs updating
+	const currentDescriptorRows = args.engine.executeSync(
 		internalQueryBuilder
-			.updateTable("state_by_version")
-			.set({
-				snapshot_content: {
-					id: args.file.id,
-					directory_id: descriptorFields.directoryId,
-					name: descriptorFields.name,
-					extension: descriptorFields.extension ?? null,
-					metadata: descriptorFields.metadata ?? null,
-					hidden: descriptorFields.hidden,
-				},
-				metadata: descriptorFields.metadata ?? null,
-				untracked: args.untracked || false,
-			})
-			.where("entity_id", "=", args.file.id)
-			.where("schema_key", "=", "lix_file_descriptor")
-			.where("version_id", "=", args.versionId)
+			.selectFrom("file_by_version")
+			.where("id", "=", args.file.id)
+			.where("lixcol_version_id", "=", args.versionId)
+			.select(["directory_id", "name", "extension", "metadata", "hidden"])
 			.compile()
-	);
+	).rows as Pick<
+		LixFile,
+		"directory_id" | "name" | "extension" | "metadata" | "hidden"
+	>[];
+	const currentDescriptor = currentDescriptorRows[0];
 
-	// Get current file data for comparison
+	const descriptorChanged =
+		!currentDescriptor ||
+		currentDescriptor.directory_id !== pluginFile.directory_id ||
+		currentDescriptor.name !== pluginFile.name ||
+		currentDescriptor.extension !== pluginFile.extension ||
+		Boolean(currentDescriptor.hidden) !== pluginFile.hidden ||
+		!metadataEquals(
+			currentDescriptor.metadata ?? null,
+			pluginFile.metadata ?? null
+		);
+
+	if (descriptorChanged) {
+		args.engine.executeSync(
+			internalQueryBuilder
+				.updateTable("state_by_version")
+				.set({
+					snapshot_content: {
+						id: args.file.id,
+						directory_id: descriptorFields.directoryId,
+						name: descriptorFields.name,
+						extension: descriptorFields.extension ?? null,
+						metadata: descriptorFields.metadata ?? null,
+						hidden: descriptorFields.hidden,
+					},
+					metadata: descriptorFields.metadata ?? null,
+					untracked: args.untracked || false,
+				})
+				.where("entity_id", "=", args.file.id)
+				.where("schema_key", "=", "lix_file_descriptor")
+				.where("version_id", "=", args.versionId)
+				.compile()
+		);
+	}
+
+	// Fetch the full file row for plugin diffing and other mutation handling
 	const currentFileRows = args.engine.executeSync(
 		internalQueryBuilder
 			.selectFrom("file_by_version")

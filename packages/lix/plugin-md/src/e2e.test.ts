@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openLix } from "@lix-js/sdk";
+import { createCheckpoint, openLix, selectWorkingDiff } from "@lix-js/sdk";
 import { plugin } from "./index.js";
 import { AstSchemas } from "@opral/markdown-wc";
 
@@ -96,6 +96,57 @@ Another paragraph here.`;
 		return false;
 	});
 	expect(hasAnotherParagraph).toBe(true);
+});
+
+test("deleting a bullet removes only the list item in diffs", async () => {
+	const lix = await openLix({
+		providePlugins: [plugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	// Seed file with a single bullet
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file_with_list",
+			path: "/init.md",
+			data: new TextEncoder().encode("- init\n"),
+		})
+		.execute();
+
+	await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new TextEncoder().encode(""),
+		})
+		.where("id", "=", "file_with_list")
+		.execute();
+
+	const diffs = await selectWorkingDiff({ lix })
+		.where("status", "!=", "unchanged")
+		.orderBy("schema_key")
+		.selectAll()
+		.execute();
+
+	expect(diffs.length).toBe(2);
+
+	const listDiff = diffs.find((diff) => diff.schema_key === "markdown_wc_list");
+	const docDiff = diffs.find(
+		(diff) => diff.schema_key === "markdown_wc_document",
+	);
+
+	expect(listDiff?.status).toBe("removed");
+	expect(listDiff?.entity_id).toBe("mdwc_1");
+	expect(docDiff?.status).toBe("modified");
+	expect(docDiff?.entity_id).toBe("root");
 });
 
 test("programatically mutating entities should be reflected in the file", async () => {

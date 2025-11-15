@@ -890,6 +890,67 @@ test("file and file_by_version views expose change_id for blame and diff functio
 	expect(updatedFileResult[0]?.path).toBe("/test-change-id-updated.json");
 });
 
+test("updating file data does not create additional file descriptor changes", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: {
+					enabled: true,
+				},
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const fileId = "data-only-descriptor-stability";
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/data-only.json",
+			data: new TextEncoder().encode(JSON.stringify({ content: "initial" })),
+		})
+		.execute();
+
+	const fetchDescriptorChanges = async () =>
+		await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_file_descriptor")
+			.where("entity_id", "=", fileId)
+			.orderBy("created_at", "desc")
+			.select(["id", "created_at"])
+			.execute();
+
+	const descriptorChangesBefore = await fetchDescriptorChanges();
+	expect(descriptorChangesBefore.length).toBeGreaterThan(0);
+
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", fileId)
+		.set({
+			data: new TextEncoder().encode(JSON.stringify({ content: "updated" })),
+		})
+		.execute();
+
+	const descriptorChangesAfter = await fetchDescriptorChanges();
+
+	expect(descriptorChangesAfter.length).toBe(descriptorChangesBefore.length);
+	expect(descriptorChangesAfter[0]?.id).toBe(descriptorChangesBefore[0]?.id);
+
+	const latestChange = await lix.db
+		.selectFrom("change")
+		.where("file_id", "=", fileId)
+		.orderBy("created_at", "desc")
+		.select(["id", "schema_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(latestChange.id).not.toBe(descriptorChangesBefore[0]?.id);
+	expect(latestChange.schema_key).not.toBe("lix_file_descriptor");
+});
+
 test("file views expose writer_key for descriptor rows", async () => {
 	const lix = await openLix({ providePlugins: [mockJsonPlugin] });
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
