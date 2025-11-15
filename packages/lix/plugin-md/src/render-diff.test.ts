@@ -137,7 +137,10 @@ describe("renderPluginDiff", () => {
 			children: [{ type: "text", value }],
 		});
 
-		const makeRow = (id: string, values: Array<{ id: string; text: string }>): AstSchemas.TableRowNode => ({
+		const makeRow = (
+			id: string,
+			values: Array<{ id: string; text: string }>,
+		): AstSchemas.TableRowNode => ({
 			type: "tableRow",
 			data: { id },
 			children: values.map(({ id: cellId, text }) => makeCell(cellId, text)),
@@ -177,10 +180,10 @@ describe("renderPluginDiff", () => {
 									? {
 											...cell,
 											children: [{ type: "text", value: "Row 2 Col 25" }],
-									  }
+										}
 									: cell,
 							),
-					  }
+						}
 					: row,
 			),
 		};
@@ -199,9 +202,7 @@ describe("renderPluginDiff", () => {
 		const html = await renderDiff({ diffs });
 
 		expect(html).toContain("Row 2 Col 25");
-		expect(html).toMatch(
-			/data-id="cell-r2c2"[^>]*class="diff-modified"/,
-		);
+		expect(html).toMatch(/data-id="cell-r2c2"[^>]*class="diff-modified"/);
 	});
 	// Additional cases (add/remove-only, ordering) can be covered once the API stabilises.
 });

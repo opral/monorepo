@@ -438,16 +438,24 @@ test("blockquote nested content receives ids", async () => {
 			metadata: {},
 		},
 	} as DetectChangesArgs);
-	const blockquote = changes.find((c) => c.snapshot_content?.type === "blockquote");
+	const blockquote = changes.find(
+		(c) => c.snapshot_content?.type === "blockquote",
+	);
 	expect(blockquote).toBeTruthy();
 	expectAllDescendantsHaveIds(blockquote!.snapshot_content, "blockquote");
-	const list = (blockquote!.snapshot_content?.children ?? []).find((n: any) => n.type === "list");
+	const list = (blockquote!.snapshot_content?.children ?? []).find(
+		(n: any) => n.type === "list",
+	);
 	expect(list).toBeTruthy();
 	expect(list?.data?.id).toBeTruthy();
-	const listItem = (list?.children ?? []).find((n: any) => n.type === "listItem");
+	const listItem = (list?.children ?? []).find(
+		(n: any) => n.type === "listItem",
+	);
 	expect(listItem).toBeTruthy();
 	expect(listItem?.data?.id).toBeTruthy();
-	const paragraphInList = (listItem?.children ?? []).find((n: any) => n.type === "paragraph");
+	const paragraphInList = (listItem?.children ?? []).find(
+		(n: any) => n.type === "paragraph",
+	);
 	expect(paragraphInList).toBeTruthy();
 	expect(paragraphInList?.data?.id).toBeTruthy();
 });
@@ -473,13 +481,17 @@ test("list item grandchildren paragraphs keep ids", async () => {
 	const firstItem = (list!.snapshot_content?.children ?? [])[0];
 	expect(firstItem).toBeTruthy();
 	expect(firstItem?.data?.id).toBeTruthy();
-	const nestedList = (firstItem?.children ?? []).find((n: any) => n.type === "list");
+	const nestedList = (firstItem?.children ?? []).find(
+		(n: any) => n.type === "list",
+	);
 	expect(nestedList).toBeTruthy();
 	expect(nestedList?.data?.id).toBeTruthy();
 	const nestedItem = (nestedList?.children ?? [])[0];
 	expect(nestedItem).toBeTruthy();
 	expect(nestedItem?.data?.id).toBeTruthy();
-	const nestedParagraph = (nestedItem?.children ?? []).find((n: any) => n.type === "paragraph");
+	const nestedParagraph = (nestedItem?.children ?? []).find(
+		(n: any) => n.type === "paragraph",
+	);
 	expect(nestedParagraph).toBeTruthy();
 	expect(nestedParagraph?.data?.id).toBeTruthy();
 });
@@ -502,7 +514,10 @@ test("list item text edit preserves nested ids", async () => {
 				item.data = { ...(item.data || {}), id: `item_${idx}` };
 				item.children?.forEach((child: any, childIdx: number) => {
 					if (child.type === "paragraph")
-						child.data = { ...(child.data || {}), id: `para_${idx}_${childIdx}` };
+						child.data = {
+							...(child.data || {}),
+							id: `para_${idx}_${childIdx}`,
+						};
 				});
 			});
 		},
@@ -515,7 +530,9 @@ test("list item text edit preserves nested ids", async () => {
 	expect(mod).toBeTruthy();
 	const secondItem = mod?.snapshot_content?.children?.[1];
 	expect(secondItem?.data?.id).toBe("item_1");
-	const nestedParagraph = secondItem?.children?.find((n: any) => n.type === "paragraph");
+	const nestedParagraph = secondItem?.children?.find(
+		(n: any) => n.type === "paragraph",
+	);
 	expect(nestedParagraph?.data?.id).toBe("para_1_0");
 	expect(nestedParagraph?.children?.[0]?.value).toBe("Item updated");
 });
@@ -544,7 +561,10 @@ test("list reorder preserves item ids", async () => {
 				item.data = { ...(item.data || {}), id: `item_${idx + 1}` };
 				item.children?.forEach((child: any, childIdx: number) => {
 					if (child.type === "paragraph")
-						child.data = { ...(child.data || {}), id: `para_${idx + 1}_${childIdx}` };
+						child.data = {
+							...(child.data || {}),
+							id: `para_${idx + 1}_${childIdx}`,
+						};
 				});
 			});
 		},
@@ -553,7 +573,9 @@ test("list reorder preserves item ids", async () => {
 		querySync: createQuerySync({ engine: lix.engine! }),
 		after: { id: fileId, path: "list.md", data: encode(after), metadata: {} },
 	} as DetectChangesArgs);
-	const listSchemaKey = AstSchemas.schemasByType.list?.["x-lix-key"] as string | undefined;
+	const listSchemaKey = AstSchemas.schemasByType.list?.["x-lix-key"] as
+		| string
+		| undefined;
 	expect(listSchemaKey).toBeTruthy();
 	const mod = changes.find((c) => c.schema["x-lix-key"] === listSchemaKey);
 	expect(mod).toBeTruthy();
@@ -590,7 +612,9 @@ test("table headers and cells receive ids", async () => {
 	const bodyRow = (table!.snapshot_content?.children ?? [])[1];
 	expect(bodyRow?.type).toBe("tableRow");
 	expect(bodyRow?.data?.id).toBeTruthy();
-	const emphasis = bodyRow?.children?.[0]?.children?.find((n: any) => n.type === "emphasis");
+	const emphasis = bodyRow?.children?.[0]?.children?.find(
+		(n: any) => n.type === "emphasis",
+	);
 	expect(emphasis).toBeTruthy();
 	expect(emphasis?.data?.id).toBeTruthy();
 });
@@ -638,12 +662,13 @@ test("deeply nested structures assign ids throughout", async () => {
 	const list = changes.find((c) => c.snapshot_content?.type === "list");
 	expect(list).toBeTruthy();
 	expectAllDescendantsHaveIds(list!.snapshot_content, "list");
-	const nestedBlockquote = (list!.snapshot_content?.children ?? [])[0]?.children?.find(
-		(n: any) => n.type === "blockquote",
-	);
+	const nestedBlockquote = (list!.snapshot_content?.children ??
+		[])[0]?.children?.find((n: any) => n.type === "blockquote");
 	expect(nestedBlockquote).toBeTruthy();
 	expect(nestedBlockquote?.data?.id).toBeTruthy();
-	const nestedTable = (nestedBlockquote?.children ?? []).find((n: any) => n.type === "table");
+	const nestedTable = (nestedBlockquote?.children ?? []).find(
+		(n: any) => n.type === "table",
+	);
 	expect(nestedTable).toBeTruthy();
 	expect(nestedTable?.data?.id).toBeTruthy();
 	expectAllDescendantsHaveIds(nestedTable!, "table");

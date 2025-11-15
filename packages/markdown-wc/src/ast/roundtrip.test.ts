@@ -4,6 +4,8 @@ import { parseMarkdown } from "./parse-markdown.js"
 import { serializeAst } from "./serialize-ast.js"
 import { validateAst } from "./validate-ast.js"
 
+const ensureTrailingNewline = (value: string) => (value.endsWith("\n") ? value : `${value}\n`)
+
 function expectNodeType<T extends MarkdownNode["type"]>(
 	node: MarkdownNode | undefined,
 	type: T
@@ -34,7 +36,7 @@ describe("root & paragraph", () => {
 		expect(text.value).toBe("Hello world.")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 })
 
@@ -49,7 +51,7 @@ describe("heading", () => {
 		expect(heading.depth).toBe(level)
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 })
 
@@ -65,7 +67,7 @@ describe("inline marks", () => {
 		expect(text.value).toBe("bold")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("strong canonicalizes '__' to '**'", () => {
@@ -80,7 +82,7 @@ describe("inline marks", () => {
 		expect(text.value).toBe("bold")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(canonicalOutput)
+		expect(out).toBe(ensureTrailingNewline(canonicalOutput))
 	})
 
 	test("italic (underscore canonical)", () => {
@@ -94,7 +96,7 @@ describe("inline marks", () => {
 		expect(text.value).toBe("italic")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("italic canonicalizes '*' to '_'", () => {
@@ -109,7 +111,7 @@ describe("inline marks", () => {
 		expect(text.value).toBe("italic")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(canonicalOutput)
+		expect(out).toBe(ensureTrailingNewline(canonicalOutput))
 	})
 
 	test("inline code", () => {
@@ -122,7 +124,7 @@ describe("inline marks", () => {
 		expect(inlineCode.value).toBe("code")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("strikethrough", () => {
@@ -136,7 +138,7 @@ describe("inline marks", () => {
 		expect(text.value).toBe("strike")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 })
 
@@ -151,7 +153,7 @@ describe("code block", () => {
 		expect(code.value).toBe("const a = 1")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("fenced code without lang", () => {
@@ -164,7 +166,7 @@ describe("code block", () => {
 		expect(code.value).toBe("plain code")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 })
 
@@ -183,7 +185,7 @@ describe("lists", () => {
 		expect(text.value).toBe("one")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("unordered task list", () => {
@@ -204,7 +206,7 @@ describe("lists", () => {
 		expect(childAt(secondParagraph, 0, "text").value).toBe("todo")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("ordered list", () => {
@@ -220,7 +222,7 @@ describe("lists", () => {
 		expect(childAt(firstParagraph, 0, "text").value).toBe("one")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("ordered list with start", () => {
@@ -237,7 +239,7 @@ describe("lists", () => {
 		expect(childAt(secondParagraph, 0, "text").value).toBe("four")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 })
 
@@ -252,7 +254,7 @@ describe("blockquote", () => {
 		expect(childAt(para, 0, "text").value).toBe("quote")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 })
 
@@ -265,7 +267,7 @@ describe("thematic break & break", () => {
 
 		expectNodeType(ast.children[0], "thematicBreak")
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(canonicalOutput)
+		expect(out).toBe(ensureTrailingNewline(canonicalOutput))
 	})
 
 	test("hard line break (two spaces)", () => {
@@ -279,7 +281,7 @@ describe("thematic break & break", () => {
 		expect(hasBreak).toBe(true)
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(canonicalOutput)
+		expect(out).toBe(ensureTrailingNewline(canonicalOutput))
 	})
 
 	test("hard line break (backslash at EOL)", () => {
@@ -293,7 +295,7 @@ describe("thematic break & break", () => {
 		expect(hasBreak).toBe(true)
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(canonicalOutput)
+		expect(out).toBe(ensureTrailingNewline(canonicalOutput))
 	})
 })
 
@@ -317,7 +319,7 @@ describe("html", () => {
 		expect(textEnd.value).toBe(".")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("block html exact roundtrip", () => {
@@ -329,7 +331,7 @@ describe("html", () => {
 		expect(html.value).toBe('<div class="wrap">\n<p>hello</p>\n</div>')
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("custom element with explicit open/close is allowed (inline html)", () => {
@@ -342,7 +344,7 @@ describe("html", () => {
 		const first = childAt(para, 0, "html")
 		expect(first.value).toContain("doc-figure")
 
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("self-closing custom element is forbidden", () => {
@@ -364,7 +366,7 @@ describe("image & link", () => {
 		expect(img.title).toBe("title")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("link with text and title (exact roundtrip)", () => {
@@ -380,7 +382,7 @@ describe("image & link", () => {
 		expect(txt.value).toBe("text")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 })
 
@@ -403,7 +405,7 @@ describe("table", () => {
 		expect(childAt(childAt(row2, 1, "tableCell"), 0, "text").value).toBe("2")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("gfm table canonicalizes compact pipes to spaced", () => {
@@ -419,7 +421,7 @@ describe("table", () => {
 		expect(childAt(childAt(headerRow, 1, "tableCell"), 0, "text").value).toBe("b")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(canonicalOutput)
+		expect(out).toBe(ensureTrailingNewline(canonicalOutput))
 	})
 })
 
@@ -435,7 +437,7 @@ describe("frontmatter (yaml)", () => {
 		expect(heading.depth).toBe(1)
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(input)
+		expect(out).toBe(ensureTrailingNewline(input))
 	})
 
 	test("canonicalizes missing blank line after yaml", () => {
@@ -448,6 +450,6 @@ describe("frontmatter (yaml)", () => {
 		expect(yaml.value).toBe("title: test")
 
 		expect(validateAst(ast)).toBe(true)
-		expect(out).toBe(canonicalOutput)
+		expect(out).toBe(ensureTrailingNewline(canonicalOutput))
 	})
 })

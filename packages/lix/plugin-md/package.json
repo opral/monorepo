@@ -10,8 +10,8 @@
 	"scripts": {
 		"build": "rolldown -c",
 		"typecheck": "tsc --noEmit",
-		"test": "tsc --noEmit && vitest run",
-		"test:watch": "vitest",
+		"test": "tsc --noEmit && vitest run src/",
+		"test:watch": "vitest src/",
 		"lint": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --format stylish .",
 		"lint:fix": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --fix .",
 		"dev": "rolldown --watch -c",
