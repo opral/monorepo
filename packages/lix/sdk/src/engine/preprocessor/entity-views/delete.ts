@@ -10,6 +10,7 @@ import {
 	type TableReferenceNode,
 	type StatementSegmentNode,
 	type SubqueryExpressionNode,
+	type RawFragmentNode,
 } from "../sql-parser/nodes.js";
 import {
 	resolveEntityView,
@@ -19,6 +20,9 @@ import {
 	rewriteViewWhereClause,
 	combineWithAnd,
 	collectPointerColumnDescriptors,
+	extractPrimaryKeys,
+	collectPrimaryKeyEqualityExpressions,
+	buildEntityIdExpressionFromEquality,
 } from "./shared.js";
 import { rewriteSelectStatementTree } from "./select.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
@@ -155,6 +159,20 @@ function buildEntityViewDelete(
 		celEnvironment,
 	} = args;
 
+	const primaryKeys = extractPrimaryKeys(schema);
+	const entityIdMatch = collectPrimaryKeyEqualityExpressions({
+		whereClause: statement.where_clause,
+		primaryKeys,
+	});
+	const entityIdExpressionSql =
+		buildEntityIdExpressionFromEquality(entityIdMatch);
+	const entityIdCondition = entityIdExpressionSql
+		? createBinaryExpression(
+				columnReference(["state_by_version", "entity_id"]),
+				createRawExpression(entityIdExpressionSql)
+			)
+		: null;
+
 	const pointerDescriptors = collectPointerColumnDescriptors({ schema });
 	const pointerAliasToPath = new Map(
 		pointerDescriptors.map((descriptor) => [
@@ -192,6 +210,9 @@ function buildEntityViewDelete(
 			createLiteralExpression(storedSchemaKey)
 		),
 	];
+	if (entityIdCondition) {
+		extraConditions.push(entityIdCondition);
+	}
 
 	const versionOverride = overrides.has("lixcol_version_id")
 		? overrides.get("lixcol_version_id")
@@ -271,6 +292,13 @@ function createLiteralExpression(
 	return {
 		node_kind: "literal",
 		value,
+	};
+}
+
+function createRawExpression(sql: string): RawFragmentNode {
+	return {
+		node_kind: "raw_fragment",
+		sql_text: sql,
 	};
 }
 

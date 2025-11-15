@@ -29,6 +29,8 @@ import {
 	combineWithAnd,
 	rewriteViewWhereClause,
 	collectPointerColumnDescriptors,
+	collectPrimaryKeyEqualityExpressions,
+	buildEntityIdExpressionFromEquality,
 } from "./shared.js";
 import { rewriteSelectStatementTree } from "./select.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
@@ -286,6 +288,19 @@ function buildEntityViewUpdate(args: BuildUpdateArgs): StatementSegmentNode {
 	);
 	const pointerAliases = new Set(pointerAliasToPath.keys());
 
+	const entityIdMatch = collectPrimaryKeyEqualityExpressions({
+		whereClause: update.where_clause,
+		primaryKeys,
+	});
+	const entityIdExpressionSql =
+		buildEntityIdExpressionFromEquality(entityIdMatch);
+	const entityIdCondition = entityIdExpressionSql
+		? createBinaryExpression(
+				columnReference(["state_by_version", "entity_id"]),
+				createRawExpression(entityIdExpressionSql)
+			)
+		: null;
+
 	const rewriteResult = rewriteViewWhereClause(update.where_clause, {
 		propertyLowerToActual,
 		stateTableAlias: "state_by_version",
@@ -307,6 +322,7 @@ function buildEntityViewUpdate(args: BuildUpdateArgs): StatementSegmentNode {
 		basePredicate,
 		hasVersionReference,
 		versionCondition: versionAssignment.condition,
+		entityCondition: entityIdCondition,
 	});
 
 	const rewritten: UpdateStatementNode = {
@@ -424,6 +440,7 @@ function buildWhereClause(args: {
 	basePredicate: ExpressionNode | null;
 	hasVersionReference: boolean;
 	versionCondition: ExpressionNode;
+	entityCondition: ExpressionNode | null;
 }): ExpressionNode {
 	let finalPredicate = args.basePredicate ?? null;
 
@@ -439,6 +456,12 @@ function buildWhereClause(args: {
 		finalPredicate = finalPredicate
 			? combineWithAnd(finalPredicate, args.versionCondition)
 			: args.versionCondition;
+	}
+
+	if (args.entityCondition) {
+		finalPredicate = finalPredicate
+			? combineWithAnd(finalPredicate, args.entityCondition)
+			: args.entityCondition;
 	}
 
 	return finalPredicate;
