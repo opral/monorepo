@@ -21,7 +21,7 @@ import {
 	createCelEnvironment,
 	type CelEnvironment,
 } from "../cel-environment/cel-environment.js";
-import { getEntityViewSqlDefinitions } from "./entity-views/select.js";
+import { rewriteEntityViewSelect } from "./entity-views/select.js";
 import { rewriteEntityViewInsert } from "./entity-views/insert.js";
 import { rewriteEntityViewUpdate } from "./entity-views/update.js";
 import { rewriteEntityViewDelete } from "./entity-views/delete.js";
@@ -38,10 +38,11 @@ type EngineShape = Pick<
 >;
 
 const fullPipeline: PreprocessorStep[] = [
-	expandSqlViews,
 	rewriteEntityViewInsert,
 	rewriteEntityViewUpdate,
 	rewriteEntityViewDelete,
+	rewriteEntityViewSelect,
+	expandSqlViews,
 	cachePopulator,
 	rewriteActiveVersionSubquery,
 	rewriteVtableSelects,
@@ -231,8 +232,6 @@ function loadSqlViewMap(engine: EngineShape): Map<string, string> {
 		columnNames: [],
 	});
 
-	const entityViews = getEntityViewSqlDefinitions({ engine });
-
 	const map = new Map<string, string>();
 	for (const row of result as Array<Record<string, unknown>>) {
 		const name = typeof row.name === "string" ? row.name : undefined;
@@ -245,10 +244,6 @@ function loadSqlViewMap(engine: EngineShape): Map<string, string> {
 			continue;
 		}
 		map.set(name, selectSql);
-	}
-
-	for (const [name, sql] of entityViews.map) {
-		map.set(name, sql);
 	}
 
 	return map;

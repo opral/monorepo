@@ -18,7 +18,9 @@ import {
 	normalizeOverrideValue,
 	rewriteViewWhereClause,
 	combineWithAnd,
+	collectPointerColumnDescriptors,
 } from "./shared.js";
+import { rewriteSelectStatementTree } from "./select.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 import type { CelEnvironment } from "../../cel-environment/cel-environment.js";
@@ -111,6 +113,8 @@ function rewriteDeleteSegment(args: {
 		storedSchemaKey,
 		propertyLowerToActual,
 		celEnvironment: args.context.getCelEnvironment?.() ?? null,
+		context: args.context,
+		storedSchemas: args.storedSchemas,
 	});
 	if (!rewritten) {
 		return null;
@@ -135,6 +139,8 @@ type BuildDeleteArgs = {
 	readonly storedSchemaKey: string;
 	readonly propertyLowerToActual: Map<string, string>;
 	readonly celEnvironment: CelEnvironment | null;
+	readonly context: PreprocessorStepContext;
+	readonly storedSchemas: Map<string, unknown>;
 };
 
 function buildEntityViewDelete(
@@ -149,8 +155,26 @@ function buildEntityViewDelete(
 		celEnvironment,
 	} = args;
 
+	const pointerDescriptors = collectPointerColumnDescriptors({ schema });
+	const pointerAliasToPath = new Map(
+		pointerDescriptors.map((descriptor) => [
+			descriptor.alias.toLowerCase(),
+			descriptor.path,
+		])
+	);
+	const pointerSet = new Set(pointerAliasToPath.keys());
+
 	const rewrite = rewriteViewWhereClause(statement.where_clause, {
 		propertyLowerToActual,
+		stateTableAlias: "state_by_version",
+		pointerAliasToPath,
+		pushdownableJsonProperties: pointerSet,
+		rewriteSubqueryStatement: (subquery) =>
+			rewriteSelectStatementTree(
+				subquery,
+				args.context,
+				args.storedSchemas as Map<string, LixSchemaDefinition>
+			),
 	});
 	if (!rewrite) {
 		return null;

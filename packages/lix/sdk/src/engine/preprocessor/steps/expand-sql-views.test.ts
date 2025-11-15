@@ -8,10 +8,12 @@ import type {
 	CompoundSelectNode,
 	RelationNode,
 	SubqueryNode,
+	TableReferenceNode,
 } from "../sql-parser/nodes.js";
 import {
 	getIdentifierValue,
 	objectNameMatches,
+	normalizeIdentifierValue,
 } from "../sql-parser/ast-helpers.js";
 
 test("expands referenced view into a subquery", () => {
@@ -245,6 +247,262 @@ test("expands views defined by compound selects with nested view references", ()
 		throw new Error("expected base CTE reference in second branch");
 	}
 	expect(objectNameMatches(secondFrom.relation.name, "base")).toBe(true);
+});
+
+test("expands nested views emitted by expandView recursively", () => {
+	const statements = parseStatements(`
+		SELECT *
+		FROM outer_view
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"inner_view",
+					`
+						SELECT core.id
+						FROM core_table AS core
+					`,
+				],
+				[
+					"outer_view",
+					`
+						SELECT iv.id
+						FROM inner_view AS iv
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	const select = assertSingleSelect(rewritten) as SelectStatementNode;
+	const firstRelation = select.from_clauses[0]?.relation;
+	if (!firstRelation || firstRelation.node_kind !== "subquery") {
+		throw new Error("expected outer_view expansion");
+	}
+	const innerRelation = (firstRelation.statement as SelectStatementNode)
+		.from_clauses[0]?.relation;
+	if (!innerRelation || innerRelation.node_kind !== "subquery") {
+		throw new Error("expected inner_view expansion");
+	}
+	const innermostRelation = (innerRelation.statement as SelectStatementNode)
+		.from_clauses[0]?.relation;
+	if (!innermostRelation || innermostRelation.node_kind !== "table_reference") {
+		throw new Error("expected base table reference");
+	}
+	expect(objectNameMatches(innermostRelation.name, "core_table")).toBe(true);
+});
+
+test("fully expands file view and file_by_version view definitions", () => {
+	const statements = parseStatements(`
+		SELECT path, data
+		FROM file
+		WHERE path NOT LIKE ?
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"file",
+					`
+						SELECT 
+						        id,
+						        directory_id,
+						        name,
+			                extension,
+			                path,
+			                data,
+			                metadata,
+			                hidden,
+			                lixcol_entity_id,
+			                lixcol_schema_key,
+			                lixcol_file_id,
+			                lixcol_inherited_from_version_id,
+			                lixcol_change_id,
+			                lixcol_created_at,
+			                lixcol_updated_at,
+			                lixcol_commit_id,
+			                lixcol_writer_key,
+			                lixcol_untracked,
+			                lixcol_metadata
+			        FROM file_by_version
+			        WHERE lixcol_version_id IN (SELECT version_id FROM active_version)
+					`,
+				],
+				[
+					"file_by_version",
+					`
+						WITH file_rows AS (
+				            SELECT
+				                json_extract(fd.snapshot_content, '$.id') AS id,
+				                json_extract(fd.snapshot_content, '$.directory_id') AS directory_id,
+				                json_extract(fd.snapshot_content, '$.name') AS name,
+				                json_extract(fd.snapshot_content, '$.extension') AS extension,
+				                json_extract(fd.snapshot_content, '$.metadata') AS metadata,
+				                json_extract(fd.snapshot_content, '$.hidden') AS hidden,
+				                fd.entity_id,
+				                fd.version_id,
+				                fd.inherited_from_version_id,
+				                fd.untracked,
+				                fd.metadata AS change_metadata,
+				                fd.change_id,
+				                fd.created_at,
+				                fd.updated_at,
+				                fd.commit_id,
+				                fd.writer_key
+				            FROM state_by_version fd
+				            WHERE fd.schema_key = 'lix_file_descriptor'
+				        ),
+				        file_rows_with_paths AS (
+				            SELECT
+				                file_rows.*,
+				                file_path_cache.path AS cached_path,
+				                COALESCE(
+				                    file_path_cache.path,
+				                    compose_file_path(file_rows.id, file_rows.version_id)
+				                ) AS resolved_path
+				            FROM file_rows
+				            LEFT JOIN lix_internal_file_path_cache AS file_path_cache
+				              ON file_path_cache.file_id = file_rows.id
+				             AND file_path_cache.version_id = file_rows.version_id
+				        ),
+				        file_rows_with_lixcol AS (
+				            SELECT
+				                file_rows_with_paths.*,
+				                cache.latest_change_id AS cache_latest_change_id,
+				                cache.latest_commit_id AS cache_latest_commit_id,
+				                cache.created_at AS cache_created_at,
+				                cache.updated_at AS cache_updated_at,
+				                cache.writer_key AS cache_writer_key,
+				                CASE
+				                    WHEN cache.file_id IS NULL THEN 0
+				                    ELSE 1
+				                END AS has_lixcol_cache,
+				                CASE
+				                    WHEN cache.file_id IS NULL THEN select_file_lixcol(file_rows_with_paths.id, file_rows_with_paths.version_id)
+				                    ELSE NULL
+				                END AS computed_lixcol_json
+				            FROM file_rows_with_paths
+				            LEFT JOIN lix_internal_file_lixcol_cache AS cache
+				              ON cache.file_id = file_rows_with_paths.id
+				             AND cache.version_id = file_rows_with_paths.version_id
+				        )
+				        SELECT
+				                file_rows_with_lixcol.id,
+				                file_rows_with_lixcol.directory_id,
+				                file_rows_with_lixcol.name,
+				                file_rows_with_lixcol.extension,
+				                file_rows_with_lixcol.resolved_path AS path,
+				                select_file_data(
+				                        file_rows_with_lixcol.id,
+				                        file_rows_with_lixcol.resolved_path,
+				                        file_rows_with_lixcol.version_id,
+				                        file_rows_with_lixcol.metadata,
+				                        file_rows_with_lixcol.directory_id,
+				                        file_rows_with_lixcol.name,
+				                        file_rows_with_lixcol.extension,
+				                        file_rows_with_lixcol.hidden
+				                ) AS data,
+				                file_rows_with_lixcol.metadata,
+				                file_rows_with_lixcol.hidden,
+				                file_rows_with_lixcol.entity_id AS lixcol_entity_id,
+				                'lix_file_descriptor' AS lixcol_schema_key,
+				                file_rows_with_lixcol.entity_id AS lixcol_file_id,
+				                file_rows_with_lixcol.version_id AS lixcol_version_id,
+				                file_rows_with_lixcol.inherited_from_version_id AS lixcol_inherited_from_version_id,
+				                CASE
+				                    WHEN file_rows_with_lixcol.has_lixcol_cache = 1 THEN file_rows_with_lixcol.cache_latest_change_id
+				                    ELSE json_extract(file_rows_with_lixcol.computed_lixcol_json, '$.latest_change_id')
+				                END AS lixcol_change_id,
+				                CASE
+				                    WHEN file_rows_with_lixcol.has_lixcol_cache = 1 THEN file_rows_with_lixcol.cache_created_at
+				                    ELSE json_extract(file_rows_with_lixcol.computed_lixcol_json, '$.created_at')
+				                END AS lixcol_created_at,
+				                CASE
+				                    WHEN file_rows_with_lixcol.has_lixcol_cache = 1 THEN file_rows_with_lixcol.cache_updated_at
+				                    ELSE json_extract(file_rows_with_lixcol.computed_lixcol_json, '$.updated_at')
+				                END AS lixcol_updated_at,
+				                CASE
+				                    WHEN file_rows_with_lixcol.has_lixcol_cache = 1 THEN file_rows_with_lixcol.cache_latest_commit_id
+				                    ELSE json_extract(file_rows_with_lixcol.computed_lixcol_json, '$.latest_commit_id')
+				                END AS lixcol_commit_id,
+				                CASE
+				                    WHEN file_rows_with_lixcol.has_lixcol_cache = 1 THEN file_rows_with_lixcol.cache_writer_key
+				                    ELSE json_extract(file_rows_with_lixcol.computed_lixcol_json, '$.writer_key')
+				                END AS lixcol_writer_key,
+				                file_rows_with_lixcol.untracked AS lixcol_untracked,
+				                file_rows_with_lixcol.change_metadata AS lixcol_metadata
+				        FROM file_rows_with_lixcol
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	expect(hasTableReference(rewritten, "file")).toBe(false);
+	expect(hasTableReference(rewritten, "file_by_version")).toBe(false);
+});
+
+test("expands views when derived tables include nested WITH clauses", () => {
+	const statements = parseStatements(`
+		SELECT o.inner_id
+		FROM outer_view AS o
+	`);
+
+	const rewritten = expandSqlViews({
+		statements,
+		getStoredSchemas: () => new Map(),
+		getCacheTables: () => new Map(),
+		getSqlViews: () =>
+			new Map([
+				[
+					"outer_view",
+					`
+						WITH wrapped AS (
+							SELECT inner_id
+							FROM wrapper_view
+						)
+						SELECT inner_id
+						FROM wrapped
+					`,
+				],
+				[
+					"wrapper_view",
+					`
+						SELECT nested.inner_id
+						FROM (
+							WITH state_rows AS (
+								SELECT inner_id
+								FROM base_view
+							)
+							SELECT inner_id
+							FROM state_rows
+						) AS nested
+					`,
+				],
+				[
+					"base_view",
+					`
+						SELECT inner_id
+						FROM core_table
+					`,
+				],
+			]),
+		hasOpenTransaction: () => false,
+	});
+
+	expect(hasTableReference(rewritten, "outer_view")).toBe(false);
+	expect(hasTableReference(rewritten, "wrapper_view")).toBe(false);
+	expect(hasTableReference(rewritten, "base_view")).toBe(false);
+	expect(hasTableReference(rewritten, "core_table")).toBe(true);
 });
 
 test("expands views referenced inside NOT EXISTS predicates", () => {
@@ -486,7 +744,7 @@ test("does not prune views whose definitions use DISTINCT", () => {
 	]);
 });
 
-test("skips pruning when parent projection cannot be resolved precisely", () => {
+test("prunes view projection when parent concatenates referenced columns", () => {
 	const statements = parseStatements(`
 		SELECT sv.entity_id || sv.schema_key AS composite
 		FROM state_by_version AS sv
@@ -509,7 +767,14 @@ test("skips pruning when parent projection cannot be resolved precisely", () => 
 		hasOpenTransaction: () => false,
 	});
 
-	expect(rewritten).toBe(statements);
+	const select = assertSingleSelect(rewritten);
+	if (select.node_kind !== "select_statement") {
+		throw new Error("expected select statement");
+	}
+	expect(extractExpandedProjectionColumns(select, "sv")).toEqual([
+		"entity_id",
+		"schema_key",
+	]);
 });
 
 test("prunes nested view dependencies transitively", () => {
@@ -1005,4 +1270,84 @@ function readProjectionColumns(statement: SelectStatementNode): string[] {
 			return identifier ? [identifier.value] : [];
 		})
 		.filter((value, index, array) => array.indexOf(value) === index);
+}
+
+function collectTableNames(
+	statements: readonly SegmentedStatementNode[]
+): Set<string> {
+	const names = new Set<string>();
+
+	const recordTable = (relation: TableReferenceNode) => {
+		const last = relation.name.parts.at(-1);
+		if (last) {
+			names.add(normalizeIdentifierValue(last.value));
+		}
+	};
+
+	const visitRelation = (relation: RelationNode) => {
+		if (relation.node_kind === "table_reference") {
+			recordTable(relation);
+			return;
+		}
+		if (relation.node_kind === "subquery") {
+			visitStatement(relation.statement);
+		}
+	};
+
+	const visitSelect = (select: SelectStatementNode) => {
+		if (select.with_clause) {
+			for (const cte of select.with_clause.ctes) {
+				visitStatement(cte.statement);
+			}
+		}
+		for (const clause of select.from_clauses) {
+			visitRelation(clause.relation);
+			for (const join of clause.joins) {
+				visitRelation(join.relation);
+			}
+		}
+	};
+
+	const visitCompound = (compound: CompoundSelectNode) => {
+		if (compound.with_clause) {
+			for (const cte of compound.with_clause.ctes) {
+				visitStatement(cte.statement);
+			}
+		}
+		visitSelect(compound.first);
+		for (const branch of compound.compounds) {
+			visitSelect(branch.select);
+		}
+	};
+
+	const visitStatement = (
+		statement: SelectStatementNode | CompoundSelectNode
+	) => {
+		if (statement.node_kind === "select_statement") {
+			visitSelect(statement);
+		} else {
+			visitCompound(statement);
+		}
+	};
+
+	for (const segmented of statements) {
+		if (!segmented || segmented.node_kind !== "segmented_statement") continue;
+		for (const segment of segmented.segments) {
+			if (segment.node_kind === "select_statement") {
+				visitSelect(segment);
+			} else if (segment.node_kind === "compound_select") {
+				visitCompound(segment);
+			}
+		}
+	}
+
+	return names;
+}
+
+function hasTableReference(
+	statements: readonly SegmentedStatementNode[],
+	tableName: string
+): boolean {
+	const target = normalizeIdentifierValue(tableName);
+	return collectTableNames(statements).has(target);
 }

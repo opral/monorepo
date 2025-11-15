@@ -884,6 +884,10 @@ function formatBinaryOperator(operator: BinaryOperator): string {
 			return "LIKE";
 		case "is":
 			return "IS";
+		case "match":
+		case "glob":
+		case "regexp":
+			return operator.toUpperCase();
 		default:
 			return operator;
 	}

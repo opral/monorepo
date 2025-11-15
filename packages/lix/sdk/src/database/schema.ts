@@ -57,6 +57,7 @@ import type { ToKysely } from "../engine/entity-views/types.js";
 import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 import type { InternalFileDataCacheTable } from "../filesystem/file/cache/schema.js";
 import type { InternalFileLixcolCacheTable } from "../filesystem/file/cache/lixcol-schema.js";
+import type { InternalFilePathCacheTable } from "../filesystem/file/cache/path-cache-schema.js";
 import type { InternalTransactionStateTable } from "../state/transaction/schema.js";
 import type { InternalStateVTable } from "../state/vtable/vtable.js";
 
@@ -73,6 +74,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	lix_internal_state_vtable: InternalStateVTable;
 	lix_internal_file_data_cache: InternalFileDataCacheTable;
 	lix_internal_file_lixcol_cache: InternalFileLixcolCacheTable;
+	lix_internal_file_path_cache: InternalFilePathCacheTable;
 	lix_internal_state_writer: InternalStateWriterTable;
 };
 

@@ -17,6 +17,13 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 			extractTableNamesFromQueryNode(queryNode.from, tableNames);
 		}
 
+		// Handle UNION/INTERSECT/EXCEPT set operations
+		if (queryNode.setOperations) {
+			for (const set of queryNode.setOperations) {
+				extractTableNamesFromQueryNode(set, tableNames);
+			}
+		}
+
 		// Get table names from JOIN clauses
 		if (queryNode.joins) {
 			for (const join of queryNode.joins) {
@@ -50,6 +57,21 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 		const lixKey = schemaDefinition["x-lix-key"];
 		if (lixKey) {
 			tableToSchemaMap[schemaKey] = lixKey;
+		}
+	}
+
+	// Some consumer-visible views (e.g. "file") are backed by descriptor tables.
+	// Map those view names back to their descriptor schema keys for invalidation.
+	const descriptorViewAliases: Record<string, string> = {
+		file: "file_descriptor",
+		directory: "directory_descriptor",
+	};
+	for (const [viewName, descriptorName] of Object.entries(
+		descriptorViewAliases
+	)) {
+		const descriptorSchemaKey = tableToSchemaMap[descriptorName];
+		if (descriptorSchemaKey) {
+			tableToSchemaMap[viewName] = descriptorSchemaKey;
 		}
 	}
 
@@ -342,6 +364,11 @@ function extractTableNamesFromQueryNode(
 			if (node.from) {
 				extractTableNamesFromQueryNode(node.from, tableNames);
 			}
+			if (node.setOperations) {
+				for (const set of node.setOperations) {
+					extractTableNamesFromQueryNode(set, tableNames);
+				}
+			}
 			if (node.joins) {
 				for (const join of node.joins) {
 					extractTableNamesFromQueryNode(join, tableNames);
@@ -362,6 +389,13 @@ function extractTableNamesFromQueryNode(
 			// Look inside the aliased node
 			if (node.node) {
 				extractTableNamesFromQueryNode(node.node, tableNames);
+			}
+			break;
+		}
+
+		case "SetOperationNode": {
+			if (node.expression) {
+				extractTableNamesFromQueryNode(node.expression, tableNames);
 			}
 			break;
 		}

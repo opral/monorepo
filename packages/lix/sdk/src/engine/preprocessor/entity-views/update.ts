@@ -28,7 +28,9 @@ import {
 	resolveEntityView,
 	combineWithAnd,
 	rewriteViewWhereClause,
+	collectPointerColumnDescriptors,
 } from "./shared.js";
+import { rewriteSelectStatementTree } from "./select.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 import { expressionToSql } from "../sql-parser/compile.js";
@@ -125,6 +127,8 @@ function rewriteUpdateSegment(args: {
 		propertyLowerToActual,
 		celEnvironment: args.context.getCelEnvironment?.() ?? null,
 		viewName,
+		context: args.context,
+		storedSchemas: args.storedSchemas,
 	});
 
 	args.context.trace?.push({
@@ -147,6 +151,8 @@ type BuildUpdateArgs = {
 	readonly propertyLowerToActual: Map<string, string>;
 	readonly celEnvironment: CelEnvironment | null;
 	readonly viewName: string;
+	readonly context: PreprocessorStepContext;
+	readonly storedSchemas: Map<string, unknown>;
 };
 
 type AssignmentInfo = {
@@ -162,6 +168,8 @@ function buildEntityViewUpdate(args: BuildUpdateArgs): StatementSegmentNode {
 		propertyLowerToActual,
 		celEnvironment,
 		viewName,
+		context,
+		storedSchemas,
 	} = args;
 	const schemaKey = String(schema["x-lix-key"] ?? storedSchemaKey);
 	const fail = (detail: string): never => {
@@ -269,8 +277,26 @@ function buildEntityViewUpdate(args: BuildUpdateArgs): StatementSegmentNode {
 		createSetClause("untracked", untrackedExpr),
 	];
 
+	const pointerDescriptors = collectPointerColumnDescriptors({ schema });
+	const pointerAliasToPath = new Map(
+		pointerDescriptors.map((descriptor) => [
+			descriptor.alias.toLowerCase(),
+			descriptor.path,
+		])
+	);
+	const pointerAliases = new Set(pointerAliasToPath.keys());
+
 	const rewriteResult = rewriteViewWhereClause(update.where_clause, {
 		propertyLowerToActual,
+		stateTableAlias: "state_by_version",
+		pointerAliasToPath,
+		pushdownableJsonProperties: pointerAliases,
+		rewriteSubqueryStatement: (subquery) =>
+			rewriteSelectStatementTree(
+				subquery,
+				context,
+				storedSchemas as Map<string, LixSchemaDefinition>
+			),
 	});
 	const { expression: basePredicate, hasVersionReference } =
 		rewriteResult ?? fail("WHERE clause contains unsupported expressions");

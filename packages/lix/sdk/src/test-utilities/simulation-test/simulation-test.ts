@@ -25,6 +25,10 @@ type SimulationTestOptions = {
 	 * Array of simulations to run. If not specified, runs default simulations (normal, cache-miss, engine-boundary).
 	 */
 	simulations?: SimulationTestDef[];
+	/**
+	 * Optional timeout passed to each generated Vitest test case.
+	 */
+	timeout?: number;
 };
 
 // Default simulations available
@@ -111,44 +115,46 @@ export function simulationTest(
 
 	const expectedValues = new Map<string, any>();
 
-	test.each(simulationsToRun)(`${name} > $name`, async (simulation) => {
-		vi.restoreAllMocks();
+	test.each(simulationsToRun)(
+		`${name} > $name`,
+		async (simulation) => {
+			vi.restoreAllMocks();
 
-		let callIndex = 0;
-		const isFirstSimulation = simulation === simulationsToRun[0];
+			let callIndex = 0;
+			const isFirstSimulation = simulation === simulationsToRun[0];
 
-		const deterministicExpect = (
-			actual: any,
-			diffCallback?: (args: { actual: any; expected: any }) => void
-		) => {
-			const key = `expect-${callIndex++}`;
+			const deterministicExpect = (
+				actual: any,
+				diffCallback?: (args: { actual: any; expected: any }) => void
+			) => {
+				const key = `expect-${callIndex++}`;
 
-			if (isFirstSimulation) {
-				// Store expected values in first simulation
-				expectedValues.set(key, actual);
-			} else {
-				// Verify values match first simulation in subsequent simulations
-				const expected = expectedValues.get(key);
-				if (expected !== undefined) {
-					// Check if values differ before invoking callback
-					let valuesMatch = false;
-					try {
-						expect(actual).toEqual(expected);
-						valuesMatch = true;
-					} catch {
-						// Values don't match
-					}
+				if (isFirstSimulation) {
+					// Store expected values in first simulation
+					expectedValues.set(key, actual);
+				} else {
+					// Verify values match first simulation in subsequent simulations
+					const expected = expectedValues.get(key);
+					if (expected !== undefined) {
+						// Check if values differ before invoking callback
+						let valuesMatch = false;
+						try {
+							expect(actual).toEqual(expected);
+							valuesMatch = true;
+						} catch {
+							// Values don't match
+						}
 
-					// Only call diff callback if values actually differ
-					if (!valuesMatch && diffCallback) {
-						diffCallback({
-							actual,
-							expected,
-						});
-					}
+						// Only call diff callback if values actually differ
+						if (!valuesMatch && diffCallback) {
+							diffCallback({
+								actual,
+								expected,
+							});
+						}
 
-					// Always perform the assertion (will throw if values differ)
-					const errorMessage = `
+						// Always perform the assertion (will throw if values differ)
+						const errorMessage = `
 SIMULATION DETERMINISM VIOLATION
 
 expectDeterministic() failed: Values differ between simulations
@@ -160,27 +166,29 @@ Use expectDeterministic() for values that must be identical across simulations.
 Use regular expect() for simulation-specific assertions.
 
 `;
-					expect(actual, errorMessage).toEqual(expected);
+						expect(actual, errorMessage).toEqual(expected);
+					}
 				}
-			}
 
-			return expect(actual);
-		};
+				return expect(actual);
+			};
 
-		// Create openSimulatedLix function
-		const openSimulatedLix = async (args: Parameters<typeof openLix>[0]) => {
-			// Open lix with the provided arguments
-			const lix = await openLix(args);
+			// Create openSimulatedLix function
+			const openSimulatedLix = async (args: Parameters<typeof openLix>[0]) => {
+				// Open lix with the provided arguments
+				const lix = await openLix(args);
 
-			// Apply simulation setup
-			return await simulation.setup(lix);
-		};
+				// Apply simulation setup
+				return await simulation.setup(lix);
+			};
 
-		await fn({
-			simulation: simulation,
-			openSimulatedLix,
-			expectDeterministic: deterministicExpect as ExpectDeterministic,
-		});
-		vi.restoreAllMocks(); // Restore original implementations, not just reset
-	});
+			await fn({
+				simulation: simulation,
+				openSimulatedLix,
+				expectDeterministic: deterministicExpect as ExpectDeterministic,
+			});
+			vi.restoreAllMocks(); // Restore original implementations, not just reset
+		},
+		options?.timeout
+	);
 }

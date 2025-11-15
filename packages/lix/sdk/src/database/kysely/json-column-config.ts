@@ -1,11 +1,15 @@
-import { LixSchemaViewMap } from "../database/schema-view-map.js";
-import { isJsonType } from "../schema-definition/json-type.js";
+import { LixSchemaViewMap } from "../schema-view-map.js";
+import { isJsonType } from "../../schema-definition/json-type.js";
 
 export function buildJsonColumnConfig(args?: {
 	includeChangeView?: boolean;
 }): Record<string, Record<string, { type: any }>> {
 	const includeChangeView = args?.includeChangeView ?? true;
 	const result: Record<string, Record<string, { type: any }>> = {};
+
+	const fileJsonColumns = {
+		metadata: { type: "object" },
+	} as const;
 
 	const hardcoded: Record<string, Record<string, { type: any }>> = {
 		state: {
@@ -20,6 +24,10 @@ export function buildJsonColumnConfig(args?: {
 			snapshot_content: { type: "object" },
 			metadata: { type: "object" },
 		},
+		// hardcoded special handling for file views
+		file: fileJsonColumns,
+		file_by_version: fileJsonColumns,
+		file_history: fileJsonColumns,
 	};
 
 	if (includeChangeView) {

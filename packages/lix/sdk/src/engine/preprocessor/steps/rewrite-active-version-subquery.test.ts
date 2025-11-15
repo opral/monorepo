@@ -71,3 +71,13 @@ test("leaves unrelated subqueries untouched", () => {
 	const sql = compileStatements(rewritten);
 	expect(sql).toEqual(compileSql(original));
 });
+
+test("replaces direct subquery expressions, e.g. insert values", () => {
+	const rewritten = run(`
+		INSERT INTO state_by_version (version_id, entity_id)
+		VALUES ((SELECT version_id FROM active_version), 'entity')
+	`);
+	const sql = compileStatements(rewritten);
+	expect(sql).toMatch(/VALUES\s*\(\s*'feature_branch'/i);
+	expect(sql).not.toMatch(/SELECT\s+version_id\s+FROM\s+active_version/i);
+});

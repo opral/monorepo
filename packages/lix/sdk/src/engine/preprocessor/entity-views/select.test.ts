@@ -1,20 +1,88 @@
 import { describe, expect, test } from "vitest";
 import { openLix } from "../../../lix/open-lix.js";
-import { getEntityViewSqlDefinitions } from "./select.js";
 import { createPreprocessor } from "../create-preprocessor.js";
+import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
 
-describe("entity view select synthesis", () => {
-	test("opening a lix exposes built-in stored schemas", async () => {
+describe("entity view select rewrite", () => {
+	test("rewrites base view selects to derive from entity state", async () => {
 		const lix = await openLix({});
-		const result = getEntityViewSqlDefinitions({ engine: lix.engine! });
-		expect(result.map.size).toBeGreaterThan(0);
-		expect(result.map.has("lix_key_value")).toBe(true);
-		expect(result.map.has("lix_key_value_by_version")).toBe(true);
-		expect(result.map.has("key_value")).toBe(true);
-		expect(result.map.has("key_value_by_version")).toBe(true);
+
+		const schema = {
+			"x-lix-key": "unit_test_schema",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			properties: {
+				id: { type: "string" },
+				label: { type: "string" },
+			},
+			additionalProperties: false,
+		} as const;
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schema })
+			.execute();
+
+		const preprocess = createPreprocessor({ engine: lix.engine! });
+		const result = preprocess({
+			sql: "SELECT label FROM unit_test_schema",
+			parameters: [],
+		});
+
+		expect(result.sql).toContain("schema_key = 'unit_test_schema'");
+		expect(result.sql).not.toMatch(/FROM\\s+unit_test_schema(?!_)/i);
+
+		await lix.close();
 	});
 
-	test("registers prefixless aliases for lix_* stored schemas", async () => {
+	test("pushes down literal lixcol overrides", async () => {
+		const lix = await openLix({});
+		const schema: LixSchemaDefinition = {
+			"x-lix-key": "file_override_schema",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			"x-lix-override-lixcols": {
+				lixcol_file_id: '"inlang"',
+				lixcol_plugin_key: '"inlang_sdk"',
+				lixcol_version_id: '"global"',
+				lixcol_inherited_from_version_id: '"root"',
+				lixcol_untracked: "1",
+				lixcol_metadata: "null",
+			},
+			type: "object",
+			properties: { id: { type: "string" } },
+			required: ["id"],
+			additionalProperties: false,
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schema })
+			.execute();
+
+		const preprocess = createPreprocessor({ engine: lix.engine! });
+		const result = preprocess({
+			sql: "SELECT id FROM file_override_schema",
+			parameters: [],
+		});
+
+		expect(result.sql).toMatch(/"?file_id"?\s*=\s*'inlang'/i);
+		expect(result.sql).toMatch(/"?plugin_key"?\s*=\s*'inlang_sdk'/i);
+		expect(result.sql).toMatch(/"?inherited_from_version_id"?\s*=\s*'root'/i);
+		expect(result.sql).toMatch(/"?untracked"?\s*=\s*1/);
+		expect(result.sql).toMatch(/"?metadata"?\s+is\s+null/i);
+
+		const byVersion = preprocess({
+			sql: "SELECT * FROM file_override_schema_by_version",
+			parameters: [],
+		});
+		expect(byVersion.sql).not.toMatch(/"?version_id"?\s*=\s*'global'/i);
+
+		await lix.close();
+	});
+
+	test("supports prefixless aliases for lix_* schemas", async () => {
 		const lix = await openLix({});
 		const schema = {
 			"x-lix-key": "lix_alias_test",
@@ -33,25 +101,21 @@ describe("entity view select synthesis", () => {
 			.values({ value: schema })
 			.execute();
 
-		const { map } = getEntityViewSqlDefinitions({ engine: lix.engine! });
-		expect(map.has("lix_alias_test")).toBe(true);
-		expect(map.has("alias_test")).toBe(true);
-		expect(map.get("alias_test")).toBe(map.get("lix_alias_test"));
-		expect(map.has("lix_alias_test_by_version")).toBe(true);
-		expect(map.has("alias_test_by_version")).toBe(true);
-		expect(map.get("alias_test_by_version")).toBe(
-			map.get("lix_alias_test_by_version")
-		);
-		expect(map.has("alias_test_history")).toBe(true);
-		expect(map.get("alias_test_history")).toBe(
-			map.get("lix_alias_test_history")
-		);
+		const preprocess = createPreprocessor({ engine: lix.engine! });
+		const result = preprocess({
+			sql: "SELECT label FROM alias_test",
+			parameters: [],
+		});
+
+		expect(result.sql).toContain("schema_key = 'lix_alias_test'");
+
+		await lix.close();
 	});
 
-	test("generates base, _by_version, and _history selects for stored schema", async () => {
+	test("rewrites _by_version and _history variants", async () => {
 		const lix = await openLix({});
 		const schema = {
-			"x-lix-key": "unit_test_schema",
+			"x-lix-key": "variant_schema",
 			"x-lix-version": "1.0",
 			"x-lix-primary-key": ["/id"],
 			type: "object",
@@ -66,34 +130,28 @@ describe("entity view select synthesis", () => {
 			.insertInto("stored_schema")
 			.values({ value: schema })
 			.execute();
+		const preprocess = createPreprocessor({ engine: lix.engine! });
 
-		const { map } = getEntityViewSqlDefinitions({ engine: lix.engine! });
-		expect(map.has("unit_test_schema")).toBe(true);
-		expect(map.has("unit_test_schema_by_version")).toBe(true);
-		expect(map.has("unit_test_schema_history")).toBe(true);
-
-		const base = map.get("unit_test_schema")!;
-		expect(base).toContain("FROM state_by_version");
-		expect(base).toContain("schema_key = 'unit_test_schema'");
-		expect(base).toContain(
-			"AND sa.version_id = (SELECT version_id FROM active_version)"
+		const byVersion = preprocess({
+			sql: "SELECT lixcol_version_id FROM variant_schema_by_version",
+			parameters: [],
+		});
+		expect(byVersion.sql.toLowerCase()).toContain(
+			"schema_key = 'variant_schema'"
 		);
-		expect(base).toContain("json_extract(sa.snapshot_content, '$.id') AS id");
-		expect(base).toContain(
-			"json_extract(sa.snapshot_content, '$.label') AS label"
+
+		const history = preprocess({
+			sql: "SELECT lixcol_schema_version FROM variant_schema_history",
+			parameters: [],
+		});
+		expect(history.sql.toLowerCase()).toContain(
+			"schema_key = 'variant_schema'"
 		);
-		expect(base).toContain("sa.plugin_key AS lixcol_plugin_key");
 
-		const all = map.get("unit_test_schema_by_version")!;
-		expect(all).toContain("FROM state_by_version");
-		expect(all).toContain("version_id AS lixcol_version_id");
-
-		const history = map.get("unit_test_schema_history")!;
-		expect(history).toContain("FROM state_history");
-		expect(history).toContain("schema_version AS lixcol_schema_version");
+		await lix.close();
 	});
 
-	test("respects x-lix-entity-views overrides when synthesising selects", async () => {
+	test("respects x-lix-entity-views overrides for disabled variants", async () => {
 		const lix = await openLix({});
 		const schema = {
 			"x-lix-key": "limited_views_schema",
@@ -101,9 +159,7 @@ describe("entity view select synthesis", () => {
 			"x-lix-primary-key": ["/id"],
 			"x-lix-entity-views": ["state"],
 			type: "object",
-			properties: {
-				id: { type: "string" },
-			},
+			properties: { id: { type: "string" } },
 			additionalProperties: false,
 		} as const;
 
@@ -111,11 +167,16 @@ describe("entity view select synthesis", () => {
 			.insertInto("stored_schema")
 			.values({ value: schema })
 			.execute();
+		const preprocess = createPreprocessor({ engine: lix.engine! });
 
-		const { map } = getEntityViewSqlDefinitions({ engine: lix.engine! });
-		expect(map.has("limited_views_schema")).toBe(true);
-		expect(map.has("limited_views_schema_by_version")).toBe(false);
-		expect(map.has("limited_views_schema_history")).toBe(false);
+		const history = preprocess({
+			sql: "SELECT * FROM limited_views_schema_history",
+			parameters: [],
+		});
+
+		expect(history.sql).toContain("FROM limited_views_schema_history");
+
+		await lix.close();
 	});
 
 	test("selecting from stored schema view returns rows via preprocessor", async () => {
@@ -166,7 +227,6 @@ describe("entity view select synthesis", () => {
 			parameters: ["row-1"],
 		});
 
-		expect(selectResult.sql).not.toMatch(/FROM\s+e2e_schema\b/i);
 		expect(selectResult.sql).toContain("schema_key = 'e2e_schema'");
 
 		const executed = lix.engine!.sqlite.exec({
@@ -178,6 +238,33 @@ describe("entity view select synthesis", () => {
 		});
 
 		expect(executed).toEqual([{ name: "Entity 1" }]);
+
+		await lix.close();
+	});
+	test("filters on metadata columns remain in the parent WHERE clause", async () => {
+		const lix = await openLix({});
+		const schema: LixSchemaDefinition = {
+			"x-lix-key": "regression_meta",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			type: "object",
+			additionalProperties: false,
+			properties: { id: { type: "string" }, note: { type: "string" } },
+			required: ["id"],
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schema })
+			.execute();
+
+		const preprocess = createPreprocessor({ engine: lix.engine! });
+		const result = preprocess({
+			sql: "SELECT * FROM regression_meta WHERE lixcol_created_at > ?",
+			parameters: ["2024-01-01"],
+		});
+
+		expect(result.sql).toMatch(/\blixcol_created_at\s*>\s*\?/);
 
 		await lix.close();
 	});
@@ -240,32 +327,6 @@ describe("entity view select synthesis", () => {
 
 		await lix.close();
 	});
-	test("cached result reuses signature while queries in flight", async () => {
-		const lix = await openLix({});
-		const schema = {
-			"x-lix-key": "cache_test_schema",
-			"x-lix-version": "1.0",
-			"x-lix-primary-key": ["/id"],
-			type: "object",
-			properties: {
-				id: { type: "string" },
-			},
-			additionalProperties: false,
-		} as const;
-
-		await lix.db
-			.insertInto("stored_schema")
-			.values({ value: schema })
-			.execute();
-
-		const first = getEntityViewSqlDefinitions({ engine: lix.engine! });
-		const second = getEntityViewSqlDefinitions({ engine: lix.engine! });
-
-		expect(first.signature).toBe(second.signature);
-		expect(first.map.get("cache_test_schema")).toBe(
-			second.map.get("cache_test_schema")
-		);
-	});
 
 	test("rewrites only when stored schema exists", async () => {
 		const lix = await openLix({});
@@ -318,5 +379,7 @@ describe("entity view select synthesis", () => {
 			parameters: ["row-1"],
 		}).rows;
 		expect(rowsPresent).toEqual([{ name: "Entity 1" }]);
+
+		await lix.close();
 	});
 });

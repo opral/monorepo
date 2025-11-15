@@ -702,6 +702,27 @@ class ToAstVisitor extends BaseVisitor {
 		return current;
 	}
 
+	public concatenation_expression(ctx: {
+		operands?: CstNode[];
+		operators?: IToken[];
+	}): ExpressionNode {
+		const operands =
+			ctx.operands?.map((operand) => this.visit(operand) as ExpressionNode) ??
+			[];
+		if (operands.length === 0) {
+			throw new Error("concatenation expression missing operands");
+		}
+		const operators = ctx.operators ?? [];
+		let current = operands[0]!;
+		for (let index = 0; index < operators.length; index += 1) {
+			const operatorToken = operators[index]!;
+			const operator = mapArithmeticOperator(operatorToken.image);
+			const right = operands[index + 1]!;
+			current = createBinaryExpression(current, operator, right);
+		}
+		return current;
+	}
+
 	public unary_expression(ctx: {
 		unaryOperator?: IToken[];
 		operand?: CstNode[];
@@ -1226,6 +1247,7 @@ function createUnaryExpression(
 
 function mapArithmeticOperator(image: string): BinaryOperator {
 	switch (image) {
+		case "||":
 		case "+":
 		case "-":
 		case "*":
@@ -1249,9 +1271,14 @@ function mapComparisonOperator(image: string): BinaryOperator {
 		case "<":
 		case "<=":
 			return image as BinaryOperator;
-		default:
-			throw new Error(`unsupported comparison operator '${image}'`);
 	}
+
+	const keyword = image.toLowerCase();
+	if (keyword === "match" || keyword === "glob" || keyword === "regexp") {
+		return keyword as BinaryOperator;
+	}
+
+	throw new Error(`unsupported comparison operator '${image}'`);
 }
 
 function normalizeJoinType(value: string): JoinType {

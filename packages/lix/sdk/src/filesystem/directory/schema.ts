@@ -219,6 +219,55 @@ export function applyDirectoryDatabaseSchema(args: {
 				COALESCE(NEW.hidden, OLD.hidden),
 				(SELECT version_id FROM active_version)
 			);
+
+			INSERT OR REPLACE INTO lix_internal_file_path_cache (
+				file_id,
+				version_id,
+				directory_id,
+				name,
+				extension,
+				path
+			)
+			WITH RECURSIVE affected_directories(id) AS (
+				SELECT COALESCE(NEW.id, OLD.id)
+
+				UNION ALL
+
+				SELECT json_extract(child.snapshot_content, '$.id')
+				FROM state_by_version child
+				JOIN affected_directories parent
+					ON json_extract(child.snapshot_content, '$.parent_id') = parent.id
+				WHERE child.schema_key = '${schemaKey}'
+					AND child.version_id = (SELECT version_id FROM active_version)
+			)
+			SELECT
+				file_state.entity_id,
+				file_state.version_id,
+				json_extract(file_state.snapshot_content, '$.directory_id') AS directory_id,
+				json_extract(file_state.snapshot_content, '$.name') AS name,
+				json_extract(file_state.snapshot_content, '$.extension') AS extension,
+				CASE
+					WHEN json_extract(file_state.snapshot_content, '$.directory_id') IS NULL THEN
+						CASE
+							WHEN json_extract(file_state.snapshot_content, '$.extension') IS NULL OR json_extract(file_state.snapshot_content, '$.extension') = ''
+								THEN '/' || json_extract(file_state.snapshot_content, '$.name')
+							ELSE '/' || json_extract(file_state.snapshot_content, '$.name') || '.' || json_extract(file_state.snapshot_content, '$.extension')
+						END
+					ELSE
+						CASE
+							WHEN json_extract(file_state.snapshot_content, '$.extension') IS NULL OR json_extract(file_state.snapshot_content, '$.extension') = ''
+								THEN COALESCE(dp.path, '/') || json_extract(file_state.snapshot_content, '$.name')
+							ELSE COALESCE(dp.path, '/') || json_extract(file_state.snapshot_content, '$.name') || '.' || json_extract(file_state.snapshot_content, '$.extension')
+						END
+				END AS resolved_path
+			FROM state_by_version AS file_state
+			JOIN affected_directories ad
+				ON json_extract(file_state.snapshot_content, '$.directory_id') = ad.id
+			LEFT JOIN directory_by_version AS dp
+				ON dp.id = json_extract(file_state.snapshot_content, '$.directory_id')
+				AND dp.lixcol_version_id = file_state.version_id
+			WHERE file_state.schema_key = 'lix_file_descriptor'
+				AND file_state.version_id = (SELECT version_id FROM active_version);
 		END;
 	`);
 
@@ -279,6 +328,56 @@ export function applyDirectoryDatabaseSchema(args: {
 				COALESCE(NEW.hidden, OLD.hidden),
 				COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id)
 			);
+
+			-- Refresh file path cache for files within the affected directory subtree
+			INSERT OR REPLACE INTO lix_internal_file_path_cache (
+				file_id,
+				version_id,
+				directory_id,
+				name,
+				extension,
+				path
+			)
+			WITH RECURSIVE affected_directories(id) AS (
+				SELECT COALESCE(NEW.id, OLD.id)
+
+				UNION ALL
+
+				SELECT json_extract(child.snapshot_content, '$.id')
+				FROM state_by_version child
+				JOIN affected_directories parent
+					ON json_extract(child.snapshot_content, '$.parent_id') = parent.id
+				WHERE child.schema_key = '${schemaKey}'
+					AND child.version_id = COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id)
+			)
+			SELECT
+				file_state.entity_id,
+				file_state.version_id,
+				json_extract(file_state.snapshot_content, '$.directory_id') AS directory_id,
+				json_extract(file_state.snapshot_content, '$.name') AS name,
+				json_extract(file_state.snapshot_content, '$.extension') AS extension,
+				CASE
+					WHEN json_extract(file_state.snapshot_content, '$.directory_id') IS NULL THEN
+						CASE
+							WHEN json_extract(file_state.snapshot_content, '$.extension') IS NULL OR json_extract(file_state.snapshot_content, '$.extension') = ''
+								THEN '/' || json_extract(file_state.snapshot_content, '$.name')
+							ELSE '/' || json_extract(file_state.snapshot_content, '$.name') || '.' || json_extract(file_state.snapshot_content, '$.extension')
+						END
+					ELSE
+						CASE
+							WHEN json_extract(file_state.snapshot_content, '$.extension') IS NULL OR json_extract(file_state.snapshot_content, '$.extension') = ''
+								THEN COALESCE(dp.path, '/') || json_extract(file_state.snapshot_content, '$.name')
+							ELSE COALESCE(dp.path, '/') || json_extract(file_state.snapshot_content, '$.name') || '.' || json_extract(file_state.snapshot_content, '$.extension')
+						END
+				END AS resolved_path
+			FROM state_by_version AS file_state
+			JOIN affected_directories ad
+				ON json_extract(file_state.snapshot_content, '$.directory_id') = ad.id
+			LEFT JOIN directory_by_version AS dp
+				ON dp.id = json_extract(file_state.snapshot_content, '$.directory_id')
+				AND dp.lixcol_version_id = file_state.version_id
+			WHERE file_state.schema_key = 'lix_file_descriptor'
+				AND file_state.version_id = COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id);
 		END;
 	`);
 
