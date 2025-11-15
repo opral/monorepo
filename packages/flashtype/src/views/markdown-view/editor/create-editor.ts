@@ -7,7 +7,7 @@ import {
 	astToTiptapDoc,
 	tiptapDocToAst,
 } from "@opral/markdown-wc/tiptap";
-import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
+import { parseMarkdown, AstSchemas, normalizeAst } from "@opral/markdown-wc";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { handlePaste as defaultHandlePaste } from "./handle-paste";
 
@@ -22,6 +22,27 @@ type CreateEditorArgs = {
 	persistDebounceMs?: number;
 	persistState?: boolean;
 	writerKey?: string | null;
+};
+
+const cloneSnapshot = <T>(value: T): T =>
+	typeof structuredClone === "function"
+		? structuredClone(value)
+		: (JSON.parse(JSON.stringify(value)) as T);
+
+const canonicalizeSnapshot = <T>(value: T): T =>
+	value == null ? value : normalizeAst(cloneSnapshot(value as any));
+
+const snapshotFingerprint = (value: unknown): string => {
+	if (value === null || value === undefined) return "null";
+	if (typeof value !== "object") return JSON.stringify(value);
+	if (Array.isArray(value)) {
+		return `[${value.map((entry) => snapshotFingerprint(entry)).join(",")}]`;
+	}
+	const obj = value as Record<string, unknown>;
+	const keys = Object.keys(obj).sort();
+	return `{${keys
+		.map((key) => `${JSON.stringify(key)}:${snapshotFingerprint(obj[key])}`)
+		.join(",")}}`;
 };
 
 // Plain TipTap Editor factory (no React). Useful for unit/integration tests.
@@ -52,25 +73,31 @@ export function createEditor(args: CreateEditorArgs): Editor {
 
 	async function upsertNodes(trx: any, fileId: string, nodes: any[]) {
 		for (const node of nodes) {
-			const schema = (AstSchemas.schemasByType as any)[node.type];
+			const schema = AstSchemas.schemasByType[node.type];
 			if (!schema) continue;
-			const schemaKey = schema["x-lix-key"] as string;
-			const schemaVersion = schema["x-lix-version"] as string;
+			const schemaKey = schema["x-lix-key"];
+			const schemaVersion = schema["x-lix-version"];
 			const entityId = node.data.id as string;
+			const normalizedNode = canonicalizeSnapshot(node);
+			const normalizedFingerprint = snapshotFingerprint(normalizedNode);
 
 			const existing = await trx
 				.selectFrom("state")
-				.where("file_id", "=", fileId as any)
+				.where("file_id", "=", fileId)
 				.where("schema_key", "=", schemaKey)
 				.where("entity_id", "=", entityId)
-				.select(["entity_id"]) // small row
+				.select(["entity_id", "snapshot_content"]) // small row
 				.executeTakeFirst();
 
 			if (existing) {
+				const prevSnapshot = canonicalizeSnapshot(existing.snapshot_content);
+				if (snapshotFingerprint(prevSnapshot) === normalizedFingerprint) {
+					continue;
+				}
 				await trx
 					.updateTable("state")
-					.set({ snapshot_content: node as any })
-					.where("file_id", "=", fileId as any)
+					.set({ snapshot_content: normalizedNode })
+					.where("file_id", "=", fileId)
 					.where("schema_key", "=", schemaKey)
 					.where("entity_id", "=", entityId)
 					.execute();
@@ -79,11 +106,11 @@ export function createEditor(args: CreateEditorArgs): Editor {
 					.insertInto("state")
 					.values({
 						entity_id: entityId,
-						file_id: fileId as any,
+						file_id: fileId,
 						schema_key: schemaKey,
 						schema_version: schemaVersion,
 						plugin_key: mdPlugin.key,
-						snapshot_content: node as any,
+						snapshot_content: normalizedNode,
 					})
 					.execute();
 			}
@@ -99,10 +126,21 @@ export function createEditor(args: CreateEditorArgs): Editor {
 			.selectFrom("state")
 			.where("file_id", "=", fileId as any)
 			.where("schema_key", "=", rootKey)
-			.select(["entity_id"]) // small row
+			.select(["entity_id", "snapshot_content"]) // small row
 			.executeTakeFirst();
 
 		if (existingRoot) {
+			const prevOrder = Array.isArray(
+				(existingRoot as any).snapshot_content?.order,
+			)
+				? ((existingRoot as any).snapshot_content.order as string[])
+				: [];
+			if (
+				order.length === prevOrder.length &&
+				order.every((value, index) => value === prevOrder[index])
+			) {
+				return;
+			}
 			await trx
 				.updateTable("state")
 				.set({ snapshot_content: { order } })
