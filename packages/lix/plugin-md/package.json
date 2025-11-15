@@ -9,6 +9,7 @@
 	},
 	"scripts": {
 		"build": "rolldown -c",
+		"typecheck": "tsc --noEmit",
 		"test": "tsc --noEmit && vitest run",
 		"test:watch": "vitest",
 		"lint": "oxlint --tsconfig ./tsconfig.json --ignore-path .gitignore --format stylish .",

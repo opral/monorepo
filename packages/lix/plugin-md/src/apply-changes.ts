@@ -1,6 +1,7 @@
 import { type LixPlugin } from "@lix-js/sdk";
 import { serializeAst, AstSchemas } from "@opral/markdown-wc";
-import type { Ast } from "@opral/markdown-wc";
+import type { Ast, MarkdownNode } from "@opral/markdown-wc";
+import { syncNodeIds } from "./sync-node-ids.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	changes,
@@ -16,6 +17,16 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 
 	// Build new AST from latest node snapshots
 	const ast: Ast = { type: "root", children: [] } as any;
+	const seenIds = new Set<string>();
+	let nestedIdCounter = 0;
+	const mintNestedId = (): string => {
+		let id: string;
+		do {
+			id = `mdwc_${(++nestedIdCounter).toString(36)}`;
+		} while (seenIds.has(id));
+		seenIds.add(id);
+		return id;
+	};
 
 	// Group latest snapshot per entity_id across any markdown-wc node schema
 	const latestById = new Map<string, (typeof changes)[number]>();
@@ -44,6 +55,12 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 		if (change?.snapshot_content) {
 			const node = change.snapshot_content as any;
 			node.data = { ...node.data, id };
+			syncNodeIds({
+				before: undefined,
+				after: node as MarkdownNode,
+				seenIds,
+				mintId: mintNestedId,
+			});
 			(ast.children as any[]).push(node);
 		}
 	}

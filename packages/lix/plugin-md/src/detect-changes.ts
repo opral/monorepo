@@ -15,8 +15,9 @@ import type {
 	LixSchemaDefinition,
 } from "@lix-js/sdk";
 import { parseMarkdown, AstSchemas, serializeAst } from "@opral/markdown-wc";
-import type { Ast } from "@opral/markdown-wc";
+import type { Ast, MarkdownNode } from "@opral/markdown-wc";
 import { makeDiff, cleanupSemantic } from "@sanity/diff-match-patch";
+import { syncNodeIds } from "./sync-node-ids.js";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	querySync,
@@ -222,15 +223,38 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 		() => "",
 	);
 	const afterNodesById = new Map<string, any>();
-	const seenIds = new Set<string>(Array.from(beforeNodes.keys()));
+	const seenIds = new Set<string>();
+	const reservedIds = new Set<string>(Array.from(beforeNodes.keys()));
 	let idCounter = 0;
 	const mintNewId = (): string => {
 		let id: string;
 		do {
 			id = `mdwc_${(++idCounter).toString(36)}`;
-		} while (seenIds.has(id));
+		} while (seenIds.has(id) || reservedIds.has(id));
 		seenIds.add(id);
 		return id;
+	};
+	const collectExistingIds = (node: any) => {
+		if (!node || typeof node !== "object") return;
+		const existingId = (node as any)?.data?.id;
+		if (typeof existingId === "string" && existingId.length > 0) {
+			reservedIds.add(existingId);
+		}
+		const children = Array.isArray(node.children) ? node.children : [];
+		for (const child of children) collectExistingIds(child);
+	};
+	for (const [, node] of beforeNodes) {
+		collectExistingIds(node);
+	}
+	const ensureNestedIds = (beforeNode: any | undefined, afterNode: any) => {
+		if (!afterNode || typeof afterNode !== "object") return;
+		syncNodeIds({
+			before: beforeNode as MarkdownNode | undefined,
+			after: afterNode as MarkdownNode,
+			seenIds,
+			mintId: mintNewId,
+			reservedIds,
+		});
 	};
 
 	// Stage 0: unique (type,key) present exactly once in before and after
@@ -241,7 +265,9 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 		const id = ids[0]!;
 		const idx = afterIdxs[0]!;
 		const a = afterInfos[idx]!;
+		const beforeNode = beforeNodes.get(id);
 		a.node.data = { ...a.node.data, id };
+		ensureNestedIds(beforeNode, a.node);
 		afterNodesById.set(id, a.node);
 		afterOrder[idx] = id;
 		used.add(id);
@@ -300,7 +326,9 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 		}
 		if (idFromExact) {
 			const id = idFromExact;
+			const beforeNode = beforeNodes.get(id);
 			a.node.data = { ...a.node.data, id };
+			ensureNestedIds(beforeNode, a.node);
 			afterNodesById.set(id, a.node);
 			afterOrder[a.idx] = id;
 			used.add(id);
@@ -368,7 +396,9 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 			}
 		}
 		if (!id) id = mintNewId();
+		const beforeNode = beforeNodes.get(id);
 		a.node.data = { ...a.node.data, id };
+		ensureNestedIds(beforeNode, a.node);
 		afterNodesById.set(id, a.node);
 		afterOrder[a.idx] = id;
 		if (id && beforeNodes.has(id)) used.add(id);
