@@ -57,10 +57,36 @@ export async function serializeToHtml(
 		.use(remarkSerializeDataAttributes as any)
 		.use(remarkRehype as any, { allowDangerousHtml: true })
 		.run(ast)
+
+	if (options.diffHints) {
+		addWrapperIdsToTables(hast)
+	}
 	// hast -> html
 	const html = unified()
 		.use(rehypeStringify, { allowDangerousHtml: true })
 		.stringify(hast as any)
 	// Normalize newlines to compact form matching TipTap's getHTML()
 	return String(html).replace(/\n/g, "")
+}
+
+function addWrapperIdsToTables(tree: any) {
+	visit(tree, (node: any) => {
+		if (!node || node.type !== "element" || node.tagName !== "table") return
+		const tableId =
+			typeof node.properties?.["data-id"] === "string"
+				? (node.properties["data-id"] as string)
+				: undefined
+		if (!tableId) return
+		for (const child of node.children ?? []) {
+			if (!child || child.type !== "element") continue
+			const tag = child.tagName
+			if (tag !== "thead" && tag !== "tbody" && tag !== "tfoot") continue
+			const props = (child.properties ||= {})
+			if (props["data-id"]) continue
+			props["data-id"] = `${tableId}_${tag}`
+			if (props["data-diff-show-when-removed"] == null) {
+				props["data-diff-show-when-removed"] = ""
+			}
+		}
+	})
 }

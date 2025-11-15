@@ -64,15 +64,11 @@ test("assign-data-id assigns ids to nested nodes", () => {
 				content: [
 					{
 						type: "listItem",
-						content: [
-							{ type: "paragraph", content: [{ type: "text", text: "Item 1" }] },
-						],
+						content: [{ type: "paragraph", content: [{ type: "text", text: "Item 1" }] }],
 					},
 					{
 						type: "listItem",
-						content: [
-							{ type: "paragraph", content: [{ type: "text", text: "Item 2" }] },
-						],
+						content: [{ type: "paragraph", content: [{ type: "text", text: "Item 2" }] }],
 					},
 				],
 			},
@@ -121,14 +117,22 @@ test("assign-data-id dedupes nested duplicate ids", () => {
 						type: "listItem",
 						attrs: { data: { id: "DUP" } },
 						content: [
-							{ type: "paragraph", attrs: { data: { id: "P_DUP" } }, content: [{ type: "text", text: "Item 1" }] },
+							{
+								type: "paragraph",
+								attrs: { data: { id: "P_DUP" } },
+								content: [{ type: "text", text: "Item 1" }],
+							},
 						],
 					},
 					{
 						type: "listItem",
 						attrs: { data: { id: "DUP" } },
 						content: [
-							{ type: "paragraph", attrs: { data: { id: "P_DUP" } }, content: [{ type: "text", text: "Item 2" }] },
+							{
+								type: "paragraph",
+								attrs: { data: { id: "P_DUP" } },
+								content: [{ type: "text", text: "Item 2" }],
+							},
 						],
 					},
 				],

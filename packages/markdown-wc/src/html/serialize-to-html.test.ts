@@ -111,3 +111,41 @@ test("serializeToHtml with diffHints adds data-diff-mode=words to table cells", 
 		'<td data-id="cell-1" data-diff-mode="words" data-diff-show-when-removed="">World</td>'
 	)
 })
+
+test("serializeToHtml with diffHints assigns ids to table wrappers", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "table",
+				data: { id: "table-1" },
+				children: [
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "header-1" },
+								children: [{ type: "text", value: "Column 1" }],
+							},
+						],
+					},
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "cell-1" },
+								children: [{ type: "text", value: "Value" }],
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { diffHints: true })
+	expect(html).toContain('<thead data-id="table-1_thead" data-diff-show-when-removed="">')
+	expect(html).toContain('<tbody data-id="table-1_tbody" data-diff-show-when-removed="">')
+})
