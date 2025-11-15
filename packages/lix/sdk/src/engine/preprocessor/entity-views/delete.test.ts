@@ -213,6 +213,15 @@ test("rewrites deletes for stored schema views", async () => {
 		equalityMatches(
 			equalities,
 			(left, right) =>
+				isColumnReference(left, ["state_by_version", "entity_id"]) &&
+				right.node_kind === "raw_fragment"
+		)
+	).toBe(true);
+
+	expect(
+		equalityMatches(
+			equalities,
+			(left, right) =>
 				isColumnReference(left, ["state_by_version", "version_id"]) &&
 				(right.node_kind === "subquery_expression" ||
 					right.node_kind === "literal")
@@ -237,6 +246,61 @@ test("rewrites deletes for stored schema views", async () => {
 	}).rows;
 
 	expect(rows).toEqual([]);
+	await lix.close();
+});
+
+test("entity_id predicate is included when deleting by primary key", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "delete_push_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_sdk"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const rewrite = preprocess({
+		sql: "DELETE FROM delete_push_schema WHERE id = ?",
+		parameters: ["row-1"],
+	});
+
+	expect(rewrite.sql).toContain("state_by_version.entity_id = ?1");
+	await lix.close();
+});
+
+test("entity_id predicate is omitted if schema defines no primary key", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "delete_pkless_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const rewrite = preprocess({
+		sql: "DELETE FROM delete_pkless_schema WHERE name = ?",
+		parameters: ["orphan"],
+	});
+
+	expect(rewrite.sql).not.toContain("state_by_version.entity_id");
 	await lix.close();
 });
 
@@ -367,6 +431,15 @@ test("rewrites deletes for _by_version views", async () => {
 			equalities,
 			(left, right) =>
 				isJsonExtractForProperty(left, "id") && right.node_kind === "parameter"
+		)
+	).toBe(true);
+
+	expect(
+		equalityMatches(
+			equalities,
+			(left, right) =>
+				isColumnReference(left, ["state_by_version", "entity_id"]) &&
+				right.node_kind === "raw_fragment"
 		)
 	).toBe(true);
 

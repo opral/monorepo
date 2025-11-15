@@ -46,6 +46,7 @@ test("rewrites updates for stored schema views", async () => {
 	expect(updateResult.sql).toContain(
 		"json_extract(state_by_version.snapshot_content, '$.id') = ?"
 	);
+	expect(updateResult.sql).toContain("state_by_version.entity_id");
 	expect(updateResult.parameters).toEqual(["Updated", "row-1"]);
 
 	lix.engine!.executeSync({
@@ -70,6 +71,40 @@ test("rewrites updates for stored schema views", async () => {
 			name: "Updated",
 		},
 	]);
+	await lix.close();
+});
+
+test("entity_id predicate is pushed down when rewriting entity view updates", async () => {
+	const lix = await openLix({});
+	const schema = {
+		"x-lix-key": "pk_push_schema",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["/id"],
+		"x-lix-override-lixcols": {
+			lixcol_file_id: '"lix"',
+			lixcol_plugin_key: '"lix_sdk"',
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id", "value"],
+		additionalProperties: false,
+	} satisfies LixSchemaDefinition;
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const rewrite = preprocess({
+		sql: "UPDATE pk_push_schema SET value = ? WHERE id = ?",
+		parameters: ["next", "row-7"],
+	});
+
+	const normalizedSql = rewrite.sql.replace(/\s+/g, " ");
+	expect(normalizedSql).toContain("state_by_version.entity_id = ?2");
+	expect(rewrite.parameters).toEqual(["next", "row-7"]);
+
 	await lix.close();
 });
 

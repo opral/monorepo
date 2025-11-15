@@ -602,6 +602,8 @@ function buildStateRowExpressions(args: {
 		return undefined;
 	};
 
+	const resolvedDefaults = new Map<string, unknown>();
+
 	const renderPrimaryKeyExpr = (
 		descriptor: PrimaryKeyDescriptor
 	): string | null => {
@@ -637,7 +639,7 @@ function buildStateRowExpressions(args: {
 			literal,
 			cel: args.celEnvironment,
 			context: args.celContext,
-			resolvedDefaults: new Map(),
+			resolvedDefaults,
 		});
 		if (!defaultExpr || defaultExpr === "NULL") {
 			return null;
@@ -736,7 +738,6 @@ function buildStateRowExpressions(args: {
 	const untrackedExpr: ExpressionLike =
 		expressionFor("lixcol_untracked") ?? literal(untrackedValue);
 
-	const resolvedDefaults = new Map<string, unknown>();
 	const snapshotContentExpr = buildSnapshotObjectExpression({
 		schema: args.schema,
 		columnMap,

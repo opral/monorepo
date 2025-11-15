@@ -9,6 +9,7 @@ import {
 	type FunctionCallExpressionNode,
 	type FunctionCallArgumentNode,
 	type LiteralNode,
+	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type SelectStatementNode,
 	type OrderByItemNode,
@@ -17,6 +18,7 @@ import {
 	type WindowFrameNode,
 	type WindowFrameBoundNode,
 } from "../sql-parser/nodes.js";
+import { expressionToSql } from "../sql-parser/compile.js";
 import { getColumnName } from "../sql-parser/ast-helpers.js";
 import { Ident, QIdent } from "../../sql-parser/tokenizer.js";
 import {
@@ -827,6 +829,115 @@ export function collectEqualityConditions(
 
 	visit(whereClause);
 	return conditions;
+}
+
+function buildPrimaryKeyMatcherMap(
+	primaryKeys: PrimaryKeyDescriptor[] | null
+): Map<string, number> {
+	const map = new Map<string, number>();
+	if (!primaryKeys || primaryKeys.length === 0) {
+		return map;
+	}
+	for (let index = 0; index < primaryKeys.length; index++) {
+		const descriptor = primaryKeys[index];
+		if (!descriptor) continue;
+		const allSegments = new Set<string>();
+		allSegments.add(descriptor.column.toLowerCase());
+		allSegments.add(descriptor.rootColumn.toLowerCase());
+		for (const segment of descriptor.path) {
+			allSegments.add(segment.toLowerCase());
+		}
+		const aliasInfo = buildPointerAliasInfo(
+			descriptor.path.at(-1) ?? descriptor.column
+		);
+		if (aliasInfo) {
+			for (const matcher of aliasInfo.matchers) {
+				allSegments.add(matcher.toLowerCase());
+			}
+		}
+		for (const matcher of allSegments) {
+			if (!map.has(matcher)) {
+				map.set(matcher, index);
+			}
+		}
+	}
+	return map;
+}
+
+function serializeEqualityValue(expression: ExpressionNode): string | null {
+	switch (expression.node_kind) {
+		case "parameter": {
+			const position = expression.position ?? -1;
+			if (position >= 0) {
+				return `?${position + 1}`;
+			}
+			const placeholder = expression.placeholder ?? "?";
+			return placeholder === "" ? "?" : placeholder;
+		}
+		case "literal":
+			return expressionToSql(expression);
+		case "raw_fragment":
+			return expression.sql_text;
+		default:
+			return null;
+	}
+}
+
+export function collectPrimaryKeyEqualityExpressions(args: {
+	whereClause: ExpressionNode | RawFragmentNode | null;
+	primaryKeys: PrimaryKeyDescriptor[] | null;
+}): string[] | null {
+	const { whereClause, primaryKeys } = args;
+	if (!primaryKeys || primaryKeys.length === 0) {
+		return null;
+	}
+	const equalityConditions = collectEqualityConditions(whereClause);
+	if (equalityConditions.length === 0) {
+		return null;
+	}
+	const matcherMap = buildPrimaryKeyMatcherMap(primaryKeys);
+	if (matcherMap.size === 0) {
+		return null;
+	}
+	const matched = new Map<number, string>();
+	for (const condition of equalityConditions) {
+		const targetIndex = matcherMap.get(condition.column);
+		if (targetIndex === undefined) {
+			continue;
+		}
+		if (matched.has(targetIndex)) {
+			continue;
+		}
+		const sql = serializeEqualityValue(condition.expression);
+		if (!sql) {
+			return null;
+		}
+		matched.set(targetIndex, sql);
+	}
+	if (matched.size !== primaryKeys.length) {
+		return null;
+	}
+	const ordered = primaryKeys.map((_pk, index) => matched.get(index));
+	if (ordered.some((value) => value === undefined)) {
+		return null;
+	}
+	return ordered as string[];
+}
+
+export function buildEntityIdExpressionFromEquality(
+	parts: readonly string[] | null
+): string | null {
+	if (!parts || parts.length === 0) {
+		return null;
+	}
+	if (parts.some((part) => part.length === 0)) {
+		return null;
+	}
+	if (parts.length === 1) {
+		return parts[0] ?? null;
+	}
+	const wrapped = parts.map((part) => `(${part})`);
+	return `(${wrapped.join(" || '~' || ")})`;
 }
 
 const VIEW_METADATA_COLUMN_MAP: Record<string, string> = {
