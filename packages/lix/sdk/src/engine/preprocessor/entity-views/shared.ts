@@ -4,11 +4,13 @@ import {
 	columnReference,
 	identifier,
 	type ColumnReferenceNode,
+	type CompoundSelectNode,
 	type ExpressionNode,
 	type FunctionCallExpressionNode,
 	type FunctionCallArgumentNode,
 	type LiteralNode,
 	type RawFragmentNode,
+	type SelectStatementNode,
 	type OrderByItemNode,
 	type WindowSpecificationNode,
 	type WindowReferenceNode,
@@ -25,6 +27,7 @@ import { isJsonType } from "../../../schema-definition/json-type.js";
 import type { CelEnvironment } from "../../cel-environment/cel-environment.js";
 import { getStoredSchema } from "../../../stored-schema/get-stored-schema.js";
 import type { LixSchemaDefinition } from "../../../schema-definition/definition.js";
+import { LixSchemaViewMap } from "../../../database/schema-view-map.js";
 
 export const escapeSqlString = (input: string): string =>
 	input.replace(/'/g, "''");
@@ -295,7 +298,7 @@ export function extractPrimaryKeys(
 
 export interface PointerColumnDescriptor {
 	readonly alias: string;
-	readonly expression: string;
+	readonly path: readonly string[];
 	readonly matchers: readonly string[];
 }
 
@@ -333,7 +336,7 @@ export function collectPointerColumnDescriptors(args: {
 			continue;
 		}
 
-		const expression = `json_extract(snapshot_content, '${buildSqliteJsonPath(descriptor.path)}')`;
+		const expressionPath = descriptor.path;
 		const matcherSet = new Set<string>();
 		for (const matcher of aliasInfo.matchers) {
 			if (matcher.length > 0) {
@@ -346,7 +349,7 @@ export function collectPointerColumnDescriptors(args: {
 
 		descriptors.set(aliasLower, {
 			alias: aliasInfo.alias,
-			expression,
+			path: expressionPath,
 			matchers: Array.from(matcherSet),
 		});
 	}
@@ -629,6 +632,11 @@ export function resolveSchemaDefinition(
 		}
 	}
 
+	const builtin = resolveBuiltinSchemaDefinition(candidates);
+	if (builtin) {
+		return builtin;
+	}
+
 	return null;
 }
 
@@ -658,6 +666,34 @@ function buildSchemaKeyCandidates(viewName: string): string[] {
 
 function isSchemaDefinition(value: unknown): value is LixSchemaDefinition {
 	return typeof value === "object" && value !== null;
+}
+
+function resolveBuiltinSchemaDefinition(
+	candidates: readonly string[]
+): LixSchemaDefinition | null {
+	for (const candidate of candidates) {
+		if (!candidate) continue;
+		const normalized = stripLixPrefix(candidate);
+		const direct = LixSchemaViewMap[normalized];
+		if (direct) {
+			return direct;
+		}
+		const lower = normalized.toLowerCase();
+		for (const [key, schema] of Object.entries(LixSchemaViewMap)) {
+			if (key.toLowerCase() === lower) {
+				return schema;
+			}
+		}
+	}
+	return null;
+}
+
+function stripLixPrefix(candidate: string): string {
+	if (!candidate) return candidate;
+	if (candidate.toLowerCase().startsWith("lix_")) {
+		return candidate.slice(4);
+	}
+	return candidate;
 }
 
 function buildPointerAliasInfo(
@@ -813,24 +849,44 @@ const VIEW_METADATA_COLUMN_MAP: Record<string, string> = {
 export type PredicateRewriteResult = {
 	expression: ExpressionNode | null;
 	hasVersionReference: boolean;
+	usesJsonProperty: boolean;
 };
 
 export function rewriteViewWhereClause(
 	whereClause: ExpressionNode | RawFragmentNode | null,
-	options: { propertyLowerToActual: Map<string, string> }
+	options: {
+		propertyLowerToActual: Map<string, string>;
+		stateTableAlias: string;
+		pointerAliasToPath?: Map<string, readonly string[]>;
+		pushdownableJsonProperties?: ReadonlySet<string>;
+		rewriteSubqueryStatement?: (
+			statement: SelectStatementNode | CompoundSelectNode
+		) => SelectStatementNode | CompoundSelectNode;
+	}
 ): PredicateRewriteResult | null {
 	if (!whereClause) {
-		return { expression: null, hasVersionReference: false };
+		return {
+			expression: null,
+			hasVersionReference: false,
+			usesJsonProperty: false,
+		};
 	}
 	if ("sql_text" in whereClause) {
 		return null;
 	}
 
-	const flags = { hasVersionReference: false };
+	const pointerFlags: PredicateRewriteFlags = {
+		hasVersionReference: false,
+		usesJsonProperty: false,
+	};
 	const rewritten = rewritePredicateExpression(
 		whereClause,
 		options.propertyLowerToActual,
-		flags
+		options.stateTableAlias,
+		pointerFlags,
+		options.pointerAliasToPath,
+		options.pushdownableJsonProperties,
+		options.rewriteSubqueryStatement
 	);
 	if (!rewritten) {
 		return null;
@@ -838,18 +894,26 @@ export function rewriteViewWhereClause(
 
 	return {
 		expression: rewritten,
-		hasVersionReference: flags.hasVersionReference,
+		hasVersionReference: pointerFlags.hasVersionReference,
+		usesJsonProperty: pointerFlags.usesJsonProperty,
 	};
 }
 
 type PredicateRewriteFlags = {
 	hasVersionReference: boolean;
+	usesJsonProperty: boolean;
 };
 
 function rewritePredicateExpression(
 	expression: ExpressionNode,
 	propertyLowerToActual: Map<string, string>,
-	flags: PredicateRewriteFlags
+	stateTableAlias: string,
+	flags: PredicateRewriteFlags,
+	pointerAliasToPath?: Map<string, readonly string[]>,
+	pushdownableJsonProperties?: ReadonlySet<string>,
+	rewriteSubqueryStatement?: (
+		statement: SelectStatementNode | CompoundSelectNode
+	) => SelectStatementNode | CompoundSelectNode
 ): ExpressionNode | null {
 	switch (expression.node_kind) {
 		case "binary_expression": {
@@ -858,13 +922,21 @@ function rewritePredicateExpression(
 				const left = rewritePredicateExpression(
 					expression.left,
 					propertyLowerToActual,
-					flags
+					stateTableAlias,
+					flags,
+					pointerAliasToPath,
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!left) return null;
 				const right = rewritePredicateExpression(
 					expression.right,
 					propertyLowerToActual,
-					flags
+					stateTableAlias,
+					flags,
+					pointerAliasToPath,
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!right) return null;
 				return {
@@ -885,6 +957,9 @@ function rewritePredicateExpression(
 				"<=",
 				"like",
 				"not_like",
+				"match",
+				"glob",
+				"regexp",
 				"is",
 				"is_not",
 			]);
@@ -895,13 +970,21 @@ function rewritePredicateExpression(
 			const left = rewritePredicateExpression(
 				expression.left,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				pointerAliasToPath,
+				pushdownableJsonProperties,
+				rewriteSubqueryStatement
 			);
 			if (!left) return null;
 			const right = rewritePredicateExpression(
 				expression.right,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				pointerAliasToPath,
+				pushdownableJsonProperties,
+				rewriteSubqueryStatement
 			);
 			if (!right) return null;
 			return {
@@ -916,7 +999,11 @@ function rewritePredicateExpression(
 				const operand = rewritePredicateExpression(
 					expression.operand,
 					propertyLowerToActual,
-					flags
+					stateTableAlias,
+					flags,
+					pointerAliasToPath,
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!operand) return null;
 				return {
@@ -931,7 +1018,11 @@ function rewritePredicateExpression(
 			const rewritten = rewritePredicateExpression(
 				expression.expression,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				pointerAliasToPath,
+				pushdownableJsonProperties,
+				rewriteSubqueryStatement
 			);
 			if (!rewritten) return null;
 			return {
@@ -940,7 +1031,14 @@ function rewritePredicateExpression(
 			};
 		}
 		case "column_reference":
-			return rewriteColumnReference(expression, propertyLowerToActual, flags);
+			return rewriteColumnReference(
+				expression,
+				propertyLowerToActual,
+				stateTableAlias,
+				flags,
+				pointerAliasToPath,
+				pushdownableJsonProperties
+			);
 		case "function_call": {
 			const args: FunctionCallArgumentNode[] = [];
 			for (const arg of expression.arguments) {
@@ -951,7 +1049,11 @@ function rewritePredicateExpression(
 				const rewritten = rewritePredicateExpression(
 					arg,
 					propertyLowerToActual,
-					flags
+					stateTableAlias,
+					flags,
+					pointerAliasToPath,
+					pushdownableJsonProperties,
+					rewriteSubqueryStatement
 				);
 				if (!rewritten) return null;
 				args.push(rewritten);
@@ -959,7 +1061,10 @@ function rewritePredicateExpression(
 			const over = rewriteWindowOverForPredicate(
 				expression.over,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				pointerAliasToPath,
+				pushdownableJsonProperties
 			);
 			if (expression.over && !over) {
 				return null;
@@ -976,7 +1081,11 @@ function rewritePredicateExpression(
 			const operand = rewritePredicateExpression(
 				expression.operand,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!operand) return null;
 			const items: ExpressionNode[] = [];
@@ -984,7 +1093,11 @@ function rewritePredicateExpression(
 				const rewritten = rewritePredicateExpression(
 					item,
 					propertyLowerToActual,
-					flags
+					stateTableAlias,
+					flags,
+					undefined,
+					undefined,
+					rewriteSubqueryStatement
 				);
 				if (!rewritten) return null;
 				items.push(rewritten);
@@ -1000,19 +1113,31 @@ function rewritePredicateExpression(
 			const operand = rewritePredicateExpression(
 				expression.operand,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!operand) return null;
 			const start = rewritePredicateExpression(
 				expression.start,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!start) return null;
 			const end = rewritePredicateExpression(
 				expression.end,
 				propertyLowerToActual,
-				flags
+				stateTableAlias,
+				flags,
+				undefined,
+				undefined,
+				rewriteSubqueryStatement
 			);
 			if (!end) return null;
 			return {
@@ -1025,8 +1150,20 @@ function rewritePredicateExpression(
 		}
 		case "literal":
 		case "parameter":
-		case "subquery_expression":
 			return expression;
+		case "subquery_expression": {
+			if (!rewriteSubqueryStatement) {
+				return expression;
+			}
+			const statement = rewriteSubqueryStatement(expression.statement);
+			if (statement === expression.statement) {
+				return expression;
+			}
+			return {
+				...expression,
+				statement,
+			};
+		}
 		default:
 			return null;
 	}
@@ -1035,7 +1172,10 @@ function rewritePredicateExpression(
 function rewriteColumnReference(
 	column: ColumnReferenceNode,
 	propertyLowerToActual: Map<string, string>,
-	flags: PredicateRewriteFlags
+	stateTableAlias: string,
+	flags: PredicateRewriteFlags,
+	pointerAliasToPath?: Map<string, readonly string[]>,
+	pushdownableJsonProperties?: ReadonlySet<string>
 ): ExpressionNode | null {
 	const terminal = column.path[column.path.length - 1];
 	if (!terminal) {
@@ -1044,9 +1184,20 @@ function rewriteColumnReference(
 	const columnName = terminal.value;
 	const lower = columnName.toLowerCase();
 
+	const pointerPath = pointerAliasToPath?.get(lower);
+	if (pointerPath) {
+		if (pushdownableJsonProperties && pushdownableJsonProperties.has(lower)) {
+			flags.usesJsonProperty = true;
+		}
+		return createJsonExtractExpressionFromPath(pointerPath, stateTableAlias);
+	}
+
 	const property = propertyLowerToActual.get(lower);
 	if (property) {
-		return createJsonExtractExpression(property);
+		if (pushdownableJsonProperties && pushdownableJsonProperties.has(lower)) {
+			flags.usesJsonProperty = true;
+		}
+		return createJsonExtractExpression(property, stateTableAlias);
 	}
 
 	const metadata = VIEW_METADATA_COLUMN_MAP[lower];
@@ -1054,18 +1205,19 @@ function rewriteColumnReference(
 		if (metadata === "version_id") {
 			flags.hasVersionReference = true;
 		}
-		return columnReference(["state_by_version", metadata]);
+		return columnReference([stateTableAlias, metadata]);
 	}
 
+	const aliasLower = stateTableAlias.toLowerCase();
 	if (
 		column.path.length === 2 &&
-		column.path[0]?.value.toLowerCase() === "state_by_version"
+		column.path[0]?.value.toLowerCase() === aliasLower
 	) {
 		const target = column.path[1]!.value;
 		if (target.toLowerCase() === "version_id") {
 			flags.hasVersionReference = true;
 		}
-		return columnReference(["state_by_version", target]);
+		return columnReference([stateTableAlias, target]);
 	}
 
 	return null;
@@ -1074,7 +1226,10 @@ function rewriteColumnReference(
 function rewriteWindowOverForPredicate(
 	over: WindowSpecificationNode | WindowReferenceNode | null,
 	propertyLowerToActual: Map<string, string>,
-	flags: PredicateRewriteFlags
+	stateTableAlias: string,
+	flags: PredicateRewriteFlags,
+	pointerAliasToPath: Map<string, readonly string[]> | undefined,
+	pushdownableJsonProperties?: ReadonlySet<string>
 ): WindowSpecificationNode | WindowReferenceNode | null {
 	if (!over) {
 		return null;
@@ -1085,7 +1240,10 @@ function rewriteWindowOverForPredicate(
 	const specification = rewriteWindowSpecificationForPredicate(
 		over,
 		propertyLowerToActual,
-		flags
+		stateTableAlias,
+		flags,
+		pointerAliasToPath,
+		pushdownableJsonProperties
 	);
 	return specification;
 }
@@ -1093,14 +1251,20 @@ function rewriteWindowOverForPredicate(
 function rewriteWindowSpecificationForPredicate(
 	spec: WindowSpecificationNode,
 	propertyLowerToActual: Map<string, string>,
-	flags: PredicateRewriteFlags
+	stateTableAlias: string,
+	flags: PredicateRewriteFlags,
+	pointerAliasToPath: Map<string, readonly string[]> | undefined,
+	pushdownableJsonProperties?: ReadonlySet<string>
 ): WindowSpecificationNode | null {
 	const partitionBy: ExpressionNode[] = [];
 	for (const expression of spec.partition_by) {
 		const rewritten = rewritePredicateExpression(
 			expression,
 			propertyLowerToActual,
-			flags
+			stateTableAlias,
+			flags,
+			pointerAliasToPath,
+			pushdownableJsonProperties
 		);
 		if (!rewritten) {
 			return null;
@@ -1113,7 +1277,10 @@ function rewriteWindowSpecificationForPredicate(
 		const rewritten = rewritePredicateExpression(
 			item.expression,
 			propertyLowerToActual,
-			flags
+			stateTableAlias,
+			flags,
+			pointerAliasToPath,
+			pushdownableJsonProperties
 		);
 		if (!rewritten) {
 			return null;
@@ -1129,7 +1296,10 @@ function rewriteWindowSpecificationForPredicate(
 		frame = rewriteWindowFrameForPredicate(
 			spec.frame,
 			propertyLowerToActual,
-			flags
+			stateTableAlias,
+			flags,
+			pointerAliasToPath,
+			pushdownableJsonProperties
 		);
 		if (!frame) {
 			return null;
@@ -1147,12 +1317,18 @@ function rewriteWindowSpecificationForPredicate(
 function rewriteWindowFrameForPredicate(
 	frame: WindowFrameNode,
 	propertyLowerToActual: Map<string, string>,
-	flags: PredicateRewriteFlags
+	stateTableAlias: string,
+	flags: PredicateRewriteFlags,
+	pointerAliasToPath: Map<string, readonly string[]> | undefined,
+	pushdownableJsonProperties?: ReadonlySet<string>
 ): WindowFrameNode | null {
 	const start = rewriteWindowFrameBoundForPredicate(
 		frame.start,
 		propertyLowerToActual,
-		flags
+		stateTableAlias,
+		flags,
+		pointerAliasToPath,
+		pushdownableJsonProperties
 	);
 	if (!start) {
 		return null;
@@ -1162,7 +1338,10 @@ function rewriteWindowFrameForPredicate(
 		end = rewriteWindowFrameBoundForPredicate(
 			frame.end,
 			propertyLowerToActual,
-			flags
+			stateTableAlias,
+			flags,
+			pointerAliasToPath,
+			pushdownableJsonProperties
 		);
 		if (!end) {
 			return null;
@@ -1178,7 +1357,10 @@ function rewriteWindowFrameForPredicate(
 function rewriteWindowFrameBoundForPredicate(
 	bound: WindowFrameBoundNode,
 	propertyLowerToActual: Map<string, string>,
-	flags: PredicateRewriteFlags
+	stateTableAlias: string,
+	flags: PredicateRewriteFlags,
+	pointerAliasToPath: Map<string, readonly string[]> | undefined,
+	pushdownableJsonProperties?: ReadonlySet<string>
 ): WindowFrameBoundNode | null {
 	if (!bound.offset) {
 		return bound;
@@ -1186,7 +1368,10 @@ function rewriteWindowFrameBoundForPredicate(
 	const offset = rewritePredicateExpression(
 		bound.offset,
 		propertyLowerToActual,
-		flags
+		stateTableAlias,
+		flags,
+		pointerAliasToPath,
+		pushdownableJsonProperties
 	);
 	if (!offset) {
 		return null;
@@ -1197,13 +1382,32 @@ function rewriteWindowFrameBoundForPredicate(
 	};
 }
 
-function createJsonExtractExpression(property: string): ExpressionNode {
+function createJsonExtractExpression(
+	property: string,
+	stateTableAlias: string
+): ExpressionNode {
 	const path = buildSqliteJsonPath([property]);
 	return {
 		node_kind: "function_call",
 		name: identifier("json_extract"),
 		arguments: [
-			columnReference(["state_by_version", "snapshot_content"]),
+			columnReference([stateTableAlias, "snapshot_content"]),
+			createLiteralNode(path),
+		],
+		over: null,
+	};
+}
+
+function createJsonExtractExpressionFromPath(
+	pathSegments: readonly string[],
+	stateTableAlias: string
+): ExpressionNode {
+	const path = buildSqliteJsonPath(pathSegments);
+	return {
+		node_kind: "function_call",
+		name: identifier("json_extract"),
+		arguments: [
+			columnReference([stateTableAlias, "snapshot_content"]),
 			createLiteralNode(path),
 		],
 		over: null,

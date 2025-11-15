@@ -78,6 +78,14 @@ function createVisitor(
 			}
 			return node;
 		},
+		subquery_expression(node) {
+			const literal = literalForActiveVersionSubquery(node, activeVersionId);
+			if (literal) {
+				onChange();
+				return literal;
+			}
+			return node;
+		},
 	};
 }
 

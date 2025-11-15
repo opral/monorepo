@@ -86,6 +86,48 @@ export function applyStateByVersionView(args: {
       DELETE FROM lix_internal_file_data_cache
       WHERE file_id = NEW.file_id
         AND version_id = NEW.version_id;
+
+      -- Update file path cache for file descriptors
+      INSERT OR REPLACE INTO lix_internal_file_path_cache (
+        file_id,
+        version_id,
+        directory_id,
+        name,
+        extension,
+        path
+      )
+      SELECT
+        NEW.entity_id,
+        NEW.version_id,
+        file_fields.directory_id,
+        file_fields.name,
+        file_fields.extension,
+        CASE
+          WHEN file_fields.directory_id IS NULL THEN
+            CASE
+              WHEN file_fields.extension IS NULL OR file_fields.extension = ''
+                THEN '/' || file_fields.name
+              ELSE '/' || file_fields.name || '.' || file_fields.extension
+            END
+          ELSE
+            CASE
+              WHEN file_fields.extension IS NULL OR file_fields.extension = ''
+                THEN COALESCE(dp.path, '/') || file_fields.name
+              ELSE COALESCE(dp.path, '/') || file_fields.name || '.' || file_fields.extension
+            END
+        END AS resolved_path
+      FROM (
+        SELECT
+          json_extract(NEW.snapshot_content, '$.directory_id') AS directory_id,
+          json_extract(NEW.snapshot_content, '$.name') AS name,
+          json_extract(NEW.snapshot_content, '$.extension') AS extension
+      ) AS file_fields
+      LEFT JOIN directory_by_version AS dp
+        ON dp.id = file_fields.directory_id
+       AND dp.lixcol_version_id = NEW.version_id
+      WHERE NEW.schema_key = 'lix_file_descriptor'
+        AND NEW.snapshot_content IS NOT NULL;
+
     END;
 
     CREATE TRIGGER IF NOT EXISTS state_by_version_update
@@ -112,6 +154,48 @@ export function applyStateByVersionView(args: {
       DELETE FROM lix_internal_file_data_cache
       WHERE file_id = NEW.file_id
         AND version_id = NEW.version_id;
+
+      -- Update file path cache for file descriptors
+      INSERT OR REPLACE INTO lix_internal_file_path_cache (
+        file_id,
+        version_id,
+        directory_id,
+        name,
+        extension,
+        path
+      )
+      SELECT
+        NEW.entity_id,
+        NEW.version_id,
+        file_fields.directory_id,
+        file_fields.name,
+        file_fields.extension,
+        CASE
+          WHEN file_fields.directory_id IS NULL THEN
+            CASE
+              WHEN file_fields.extension IS NULL OR file_fields.extension = ''
+                THEN '/' || file_fields.name
+              ELSE '/' || file_fields.name || '.' || file_fields.extension
+            END
+          ELSE
+            CASE
+              WHEN file_fields.extension IS NULL OR file_fields.extension = ''
+                THEN COALESCE(dp.path, '/') || file_fields.name
+              ELSE COALESCE(dp.path, '/') || file_fields.name || '.' || file_fields.extension
+            END
+        END AS resolved_path
+      FROM (
+        SELECT
+          json_extract(NEW.snapshot_content, '$.directory_id') AS directory_id,
+          json_extract(NEW.snapshot_content, '$.name') AS name,
+          json_extract(NEW.snapshot_content, '$.extension') AS extension
+      ) AS file_fields
+      LEFT JOIN directory_by_version AS dp
+        ON dp.id = file_fields.directory_id
+       AND dp.lixcol_version_id = NEW.version_id
+      WHERE NEW.schema_key = 'lix_file_descriptor'
+        AND NEW.snapshot_content IS NOT NULL;
+
     END;
 
     CREATE TRIGGER IF NOT EXISTS state_by_version_delete
@@ -126,6 +210,11 @@ export function applyStateByVersionView(args: {
 
       -- Invalidate file data cache for this file/version
       DELETE FROM lix_internal_file_data_cache
+      WHERE file_id = OLD.file_id
+        AND version_id = OLD.version_id;
+
+      -- Invalidate file path cache for this file/version
+      DELETE FROM lix_internal_file_path_cache
       WHERE file_id = OLD.file_id
         AND version_id = OLD.version_id;
     END;

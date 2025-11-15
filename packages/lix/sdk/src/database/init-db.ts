@@ -15,6 +15,7 @@ import type { LixEngine } from "../engine/boot.js";
 import { nanoIdSync } from "../engine/functions/nano-id.js";
 import { applyFileLixcolCacheSchema } from "../filesystem/file/cache/lixcol-schema.js";
 import { applyFileDataCacheSchema } from "../filesystem/file/cache/schema.js";
+import { applyFilePathCacheSchema } from "../filesystem/file/cache/path-cache-schema.js";
 import { applyTransactionStateSchema } from "../state/transaction/schema.js";
 import { uuidV7Sync } from "../engine/functions/uuid-v7.js";
 import { humanIdSync } from "../engine/functions/generate-human-id.js";
@@ -63,8 +64,8 @@ export function prepareEngineDatabase(args: {
 	applySnapshotDatabaseSchema(args.engine.sqlite);
 	applyChangeDatabaseSchema(args.engine.sqlite);
 	applyFileLixcolCacheSchema({ engine: args.engine });
-	// Ensure file data cache table exists before any triggers may reference it
 	applyFileDataCacheSchema({ engine: args.engine });
+	applyFilePathCacheSchema({ engine: args.engine });
 	applyStateDatabaseSchema({ engine: args.engine });
 	// applyEntityDatabaseSchema({ engine: args.engine });
 	// applyChangeSetDatabaseSchema({ engine: args.engine });

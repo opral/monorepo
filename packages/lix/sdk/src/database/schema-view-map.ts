@@ -31,7 +31,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set_element: LixChangeSetElementSchema,
 	commit: LixCommitSchema,
 	commit_edge: LixCommitEdgeSchema,
-	file: LixFileDescriptorSchema,
+	file_descriptor: LixFileDescriptorSchema,
 	directory_descriptor: LixDirectoryDescriptorSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,

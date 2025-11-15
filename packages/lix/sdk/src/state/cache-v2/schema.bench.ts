@@ -6,7 +6,7 @@ import { updateStateCacheV2 } from "./update-state-cache.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 import { schemaKeyToCacheTableNameV2 } from "./create-schema-cache-table.js";
 
-const ROW_NUM = 1000;
+const ROW_NUM = 100;
 const BENCH_SCHEMA_KEY = "bench_cache_v2";
 const BENCH_SCHEMA_VERSION = "1.0";
 const BENCH_PLUGIN_KEY = "bench_plugin";

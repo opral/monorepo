@@ -52,6 +52,9 @@ import {
 	Exists,
 	Between,
 	Like,
+	Match,
+	Glob,
+	Regexp,
 	CaseKeyword,
 	WhenKeyword,
 	ThenKeyword,
@@ -79,6 +82,7 @@ import {
 	Minus,
 	Slash,
 	Percent,
+	Concat,
 	Values,
 	StringLiteral,
 	NumberLiteral,
@@ -382,6 +386,10 @@ class SqlParser extends CstParser {
 					},
 				},
 				{
+					GATE: () =>
+						this.LA(1).tokenType === LeftParen &&
+						this.LA(2).tokenType !== Select &&
+						this.LA(2).tokenType !== With,
 					ALT: () => {
 						this.CONSUME1(LeftParen, { LABEL: "nestedLParen" });
 						this.SUBRULE(this.table_reference, { LABEL: "nested" });
@@ -393,6 +401,9 @@ class SqlParser extends CstParser {
 					},
 				},
 				{
+					GATE: () =>
+						this.LA(1).tokenType === LeftParen &&
+						(this.LA(2).tokenType === Select || this.LA(2).tokenType === With),
 					ALT: () => {
 						this.CONSUME2(LeftParen, { LABEL: "selectLParen" });
 						this.SUBRULE(this.select_compound, { LABEL: "select" });
@@ -621,6 +632,9 @@ class SqlParser extends CstParser {
 				},
 				{ ALT: () => this.CONSUME(GreaterThan, { LABEL: "operator" }) },
 				{ ALT: () => this.CONSUME(LessThan, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(Match, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(Glob, { LABEL: "operator" }) },
+				{ ALT: () => this.CONSUME(Regexp, { LABEL: "operator" }) },
 			]);
 		}
 	);
@@ -688,12 +702,27 @@ class SqlParser extends CstParser {
 	private readonly multiplicative_expression: () => CstNode = this.RULE(
 		"multiplicative_expression",
 		() => {
-			this.SUBRULE(this.unary_expression, { LABEL: "operands" });
+			this.SUBRULE(this.concatenation_expression, { LABEL: "operands" });
 			this.MANY(() => {
 				this.OR([
 					{ ALT: () => this.CONSUME(Star, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Slash, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(Percent, { LABEL: "operators" }) },
+				]);
+				this.SUBRULE1(this.concatenation_expression, {
+					LABEL: "operands",
+				});
+			});
+		}
+	);
+
+	private readonly concatenation_expression: () => CstNode = this.RULE(
+		"concatenation_expression",
+		() => {
+			this.SUBRULE(this.unary_expression, { LABEL: "operands" });
+			this.MANY(() => {
+				this.OR([
+					{ ALT: () => this.CONSUME(Concat, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(JsonExtract, { LABEL: "operators" }) },
 					{ ALT: () => this.CONSUME(JsonExtractText, { LABEL: "operators" }) },
 				]);
@@ -770,7 +799,8 @@ class SqlParser extends CstParser {
 						this.SUBRULE(this.column_reference, { LABEL: "reference" }),
 				},
 				{
-					GATE: () => this.LA(2).tokenType === Select,
+					GATE: () =>
+						this.LA(2).tokenType === Select || this.LA(2).tokenType === With,
 					ALT: () => {
 						this.CONSUME1(LeftParen);
 						this.SUBRULE(this.select_compound, { LABEL: "subselect" });
@@ -778,7 +808,8 @@ class SqlParser extends CstParser {
 					},
 				},
 				{
-					GATE: () => this.LA(2).tokenType !== Select,
+					GATE: () =>
+						this.LA(2).tokenType !== Select && this.LA(2).tokenType !== With,
 					ALT: () => {
 						this.CONSUME2(LeftParen);
 						this.SUBRULE(this.expression, { LABEL: "inner" });

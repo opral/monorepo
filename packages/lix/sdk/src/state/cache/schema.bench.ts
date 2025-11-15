@@ -6,7 +6,7 @@ import { getTimestamp } from "../../engine/functions/timestamp.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 import { updateStateCache } from "./update-state-cache.js";
 
-const ROW_NUM = 1000;
+const ROW_NUM = 100;
 
 const TEST_STATE_SCHEMA: LixSchemaDefinition = {
 	type: "object",

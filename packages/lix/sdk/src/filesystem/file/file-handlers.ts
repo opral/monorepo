@@ -5,6 +5,7 @@ import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js"
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
 import { createQuerySync } from "../../plugin/query-sync.js";
 import { clearFileDataCache } from "./cache/clear-file-data-cache.js";
+import { updateFilePathCache } from "./cache/update-file-path-cache.js";
 import type { LixEngine } from "../../engine/boot.js";
 import {
 	ensureDirectoryAncestors,
@@ -54,7 +55,10 @@ const metadataEquals = (left: unknown, right: unknown): boolean => {
 };
 
 export function handleFileInsert(args: {
-	engine: Pick<LixEngine, "hooks" | "getAllPluginsSync" | "executeSync">;
+	engine: Pick<
+		LixEngine,
+		"hooks" | "getAllPluginsSync" | "executeSync" | "sqlite"
+	>;
 	file: FileMutationInput;
 	versionId: string;
 	untracked?: boolean;
@@ -140,6 +144,16 @@ export function handleFileInsert(args: {
 			})
 			.compile()
 	);
+
+	updateFilePathCache({
+		engine: args.engine,
+		fileId: args.file.id,
+		versionId: args.versionId,
+		directoryId: descriptorFields.directoryId,
+		name: descriptorFields.name,
+		extension: descriptorFields.extension ?? null,
+		path: normalizedPath,
+	});
 
 	const querySync = createQuerySync({ engine: args.engine });
 
@@ -402,6 +416,16 @@ export function handleFileUpdate(args: {
 				.compile()
 		);
 	}
+
+	updateFilePathCache({
+		engine: args.engine,
+		fileId: args.file.id,
+		versionId: args.versionId,
+		directoryId: descriptorFields.directoryId,
+		name: descriptorFields.name,
+		extension: descriptorFields.extension ?? null,
+		path: normalizedPath,
+	});
 
 	// Fetch the full file row for plugin diffing and other mutation handling
 	const currentFileRows = args.engine.executeSync(

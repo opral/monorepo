@@ -1,12 +1,19 @@
 import {
+	columnReference,
 	identifier,
+	type CompoundSelectNode,
 	type ExpressionNode,
 	type InsertStatementNode,
 	type ObjectNameNode,
 	type ParameterExpressionNode,
 	type RawFragmentNode,
 	type SegmentedStatementNode,
+	type SelectExpressionNode,
+	type SelectStatementNode,
 	type StatementSegmentNode,
+	type SubqueryExpressionNode,
+	type TableReferenceNode,
+	type FromClauseNode,
 } from "../sql-parser/nodes.js";
 import { normalizeIdentifierValue } from "../sql-parser/ast-helpers.js";
 import { expressionToSql } from "../sql-parser/compile.js";
@@ -36,7 +43,7 @@ import {
 	type PrimaryKeyDescriptor,
 } from "./shared.js";
 import { expandSqlViews as expandSqlViewsStep } from "../steps/expand-sql-views.js";
-import { normalizeSegmentedStatement } from "../sql-parser/parse.js";
+import { normalizeSegmentedStatement, parse } from "../sql-parser/parse.js";
 
 const STATE_BY_VERSION_COLUMNS: readonly string[] = [
 	"entity_id",
@@ -213,8 +220,10 @@ type EvaluatedRow = {
 	readonly expressions: readonly string[];
 };
 
+type ExpressionLike = ExpressionNode | string;
+
 type StateRowResult = {
-	readonly expressions: readonly string[];
+	readonly expressions: readonly ExpressionLike[];
 };
 
 function buildEntityViewInsert(
@@ -637,7 +646,7 @@ function buildStateRowExpressions(args: {
 	};
 
 	const entityIdOverride = getLixcolOverride("lixcol_entity_id");
-	let entityIdExpr: string;
+	let entityIdExpr: ExpressionLike;
 	if (entityIdOverride !== undefined) {
 		entityIdExpr = literal(normalizeOverrideValue(entityIdOverride));
 	} else if (args.primaryKeys.length === 1) {
@@ -658,7 +667,7 @@ function buildStateRowExpressions(args: {
 		entityIdExpr = `(${parts.join(" || '~' || ")})`;
 	}
 
-	const schemaKeyExpr = literal(args.schemaKey);
+	const schemaKeyExpr: ExpressionLike = literal(args.schemaKey);
 	const overrideFileId = getLixcolOverride("lixcol_file_id");
 	const fileIdValue =
 		overrideFileId !== undefined
@@ -669,7 +678,8 @@ function buildStateRowExpressions(args: {
 			`Schema ${args.schemaKey} requires lixcol_file_id via column or x-lix-override-lixcols`
 		);
 	}
-	const fileIdExpr = expressionFor("lixcol_file_id") ?? literal(fileIdValue);
+	const fileIdExpr: ExpressionLike =
+		expressionFor("lixcol_file_id") ?? literal(fileIdValue);
 
 	const overridePluginKey = getLixcolOverride("lixcol_plugin_key");
 	const pluginKeyValue =
@@ -681,13 +691,13 @@ function buildStateRowExpressions(args: {
 			`Schema ${args.schemaKey} requires lixcol_plugin_key via column or x-lix-override-lixcols`
 		);
 	}
-	const pluginKeyExpr =
+	const pluginKeyExpr: ExpressionLike =
 		expressionFor("lixcol_plugin_key") ?? literal(pluginKeyValue);
 
 	const overrideVersion = getLixcolOverride("lixcol_version_id");
 	const explicitVersionExpr =
 		expressionFor("lixcol_version_id") ?? expressionFor("version_id");
-	let versionExpr: string;
+	let versionExpr: ExpressionLike;
 	if (args.variant === "by_version") {
 		if (explicitVersionExpr) {
 			versionExpr = explicitVersionExpr;
@@ -703,7 +713,7 @@ function buildStateRowExpressions(args: {
 	} else if (explicitVersionExpr) {
 		versionExpr = explicitVersionExpr;
 	} else {
-		versionExpr = "(SELECT version_id FROM active_version)";
+		versionExpr = createActiveVersionSubqueryExpression();
 	}
 
 	const overrideMetadata = getLixcolOverride("lixcol_metadata");
@@ -711,7 +721,7 @@ function buildStateRowExpressions(args: {
 		overrideMetadata !== undefined
 			? normalizeOverrideValue(overrideMetadata)
 			: (columnMap.get("lixcol_metadata") ?? null);
-	const metadataExpr =
+	const metadataExpr: ExpressionLike =
 		expressionFor("lixcol_metadata") ?? literal(metadataValue);
 
 	const overrideUntracked = getLixcolOverride("lixcol_untracked");
@@ -723,7 +733,7 @@ function buildStateRowExpressions(args: {
 					"lixcol_untracked",
 					overrideUntracked ?? 0
 				);
-	const untrackedExpr =
+	const untrackedExpr: ExpressionLike =
 		expressionFor("lixcol_untracked") ?? literal(untrackedValue);
 
 	const resolvedDefaults = new Map<string, unknown>();
@@ -752,7 +762,13 @@ function buildStateRowExpressions(args: {
 	};
 }
 
-function expressionStringToAst(sql: string): ExpressionNode {
+function expressionStringToAst(
+	sqlOrExpression: ExpressionLike
+): ExpressionNode {
+	if (typeof sqlOrExpression !== "string") {
+		return sqlOrExpression;
+	}
+	const sql = sqlOrExpression;
 	const trimmed = sql.trim();
 	if (/^\?\d+$/.test(trimmed) || trimmed === "?") {
 		return createParameterExpression(trimmed === "?" ? "?" : trimmed);
@@ -769,6 +785,10 @@ function expressionStringToAst(sql: string): ExpressionNode {
 	if (/^'(?:''|[^'])*'$/.test(trimmed)) {
 		const inner = trimmed.slice(1, -1).replace(/''/g, "'");
 		return createLiteralNode(inner);
+	}
+	const subqueryExpression = maybeParseSubqueryExpression(trimmed);
+	if (subqueryExpression) {
+		return subqueryExpression;
 	}
 	return createRawExpression(sql);
 }
@@ -791,6 +811,71 @@ function createLiteralNode(
 	return {
 		node_kind: "literal",
 		value,
+	};
+}
+
+function maybeParseSubqueryExpression(
+	sql: string
+): SubqueryExpressionNode | null {
+	if (!sql.startsWith("(") || !sql.endsWith(")")) {
+		return null;
+	}
+	const inner = sql.slice(1, -1).trim();
+	if (!/^select/i.test(inner)) {
+		return null;
+	}
+	try {
+		const statements = parse(inner);
+		const [first] = statements;
+		const segment = first?.segments[0];
+		if (
+			segment &&
+			segment.node_kind !== "raw_fragment" &&
+			(segment.node_kind === "select_statement" ||
+				segment.node_kind === "compound_select")
+		) {
+			return {
+				node_kind: "subquery_expression",
+				statement: segment as SelectStatementNode | CompoundSelectNode,
+			};
+		}
+	} catch {
+		// Fall through to raw fragment when parsing fails.
+	}
+	return null;
+}
+
+function createActiveVersionSubqueryExpression(): SubqueryExpressionNode {
+	const projection: SelectExpressionNode = {
+		node_kind: "select_expression",
+		expression: columnReference(["version_id"]),
+		alias: null,
+	};
+	const relation: TableReferenceNode = {
+		node_kind: "table_reference",
+		name: buildObjectName("active_version"),
+		alias: null,
+	};
+	const fromClause: FromClauseNode = {
+		node_kind: "from_clause",
+		relation,
+		joins: [],
+	};
+	const statement: SelectStatementNode = {
+		node_kind: "select_statement",
+		distinct: false,
+		projection: [projection],
+		from_clauses: [fromClause],
+		where_clause: null,
+		group_by: [],
+		order_by: [],
+		limit: null,
+		offset: null,
+		with_clause: null,
+	};
+	return {
+		node_kind: "subquery_expression",
+		statement,
 	};
 }
 

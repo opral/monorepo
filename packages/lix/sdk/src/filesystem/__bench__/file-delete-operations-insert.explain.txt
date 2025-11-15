@@ -1,0 +1,11 @@
+-- label --
+file delete operations - insert
+
+-- original SQL --
+insert into "file" ("id", "path", "data") values (?, ?, ?)
+
+-- rewritten SQL --
+INSERT INTO "file" ("id", "path", "data") VALUES (?, ?, ?)
+
+-- plan --
+[]
