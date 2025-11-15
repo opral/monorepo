@@ -55,13 +55,6 @@ export const machineTranslateMessageCommand = {
 					locale: updatedMessage.locale,
 					selectors: updatedMessage.selectors,
 				})
-				.onConflict((oc) =>
-					oc.column("id").doUpdateSet({
-						bundleId: updatedMessage.bundleId,
-						locale: updatedMessage.locale,
-						selectors: updatedMessage.selectors,
-					})
-				)
 				.execute()
 		}
 
