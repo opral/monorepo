@@ -71,6 +71,23 @@ export function rewriteSelectStatementTree(
 }
 
 type EntityViewVariant = "base" | "by_version" | "history";
+
+type OverrideColumnConfig = {
+	readonly column: string;
+	readonly variants?: readonly EntityViewVariant[];
+};
+
+const OVERRIDE_COLUMN_CONFIG: Record<string, OverrideColumnConfig> = {
+	lixcol_entity_id: { column: "entity_id" },
+	lixcol_file_id: { column: "file_id" },
+	lixcol_plugin_key: { column: "plugin_key" },
+	lixcol_inherited_from_version_id: {
+		column: "inherited_from_version_id",
+		variants: ["base", "by_version"],
+	},
+	lixcol_metadata: { column: "metadata" },
+	lixcol_untracked: { column: "untracked", variants: ["base", "by_version"] },
+};
 function rewriteSegmentedStatement(
 	statement: SegmentedStatementNode,
 	context: PreprocessorStepContext,
@@ -991,6 +1008,14 @@ function buildEntityViewSelectAst(args: {
 			createLiteralExpression(args.storedSchemaKey)
 		),
 	];
+	const overridePredicates = collectOverridePredicates({
+		schema: args.schema,
+		stateAlias,
+		variant: args.variant,
+	});
+	if (overridePredicates.length > 0) {
+		predicates.push(...overridePredicates);
+	}
 	if (args.variant === "base") {
 		predicates.push(
 			buildActiveVersionPredicate({
@@ -1200,7 +1225,7 @@ function buildInheritedFromVersionExpression(args: {
 		args.schema,
 		"lixcol_inherited_from_version_id"
 	);
-	if (override !== null) {
+	if (override !== undefined) {
 		return createLiteralExpression(override);
 	}
 	const versionOverride = extractLiteralOverride(
@@ -1211,7 +1236,7 @@ function buildInheritedFromVersionExpression(args: {
 		args.stateAlias,
 		"inherited_from_version_id",
 	]);
-	if (versionOverride !== null) {
+	if (versionOverride !== undefined) {
 		return {
 			node_kind: "function_call",
 			name: identifier("coalesce"),
@@ -1228,7 +1253,7 @@ function buildActiveVersionPredicate(args: {
 }): ExpressionNode {
 	const override = extractLiteralOverride(args.schema, "lixcol_version_id");
 	const left = columnReference([args.stateAlias, "version_id"]);
-	if (override !== null) {
+	if (override !== undefined) {
 		return createBinaryExpression(left, "=", createLiteralExpression(override));
 	}
 	return createBinaryExpression(left, "=", buildActiveVersionSubquery());
@@ -1267,6 +1292,66 @@ function buildActiveVersionSubquery(): SubqueryExpressionNode {
 			with_clause: null,
 		},
 	};
+}
+
+function collectOverridePredicates(args: {
+	schema: LixSchemaDefinition;
+	stateAlias: string;
+	variant: EntityViewVariant;
+}): ExpressionNode[] {
+	const overrides = args.schema["x-lix-override-lixcols"];
+	if (!overrides || typeof overrides !== "object") {
+		return [];
+	}
+	const predicates: ExpressionNode[] = [];
+	for (const [key, config] of Object.entries(OVERRIDE_COLUMN_CONFIG)) {
+		if (!isOverrideAllowedForVariant(config, args.variant)) {
+			continue;
+		}
+		const value = extractLiteralOverride(args.schema, key);
+		if (value === undefined) {
+			continue;
+		}
+		predicates.push(
+			buildOverridePredicateExpression({
+				column: config.column,
+				stateAlias: args.stateAlias,
+				value,
+			})
+		);
+	}
+	return predicates;
+}
+
+function buildOverridePredicateExpression(args: {
+	column: string;
+	stateAlias: string;
+	value: string | number | boolean | null;
+}): ExpressionNode {
+	const columnRef = columnReference([args.stateAlias, args.column]);
+	if (args.value === null) {
+		return {
+			node_kind: "binary_expression",
+			left: columnRef,
+			operator: "is",
+			right: createLiteralExpression(null),
+		};
+	}
+	return createBinaryExpression(
+		columnRef,
+		"=",
+		createLiteralExpression(args.value)
+	);
+}
+
+function isOverrideAllowedForVariant(
+	config: OverrideColumnConfig,
+	variant: EntityViewVariant
+): boolean {
+	if (!config.variants || config.variants.length === 0) {
+		return true;
+	}
+	return config.variants.includes(variant);
 }
 
 function buildTableReferenceNode(
@@ -1317,21 +1402,41 @@ function createIdentifier(name: string): IdentifierNode {
 function extractLiteralOverride(
 	schema: LixSchemaDefinition,
 	key: string
-): string | null {
+): string | number | boolean | null | undefined {
 	const overrides = schema["x-lix-override-lixcols"];
 	if (!overrides || typeof overrides !== "object") {
-		return null;
+		return undefined;
 	}
 	const raw = (overrides as Record<string, unknown>)[key];
 	if (typeof raw !== "string") {
-		return null;
+		return undefined;
 	}
 	const trimmed = raw.trim();
-	const match = /^"([^"]*)"$/u.exec(trimmed);
-	if (match) {
-		return match[1] ?? null;
+	if (trimmed.length === 0) {
+		return undefined;
 	}
-	return null;
+	if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+		try {
+			return JSON.parse(trimmed);
+		} catch (error) {
+			void error;
+			return undefined;
+		}
+	}
+	if (trimmed === "true") {
+		return true;
+	}
+	if (trimmed === "false") {
+		return false;
+	}
+	if (trimmed === "null") {
+		return null;
+	}
+	if (/^-?\d+(?:\.\d+)?$/u.test(trimmed)) {
+		const numeric = Number(trimmed);
+		return Number.isNaN(numeric) ? undefined : numeric;
+	}
+	return undefined;
 }
 
 type ColumnUsageEntry = {

@@ -36,6 +36,52 @@ describe("entity view select rewrite", () => {
 		await lix.close();
 	});
 
+	test("pushes down literal lixcol overrides", async () => {
+		const lix = await openLix({});
+		const schema: LixSchemaDefinition = {
+			"x-lix-key": "file_override_schema",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			"x-lix-override-lixcols": {
+				lixcol_file_id: '"inlang"',
+				lixcol_plugin_key: '"inlang_sdk"',
+				lixcol_version_id: '"global"',
+				lixcol_inherited_from_version_id: '"root"',
+				lixcol_untracked: "1",
+				lixcol_metadata: "null",
+			},
+			type: "object",
+			properties: { id: { type: "string" } },
+			required: ["id"],
+			additionalProperties: false,
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: schema })
+			.execute();
+
+		const preprocess = createPreprocessor({ engine: lix.engine! });
+		const result = preprocess({
+			sql: "SELECT id FROM file_override_schema",
+			parameters: [],
+		});
+
+		expect(result.sql).toMatch(/"?file_id"?\s*=\s*'inlang'/i);
+		expect(result.sql).toMatch(/"?plugin_key"?\s*=\s*'inlang_sdk'/i);
+		expect(result.sql).toMatch(/"?inherited_from_version_id"?\s*=\s*'root'/i);
+		expect(result.sql).toMatch(/"?untracked"?\s*=\s*1/);
+		expect(result.sql).toMatch(/"?metadata"?\s+is\s+null/i);
+
+		const byVersion = preprocess({
+			sql: "SELECT * FROM file_override_schema_by_version",
+			parameters: [],
+		});
+		expect(byVersion.sql).not.toMatch(/"?version_id"?\s*=\s*'global'/i);
+
+		await lix.close();
+	});
+
 	test("supports prefixless aliases for lix_* schemas", async () => {
 		const lix = await openLix({});
 		const schema = {
