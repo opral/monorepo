@@ -1,5 +1,33 @@
 # @inlang/paraglide-js
 
+## 2.6.0
+
+### Minor Changes
+
+- 7791be7: Upgraded the [inlang SDK](https://github.com/opral/inlang-sdk) to [Lix](https://lix.dev/) v0.5 🎉
+
+  ## Highlights
+
+  ### Writing directly to Lix state
+
+  State is now written straight into Lix instead of the SDK’s private in-memory SQLite snapshot. Every bundle, message, and variant change becomes a first-class Lix commit, unlocking:
+
+  - history and branching,
+  - writer-key aware workflows,
+  - change proposals and subscriptions, and
+  - a single source of truth for downstream tools.
+
+  ### Per-file filesystem sync
+
+  Any inlang-based tooling that opens a project from disk (IDE extensions, CLIs, custom apps) used to patch the entire locale tree whenever a single message changed. That behaviour is at the heart of [opral/inlang-sherlock#173](https://github.com/opral/inlang-sherlock/issues/173) where editing one key in `en.json` would re-export every other locale file, destroying manual formatting or reintroducing stale content.
+
+  Thanks to Lix v0.5’s observable state and writer-key APIs we can now react to per-commit metadata and suppress our own writes. When `happy_elephant` in `en.json` is updated, the SDK marks only `en.json` as dirty, leaving `de.json` and friends untouched. Drift is still possible if another tool rewrites `en.json`, yet the blast radius falls from “the whole project just changed” to “only the file you touched,” making reviews and merges manageable across all inlang integrations.
+
+### Patch Changes
+
+- Updated dependencies [7791be7]
+  - @inlang/sdk@3.0.0
+
 ## 2.5.0
 
 - 72d1c53: Ensure the CLI honours allowJs flags defined in extended or referenced tsconfig files instead of prompting unnecessarily.
@@ -15,6 +43,7 @@
   The issue occurred because these functions converted locales to lowercase, while the comparison logic inside `assertIsLocale` and `isLocale` wasn't case-sensitive.
 
   List of changes:
+
   - Ensured locale comparisons in `assertIsLocale()` and `isLocale()` are fully case-insensitive.
   - Made `assertIsLocale()` return the canonical-cased locale from `locales` instead of the raw input.
   - Added new test coverage for case-insensitive behavior in `assertIsLocale()` and `isLocale()`.
@@ -73,6 +102,7 @@
   This change introduces a new `extractLocaleFromRequestAsync` function that supports asynchronous custom server strategies, enabling use cases like fetching user locale preferences from databases.
 
   ## What's Changed
+
   - **New Function**: Added `extractLocaleFromRequestAsync` that supports async custom server strategies
   - **Middleware Update**: Server middleware now uses the async version to support async custom strategies
   - **Breaking Change**: The synchronous `extractLocaleFromRequest` no longer supports custom server strategies
@@ -141,6 +171,7 @@
   ```
 
   **Migration**:
+
   - If you want the previous behavior (subdomain sharing), explicitly set `cookieDomain` in your configuration:
 
   ```diff
@@ -158,6 +189,7 @@
 - 4255bd5: Provide functions for getting the preferred language on server and client.
 
   This defines two new functions for getting the preferred language:
+
   - `extractLocaleFromHeader`: Extracts the locale from the accept-language header on the server.
   - `extractLocaleFromNavigator`: Extracts the locale from the navigator.languages array on the client.
 
@@ -169,10 +201,12 @@
   This introduces a new way to define custom locale resolution strategies alongside built-in strategies. Custom strategies provide a cleaner, more composable approach compared to overwriting `getLocale()` and `setLocale()` functions directly.
 
   **New APIs:**
+
   - `defineCustomClientStrategy()`: Define custom strategies for client-side locale resolution
   - `defineCustomServerStrategy()`: Define custom strategies for server-side locale resolution
 
   **Key features:**
+
   - Custom strategies must follow the pattern `custom-<name>` where `<name>` contains only alphanumeric characters
   - Can be combined with built-in strategies in the strategy array
   - Respect strategy order for fallback handling
@@ -295,6 +329,7 @@
 - 698b9a9: add `cookieMaxAge` option to compiler and runtime
 
   Closes https://github.com/opral/inlang-paraglide-js/issues/483
+
   - Introduced `cookieMaxAge` option to `CompilerOptions`, allowing configuration of cookie expiration time.
   - Adjusted tests to verify `max-age` in cookies.
 
@@ -1013,6 +1048,7 @@ await compile({
 - 14d80b3: Removed the "Which tech-stack are you using?" prompt from the `init` command as it was not providing any real value. All it did was link you to the appropriate documentation.
 
   From now on we rely on the docuemntation site to guide people to the correct documenation for their framework.
+
   - SvelteKit: https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n
   - NextJs: https://inlang.com/m/osslbuzt/paraglide-next-i18n
   - Astro: https://inlang.com/m/iljlwzfs/paraglide-astro-i18n
