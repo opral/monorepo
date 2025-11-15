@@ -30,7 +30,7 @@ export async function serializeToHtml(
 			// diff hints: set diff attributes when requested (non-destructive: don't override if present)
 			if (options.diffHints) {
 				const diffData = ((node as any).data ||= {}) as Record<string, any>
-				if (node.type === "paragraph" || node.type === "heading") {
+				if (node.type === "paragraph" || node.type === "heading" || node.type === "tableCell") {
 					if (diffData["diff-mode"] == null) diffData["diff-mode"] = "words"
 				}
 				if (diffData["id"] != null && diffData["diff-show-when-removed"] == null) {

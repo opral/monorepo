@@ -73,3 +73,41 @@ test.each([1, 2, 3, 4, 5, 6])(
 		)
 	}
 )
+
+test("serializeToHtml with diffHints adds data-diff-mode=words to table cells", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "table",
+				children: [
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "header-1" },
+								children: [{ type: "text", value: "Hello" }],
+							},
+						],
+					},
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "cell-1" },
+								children: [{ type: "text", value: "World" }],
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { diffHints: true })
+	expect(html).toContain(
+		'<td data-id="cell-1" data-diff-mode="words" data-diff-show-when-removed="">World</td>'
+	)
+})
