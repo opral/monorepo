@@ -39,8 +39,7 @@ function astBlockToPM(node: any): PMNode {
 			const type = n.ordered ? "orderedList" : "bulletList"
 			let attrs: any = {
 				data: buildNodeData(n.data, {
-					[SPREAD_META_KEY]:
-						typeof n.spread === "boolean" ? n.spread : undefined,
+					[SPREAD_META_KEY]: typeof n.spread === "boolean" ? n.spread : undefined,
 				}),
 			}
 			if (n.ordered && n.start != null && n.start !== 1) attrs = { ...attrs, start: n.start }
@@ -60,8 +59,7 @@ function astBlockToPM(node: any): PMNode {
 			const hasChecked = n.checked === true || n.checked === false
 			const attrs = {
 				data: buildNodeData(n.data, {
-					[SPREAD_META_KEY]:
-						typeof n.spread === "boolean" ? n.spread : undefined,
+					[SPREAD_META_KEY]: typeof n.spread === "boolean" ? n.spread : undefined,
 				}),
 				...(hasChecked ? { checked: n.checked } : {}),
 			}
@@ -81,6 +79,28 @@ function astBlockToPM(node: any): PMNode {
 				type: "codeBlock",
 				attrs: { language: n.lang ?? null, data: buildNodeData(n.data) },
 				content: textContent(n.value || ""),
+			}
+		}
+		case "html": {
+			const n = node as any
+			return {
+				type: "markdownUnsupported",
+				attrs: {
+					kind: "html",
+					value: n.value ?? "",
+					data: buildNodeData(n.data),
+				},
+			}
+		}
+		case "yaml": {
+			const n = node as any
+			return {
+				type: "markdownUnsupported",
+				attrs: {
+					kind: "yaml",
+					value: n.value ?? "",
+					data: buildNodeData(n.data),
+				},
 			}
 		}
 		case "thematicBreak": {
@@ -111,13 +131,6 @@ function astBlockToPM(node: any): PMNode {
 				content: flattenInline((n.children || []) as any, []),
 			}
 		}
-		case "yaml":
-			// Not represented in editor surface; drop
-			return {
-				type: "paragraph",
-				attrs: { data: (node as any).data ?? null },
-				content: textContent(""),
-			}
 		default:
 			// Fallback: paragraph of inline content if present
 			// @ts-ignore
@@ -139,10 +152,7 @@ function buildNodeData(
 	data: Record<string, any> | null | undefined,
 	extras?: Record<string, unknown>
 ): Record<string, any> | null {
-	const base =
-		data && typeof data === "object"
-			? { ...data }
-			: {}
+	const base = data && typeof data === "object" ? { ...data } : {}
 	if (extras) {
 		for (const [key, value] of Object.entries(extras)) {
 			if (value === undefined) continue
@@ -204,6 +214,14 @@ function flattenInline(nodes: any[], active: PMMark[]): PMNode[] {
 			case "break":
 				out.push({ type: "hardBreak", attrs: { data: (n as any).data ?? null } as any })
 				break
+			case "html": {
+				const html = n as any
+				out.push({
+					type: "markdownInlineHtml",
+					attrs: { value: html.value ?? "", data: html.data ?? null },
+				})
+				break
+			}
 			default:
 				// ignore unsupported inline nodes in this minimal pass
 				break

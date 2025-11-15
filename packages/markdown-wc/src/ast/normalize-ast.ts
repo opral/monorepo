@@ -34,12 +34,14 @@ function normalizeNode(node: any): any {
 
 	normalizeStringField(node, "value")
 	for (const field of STRING_FIELDS) normalizeStringField(node, field)
-	for (const field of URL_FIELDS) normalizeStringField(node, field, {
-		dropEmpty: true,
-	})
-	for (const field of LANG_FIELDS) normalizeStringField(node, field, {
-		dropEmpty: true,
-	})
+	for (const field of URL_FIELDS)
+		normalizeStringField(node, field, {
+			dropEmpty: true,
+		})
+	for (const field of LANG_FIELDS)
+		normalizeStringField(node, field, {
+			dropEmpty: true,
+		})
 
 	// Normalize booleans/optionals that Prettier omits when null-ish.
 	if ("checked" in node && (node.checked === null || node.checked === undefined)) {
@@ -71,11 +73,7 @@ function normalizeNode(node: any): any {
 	return node
 }
 
-function normalizeStringField(
-	node: any,
-	field: string,
-	opts?: { dropEmpty?: boolean }
-) {
+function normalizeStringField(node: any, field: string, opts?: { dropEmpty?: boolean }) {
 	if (!(field in node)) return
 	const raw = node[field]
 	if (raw === null || raw === undefined) {

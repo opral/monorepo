@@ -71,8 +71,7 @@ function pmBlockToAst(node: PMNode): any {
 		case "bulletList":
 		case "orderedList": {
 			const listData = extractNodeData(node.attrs)
-			const spread =
-				listData.spread === undefined ? undefined : listData.spread
+			const spread = listData.spread === undefined ? undefined : listData.spread
 			const ordered = node.type === "orderedList"
 			const base: any = {
 				type: "list",
@@ -144,6 +143,23 @@ function pmBlockToAst(node: PMNode): any {
 				children: pmInlineToMd(node.content || []),
 			}
 		}
+		case "markdownUnsupported": {
+			const unsupportedData = extractNodeData(node.attrs)
+			const kind = node.attrs?.kind ?? "html"
+			const value = node.attrs?.value ?? ""
+			if (kind === "yaml") {
+				return {
+					type: "yaml",
+					value: value as string,
+					data: unsupportedData.data,
+				}
+			}
+			return {
+				type: "html",
+				value: value as string,
+				data: unsupportedData.data,
+			}
+		}
 		default:
 			if (node.content && node.content.length && isInline(node.content[0] as any)) {
 				const inlineData = extractNodeData(node.attrs)
@@ -167,6 +183,12 @@ function pmInlineToMd(nodes: PMNode[]): any[] {
 			const br: any = { type: "break" }
 			if (n.attrs?.data != null) br.data = n.attrs.data
 			out.push(br as any)
+		} else if (n.type === "markdownInlineHtml") {
+			const htmlValue = (n.attrs?.value ?? "") as string
+			const htmlData = n.attrs?.data ?? null
+			const htmlNode: any = { type: "html", value: htmlValue }
+			if (htmlData != null) htmlNode.data = htmlData
+			out.push(htmlNode)
 		} else if (n.type === "image") {
 			const src = n.attrs?.src ?? null
 			const title = n.attrs?.title ?? null
@@ -202,7 +224,7 @@ function applyMarksToText(value: string, marks: PMMark[]): any {
 }
 
 function isInline(n: PMNode) {
-	return !n.content && (n.text != null || n.type === "hardBreak")
+	return !n.content && (n.text != null || n.type === "hardBreak" || n.type === "markdownInlineHtml")
 }
 
 function collectText(nodes: PMNode[]): string {
