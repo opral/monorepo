@@ -1,6 +1,8 @@
 import { diffWords } from "diff";
 import { parse } from "parse5";
 
+type DiffStatus = "added" | "removed" | "modified";
+
 type Node = ElementNode | TextNode;
 
 type ElementNode = {
@@ -110,14 +112,8 @@ function cloneElement(
   return clone;
 }
 
-function appendClass(node: ElementNode, className: string): void {
-  const existing = node.attrs.class
-    ? node.attrs.class.split(/\s+/).filter(Boolean)
-    : [];
-  if (!existing.includes(className)) {
-    existing.unshift(className);
-  }
-  node.attrs.class = existing.join(" ");
+function setDiffStatus(node: ElementNode, status: DiffStatus): void {
+  setAttribute(node, "data-diff-status", status);
 }
 
 function setAttribute(node: ElementNode, key: string, value: string): void {
@@ -147,15 +143,15 @@ function createTextNode(value: string, parent: ElementNode): TextNode {
   return { type: "text", value, parent };
 }
 
-function createSpanNode(
-  className: string,
+function createStatusSpan(
+  status: DiffStatus,
   value: string,
   parent: ElementNode,
 ): ElementNode {
   const span: ElementNode = {
     type: "element",
     tagName: "span",
-    attrs: { class: className },
+    attrs: { "data-diff-status": status },
     children: [],
     parent,
   };
@@ -186,10 +182,10 @@ function applyWordDiff(beforeNode: ElementNode, afterNode: ElementNode): void {
   const diff = diffWords(beforeText, afterText);
   const newChildren: Node[] = diff.map((part) => {
     if (part.added) {
-      return createSpanNode("diff-added", part.value, afterNode);
+      return createStatusSpan("added", part.value, afterNode);
     }
     if (part.removed) {
-      return createSpanNode("diff-removed", part.value, afterNode);
+      return createStatusSpan("removed", part.value, afterNode);
     }
     return createTextNode(part.value, afterNode);
   });
@@ -345,7 +341,7 @@ function renderHtmlDiffInternal(args: {
   for (const id of addedIds) {
     const node = after.elementsById.get(id);
     if (!node) continue;
-    appendClass(node, "diff-added");
+    setDiffStatus(node, "added");
   }
 
   // Handle modifications
@@ -360,17 +356,17 @@ function renderHtmlDiffInternal(args: {
 
     if (mode === "element") {
       const clone = cloneElement(beforeNode);
-      appendClass(clone, "diff-removed");
+      setDiffStatus(clone, "removed");
       setAttribute(clone, "contenteditable", "false");
       markElementNonInteractive(clone);
 
-      appendClass(afterNode, "diff-added");
+      setDiffStatus(afterNode, "added");
       const parent = afterNode.parent;
       insertBefore(after.roots, parent, clone, afterNode);
     } else if (mode === "words") {
       applyWordDiff(beforeNode, afterNode);
     } else if (hasShallowDifference(beforeNode, afterNode)) {
-      appendClass(afterNode, "diff-modified");
+      setDiffStatus(afterNode, "modified");
     }
   }
 
@@ -417,7 +413,7 @@ function renderHtmlDiffInternal(args: {
     }
 
     const clone = cloneElement(beforeNode);
-    appendClass(clone, "diff-removed");
+    setDiffStatus(clone, "removed");
     setAttribute(clone, "contenteditable", "false");
     markElementNonInteractive(clone);
 

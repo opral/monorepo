@@ -83,17 +83,17 @@ padding: 8px;
 font-weight: bold;
 }
 
-.diff-added {
+[data-diff-status='added'] {
 background-color: #d4edda;
 color: #155724;
 }
 
-.diff-modified {
+[data-diff-status='modified'] {
 background-color: #fff3cd;
 color: #856404;
 }
 
-.diff-removed {
+[data-diff-status='removed'] {
 background-color: #f8d7da;
 color: #721c24;
 }`}
@@ -169,13 +169,13 @@ const afterHtml = `
 const diff = renderHtmlDiff({ beforeHtml, afterHtml });
 
 // The diff now contains:
-// - "The fast red fox" with class="diff-modified"
-// - "The lazy dog sleeps" with class="diff-added"
+// - "The fast red fox" with data-diff-status="modified"
+// - "The lazy dog sleeps" with data-diff-status="added"
 ```
 
 ### Step 3: Render the diff
 
-The diff HTML preserves your original elements and styling - only CSS classes are added. Your app's existing CSS continues to work:
+The diff HTML preserves your original elements and styling—only `data-diff-status` attributes are added. Your app's existing CSS continues to work:
 
 ```typescript
 // Vanilla JS
@@ -197,14 +197,14 @@ function DiffViewer({ diff }: { diff: string }) {
   line-height: 1.4;
 }
 
-/* Only these 3 classes needed for diff highlighting */
-.diff-added {
+/* Only these selectors needed for diff highlighting */
+[data-diff-status='added'] {
   color: #22c55e;
 }
-.diff-modified {
+[data-diff-status='modified'] {
   color: #f59e0b;
 }
-.diff-removed {
+[data-diff-status='removed'] {
   color: #ef4444;
 }
 ```
@@ -224,14 +224,13 @@ function DiffViewer({ diff }: { diff: string }) {
   line-height: 1.4;
 }
 
-/_ Only these 3 classes needed for diff highlighting _/
-
-.diff-added { color: #22c55e }
-.diff-modified { color: #f59e0b }
-.diff-removed { color: #ef4444 }`}
+/* Only these selectors needed for diff highlighting */
+[data-diff-status='added'] { color: #22c55e }
+[data-diff-status='modified'] { color: #f59e0b }
+[data-diff-status='removed'] { color: #ef4444 }`}
 />
 
-Notice how your existing `.my-text` styles (large, bold typography) are preserved. Only the diff highlighting is added on top based on your CSS diff classes.
+Notice how your existing `.my-text` styles (large, bold typography) are preserved. Only the diff highlighting is added on top based on your CSS targeting `data-diff-status`.
 
 ### Step 4: Make diffs more granular (optional)
 
@@ -252,9 +251,9 @@ For word-level highlighting within text elements, add the `data-diff-mode="words
   line-height: 1.4;
 }
 
-.diff-added { color: #22c55e; }
-.diff-modified { color: #f59e0b; }
-.diff-removed { color: #ef4444; text-decoration: line-through; }`}
+[data-diff-status='added'] { color: #22c55e; }
+[data-diff-status='modified'] { color: #f59e0b; }
+[data-diff-status='removed'] { color: #ef4444; text-decoration: line-through; }`}
 />
 
 Notice how `data-diff-mode="words"` enables word-level highlighting instead of highlighting the entire element. Learn more in the [attributes guide](/guide/attributes).

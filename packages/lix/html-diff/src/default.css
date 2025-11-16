@@ -1,14 +1,14 @@
-.diff-added {
+[data-diff-status="added"] {
   color: #1f883d;
   text-decoration: none;
   outline: none;
 }
-.diff-modified {
+[data-diff-status="modified"] {
   color: #f59e0b;
   text-decoration: none;
   outline: none;
 }
-.diff-removed {
+[data-diff-status="removed"] {
   color: #d1242f;
   text-decoration: none;
   outline: none;
@@ -16,6 +16,6 @@
 }
 
 /* Strikethrough only for word-level diffing */
-[data-diff-mode="words"] .diff-removed {
+[data-diff-mode="words"] [data-diff-status="removed"] {
   text-decoration: line-through;
 }
