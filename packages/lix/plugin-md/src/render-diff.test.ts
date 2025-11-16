@@ -201,8 +201,9 @@ describe("renderPluginDiff", () => {
 
 		const html = await renderDiff({ diffs });
 
-		expect(html).toContain("Row 2 Col 25");
-		expect(html).toMatch(/data-id="cell-r2c2"[^>]*class="diff-modified"/);
+		expect(html).toMatch(
+			/<td[^>]*data-id="cell-r2c2"[^>]*>Row 2 Col <span class="diff-removed">2<\/span><span class="diff-added">25<\/span>/,
+		);
 	});
 	// Additional cases (add/remove-only, ordering) can be covered once the API stabilises.
 });

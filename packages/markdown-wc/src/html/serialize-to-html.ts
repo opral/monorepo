@@ -60,6 +60,7 @@ export async function serializeToHtml(
 
 	if (options.diffHints) {
 		addWrapperIdsToTables(hast)
+		addCheckboxIdsToTaskLists(hast)
 	}
 	// hast -> html
 	const html = unified()
@@ -87,6 +88,49 @@ function addWrapperIdsToTables(tree: any) {
 			if (props["data-diff-show-when-removed"] == null) {
 				props["data-diff-show-when-removed"] = ""
 			}
+		}
+	})
+}
+
+function addCheckboxIdsToTaskLists(tree: any) {
+	visit(tree, (node: any) => {
+		if (!node || node.type !== "element" || node.tagName !== "li") return
+		const parentId =
+			typeof node.properties?.["data-id"] === "string"
+				? (node.properties["data-id"] as string)
+				: undefined
+		if (!parentId) return
+		let checkboxIndex = 0
+		const assign = (child: any) => {
+			if (!child || typeof child !== "object") return
+			if (child.type === "element") {
+				if (child.tagName === "input") {
+					const props = (child.properties ||= {}) as Record<string, unknown>
+					const inputType =
+						typeof props.type === "string"
+							? (props.type as string).toLowerCase()
+							: ""
+					if (inputType === "checkbox") {
+						if (typeof props["data-id"] !== "string" || props["data-id"] === "") {
+							const suffix = checkboxIndex === 0 ? "" : `_${checkboxIndex + 1}`
+							props["data-id"] = `${parentId}_checkbox${suffix}`
+						}
+						if (props["data-diff-show-when-removed"] == null) {
+							props["data-diff-show-when-removed"] = ""
+						}
+						if (props["data-diff-mode"] == null) {
+							props["data-diff-mode"] = "element"
+						}
+						checkboxIndex++
+					}
+				}
+				for (const grandchild of child.children ?? []) {
+					assign(grandchild)
+				}
+			}
+		}
+		for (const child of node.children ?? []) {
+			assign(child)
 		}
 	})
 }

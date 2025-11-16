@@ -163,6 +163,34 @@
 	text-decoration-color: currentColor;
 }
 
+.lix-diff-content input.diff-added,
+.lix-diff-content input.diff-removed,
+.lix-diff-content input.diff-modified {
+	margin-right: 4px;
+	border-radius: 4px;
+}
+
+.lix-diff-content input.diff-added {
+	outline: 2px solid #1f883d;
+	outline-offset: 2px;
+}
+
+.lix-diff-content input.diff-removed {
+	outline: 2px solid #d1242f;
+	outline-offset: 2px;
+	opacity: 0.6;
+}
+
+.lix-diff-content input.diff-modified {
+	outline: 2px solid #f59e0b;
+	outline-offset: 2px;
+}
+
+.lix-diff-content input.diff-removed + input.diff-added,
+.lix-diff-content input.diff-added + input.diff-removed {
+	margin-left: 6px;
+}
+
 .dark {
 	--background: oklch(0.145 0 0);
 

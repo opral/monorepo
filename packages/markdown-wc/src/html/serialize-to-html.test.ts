@@ -149,3 +149,35 @@ test("serializeToHtml with diffHints assigns ids to table wrappers", async () =>
 	expect(html).toContain('<thead data-id="table-1_thead" data-diff-show-when-removed="">')
 	expect(html).toContain('<tbody data-id="table-1_tbody" data-diff-show-when-removed="">')
 })
+
+test("serializeToHtml with diffHints assigns ids to task list checkboxes", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "list",
+				ordered: false,
+				data: { id: "list-1" },
+				children: [
+					{
+						type: "listItem",
+						data: { id: "item-1" },
+						checked: true,
+						children: [
+							{
+								type: "paragraph",
+								data: { id: "para-1" },
+								children: [{ type: "text", value: "checkbox" }],
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { diffHints: true })
+	expect(html).toMatch(
+		/<input[^>]*type="checkbox"[^>]*data-id="item-1_checkbox"[^>]*data-diff-show-when-removed=""[^>]*data-diff-mode="element"[^>]*>/
+	)
+})
