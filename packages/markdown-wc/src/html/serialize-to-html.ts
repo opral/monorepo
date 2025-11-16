@@ -46,7 +46,8 @@ export async function serializeToHtml(
 					if (v == null) continue
 					const t = typeof v
 					if (t === "string" || t === "number" || t === "boolean") {
-						h[`data-${k}`] = String(v)
+						const attrName = k === "id" ? "data-diff-key" : `data-${k}`
+						h[attrName] = String(v)
 					}
 				}
 			}
@@ -74,8 +75,8 @@ function addWrapperIdsToTables(tree: any) {
 	visit(tree, (node: any) => {
 		if (!node || node.type !== "element" || node.tagName !== "table") return
 		const tableId =
-			typeof node.properties?.["data-id"] === "string"
-				? (node.properties["data-id"] as string)
+			typeof node.properties?.["data-diff-key"] === "string"
+				? (node.properties["data-diff-key"] as string)
 				: undefined
 		if (!tableId) return
 		for (const child of node.children ?? []) {
@@ -83,8 +84,8 @@ function addWrapperIdsToTables(tree: any) {
 			const tag = child.tagName
 			if (tag !== "thead" && tag !== "tbody" && tag !== "tfoot") continue
 			const props = (child.properties ||= {})
-			if (props["data-id"]) continue
-			props["data-id"] = `${tableId}_${tag}`
+			if (props["data-diff-key"]) continue
+			props["data-diff-key"] = `${tableId}_${tag}`
 			if (props["data-diff-show-when-removed"] == null) {
 				props["data-diff-show-when-removed"] = ""
 			}
@@ -96,8 +97,8 @@ function addCheckboxIdsToTaskLists(tree: any) {
 	visit(tree, (node: any) => {
 		if (!node || node.type !== "element" || node.tagName !== "li") return
 		const parentId =
-			typeof node.properties?.["data-id"] === "string"
-				? (node.properties["data-id"] as string)
+			typeof node.properties?.["data-diff-key"] === "string"
+				? (node.properties["data-diff-key"] as string)
 				: undefined
 		if (!parentId) return
 		let checkboxIndex = 0
@@ -111,9 +112,12 @@ function addCheckboxIdsToTaskLists(tree: any) {
 							? (props.type as string).toLowerCase()
 							: ""
 					if (inputType === "checkbox") {
-						if (typeof props["data-id"] !== "string" || props["data-id"] === "") {
+						if (
+							typeof props["data-diff-key"] !== "string" ||
+							props["data-diff-key"] === ""
+						) {
 							const suffix = checkboxIndex === 0 ? "" : `_${checkboxIndex + 1}`
-							props["data-id"] = `${parentId}_checkbox${suffix}`
+							props["data-diff-key"] = `${parentId}_checkbox${suffix}`
 						}
 						if (props["data-diff-show-when-removed"] == null) {
 							props["data-diff-show-when-removed"] = ""

@@ -14,7 +14,7 @@ test("serializeToHtml maps node.data.* to HTML data-* attributes", async () => {
 	}
 
 	const html = await serializeToHtml(ast)
-	expect(html).toContain('<p data-id="P1" data-foo="bar">')
+	expect(html).toContain('<p data-diff-key="P1" data-foo="bar">')
 	expect(html).toContain(">Hello</p>")
 })
 
@@ -31,7 +31,9 @@ test("serializeToHtml with diffHints adds data-diff-mode=words to paragraphs", a
 	}
 
 	const html = await serializeToHtml(ast, { diffHints: true })
-	expect(html).toContain('<p data-id="P1" data-diff-mode="words" data-diff-show-when-removed="">')
+	expect(html).toContain(
+		'<p data-diff-key="P1" data-diff-mode="words" data-diff-show-when-removed="">'
+	)
 })
 
 test("serializeToHtml with diffHints marks identified nodes to show when removed", async () => {
@@ -49,7 +51,9 @@ test("serializeToHtml with diffHints marks identified nodes to show when removed
 	}
 
 	const html = await serializeToHtml(ast, { diffHints: true })
-	expect(html).toContain('<p data-id="P1" data-diff-mode="words" data-diff-show-when-removed="">')
+	expect(html).toContain(
+		'<p data-diff-key="P1" data-diff-mode="words" data-diff-show-when-removed="">'
+	)
 })
 
 test.each([1, 2, 3, 4, 5, 6])(
@@ -69,7 +73,7 @@ test.each([1, 2, 3, 4, 5, 6])(
 
 		const html = await serializeToHtml(ast, { diffHints: true })
 		expect(html).toContain(
-			`<h${depth} data-id="H${depth}" data-diff-mode="words" data-diff-show-when-removed="">`
+			`<h${depth} data-diff-key="H${depth}" data-diff-mode="words" data-diff-show-when-removed="">`
 		)
 	}
 )
@@ -108,7 +112,7 @@ test("serializeToHtml with diffHints adds data-diff-mode=words to table cells", 
 
 	const html = await serializeToHtml(ast, { diffHints: true })
 	expect(html).toContain(
-		'<td data-id="cell-1" data-diff-mode="words" data-diff-show-when-removed="">World</td>'
+		'<td data-diff-key="cell-1" data-diff-mode="words" data-diff-show-when-removed="">World</td>'
 	)
 })
 
@@ -146,8 +150,8 @@ test("serializeToHtml with diffHints assigns ids to table wrappers", async () =>
 	}
 
 	const html = await serializeToHtml(ast, { diffHints: true })
-	expect(html).toContain('<thead data-id="table-1_thead" data-diff-show-when-removed="">')
-	expect(html).toContain('<tbody data-id="table-1_tbody" data-diff-show-when-removed="">')
+	expect(html).toContain('<thead data-diff-key="table-1_thead" data-diff-show-when-removed="">')
+	expect(html).toContain('<tbody data-diff-key="table-1_tbody" data-diff-show-when-removed="">')
 })
 
 test("serializeToHtml with diffHints assigns ids to task list checkboxes", async () => {
@@ -178,6 +182,6 @@ test("serializeToHtml with diffHints assigns ids to task list checkboxes", async
 
 	const html = await serializeToHtml(ast, { diffHints: true })
 	expect(html).toMatch(
-		/<input[^>]*type="checkbox"[^>]*data-id="item-1_checkbox"[^>]*data-diff-show-when-removed=""[^>]*data-diff-mode="element"[^>]*>/
+		/<input[^>]*type="checkbox"[^>]*data-diff-key="item-1_checkbox"[^>]*data-diff-show-when-removed=""[^>]*data-diff-mode="element"[^>]*>/
 	)
 })
