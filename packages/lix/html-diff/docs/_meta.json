@@ -5,12 +5,18 @@
     "activeMatch": "/guide/"
   },
   {
-    "text": "Hello world",
-    "link": "/hello/",
-    "activeMatch": "/hello/"
+    "text": "Examples",
+    "link": "/examples/simple-rich-text-document/",
+    "activeMatch": "/examples/"
   },
   {
-    "text": "API",
-    "link": "https://rspress.dev/api/index.html"
+    "text": "Playground",
+    "link": "/playground",
+    "activeMatch": "/playground"
+  },
+  {
+    "text": "Test Cases",
+    "link": "/test-cases",
+    "activeMatch": "/test-cases"
   }
 ]

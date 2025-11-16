@@ -65,6 +65,18 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <div class="diff-modified tool-container" data-diff-key="complex-component">New complex component</div>
       `,
     },
+    {
+      name: "should preserve escaped attribute values when text changes",
+      beforeHtml: dedent`
+        <div data-diff-key="meta" data-info="&lt;tag&gt; &amp; &quot;'">Old value</div>
+      `,
+      afterHtml: dedent`
+        <div data-diff-key="meta" data-info="&lt;tag&gt; &amp; &quot;'">New value</div>
+      `,
+      expectedHtml: dedent`
+        <div data-diff-key="meta" data-info="&lt;tag&gt; &amp; &quot;&#39;" class="diff-modified">New value</div>
+      `,
+    },
   ],
   "data-diff-mode='element'": [
     {
@@ -103,6 +115,24 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       `,
       expectedHtml: dedent`
         <p data-diff-key="ksu4" data-diff-mode="words">Hello <span class="diff-added">World</span></p>
+      `,
+    },
+    {
+      name: "should keep escaped text when doing word-level diffing",
+      beforeHtml: dedent`
+        <p data-diff-key="escaped" data-diff-mode="words">
+          &lt;script&gt;alert("one")&lt;/script&gt;
+        </p>
+      `,
+      afterHtml: dedent`
+        <p data-diff-key="escaped" data-diff-mode="words">
+          &lt;script&gt;alert("two")&lt;/script&gt;
+        </p>
+      `,
+      expectedHtml: dedent`
+        <p data-diff-key="escaped" data-diff-mode="words">
+          &lt;script&gt;alert("<span class="diff-removed">one</span><span class="diff-added">two</span>")&lt;/script&gt;
+        </p>
       `,
     },
     {
@@ -222,6 +252,30 @@ export const testCasesBySection: Record<string, TestCase[]> = {
             </tr>
           </tbody>
         </table>
+      `,
+    },
+    {
+      name: "should preserve escaped text when re-inserting removed elements",
+      beforeHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1" data-diff-show-when-removed>
+            &lt;script&gt;alert("remove me")&lt;/script&gt;
+          </li>
+          <li data-diff-key="item2">keep me</li>
+        </ul>
+      `,
+      afterHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item2">keep me</li>
+        </ul>
+      `,
+      expectedHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1" data-diff-show-when-removed="" class="diff-removed" contenteditable="false">
+            &lt;script&gt;alert("remove me")&lt;/script&gt;
+          </li>
+          <li data-diff-key="item2">keep me</li>
+        </ul>
       `,
     },
   ],

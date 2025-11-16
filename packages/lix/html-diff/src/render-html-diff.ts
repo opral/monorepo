@@ -243,12 +243,28 @@ function insertBefore(
   list.push(newNode);
 }
 
+function escapeText(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeAttribute(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/'/g, "&#39;");
+}
+
 function renderNode(node: Node): string {
   if (node.type === "text") {
-    return node.value ?? "";
+    return escapeText(node.value ?? "");
   }
   const attrs = Object.entries(node.attrs)
-    .map(([name, value]) => `${name}="${value.replace(/"/g, "&quot;")}"`)
+    .map(([name, value]) => `${name}="${escapeAttribute(value)}"`)
     .join(" ");
   const inner = node.children.map(renderNode).join("");
   return `<${node.tagName}${attrs ? " " + attrs : ""}>${inner}</${node.tagName}>`;
