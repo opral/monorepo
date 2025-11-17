@@ -23,14 +23,20 @@ export async function serializeToHtml(
 	// - Make lists "loose" so list items render paragraphs inside <li>
 	// - Promote node.data.* to hProperties data-* attributes
 	const remarkSerializeDataAttributes: Plugin<[], any> = () => (tree: any) => {
-		visit(tree, (node: any) => {
+		visit(tree, (node: any, _index: number | null | undefined, parent: any) => {
 			if (!node || typeof node !== "object") return
 			// loose lists
 			if (node.type === "list" || node.type === "listItem") (node as any).spread = true
 			// diff hints: set diff attributes when requested (non-destructive: don't override if present)
 			if (options.diffHints) {
 				const diffData = ((node as any).data ||= {}) as Record<string, any>
-				if (node.type === "paragraph" || node.type === "heading" || node.type === "tableCell") {
+				const parentIsListItem = parent?.type === "listItem"
+				if (node.type === "listItem" && diffData["diff-mode"] == null) {
+					diffData["diff-mode"] = "element"
+				}
+				const supportsWordDiff =
+					node.type === "paragraph" || node.type === "heading" || node.type === "tableCell"
+				if (!parentIsListItem && supportsWordDiff) {
 					if (diffData["diff-mode"] == null) diffData["diff-mode"] = "words"
 				}
 				if (diffData["id"] != null && diffData["diff-show-when-removed"] == null) {
@@ -61,7 +67,6 @@ export async function serializeToHtml(
 
 	if (options.diffHints) {
 		addWrapperIdsToTables(hast)
-		addCheckboxIdsToTaskLists(hast)
 	}
 	// hast -> html
 	const html = unified()
@@ -89,52 +94,6 @@ function addWrapperIdsToTables(tree: any) {
 			if (props["data-diff-show-when-removed"] == null) {
 				props["data-diff-show-when-removed"] = ""
 			}
-		}
-	})
-}
-
-function addCheckboxIdsToTaskLists(tree: any) {
-	visit(tree, (node: any) => {
-		if (!node || node.type !== "element" || node.tagName !== "li") return
-		const parentId =
-			typeof node.properties?.["data-diff-key"] === "string"
-				? (node.properties["data-diff-key"] as string)
-				: undefined
-		if (!parentId) return
-		let checkboxIndex = 0
-		const assign = (child: any) => {
-			if (!child || typeof child !== "object") return
-			if (child.type === "element") {
-				if (child.tagName === "input") {
-					const props = (child.properties ||= {}) as Record<string, unknown>
-					const inputType =
-						typeof props.type === "string"
-							? (props.type as string).toLowerCase()
-							: ""
-					if (inputType === "checkbox") {
-						if (
-							typeof props["data-diff-key"] !== "string" ||
-							props["data-diff-key"] === ""
-						) {
-							const suffix = checkboxIndex === 0 ? "" : `_${checkboxIndex + 1}`
-							props["data-diff-key"] = `${parentId}_checkbox${suffix}`
-						}
-						if (props["data-diff-show-when-removed"] == null) {
-							props["data-diff-show-when-removed"] = ""
-						}
-						if (props["data-diff-mode"] == null) {
-							props["data-diff-mode"] = "element"
-						}
-						checkboxIndex++
-					}
-				}
-				for (const grandchild of child.children ?? []) {
-					assign(grandchild)
-				}
-			}
-		}
-		for (const child of node.children ?? []) {
-			assign(child)
 		}
 	})
 }

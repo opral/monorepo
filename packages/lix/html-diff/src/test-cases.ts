@@ -92,6 +92,24 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       `,
     },
     {
+      name: "should not duplicate identical element-mode nodes",
+      beforeHtml: dedent`
+        <li data-diff-key="item-1" data-diff-mode="element">
+          <p><input type="checkbox"></input> nice</p>
+        </li>
+      `,
+      afterHtml: dedent`
+        <li data-diff-key="item-1" data-diff-mode="element">
+          <p><input type="checkbox"></input> nice</p>
+        </li>
+      `,
+      expectedHtml: dedent`
+        <li data-diff-key="item-1" data-diff-mode="element">
+          <p><input type="checkbox"></input> nice</p>
+        </li>
+      `,
+    },
+    {
       name: "should handle element diffing with existing classes",
       beforeHtml: dedent`
         <p class="highlight important" data-diff-key="text" data-diff-mode="element">Before text</p>

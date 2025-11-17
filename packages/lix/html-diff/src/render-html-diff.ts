@@ -311,6 +311,27 @@ function hasShallowDifference(
   return false;
 }
 
+function nodesStructurallyEqual(beforeNode: Node, afterNode: Node): boolean {
+  if (beforeNode.type !== afterNode.type) return false;
+  if (beforeNode.type === "text" && afterNode.type === "text") {
+    return beforeNode.value === afterNode.value;
+  }
+  if (beforeNode.type === "element" && afterNode.type === "element") {
+    if (beforeNode.tagName !== afterNode.tagName) return false;
+    if (!shallowAttributesEqual(beforeNode, afterNode)) return false;
+    if (beforeNode.children.length !== afterNode.children.length) return false;
+    for (let i = 0; i < beforeNode.children.length; i++) {
+      const beforeChild = beforeNode.children[i]!;
+      const afterChild = afterNode.children[i]!;
+      if (!nodesStructurallyEqual(beforeChild, afterChild)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 function renderHtmlDiffInternal(args: {
   beforeHtml: string;
   afterHtml: string;
@@ -355,6 +376,9 @@ function renderHtmlDiffInternal(args: {
       getAttribute(beforeNode, "data-diff-mode");
 
     if (mode === "element") {
+      if (nodesStructurallyEqual(beforeNode, afterNode)) {
+        continue;
+      }
       const clone = cloneElement(beforeNode);
       setDiffStatus(clone, "removed");
       setAttribute(clone, "contenteditable", "false");
