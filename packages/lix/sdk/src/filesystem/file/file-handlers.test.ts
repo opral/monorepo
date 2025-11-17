@@ -175,4 +175,59 @@ describe("file update", () => {
 		);
 		expect(janeEntities.length).toBe(0);
 	});
+
+	it("updates descriptor untracked state when only tracking flag changes", async () => {
+		const lix = await openLix({});
+		const version = await createVersion({ lix });
+		const fileId = randomNanoId();
+		const initialData = new TextEncoder().encode("no-op content");
+
+		// Seed a tracked file row
+		await lix.db
+			.insertInto("file_by_version")
+			.values({
+				id: fileId,
+				path: "/tracked-file.txt",
+				data: initialData,
+				lixcol_version_id: version.id,
+				metadata: null,
+				hidden: false,
+				lixcol_untracked: false,
+			})
+			.execute();
+
+		const [descriptorBefore] = await lix.db
+			.selectFrom("state_by_version")
+			.where("entity_id", "=", fileId)
+			.where("schema_key", "=", "lix_file_descriptor")
+			.where("version_id", "=", version.id)
+			.select(["untracked"])
+			.execute();
+
+		expect(Boolean(descriptorBefore?.untracked)).toBe(false);
+
+		// Update only the untracked flag
+		handleFileUpdate({
+			engine: lix.engine!,
+			file: {
+				id: fileId,
+				path: "/tracked-file.txt",
+				data: initialData,
+				metadata: null,
+				hidden: false,
+			},
+			versionId: version.id,
+			untracked: true,
+		});
+
+		const [descriptorAfter] = await lix.db
+			.selectFrom("state_by_version")
+			.where("entity_id", "=", fileId)
+			.where("schema_key", "=", "lix_file_descriptor")
+			.where("version_id", "=", version.id)
+			.select(["untracked"])
+			.execute();
+
+		expect(Boolean(descriptorAfter?.untracked)).toBe(true);
+	});
 });

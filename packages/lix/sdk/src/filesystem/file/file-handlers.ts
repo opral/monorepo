@@ -375,13 +375,23 @@ export function handleFileUpdate(args: {
 			.selectFrom("file_by_version")
 			.where("id", "=", args.file.id)
 			.where("lixcol_version_id", "=", args.versionId)
-			.select(["directory_id", "name", "extension", "metadata", "hidden"])
+			.select([
+				"directory_id",
+				"name",
+				"extension",
+				"metadata",
+				"hidden",
+				"lixcol_untracked",
+			])
 			.compile()
-	).rows as Pick<
+	).rows as (Pick<
 		LixFile,
 		"directory_id" | "name" | "extension" | "metadata" | "hidden"
-	>[];
+	> & {
+		lixcol_untracked: number;
+	})[];
 	const currentDescriptor = currentDescriptorRows[0];
+	const desiredUntrackedState = args.untracked || false;
 
 	const descriptorChanged =
 		!currentDescriptor ||
@@ -389,6 +399,7 @@ export function handleFileUpdate(args: {
 		currentDescriptor.name !== pluginFile.name ||
 		currentDescriptor.extension !== pluginFile.extension ||
 		Boolean(currentDescriptor.hidden) !== pluginFile.hidden ||
+		Boolean(currentDescriptor.lixcol_untracked) !== desiredUntrackedState ||
 		!metadataEquals(
 			currentDescriptor.metadata ?? null,
 			pluginFile.metadata ?? null
@@ -408,7 +419,7 @@ export function handleFileUpdate(args: {
 						hidden: descriptorFields.hidden,
 					},
 					metadata: descriptorFields.metadata ?? null,
-					untracked: args.untracked || false,
+					untracked: desiredUntrackedState,
 				})
 				.where("entity_id", "=", args.file.id)
 				.where("schema_key", "=", "lix_file_descriptor")
