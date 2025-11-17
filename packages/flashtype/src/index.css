@@ -186,8 +186,12 @@
 	outline-offset: 2px;
 }
 
-.lix-diff-content input[data-diff-status="removed"] + input[data-diff-status="added"],
-.lix-diff-content input[data-diff-status="added"] + input[data-diff-status="removed"] {
+.lix-diff-content
+	input[data-diff-status="removed"]
+	+ input[data-diff-status="added"],
+.lix-diff-content
+	input[data-diff-status="added"]
+	+ input[data-diff-status="removed"] {
 	margin-left: 6px;
 }
 

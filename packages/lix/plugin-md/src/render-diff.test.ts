@@ -116,10 +116,10 @@ describe("renderPluginDiff", () => {
 			},
 		];
 
-	const html = await renderDiff({ diffs });
-	expect(html).toContain("Removed Section");
-	expect(html).toContain('data-diff-status="removed"');
-	expect(html).not.toContain("North America");
+		const html = await renderDiff({ diffs });
+		expect(html).toContain("Removed Section");
+		expect(html).toContain('data-diff-status="removed"');
+		expect(html).not.toContain("North America");
 	});
 
 	test("marks table cells as modified when their content changes", async () => {
@@ -201,9 +201,9 @@ describe("renderPluginDiff", () => {
 
 		const html = await renderDiff({ diffs });
 
-	expect(html).toMatch(
-		/<td[^>]*data-diff-key="cell-r2c2"[^>]*>Row 2 Col <span data-diff-status="removed">2<\/span><span data-diff-status="added">25<\/span>/,
-	);
+		expect(html).toMatch(
+			/<td[^>]*data-diff-key="cell-r2c2"[^>]*>Row 2 Col <span data-diff-status="removed">2<\/span><span data-diff-status="added">25<\/span>/,
+		);
 	});
 	// Additional cases (add/remove-only, ordering) can be covered once the API stabilises.
 });
