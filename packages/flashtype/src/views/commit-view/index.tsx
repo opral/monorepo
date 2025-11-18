@@ -38,7 +38,7 @@ function formatTimestamp(value: string | null | undefined): string {
 }
 
 export function CommitView({ context, view }: CommitViewProps) {
-	const checkpointId = view?.metadata?.checkpointId;
+	const checkpointId = view?.props?.checkpointId;
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
 	const checkpoint = checkpoints.find((cp) => cp.id === checkpointId);

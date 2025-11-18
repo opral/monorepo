@@ -34,22 +34,25 @@ export type DiffViewConfig = {
 };
 
 /**
- * Per-panel instance metadata used to track which views are open.
+ * Per-panel instance props used to track which views are open.
  *
  * @example
  * const instance: ViewInstance = { instanceKey: "files-1", viewKey: "files" };
  */
+export interface ViewInstanceProps {
+	readonly filePath?: string;
+	readonly label?: string;
+	readonly checkpointId?: string;
+	readonly fileId?: string;
+	readonly diff?: DiffViewConfig;
+	readonly [key: string]: unknown;
+}
+
 export interface ViewInstance {
 	readonly instanceKey: string;
 	readonly viewKey: ViewKey;
 	readonly isPending?: boolean;
-	readonly metadata?: {
-		readonly filePath?: string;
-		readonly label?: string;
-		readonly checkpointId?: string;
-		readonly fileId?: string;
-		readonly diff?: DiffViewConfig;
-	};
+	readonly props?: ViewInstanceProps;
 }
 
 /**
@@ -124,6 +127,18 @@ export interface ViewContext {
 	) => void;
 	readonly openHistoryView?: (options?: { readonly focus?: boolean }) => void;
 	readonly closeDiffView?: (fileId: string) => void;
+	readonly openView?: (args: {
+		readonly panel: PanelSide;
+		readonly viewKey: ViewKey;
+		readonly props?: ViewInstanceProps;
+		readonly focus?: boolean;
+		readonly instanceKey?: string;
+	}) => void;
+	readonly closeView?: (args: {
+		readonly panel?: PanelSide;
+		readonly instanceKey?: string;
+		readonly viewKey?: ViewKey;
+	}) => void;
 	readonly isPanelFocused?: boolean;
 	readonly setTabBadgeCount: (count: number | null | undefined) => void;
 	readonly moveViewToPanel?: (targetPanel: PanelSide, instanceKey?: string) => void;

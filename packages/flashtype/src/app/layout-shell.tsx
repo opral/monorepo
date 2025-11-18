@@ -33,6 +33,7 @@ import type {
 	PanelSide,
 	PanelState,
 	ViewInstance,
+	ViewInstanceProps,
 	ViewKey,
 	DiffViewConfig,
 	RenderableDiff,
@@ -51,11 +52,25 @@ import {
 	reorderPanelViewsByIndex,
 } from "./panel-utils";
 
+type LegacyViewInstance = ViewInstance & {
+	readonly metadata?: ViewInstance["props"];
+};
+
+const adoptLegacyProps = (view: LegacyViewInstance): ViewInstance => {
+	if (view.props || !view.metadata) return view;
+	const { metadata, ...rest } = view;
+	return {
+		...rest,
+		props: metadata,
+	};
+};
+
 const hydratePanel = (panel: PanelState): PanelState => {
-	const views = panel.views
+	const views = (panel.views as LegacyViewInstance[])
+		.map(adoptLegacyProps)
 		// Drop unknown view keys that might linger in persisted UI state.
 		.filter((view) => VIEW_MAP.has(view.viewKey))
-		.map(upgradeDiffMetadata);
+		.map(upgradeDiffProps);
 	if (views.length === 0) {
 		return { views, activeInstanceKey: null };
 	}
@@ -71,22 +86,22 @@ const hydratePanel = (panel: PanelState): PanelState => {
 	};
 };
 
-const upgradeDiffMetadata = (view: ViewInstance): ViewInstance => {
+const upgradeDiffProps = (view: ViewInstance): ViewInstance => {
 	if (view.viewKey !== "diff") return view;
-	const fileId = view.metadata?.fileId;
+	const fileId = view.props?.fileId;
 	if (!fileId) return view;
-	const existing = view.metadata?.diff;
+	const existing = view.props?.diff;
 	const nextLabel =
-		view.metadata?.label ??
-		diffLabelFromPath(view.metadata?.filePath) ??
+		view.props?.label ??
+		diffLabelFromPath(view.props?.filePath) ??
 		"Unnamed diff";
-	if (existing?.query && view.metadata?.label === nextLabel) {
+	if (existing?.query && view.props?.label === nextLabel) {
 		return view;
 	}
 	return {
 		...view,
-		metadata: {
-			...view.metadata,
+		props: {
+			...view.props,
 			label: nextLabel,
 			diff: existing?.query
 				? existing
@@ -372,24 +387,118 @@ export function V2LayoutShell() {
 		[setLeftPanel, setCentralPanel, setRightPanel, setFocusedPanel],
 	);
 
-	const handleAddView = useCallback(
-		(side: PanelSide, viewKey: ViewKey) => {
+	const handleOpenView = useCallback(
+		({
+			panel,
+			viewKey,
+			props,
+			focus = true,
+			instanceKey,
+		}: {
+			panel: PanelSide;
+			viewKey: ViewKey;
+			props?: ViewInstanceProps;
+			focus?: boolean;
+			instanceKey?: string;
+		}) => {
 			setPanelState(
-				side,
-				(panel) => {
-					const next: ViewInstance = {
-						instanceKey: createViewInstanceKey(viewKey),
+				panel,
+				(current) => {
+					if (!instanceKey) {
+						const existing = current.views.find(
+							(entry) => entry.viewKey === viewKey,
+						);
+						if (existing) {
+							const views = props
+								? current.views.map((entry) =>
+										entry.instanceKey === existing.instanceKey
+											? { ...entry, props }
+											: entry,
+								  )
+								: current.views;
+							return {
+								views,
+								activeInstanceKey: existing.instanceKey,
+							};
+						}
+					}
+					const targetKey = instanceKey ?? createViewInstanceKey(viewKey);
+					const existingByInstance = instanceKey
+						? current.views.find(
+							(entry) => entry.instanceKey === instanceKey,
+						)
+						: null;
+					if (existingByInstance) {
+						const views = current.views.map((entry) =>
+							entry.instanceKey === targetKey
+								? { ...entry, viewKey, props }
+								: entry,
+						);
+						return {
+							views,
+							activeInstanceKey: targetKey,
+						};
+					}
+					const nextView: ViewInstance = {
+						instanceKey: targetKey,
 						viewKey,
+						props,
 					};
 					return {
-						views: [...panel.views, next],
-						activeInstanceKey: next.instanceKey,
+						views: [...current.views, nextView],
+						activeInstanceKey: nextView.instanceKey,
 					};
 				},
-				{ focus: true },
+				{ focus },
 			);
 		},
 		[setPanelState],
+	);
+
+	const handleCloseView = useCallback(
+		({
+			panel,
+			instanceKey,
+			viewKey,
+		}: {
+			panel?: PanelSide;
+			instanceKey?: string;
+			viewKey?: ViewKey;
+		}) => {
+			if (!instanceKey && !viewKey) return;
+			const predicate = (entry: ViewInstance) => {
+				if (instanceKey) return entry.instanceKey === instanceKey;
+				if (viewKey) return entry.viewKey === viewKey;
+				return false;
+			};
+			const targetPanels: PanelSide[] = panel
+				? [panel]
+				: (["central", "left", "right"] as PanelSide[]);
+			for (const side of targetPanels) {
+				let removed = false;
+				setPanelState(side, (current) => {
+					const index = current.views.findIndex(predicate);
+					if (index === -1) return current;
+					removed = true;
+					const views = current.views.filter((_, idx) => idx !== index);
+					const removedView = current.views[index];
+					const activeInstanceKey =
+						current.activeInstanceKey === removedView.instanceKey
+							? views[views.length - 1]?.instanceKey ?? null
+							: current.activeInstanceKey;
+					return { views, activeInstanceKey };
+				});
+				if (removed) break;
+			}
+		},
+		[setPanelState],
+	);
+
+	const handleAddView = useCallback(
+		(side: PanelSide, viewKey: ViewKey) => {
+			handleOpenView({ panel: side, viewKey });
+		},
+		[handleOpenView],
 	);
 
 	const focusPanel = useCallback((side: PanelSide) => {
@@ -562,36 +671,36 @@ export function V2LayoutShell() {
 			setPanelState(
 				"central",
 				(panel) => {
-					const existingFileView = panel.views.find(
-						(view) =>
-							view.metadata?.fileId === fileId ||
-							(filePath && view.metadata?.filePath === filePath),
-					);
+				const existingFileView = panel.views.find(
+					(view) =>
+						view.props?.fileId === fileId ||
+						(filePath && view.props?.filePath === filePath),
+				);
 					if (existingFileView) {
 						const activated = activatePanelView(
 							panel,
 							existingFileView.instanceKey,
 						);
-						const nextViews = activated.views.map((entry) => {
-							if (entry.instanceKey !== existingFileView.instanceKey) {
-								return entry;
-							}
-							const nextMetadata = {
-								...entry.metadata,
+					const nextViews = activated.views.map((entry) => {
+						if (entry.instanceKey !== existingFileView.instanceKey) {
+							return entry;
+						}
+						const nextProps = {
+							...entry.props,
+							fileId,
+							filePath: filePath ?? entry.props?.filePath,
+						};
+						if (!nextProps.label) {
+							nextProps.label = fileLabelFromPath(
+								nextProps.filePath,
 								fileId,
-								filePath: filePath ?? entry.metadata?.filePath,
-							};
-							if (!nextMetadata.label) {
-								nextMetadata.label = fileLabelFromPath(
-									nextMetadata.filePath,
-									fileId,
-								);
-							}
-							return {
-								...entry,
-								metadata: nextMetadata,
-							};
-						});
+							);
+						}
+						return {
+							...entry,
+							props: nextProps,
+						};
+					});
 						return {
 							views: nextViews,
 							activeInstanceKey: activated.activeInstanceKey,
@@ -602,16 +711,16 @@ export function V2LayoutShell() {
 						instanceKey: createViewInstanceKey("file-content"),
 						viewKey: "file-content" as ViewKey,
 						isPending: true,
-						metadata: filePath
-							? {
+					props: filePath
+						? {
 									fileId,
 									filePath,
 									label,
 								}
-							: {
-									fileId,
-									label,
-								},
+						: {
+							fileId,
+							label,
+						},
 					};
 					return upsertPendingView(panel, newView);
 				},
@@ -652,9 +761,9 @@ export function V2LayoutShell() {
 			setPanelState(
 				"central",
 				(panel) => {
-					const existingCommitView = panel.views.find(
-						(view) => view.metadata?.checkpointId === checkpointId,
-					);
+				const existingCommitView = panel.views.find(
+					(view) => view.props?.checkpointId === checkpointId,
+				);
 					if (existingCommitView) {
 						return activatePanelView(panel, existingCommitView.instanceKey);
 					}
@@ -662,7 +771,7 @@ export function V2LayoutShell() {
 						instanceKey: createViewInstanceKey("commit"),
 						viewKey: "commit" as ViewKey,
 						isPending: true,
-						metadata: {
+						props: {
 							checkpointId,
 							label,
 						},
@@ -720,25 +829,25 @@ export function V2LayoutShell() {
 			setPanelState(
 				"central",
 				(panel) => {
-					const existingDiffView = panel.views.find(
-						(view) =>
-							view.viewKey === "diff" && view.metadata?.fileId === fileId,
-					);
+				const existingDiffView = panel.views.find(
+					(view) =>
+						view.viewKey === "diff" && view.props?.fileId === fileId,
+				);
 					if (existingDiffView) {
-						const nextViews = panel.views.map((entry) =>
-							entry.instanceKey === existingDiffView.instanceKey
-								? {
-										...entry,
-										isPending: false,
-										metadata: {
-											fileId,
-											filePath,
-											label: diffLabel,
-											diff: diffConfig,
-										},
-									}
-								: entry,
-						);
+					const nextViews = panel.views.map((entry) =>
+						entry.instanceKey === existingDiffView.instanceKey
+							? {
+									...entry,
+									isPending: false,
+									props: {
+										fileId,
+										filePath,
+										label: diffLabel,
+										diff: diffConfig,
+									},
+								}
+							: entry,
+					);
 						return {
 							views: nextViews,
 							activeInstanceKey: existingDiffView.instanceKey,
@@ -748,7 +857,7 @@ export function V2LayoutShell() {
 						instanceKey: createViewInstanceKey("diff"),
 						viewKey: "diff",
 						isPending: true,
-						metadata: {
+						props: {
 							fileId,
 							filePath,
 							label: diffLabel,
@@ -770,21 +879,21 @@ export function V2LayoutShell() {
 			setPanelState(
 				"central",
 				(panel) => {
-					const targetIndex = panel.views.findIndex(
-						(view) =>
-							view.viewKey === "diff" && view.metadata?.fileId === fileId,
-					);
+				const targetIndex = panel.views.findIndex(
+					(view) =>
+						view.viewKey === "diff" && view.props?.fileId === fileId,
+				);
 					if (targetIndex === -1) {
 						return panel;
 					}
 					const targetView = panel.views[targetIndex];
 					const nextViews = panel.views.filter(
 						(view) =>
-							!(view.viewKey === "diff" && view.metadata?.fileId === fileId),
+							!(view.viewKey === "diff" && view.props?.fileId === fileId),
 					);
 					const filePath =
-						typeof targetView.metadata?.filePath === "string"
-							? targetView.metadata.filePath
+						typeof targetView.props?.filePath === "string"
+							? targetView.props.filePath
 							: undefined;
 					if (nextViews.length === 0) {
 						const label = fileLabelFromPath(filePath, fileId);
@@ -792,7 +901,7 @@ export function V2LayoutShell() {
 							instanceKey: createViewInstanceKey("file-content"),
 							viewKey: "file-content",
 							isPending: true,
-							metadata: filePath
+							props: filePath
 								? { fileId, filePath, label }
 								: { fileId, label },
 						};
@@ -831,7 +940,7 @@ export function V2LayoutShell() {
 
 	const activeStatusLabel = useMemo(() => {
 		if (!activeCentralEntry) return null;
-		const rawPath = activeCentralEntry.metadata?.filePath;
+		const rawPath = activeCentralEntry.props?.filePath;
 		if (rawPath) {
 			const parts = rawPath.split("/").map((segment, index) => {
 				if (index === 0 && segment === "") return "";
@@ -841,7 +950,7 @@ export function V2LayoutShell() {
 			return decoded.length > 0 ? decoded : rawPath;
 		}
 		return (
-			activeCentralEntry.metadata?.label ??
+			activeCentralEntry.props?.label ??
 			VIEW_MAP.get(activeCentralEntry.viewKey)?.label ??
 			null
 		);
@@ -975,7 +1084,7 @@ export function V2LayoutShell() {
 						{
 							instanceKey: viewToMove.instanceKey,
 							viewKey: viewToMove.viewKey,
-							metadata: viewToMove.metadata,
+							props: viewToMove.props,
 						},
 					],
 					activeInstanceKey: viewToMove.instanceKey,
@@ -1016,6 +1125,8 @@ export function V2LayoutShell() {
 			openCommitView: handleOpenCommit,
 			openDiffView: handleOpenDiff,
 			closeDiffView: handleCloseDiff,
+			openView: handleOpenView,
+			closeView: handleCloseView,
 			setTabBadgeCount: () => {},
 			moveViewToPanel: handleMoveViewToPanel,
 			resizePanel: handleResizePanel,
@@ -1027,6 +1138,8 @@ export function V2LayoutShell() {
 			handleOpenCommit,
 			handleOpenDiff,
 			handleCloseDiff,
+			handleOpenView,
+			handleCloseView,
 			handleMoveViewToPanel,
 			handleResizePanel,
 			focusPanel,
@@ -1192,10 +1305,9 @@ export function V2LayoutShell() {
 										{ focus: true },
 									)
 								}
-								viewContext={centralViewContext}
-								onCreateNewFile={handleCreateNewFile}
-								onAddView={handleAddView}
-							/>
+						viewContext={centralViewContext}
+						onCreateNewFile={handleCreateNewFile}
+					/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />

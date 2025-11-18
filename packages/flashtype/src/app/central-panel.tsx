@@ -17,7 +17,6 @@ type CentralPanelProps = {
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
 	readonly onFinalizePendingView?: (instanceKey: string) => void;
-	readonly onAddView?: (side: PanelSide, viewKey: string) => void;
 };
 
 /**
@@ -40,7 +39,6 @@ export function CentralPanel({
 	onFocusPanel,
 	onFinalizePendingView,
 	onCreateNewFile,
-	onAddView,
 }: CentralPanelProps) {
 	const finalizePendingIfNeeded = useCallback(
 		(instanceKey: string) => {
@@ -55,21 +53,13 @@ export function CentralPanel({
 		[onFinalizePendingView, panel.views],
 	);
 
-	const handleOpenAgentView = useCallback(() => {
-		if (!onAddView) return;
-		onAddView("central", "agent");
-	}, [onAddView]);
-
 	const emptyState = (
-		<WelcomeScreen
-			context={viewContext}
-			onOpenAgentView={handleOpenAgentView}
-		/>
+		<WelcomeScreen context={viewContext} onCreateNewFile={onCreateNewFile} />
 	);
 
 	const labelResolver = useCallback(
 		(view: ViewDefinition, entry: (typeof panel.views)[number]) =>
-			entry.metadata?.label ?? view.label,
+			entry.props?.label ?? view.label,
 		[],
 	);
 

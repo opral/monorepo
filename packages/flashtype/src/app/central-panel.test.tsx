@@ -1,9 +1,12 @@
+import { Suspense, act, type ReactNode } from "react";
 import { DndContext } from "@dnd-kit/core";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { CentralPanel } from "./central-panel";
 import type { PanelState, ViewContext } from "./types";
 import type { Lix } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
 vi.mock("./view-registry", () => {
 	const definitions = [
@@ -38,22 +41,45 @@ vi.mock("./view-registry", () => {
 	};
 });
 
-const mockLix = {} as Lix;
+let lix: Awaited<ReturnType<typeof openLix>> | null = null;
+
+beforeAll(async () => {
+	lix = await openLix({ providePlugins: [mdPlugin] });
+});
+
+afterAll(async () => {
+	await lix?.close();
+	lix = null;
+});
+
+const renderWithProviders = async (ui: ReactNode) => {
+	let result: ReturnType<typeof render> | undefined;
+	await act(async () => {
+		result = render(
+			<Suspense fallback={<div data-testid="loading-state" />}>
+				{ui}
+			</Suspense>,
+		);
+	});
+	return result!;
+};
 
 const createViewContext = (
 	overrides: Partial<ViewContext> = {},
 ): ViewContext => ({
-	lix: mockLix,
+	lix: lix ?? (() => {
+		throw new Error("Lix instance not initialized");
+	})(),
 	isPanelFocused: false,
 	setTabBadgeCount: () => {},
 	...overrides,
 });
 
 describe("CentralPanel", () => {
-	test("shows the welcome screen when no views are open", () => {
+	test("shows the welcome screen when no views are open", async () => {
 		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
 
-		render(
+		await renderWithProviders(
 			<DndContext>
 				<CentralPanel
 					panel={emptyPanel}
@@ -66,7 +92,7 @@ describe("CentralPanel", () => {
 			</DndContext>,
 		);
 
-		expect(screen.getByTestId("welcome-screen")).toBeInTheDocument();
+		expect(await screen.findByTestId("welcome-screen")).toBeInTheDocument();
 	});
 
 	test("renders the active view and wires tab selection", async () => {
@@ -76,7 +102,7 @@ describe("CentralPanel", () => {
 		};
 		const handleSelect = vi.fn();
 
-		render(
+		await renderWithProviders(
 			<DndContext>
 				<CentralPanel
 					panel={panelState}
@@ -104,7 +130,7 @@ describe("CentralPanel", () => {
 			activeInstanceKey: "search-1",
 		};
 
-		render(
+		await renderWithProviders(
 			<DndContext>
 				<CentralPanel
 					panel={panelState}
@@ -128,7 +154,7 @@ describe("CentralPanel", () => {
 		};
 		const handleFinalize = vi.fn();
 
-		render(
+		await renderWithProviders(
 			<DndContext>
 				<CentralPanel
 					panel={panelState}
@@ -148,11 +174,11 @@ describe("CentralPanel", () => {
 		expect(handleFinalize).toHaveBeenCalledWith("search-1");
 	});
 
-	test("triggers create-new-file callback from welcome screen", () => {
+	test("triggers create-new-file callback from welcome screen", async () => {
 		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
 		const handleCreateNewFile = vi.fn();
 
-		render(
+		await renderWithProviders(
 			<DndContext>
 				<CentralPanel
 					panel={emptyPanel}
@@ -166,7 +192,8 @@ describe("CentralPanel", () => {
 			</DndContext>,
 		);
 
-		fireEvent.click(screen.getByRole("button", { name: /create a new file/i }));
+		const createButton = await screen.findByTestId("welcome-create-file");
+		fireEvent.click(createButton);
 
 		expect(handleCreateNewFile).toHaveBeenCalledTimes(1);
 	});

@@ -105,8 +105,8 @@ export const view = createReactViewDefinition({
 	component: ({ context, instance }) => (
 		<LixProvider lix={context.lix}>
 			<MarkdownView
-				fileId={instance.metadata?.fileId}
-				filePath={instance.metadata?.filePath}
+				fileId={instance.props?.fileId}
+				filePath={instance.props?.filePath}
 			/>
 		</LixProvider>
 	),

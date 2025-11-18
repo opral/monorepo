@@ -262,7 +262,7 @@ const resolveLabel = (
 	if (tabLabel) {
 		return tabLabel(view, instance);
 	}
-	return instance.metadata?.label ?? view.label;
+	return instance.props?.label ?? view.label;
 };
 
 interface TabBarProps {

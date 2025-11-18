@@ -23,6 +23,7 @@ import {
 import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type {
 	ViewContext,
+	ViewInstance,
 	DiffViewConfig,
 	RenderableDiff,
 } from "../../app/types";
@@ -38,8 +39,15 @@ import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { WelcomeScreen } from "./components/welcome-screen";
 
+type AgentViewLaunchProps = {
+	readonly initialMessage?: string;
+	readonly invocationId?: string;
+	readonly source?: string;
+};
+
 type AgentViewProps = {
 	readonly context?: ViewContext;
+	readonly instance?: ViewInstance;
 };
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
@@ -65,7 +73,7 @@ const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";
  * @example
  * <AgentView />
  */
-export function AgentView({ context }: AgentViewProps) {
+export function AgentView({ context, instance }: AgentViewProps) {
 	const lix = useLix();
 	const devApiKey =
 		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
@@ -184,6 +192,7 @@ export function AgentView({ context }: AgentViewProps) {
 		[provider, selectedModelId],
 	);
 	const hasKey = Boolean(storedApiKey);
+	const launchProps = instance?.props as AgentViewLaunchProps | undefined;
 
 	const messages = useQuery(({ lix }) =>
 		lix.db
@@ -277,6 +286,7 @@ export function AgentView({ context }: AgentViewProps) {
 
 	const [pendingMessage, setPendingMessage] =
 		useState<AgentConversationMessage | null>(null);
+	const launchPropsRef = useRef<string | null>(null);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const messageCount = messages?.length ?? 0;
 
@@ -442,15 +452,15 @@ export function AgentView({ context }: AgentViewProps) {
 								reject: event.reject,
 							});
 
-							// On first proposal, move agent to right panel and set it up
-							if (isFirstProposalRef.current && context) {
-								isFirstProposalRef.current = false;
+					// On first proposal, move agent to right panel and set it up
+					if (isFirstProposalRef.current && context) {
+						isFirstProposalRef.current = false;
 
-								// Move agent view to right panel
-								context.moveViewToPanel?.("right");
+						// Move agent view to right panel
+						context.moveViewToPanel?.("right", instance?.instanceKey);
 
-								// Resize right panel to at least 30
-								context.resizePanel?.("right", 30);
+						// Resize right panel to at least 30
+						context.resizePanel?.("right", 30);
 
 								// Focus right panel
 								context.focusPanel?.("right");
@@ -530,18 +540,13 @@ export function AgentView({ context }: AgentViewProps) {
 		[agent, conversationId, context, autoAcceptEnabled],
 	);
 
-	// Check for pending message from welcome screen
 	useEffect(() => {
-		if (typeof window === "undefined" || !hasKey || !agent) return;
-		const pendingMessage = sessionStorage.getItem(
-			"flashtype_pending_welcome_message",
-		);
-		if (pendingMessage) {
-			sessionStorage.removeItem("flashtype_pending_welcome_message");
-			void send(pendingMessage);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [hasKey, agent, send]);
+		if (!launchProps?.initialMessage || !launchProps.invocationId) return;
+		if (!hasKey || !agent) return;
+		if (launchPropsRef.current === launchProps.invocationId) return;
+		launchPropsRef.current = launchProps.invocationId;
+		void send(launchProps.initialMessage);
+	}, [agent, hasKey, launchProps, send]);
 
 	useEffect(() => {
 		if (
@@ -728,7 +733,7 @@ export const view = createReactViewDefinition({
 	label: "AI Agent",
 	description: "Chat with the project assistant.",
 	icon: Bot,
-	component: ({ context }) => (
+	component: ({ context, instance }) => (
 		<LixProvider lix={context.lix}>
 			<Suspense
 				fallback={
@@ -737,7 +742,7 @@ export const view = createReactViewDefinition({
 					</div>
 				}
 			>
-				<AgentView context={context} />
+				<AgentView context={context} instance={instance} />
 			</Suspense>
 		</LixProvider>
 	),

@@ -7,13 +7,13 @@ import {
 	type JSX,
 } from "react";
 import { Zap } from "lucide-react";
-import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
+import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { PromptComposer } from "@/views/agent-view/components/prompt-composer";
 import { COMMANDS } from "@/views/agent-view/commands";
 import { selectFilePaths } from "@/views/agent-view/select-file-paths";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
-import type { ViewContext } from "./types";
+import type { ViewContext, ViewInstanceProps } from "./types";
 
 const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
 const AVAILABLE_MODELS = [
@@ -33,9 +33,9 @@ type WelcomeScreenProps = {
 	 */
 	readonly context: ViewContext;
 	/**
-	 * Callback to open the agent view.
+	 * Optional callback to create a new file directly from the welcome screen.
 	 */
-	readonly onOpenAgentView: () => void;
+	readonly onCreateNewFile?: () => void | Promise<void>;
 };
 
 /**
@@ -46,13 +46,13 @@ type WelcomeScreenProps = {
  * return (
  *   <WelcomeScreen
  *     context={viewContext}
- *     onOpenAgentView={() => console.log("open agent")}
+ *     onCreateNewFile={() => console.log("create doc")}
  *   />
  * );
  */
 function WelcomeScreenContent({
 	context,
-	onOpenAgentView,
+	onCreateNewFile,
 }: WelcomeScreenProps): JSX.Element {
 	const devApiKey =
 		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
@@ -67,7 +67,6 @@ function WelcomeScreenContent({
 		"flashtype_auto_accept_session",
 	);
 	const [notice, setNotice] = useState<string | null>(null);
-	const [pending, setPending] = useState(false);
 	const [placeholderText, setPlaceholderText] = useState("");
 
 	const selectedModelId = useMemo(() => {
@@ -190,26 +189,34 @@ function WelcomeScreenContent({
 		[setAutoAccept],
 	);
 
-	const handleSlashCommand = useCallback(
-		async (command: string) => {
-			// For welcome screen, slash commands should open agent view
-			onOpenAgentView();
+	const openAgentView = useCallback(
+		(props?: ViewInstanceProps) => {
+			context.openView?.({
+				panel: "central",
+				viewKey: "agent",
+				props,
+				focus: true,
+			});
 		},
-		[onOpenAgentView],
+		[context],
+	);
+
+	const handleSlashCommand = useCallback(
+		async (_command: string) => {
+			openAgentView();
+		},
+		[openAgentView],
 	);
 
 	const handleSendMessage = useCallback(
 		async (message: string) => {
-			// Open agent view first, then the agent view will handle sending
-			onOpenAgentView();
-			// Store the message to send it when agent view opens
-			// This is a simple approach - in a real implementation, you might want
-			// to pass the message through context or state
-			if (typeof window !== "undefined") {
-				sessionStorage.setItem("flashtype_pending_welcome_message", message);
-			}
+			openAgentView({
+				source: "welcome",
+				initialMessage: message,
+				invocationId: createInvocationId(),
+			});
 		},
-		[onOpenAgentView],
+		[openAgentView],
 	);
 
 	if (!keyLoaded) {
@@ -247,10 +254,10 @@ function WelcomeScreenContent({
 					</p>
 				</div>
 
-				{/* Prompt Composer */}
-				<div className="mt-4 flex w-full justify-center [&>div>div:last-child]:hidden">
-					<PromptComposer
-						hasKey={hasKey}
+			{/* Prompt Composer */}
+			<div className="mt-4 flex w-full justify-center [&>div>div:last-child]:hidden">
+				<PromptComposer
+					hasKey={hasKey}
 						models={AVAILABLE_MODELS}
 						modelId={selectedModelId}
 						onModelChange={handleModelChange}
@@ -258,15 +265,30 @@ function WelcomeScreenContent({
 						onAutoAcceptToggle={handleAutoAcceptToggle}
 						commands={COMMANDS}
 						files={filePaths}
-						pending={pending}
+						pending={false}
 						onNotice={setNotice}
 						onSlashCommand={handleSlashCommand}
 						onSendMessage={handleSendMessage}
-						placeholderText={placeholderText || "Ask Flashtype to..."}
-					/>
-				</div>
+					placeholderText={placeholderText || "Ask Flashtype to..."}
+				/>
+			</div>
 
-				{/* Social Links */}
+			{onCreateNewFile ? (
+				<div className="flex justify-center">
+					<button
+						type="button"
+						data-testid="welcome-create-file"
+						onClick={() => {
+							void onCreateNewFile();
+						}}
+						className="mt-4 inline-flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
+					>
+						Create a new file
+					</button>
+				</div>
+			) : null}
+
+			{/* Social Links */}
 				<div className="mt-4 flex items-center gap-4 text-xs text-neutral-400">
 					<a
 						href="https://github.com/opral/flashtype"
@@ -333,14 +355,21 @@ function WelcomeScreenContent({
  */
 export function WelcomeScreen({
 	context,
-	onOpenAgentView,
+	onCreateNewFile,
 }: WelcomeScreenProps): JSX.Element {
 	return (
 		<LixProvider lix={context.lix}>
 			<WelcomeScreenContent
 				context={context}
-				onOpenAgentView={onOpenAgentView}
+				onCreateNewFile={onCreateNewFile}
 			/>
 		</LixProvider>
 	);
+}
+
+function createInvocationId(): string {
+	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+		return crypto.randomUUID();
+	}
+	return `welcome-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }

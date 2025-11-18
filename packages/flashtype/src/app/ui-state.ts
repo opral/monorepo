@@ -6,7 +6,7 @@ export const FLASHTYPE_UI_STATE_KEY = "flashtype_ui_state" as const;
  * Serialized layout snapshot persisted in Lix under `flashtype_ui_state`.
  *
  * The structure mirrors the in-memory panel model so we can revive the exact
- * view arrangement (active views, metadata, focused panel, and optional
+ * view arrangement (active views, props, focused panel, and optional
  * panel sizes) when the prototype boots.
  *
  * @example
