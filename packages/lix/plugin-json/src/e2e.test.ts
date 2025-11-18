@@ -422,4 +422,56 @@ describe("plugin-json integration", () => {
 			expectRoundTrip(before, after);
 		}
 	});
+
+	test("two different files with same path do not conflict", async () => {
+		const lix = await openLix({});
+		try {
+			await lix.db
+				.insertInto("stored_schema")
+				.values({ value: JSONPointerValueSchema })
+				.execute();
+
+			const activeVersion = await lix.db
+				.selectFrom("active_version")
+				.select("version_id")
+				.executeTakeFirstOrThrow();
+
+			const pointer = "/shared/path";
+
+			await lix.db
+				.insertInto("state_by_version")
+				.values({
+					entity_id: pointer,
+					file_id: "file-1",
+					schema_key: JSONPointerValueSchema["x-lix-key"],
+					schema_version: JSONPointerValueSchema["x-lix-version"],
+					plugin_key: "plugin_json",
+					version_id: activeVersion.version_id,
+					snapshot_content: {
+						path: pointer,
+						value: "value1",
+					},
+				})
+				.execute();
+
+			// This should NOT throw
+			await lix.db
+				.insertInto("state_by_version")
+				.values({
+					entity_id: pointer,
+					file_id: "file-2", // Different file
+					schema_key: JSONPointerValueSchema["x-lix-key"],
+					schema_version: JSONPointerValueSchema["x-lix-version"],
+					plugin_key: "plugin_json",
+					version_id: activeVersion.version_id,
+					snapshot_content: {
+						path: pointer,
+						value: "value2",
+					},
+				})
+				.execute();
+		} finally {
+			await lix.close();
+		}
+	});
 });
