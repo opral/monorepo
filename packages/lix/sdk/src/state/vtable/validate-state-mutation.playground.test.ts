@@ -283,6 +283,7 @@ test("validateStateMutation explain plans", async () => {
 						},
 						entity_id: `${PK_SCHEMA["x-lix-key"]}-entity-new`,
 						version_id: VERSION_ID,
+						file_id: FILE_ID,
 						operation: "insert",
 					});
 				},
@@ -343,6 +344,7 @@ test("validateStateMutation explain plans", async () => {
 						},
 						entity_id: `${UNIQUE_SCHEMA["x-lix-key"]}-entity-new`,
 						version_id: VERSION_ID,
+						file_id: FILE_ID,
 						operation: "insert",
 					});
 				},
@@ -442,6 +444,7 @@ test("validateStateMutation explain plans", async () => {
 						},
 						entity_id: "source-new",
 						version_id: VERSION_ID,
+						file_id: FILE_ID,
 						operation: "insert",
 					});
 				},

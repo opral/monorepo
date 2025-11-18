@@ -362,7 +362,7 @@ WHERE "id" = ?
     "id": 48,
     "parent": 42,
     "notused": 62,
-    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_lix_file_descriptor_unique_version_id_json_extract_snapsho_json_extract_snapsho_json_extract_snapsho_h3d0az (version_id=?)"
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_lix_file_descriptor_unique_version_id_json_extract_snapsho_json_extract_snapsho_json_extract_snapsho_file_id_42p3je (version_id=?)"
   },
   {
     "id": 78,

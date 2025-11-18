@@ -1,5 +1,6 @@
 import type {
 	LixForeignKey,
+	LixForeignKeyScopeColumn,
 	LixSchemaDefinition,
 } from "../../schema-definition/definition.js";
 import {
@@ -52,6 +53,33 @@ export function buildSchemaIndexStatements(args: {
 	});
 }
 
+const FOREIGN_SCOPE_VALUES: readonly LixForeignKeyScopeColumn[] = [
+	"version_id",
+	"file_id",
+] as const;
+const DEFAULT_FOREIGN_SCOPE: readonly LixForeignKeyScopeColumn[] = [
+	"version_id",
+	"file_id",
+] as const;
+
+const normalizeForeignKeyScope = (
+	scope?: readonly (string | LixForeignKeyScopeColumn)[]
+): LixForeignKeyScopeColumn[] | undefined => {
+	if (!Array.isArray(scope)) {
+		return undefined;
+	}
+	const normalized: LixForeignKeyScopeColumn[] = [];
+	for (const value of scope) {
+		if (
+			FOREIGN_SCOPE_VALUES.includes(value as LixForeignKeyScopeColumn) &&
+			!normalized.includes(value as LixForeignKeyScopeColumn)
+		) {
+			normalized.push(value as LixForeignKeyScopeColumn);
+		}
+	}
+	return normalized;
+};
+
 export function buildSchemaIndexSpecs(
 	schema: LixSchemaDefinition
 ): SchemaIndexSpec[] {
@@ -77,9 +105,10 @@ export function buildSchemaIndexSpecs(
 	const primaryKeyPaths = parsePointerPaths(schema["x-lix-primary-key"]);
 	const primaryKeyColumns = pointerPathsToExpressions(primaryKeyPaths);
 	if (primaryKeyColumns && primaryKeyColumns.length > 0) {
+		const pkExpressions = [...primaryKeyColumns, "file_id"];
 		register({
 			kind: "pk",
-			columns: ["version_id", ...primaryKeyColumns],
+			columns: ["version_id", ...pkExpressions],
 			unique: true,
 		});
 	}
@@ -91,9 +120,10 @@ export function buildSchemaIndexSpecs(
 		const uniquePaths = parsePointerPaths(group as readonly string[]);
 		const uniqueColumns = pointerPathsToExpressions(uniquePaths);
 		if (uniqueColumns && uniqueColumns.length > 0) {
+			const uniqueExpressions = [...uniqueColumns, "file_id"];
 			register({
 				kind: "unique",
-				columns: ["version_id", ...uniqueColumns],
+				columns: ["version_id", ...uniqueExpressions],
 				unique: true,
 			});
 		}
@@ -109,9 +139,25 @@ export function buildSchemaIndexSpecs(
 		const localPaths = parsePointerPaths(foreignKey.properties);
 		const localColumns = pointerPathsToExpressions(localPaths);
 		if (localColumns && localColumns.length > 0) {
+			const scopeColumns =
+				normalizeForeignKeyScope(
+					foreignKey.scope as readonly LixForeignKeyScopeColumn[]
+				) ?? DEFAULT_FOREIGN_SCOPE;
+			const leadingScope: string[] = [];
+			if (scopeColumns.includes("version_id")) {
+				leadingScope.push("version_id");
+			}
+			const trailingScope = scopeColumns.filter(
+				(column) => column !== "version_id"
+			);
 			register({
 				kind: "foreign",
-				columns: ["version_id", "inherited_from_version_id", ...localColumns],
+				columns: [
+					...leadingScope,
+					"inherited_from_version_id",
+					...localColumns,
+					...trailingScope,
+				],
 			});
 		}
 	}

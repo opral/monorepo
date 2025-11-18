@@ -2449,6 +2449,105 @@ simulationTest(
 );
 
 simulationTest(
+	"file scoped unique constraints allow duplicates across files via lix_internal_state_vtable",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const constrainedSchema: LixSchemaDefinition = {
+			"x-lix-key": "file_scoped_unique_schema",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["/id"],
+			"x-lix-unique": [["/slug"]],
+			type: "object",
+			additionalProperties: false,
+			required: ["id", "slug"],
+			properties: {
+				id: { type: "string" },
+				slug: { type: "string" },
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: constrainedSchema })
+			.execute();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+		const activeVersion = await db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
+		const insertEntity = async (args: {
+			entityId: string;
+			fileId: string;
+			slug: string;
+		}) => {
+			await db
+				.insertInto("lix_internal_state_vtable")
+				.values({
+					entity_id: args.entityId,
+					file_id: args.fileId,
+					schema_key: constrainedSchema["x-lix-key"],
+					plugin_key: "test_plugin",
+					schema_version: constrainedSchema["x-lix-version"],
+					version_id: activeVersion.version_id,
+					snapshot_content: JSON.stringify({
+						id: args.entityId,
+						slug: args.slug,
+					}),
+					untracked: 0,
+				})
+				.execute();
+		};
+
+		await insertEntity({
+			entityId: "entity-a",
+			fileId: "file-a",
+			slug: "shared-slug",
+		});
+		await insertEntity({
+			entityId: "entity-b",
+			fileId: "file-b",
+			slug: "shared-slug",
+		});
+
+		const insertedRows = await db
+			.selectFrom("lix_internal_state_vtable")
+			.where("schema_key", "=", constrainedSchema["x-lix-key"])
+			.orderBy("entity_id")
+			.orderBy("version_id")
+			.select([
+				"entity_id",
+				"file_id",
+				sql`json_extract(snapshot_content, '$.slug')`.as("slug"),
+			])
+			.execute();
+
+		expectDeterministic(insertedRows).toEqual([
+			{ entity_id: "entity-a", file_id: "file-a", slug: "shared-slug" },
+			{ entity_id: "entity-b", file_id: "file-b", slug: "shared-slug" },
+		]);
+
+		await expect(
+			insertEntity({
+				entityId: "entity-c",
+				fileId: "file-a",
+				slug: "shared-slug",
+			})
+		).rejects.toThrow(/unique/i);
+	}
+);
+
+simulationTest(
 	"delete operations remove entries from underlying data via lix_internal_state_vtable",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({

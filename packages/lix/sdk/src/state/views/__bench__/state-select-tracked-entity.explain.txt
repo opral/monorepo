@@ -219,7 +219,7 @@ WHERE schema_key = ? AND entity_id = ?
     "id": 132,
     "parent": 102,
     "notused": 27,
-    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_version_id (version_id=? AND entity_id=?)"
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_view_ve (version_id=? AND entity_id=?)"
   },
   {
     "id": 151,

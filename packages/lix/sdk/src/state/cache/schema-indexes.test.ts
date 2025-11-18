@@ -24,7 +24,11 @@ describe("buildSchemaIndexSpecs", () => {
 				expect.objectContaining({
 					kind: "pk",
 					unique: true,
-					columns: ["version_id", "json_extract(snapshot_content, '$.code')"],
+					columns: [
+						"version_id",
+						"json_extract(snapshot_content, '$.code')",
+						"file_id",
+					],
 				}),
 			])
 		);
@@ -58,6 +62,7 @@ describe("buildSchemaIndexSpecs", () => {
 					columns: [
 						"version_id",
 						"json_extract(snapshot_content, '$.details.slug')",
+						"file_id",
 					],
 				}),
 			])
@@ -93,6 +98,44 @@ describe("buildSchemaIndexSpecs", () => {
 						"version_id",
 						"inherited_from_version_id",
 						"json_extract(snapshot_content, '$.target_id')",
+						"file_id",
+					],
+				}),
+			])
+		);
+	});
+
+	test("foreign key respects custom scope", () => {
+		const schema: LixSchemaDefinition = {
+			"x-lix-key": "bench_fk_scope",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				target_id: { type: "string" },
+			},
+			required: ["id", "target_id"],
+			"x-lix-foreign-keys": [
+				{
+					properties: ["/target_id"],
+					references: { schemaKey: "bench_target", properties: ["/id"] },
+					scope: ["version_id"],
+				},
+			],
+		} as const;
+
+		const specs = buildSchemaIndexSpecs(schema);
+
+		expect(specs).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					kind: "foreign",
+					columns: [
+						"version_id",
+						"inherited_from_version_id",
+						"json_extract(snapshot_content, '$.target_id')",
+						// file_id intentionally omitted because scope excludes it
 					],
 				}),
 			])

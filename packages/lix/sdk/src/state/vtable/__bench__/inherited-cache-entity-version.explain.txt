@@ -278,7 +278,7 @@ WHERE schema_key = 'bench_vtable_schema' AND entity_id = ? AND version_id = ?
     "id": 152,
     "parent": 122,
     "notused": 27,
-    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_vtable_schema_version_id (version_id=? AND entity_id=?)"
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_vtable_schema_ve (version_id=? AND entity_id=?)"
   },
   {
     "id": 171,
