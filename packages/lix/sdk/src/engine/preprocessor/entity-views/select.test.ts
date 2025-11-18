@@ -303,7 +303,6 @@ describe("entity view select rewrite", () => {
 				plugin_key: "lix_sdk",
 				schema_version: "1.0",
 				snapshot_content: { id: entityId, name: "Entity" },
-				inherited_from_version_id: "global",
 				metadata: null,
 				untracked: false,
 			})

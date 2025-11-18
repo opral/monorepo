@@ -33,6 +33,34 @@ test("state_by_version view is rewritten", async () => {
 	await lix.close();
 });
 
+test("state_by_version insert statements are rewritten via preprocessor", async () => {
+	const lix = await openLix({});
+	const preprocess = createPreprocessor({ engine: lix.engine! });
+
+	const { sql, trace } = preprocess({
+		sql: `
+			INSERT INTO state_by_version (
+				entity_id,
+				schema_key,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version
+			) VALUES ('row', 'schema', 'file', 'version', 'plugin', json('{}'), '1.0')
+		`,
+		parameters: [],
+		trace: true,
+	});
+
+	expect(sql.toLowerCase()).toContain("lix_internal_state_vtable");
+	expect(trace?.some((entry) => entry.step === "rewrite_state_by_version_insert")).toBe(
+		true
+	);
+
+	await lix.close();
+});
+
 test("unsupported statements are passed through", async () => {
 	const lix = await openLix({});
 	const preprocess = createPreprocessor({ engine: lix.engine! });

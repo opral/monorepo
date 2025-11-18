@@ -107,7 +107,6 @@ test("populateStateCacheV2 materializes normalized rows for global version", asy
 			schema_version: "1.0",
 			created_at: timestamp,
 			updated_at: timestamp,
-			inherited_from_version_id: null,
 			change_id: "change-1",
 			commit_id: "commit-1",
 		})

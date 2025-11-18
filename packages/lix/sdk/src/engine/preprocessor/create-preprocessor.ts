@@ -26,6 +26,7 @@ import { rewriteEntityViewInsert } from "./entity-views/insert.js";
 import { rewriteEntityViewUpdate } from "./entity-views/update.js";
 import { rewriteEntityViewDelete } from "./entity-views/delete.js";
 import { getVersionInheritanceSnapshot } from "./inheritance/version-inheritance-cache.js";
+import { rewriteStateByVersionInsert } from "./state-by-version/insert.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -41,6 +42,7 @@ const fullPipeline: PreprocessorStep[] = [
 	rewriteEntityViewInsert,
 	rewriteEntityViewUpdate,
 	rewriteEntityViewDelete,
+	rewriteStateByVersionInsert,
 	rewriteEntityViewSelect,
 	expandSqlViews,
 	cachePopulator,
@@ -49,6 +51,7 @@ const fullPipeline: PreprocessorStep[] = [
 ];
 
 const vtableOnlyPipeline: PreprocessorStep[] = [
+	rewriteStateByVersionInsert,
 	cachePopulator,
 	rewriteActiveVersionSubquery,
 	rewriteVtableSelects,
@@ -69,9 +72,16 @@ export function createPreprocessor(args: {
 }): PreprocessorFn {
 	const { engine } = args;
 
-	return ({ sql, parameters, trace, mode = "full" }: PreprocessorArgs) => {
+	return ({
+		sql,
+		parameters,
+		trace,
+		mode = "full",
+		steps,
+	}: PreprocessorArgs) => {
 		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
+		let activeParameters = parameters;
 
 		if (mode === "none") {
 			if (traceEntries) {
@@ -88,12 +98,15 @@ export function createPreprocessor(args: {
 		}
 
 		const statements = parse(sql);
-		const pipeline = selectPipeline(mode);
+		const pipeline = selectPipeline(mode, steps);
 		const rewritten = pipeline.reduce(
 			(current, step) =>
 				step({
 					statements: current,
-					parameters,
+					parameters: activeParameters,
+					setParameters: (next) => {
+						activeParameters = next;
+					},
 					getStoredSchemas: context.getStoredSchemas,
 					getCacheTables: context.getCacheTables,
 					getSqlViews: context.getSqlViews,
@@ -118,13 +131,19 @@ export function createPreprocessor(args: {
 
 		return {
 			sql: compiled.sql,
-			parameters,
+			parameters: activeParameters,
 			trace: traceEntries,
 		};
 	};
 }
 
-function selectPipeline(mode: PreprocessMode): readonly PreprocessorStep[] {
+function selectPipeline(
+	mode: PreprocessMode,
+	override: readonly PreprocessorStep[] | undefined
+): readonly PreprocessorStep[] {
+	if (override && override.length > 0) {
+		return override;
+	}
 	if (mode === "vtable-select-only") {
 		return vtableOnlyPipeline;
 	}
