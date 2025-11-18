@@ -1,7 +1,3 @@
----
-title: What is Lix?
----
-
 # Lix in a nutshell
 
 Lix is a local-first change engine for structured content. It stores files

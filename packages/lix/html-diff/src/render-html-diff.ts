@@ -1,6 +1,8 @@
 import { diffWords } from "diff";
 import { parse } from "parse5";
 
+type DiffStatus = "added" | "removed" | "modified";
+
 type Node = ElementNode | TextNode;
 
 type ElementNode = {
@@ -110,14 +112,8 @@ function cloneElement(
   return clone;
 }
 
-function appendClass(node: ElementNode, className: string): void {
-  const existing = node.attrs.class
-    ? node.attrs.class.split(/\s+/).filter(Boolean)
-    : [];
-  if (!existing.includes(className)) {
-    existing.unshift(className);
-  }
-  node.attrs.class = existing.join(" ");
+function setDiffStatus(node: ElementNode, status: DiffStatus): void {
+  setAttribute(node, "data-diff-status", status);
 }
 
 function setAttribute(node: ElementNode, key: string, value: string): void {
@@ -147,15 +143,15 @@ function createTextNode(value: string, parent: ElementNode): TextNode {
   return { type: "text", value, parent };
 }
 
-function createSpanNode(
-  className: string,
+function createStatusSpan(
+  status: DiffStatus,
   value: string,
   parent: ElementNode,
 ): ElementNode {
   const span: ElementNode = {
     type: "element",
     tagName: "span",
-    attrs: { class: className },
+    attrs: { "data-diff-status": status },
     children: [],
     parent,
   };
@@ -186,10 +182,10 @@ function applyWordDiff(beforeNode: ElementNode, afterNode: ElementNode): void {
   const diff = diffWords(beforeText, afterText);
   const newChildren: Node[] = diff.map((part) => {
     if (part.added) {
-      return createSpanNode("diff-added", part.value, afterNode);
+      return createStatusSpan("added", part.value, afterNode);
     }
     if (part.removed) {
-      return createSpanNode("diff-removed", part.value, afterNode);
+      return createStatusSpan("removed", part.value, afterNode);
     }
     return createTextNode(part.value, afterNode);
   });
@@ -243,12 +239,28 @@ function insertBefore(
   list.push(newNode);
 }
 
+function escapeText(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeAttribute(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/'/g, "&#39;");
+}
+
 function renderNode(node: Node): string {
   if (node.type === "text") {
-    return node.value ?? "";
+    return escapeText(node.value ?? "");
   }
   const attrs = Object.entries(node.attrs)
-    .map(([name, value]) => `${name}="${value.replace(/"/g, "&quot;")}"`)
+    .map(([name, value]) => `${name}="${escapeAttribute(value)}"`)
     .join(" ");
   const inner = node.children.map(renderNode).join("");
   return `<${node.tagName}${attrs ? " " + attrs : ""}>${inner}</${node.tagName}>`;
@@ -299,6 +311,27 @@ function hasShallowDifference(
   return false;
 }
 
+function nodesStructurallyEqual(beforeNode: Node, afterNode: Node): boolean {
+  if (beforeNode.type !== afterNode.type) return false;
+  if (beforeNode.type === "text" && afterNode.type === "text") {
+    return beforeNode.value === afterNode.value;
+  }
+  if (beforeNode.type === "element" && afterNode.type === "element") {
+    if (beforeNode.tagName !== afterNode.tagName) return false;
+    if (!shallowAttributesEqual(beforeNode, afterNode)) return false;
+    if (beforeNode.children.length !== afterNode.children.length) return false;
+    for (let i = 0; i < beforeNode.children.length; i++) {
+      const beforeChild = beforeNode.children[i]!;
+      const afterChild = afterNode.children[i]!;
+      if (!nodesStructurallyEqual(beforeChild, afterChild)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 function renderHtmlDiffInternal(args: {
   beforeHtml: string;
   afterHtml: string;
@@ -329,7 +362,7 @@ function renderHtmlDiffInternal(args: {
   for (const id of addedIds) {
     const node = after.elementsById.get(id);
     if (!node) continue;
-    appendClass(node, "diff-added");
+    setDiffStatus(node, "added");
   }
 
   // Handle modifications
@@ -343,18 +376,21 @@ function renderHtmlDiffInternal(args: {
       getAttribute(beforeNode, "data-diff-mode");
 
     if (mode === "element") {
+      if (nodesStructurallyEqual(beforeNode, afterNode)) {
+        continue;
+      }
       const clone = cloneElement(beforeNode);
-      appendClass(clone, "diff-removed");
+      setDiffStatus(clone, "removed");
       setAttribute(clone, "contenteditable", "false");
       markElementNonInteractive(clone);
 
-      appendClass(afterNode, "diff-added");
+      setDiffStatus(afterNode, "added");
       const parent = afterNode.parent;
       insertBefore(after.roots, parent, clone, afterNode);
     } else if (mode === "words") {
       applyWordDiff(beforeNode, afterNode);
     } else if (hasShallowDifference(beforeNode, afterNode)) {
-      appendClass(afterNode, "diff-modified");
+      setDiffStatus(afterNode, "modified");
     }
   }
 
@@ -401,7 +437,7 @@ function renderHtmlDiffInternal(args: {
     }
 
     const clone = cloneElement(beforeNode);
-    appendClass(clone, "diff-removed");
+    setDiffStatus(clone, "removed");
     setAttribute(clone, "contenteditable", "false");
     markElementNonInteractive(clone);
 

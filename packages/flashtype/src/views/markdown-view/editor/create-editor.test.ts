@@ -9,6 +9,9 @@ import { AstSchemas } from "@opral/markdown-wc";
 import { insertMarkdownSchemas } from "../../../lib/insert-markdown-schemas";
 import { Editor } from "@tiptap/core";
 
+const ensureTrailingNewline = (value: string) =>
+	value.endsWith("\n") ? value : `${value}\n`;
+
 async function createEditorFromFile(args: {
 	lix: Awaited<ReturnType<typeof openLix>>;
 	fileId: string;
@@ -123,7 +126,7 @@ test("paste at start inserts before existing content (TipTap + Lix)", async () =
 
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
 
-	expect(mdAfter).toBe("New\n\nStart");
+	expect(mdAfter).toBe(ensureTrailingNewline("New\n\nStart"));
 
 	editor.destroy();
 });
@@ -165,7 +168,7 @@ test("paste at end inserts after existing content (TipTap + Lix)", async () => {
 		.selectAll()
 		.executeTakeFirst();
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
-	expect(mdAfter).toBe("Start\n\nNew");
+	expect(mdAfter).toBe(ensureTrailingNewline("Start\n\nNew"));
 	editor.destroy();
 });
 
@@ -206,7 +209,7 @@ test("replace word selection with paste (TipTap + Lix)", async () => {
 		.selectAll()
 		.executeTakeFirst();
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
-	expect(mdAfter).toBe("Replace new content here.");
+	expect(mdAfter).toBe(ensureTrailingNewline("Replace new content here."));
 	editor.destroy();
 });
 
@@ -247,7 +250,9 @@ test("replace entire document with paste (TipTap + Lix)", async () => {
 		.selectAll()
 		.executeTakeFirst();
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
-	expect(mdAfter).toBe("# New Document\n\nCompletely new content");
+	expect(mdAfter).toBe(
+		ensureTrailingNewline("# New Document\n\nCompletely new content"),
+	);
 	editor.destroy();
 });
 
@@ -289,7 +294,7 @@ test("paste multi-paragraph plain text into empty doc (TipTap + Lix)", async () 
 		.executeTakeFirst();
 
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
-	expect(mdAfter).toBe("First line\n\nSecond line");
+	expect(mdAfter).toBe(ensureTrailingNewline("First line\n\nSecond line"));
 	editor.destroy();
 });
 
@@ -471,7 +476,7 @@ test("normalize CRLF line endings on paste (TipTap + Lix)", async () => {
 		.selectAll()
 		.executeTakeFirst();
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
-	expect(mdAfter).toBe("Line one\n\nLine two");
+	expect(mdAfter).toBe(ensureTrailingNewline("Line one\n\nLine two"));
 	editor.destroy();
 });
 
@@ -549,7 +554,7 @@ test("paste inline formatting markdown (TipTap + Lix)", async () => {
 		.selectAll()
 		.executeTakeFirst();
 	const mdAfter = new TextDecoder().decode(fileAfter?.data ?? new Uint8Array());
-	expect(mdAfter).toBe(input);
+	expect(mdAfter).toBe(ensureTrailingNewline(input));
 	editor.destroy();
 });
 

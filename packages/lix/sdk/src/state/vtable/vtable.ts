@@ -15,6 +15,8 @@ import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
 import { LixStoredSchemaSchema } from "../../stored-schema/schema-definition.js";
 import { withRuntimeCache } from "../../engine/with-runtime-cache.js";
 import { getStateCacheTables } from "../cache/schema.js";
+import { updateFilePathCache } from "../../filesystem/file/cache/update-file-path-cache.js";
+import { composeDirectoryPath } from "../../filesystem/directory/ensure-directories.js";
 
 const LIX_OPEN_TRANSACTION = Symbol("lix_open_transaction");
 
@@ -622,7 +624,15 @@ export function applyStateVTable(
 					const file_id = valueFor("file_id");
 					const version_id = valueFor("version_id");
 					const plugin_key = valueFor("plugin_key");
-					const snapshot_content = valueFor("snapshot_content") as string;
+					const snapshotContentValue = valueFor("snapshot_content");
+					const snapshot_content =
+						snapshotContentValue === null || snapshotContentValue === undefined
+							? null
+							: typeof snapshotContentValue === "string"
+								? snapshotContentValue
+								: JSON.stringify(snapshotContentValue);
+					const parsedSnapshot =
+						snapshot_content === null ? null : JSON.parse(snapshot_content);
 					const schema_version = valueFor("schema_version");
 					const untracked = valueFor("untracked") ?? false;
 					const metadataValue =
@@ -679,7 +689,7 @@ export function applyStateVTable(
 								? LixStoredSchemaSchema
 								: null,
 						schemaKey,
-						snapshot_content: JSON.parse(snapshot_content),
+						snapshot_content: parsedSnapshot,
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
 						version_id: String(version_id),
@@ -715,6 +725,27 @@ export function applyStateVTable(
 							},
 						],
 					});
+
+					if (schemaKey === "lix_file_descriptor") {
+						const descriptorSnapshot =
+							normalizeFileDescriptorSnapshot(parsedSnapshot);
+						if (descriptorSnapshot) {
+							refreshFilePathCacheEntry({
+								engine,
+								fileId: String(entity_id),
+								versionId: String(version_id),
+								directoryId: descriptorSnapshot.directoryId,
+								name: descriptorSnapshot.name,
+								extension: descriptorSnapshot.extension,
+							});
+						} else {
+							deleteFilePathCacheEntry({
+								engine,
+								fileId: String(entity_id),
+								versionId: String(version_id),
+							});
+						}
+					}
 
 					// TODO: This cache copying logic is a temporary workaround for shared commits.
 					// The proper solution requires improving cache miss logic to handle commit sharing
@@ -908,7 +939,10 @@ export function applyStateVTable(
 }
 
 export function handleStateDelete(
-	engine: Pick<LixEngine, "executeSync" | "hooks" | "runtimeCacheRef">,
+	engine: Pick<
+		LixEngine,
+		"executeSync" | "hooks" | "runtimeCacheRef" | "sqlite"
+	>,
 	primaryKey: string,
 	timestamp: string
 ): void {
@@ -943,6 +977,14 @@ export function handleStateDelete(
 	const snapshot_content = rowToDelete.snapshot_content;
 	const schema_version = rowToDelete.schema_version;
 	const untracked = rowToDelete.untracked;
+
+	if (rowToDelete.schema_key === "lix_file_descriptor") {
+		deleteFilePathCacheEntry({
+			engine,
+			fileId: rowToDelete.entity_id,
+			versionId: version_id,
+		});
+	}
 
 	// If entity is untracked, handle differently based on its source (transaction/inherited/direct)
 	if (untracked) {
@@ -1036,6 +1078,119 @@ export function handleStateDelete(
 			},
 		],
 	});
+}
+
+function deleteFilePathCacheEntry(args: {
+	engine: Pick<LixEngine, "sqlite">;
+	fileId: string;
+	versionId: string;
+}): void {
+	args.engine.sqlite.exec({
+		sql: `
+			DELETE FROM lix_internal_file_path_cache
+			WHERE file_id = ?
+			  AND version_id = ?
+		`,
+		bind: [args.fileId, args.versionId],
+		returnValue: "resultRows",
+	});
+}
+
+function refreshFilePathCacheEntry(args: {
+	engine: Pick<LixEngine, "sqlite" | "executeSync">;
+	fileId: string;
+	versionId: string;
+	directoryId: string | null;
+	name: string;
+	extension: string | null;
+}): void {
+	const resolvedPath = resolveFileDescriptorPath({
+		engine: args.engine,
+		versionId: args.versionId,
+		directoryId: args.directoryId,
+		name: args.name,
+		extension: args.extension,
+	});
+
+	if (!resolvedPath) {
+		deleteFilePathCacheEntry({
+			engine: args.engine,
+			fileId: args.fileId,
+			versionId: args.versionId,
+		});
+		return;
+	}
+
+	updateFilePathCache({
+		engine: args.engine,
+		fileId: args.fileId,
+		versionId: args.versionId,
+		directoryId: args.directoryId,
+		name: args.name,
+		extension: args.extension,
+		path: resolvedPath,
+	});
+}
+
+type NormalizedDescriptorSnapshot = {
+	directoryId: string | null;
+	name: string;
+	extension: string | null;
+};
+
+function normalizeFileDescriptorSnapshot(
+	snapshot: any
+): NormalizedDescriptorSnapshot | null {
+	if (!snapshot || typeof snapshot !== "object") {
+		return null;
+	}
+	const directoryIdRaw = (snapshot as any).directory_id;
+	const nameRaw = (snapshot as any).name;
+	const extensionRaw = (snapshot as any).extension;
+	if (typeof nameRaw !== "string" || nameRaw.length === 0) {
+		return null;
+	}
+	const directoryId =
+		typeof directoryIdRaw === "string" && directoryIdRaw.length > 0
+			? directoryIdRaw
+			: null;
+	const extension =
+		typeof extensionRaw === "string" && extensionRaw.length > 0
+			? extensionRaw
+			: null;
+	return {
+		directoryId,
+		name: nameRaw,
+		extension,
+	};
+}
+
+function resolveFileDescriptorPath(args: {
+	engine: Pick<LixEngine, "executeSync">;
+	versionId: string;
+	directoryId: string | null;
+	name: string;
+	extension: string | null;
+}): string | null {
+	const directoryPath = args.directoryId
+		? (composeDirectoryPath({
+				engine: args.engine,
+				versionId: args.versionId,
+				directoryId: args.directoryId,
+			}) ?? undefined)
+		: "/";
+
+	if (!directoryPath) {
+		return null;
+	}
+
+	const normalizedExtension =
+		args.extension && args.extension.length > 0 ? args.extension : null;
+	const suffix = normalizedExtension
+		? `${args.name}.${normalizedExtension}`
+		: args.name;
+	const basePath = directoryPath === "/" ? "/" : directoryPath;
+	return `${basePath}${suffix}`;
 }
 
 function getColumnName(columnIndex: number): string {

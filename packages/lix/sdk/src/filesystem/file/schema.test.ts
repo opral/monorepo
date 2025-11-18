@@ -1,4 +1,4 @@
-import { expect, expectTypeOf } from "vitest";
+import { expect, expectTypeOf, test } from "vitest";
 import { createVersion } from "../../version/create-version.js";
 import { createCheckpoint } from "../../state/create-checkpoint.js";
 import { switchVersion } from "../../version/switch-version.js";
@@ -9,6 +9,9 @@ import { simulationTest } from "../../test-utilities/simulation-test/simulation-
 import { withWriterKey } from "../../state/writer.js";
 import { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { openLix } from "../../lix/open-lix.js";
+
+test("sim test discovery", () => {});
 
 simulationTest(
 	"insert, update, delete on the file view",
@@ -794,6 +797,67 @@ simulationTest(
 	},
 	{ timeout: 100_000 }
 );
+
+test("updating file data does not create additional file descriptor changes", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: {
+					enabled: true,
+				},
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const fileId = "data-only-descriptor-stability";
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/data-only.json",
+			data: new TextEncoder().encode(JSON.stringify({ content: "initial" })),
+		})
+		.execute();
+
+	const fetchDescriptorChanges = async () =>
+		await lix.db
+			.selectFrom("change")
+			.where("schema_key", "=", "lix_file_descriptor")
+			.where("entity_id", "=", fileId)
+			.orderBy("created_at", "desc")
+			.select(["id", "created_at"])
+			.execute();
+
+	const descriptorChangesBefore = await fetchDescriptorChanges();
+	expect(descriptorChangesBefore.length).toBeGreaterThan(0);
+
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", fileId)
+		.set({
+			data: new TextEncoder().encode(JSON.stringify({ content: "updated" })),
+		})
+		.execute();
+
+	const descriptorChangesAfter = await fetchDescriptorChanges();
+
+	expect(descriptorChangesAfter.length).toBe(descriptorChangesBefore.length);
+	expect(descriptorChangesAfter[0]?.id).toBe(descriptorChangesBefore[0]?.id);
+
+	const latestChange = await lix.db
+		.selectFrom("change")
+		.where("file_id", "=", fileId)
+		.orderBy("created_at", "desc")
+		.select(["id", "schema_key"])
+		.executeTakeFirstOrThrow();
+
+	expect(latestChange.id).not.toBe(descriptorChangesBefore[0]?.id);
+	expect(latestChange.schema_key).not.toBe("lix_file_descriptor");
+});
 
 // its super annoying to work with metadata otherwise
 simulationTest("file metadata is Record<string, any>", async () => {

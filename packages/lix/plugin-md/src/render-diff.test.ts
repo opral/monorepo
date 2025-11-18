@@ -30,7 +30,7 @@ describe("renderPluginDiff", () => {
 		};
 
 		const html = await renderDiff(args);
-		expect(html).toContain('class="diff-added"');
+		expect(html).toContain('data-diff-status="added"');
 		expect(html).toContain("Hello");
 		expect(html).toContain("brave new");
 		expect(html).toContain("world.");
@@ -118,8 +118,92 @@ describe("renderPluginDiff", () => {
 
 		const html = await renderDiff({ diffs });
 		expect(html).toContain("Removed Section");
-		expect(html).toContain("diff-removed");
+		expect(html).toContain('data-diff-status="removed"');
 		expect(html).not.toContain("North America");
+	});
+
+	test("marks table cells as modified when their content changes", async () => {
+		const documentDiff = {
+			plugin_key: "plugin_md",
+			entity_id: "root",
+			schema_key: AstSchemas.DocumentSchema["x-lix-key"],
+			before_snapshot_content: { order: ["table"] },
+			after_snapshot_content: { order: ["table"] },
+		};
+
+		const makeCell = (id: string, value: string): AstSchemas.TableCellNode => ({
+			type: "tableCell",
+			data: { id },
+			children: [{ type: "text", value }],
+		});
+
+		const makeRow = (
+			id: string,
+			values: Array<{ id: string; text: string }>,
+		): AstSchemas.TableRowNode => ({
+			type: "tableRow",
+			data: { id },
+			children: values.map(({ id: cellId, text }) => makeCell(cellId, text)),
+		});
+
+		const tableBefore: AstSchemas.TableNode = {
+			type: "table",
+			data: { id: "table" },
+			align: [null, null, null],
+			children: [
+				makeRow("header", [
+					{ id: "head-0", text: "Header 1" },
+					{ id: "head-1", text: "Header 2" },
+					{ id: "head-2", text: "Header 3" },
+				]),
+				makeRow("row-1", [
+					{ id: "row1-0", text: "Row 1 Col 1" },
+					{ id: "row1-1", text: "Row 1 Col 2" },
+					{ id: "row1-2", text: "Row 1 Col 3" },
+				]),
+				makeRow("row-2", [
+					{ id: "cell-r2c1", text: "Row 2 Col 1" },
+					{ id: "cell-r2c2", text: "Row 2 Col 2" },
+					{ id: "cell-r2c3", text: "Row 2 Col 3" },
+				]),
+			],
+		};
+
+		const tableAfter: AstSchemas.TableNode = {
+			...tableBefore,
+			children: (tableBefore.children ?? []).map((row) =>
+				row.data?.id === "row-2"
+					? {
+							...row,
+							children: (row.children ?? []).map((cell) =>
+								cell.data?.id === "cell-r2c2"
+									? {
+											...cell,
+											children: [{ type: "text", value: "Row 2 Col 25" }],
+										}
+									: cell,
+							),
+						}
+					: row,
+			),
+		};
+
+		const diffs: RenderDiffArgs["diffs"] = [
+			documentDiff,
+			{
+				plugin_key: "plugin_md",
+				entity_id: "table",
+				schema_key: AstSchemas.schemasByType.table?.["x-lix-key"],
+				before_snapshot_content: tableBefore,
+				after_snapshot_content: tableAfter,
+			},
+		];
+
+		const html = await renderDiff({ diffs });
+
+		expect(html).toMatch(
+			/<td[^>]*data-diff-key="cell-r2c2"[^>]*>Row 2 Col <span data-diff-status="removed">2<\/span><span data-diff-status="added">25<\/span>/,
+		);
 	});
 	// Additional cases (add/remove-only, ordering) can be covered once the API stabilises.
 });

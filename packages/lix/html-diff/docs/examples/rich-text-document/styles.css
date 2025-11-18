@@ -1802,23 +1802,23 @@ button:hover {
 }
 
 /* Diff highlighting styles */
-.diff-added {
+[data-diff-status="added"] {
   color: green;
   text-decoration: none;
   outline: none;
 }
-.diff-modified {
+[data-diff-status="modified"] {
   color: orange;
   text-decoration: none;
   outline: none;
 }
-.diff-removed {
+[data-diff-status="removed"] {
   color: red;
   text-decoration: none;
   outline: none;
 }
 
 /* Strikethrough only for word-level diffing */
-[data-diff-mode="words"] .diff-removed {
+[data-diff-mode="words"] [data-diff-status="removed"] {
   text-decoration: line-through;
 }

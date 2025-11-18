@@ -202,6 +202,66 @@ describe("paragraph marks", () => {
 	})
 })
 
+describe("unsupported blocks", () => {
+	test("html block preserved through editor", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "html",
+					value: '<div class="hero">Welcome</div>',
+					data: { id: "html_1" },
+				},
+			],
+		}
+		const output = roundtrip(input)
+		expect(output).toEqual(input)
+		const editorOutput = roundtripThroughEditor(input)
+		expect(editorOutput).toEqual(input)
+	})
+
+	test("yaml frontmatter preserved through editor", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "yaml",
+					value: "title: Demo\nlayout: doc",
+					data: { id: "yaml_1" },
+				},
+				{
+					type: "paragraph",
+					children: [{ type: "text", value: "Hello" }],
+				},
+			],
+		}
+		const output = roundtrip(input)
+		expect(output).toEqual(input)
+		const editorOutput = roundtripThroughEditor(input)
+		expect(editorOutput).toEqual(input)
+	})
+})
+
+describe("inline HTML", () => {
+	test("inline html inside paragraph survives editor", () => {
+		const input: Ast = {
+			type: "root",
+			children: [
+				{
+					type: "paragraph",
+					children: [
+						{ type: "text", value: "Hello" },
+						{ type: "html", value: "<span class='pill'>beta</span>" },
+						{ type: "text", value: "world" },
+					],
+				},
+			],
+		}
+		const editorOutput = roundtripThroughEditor(input)
+		expect(editorOutput).toEqual(input)
+	})
+})
+
 describe("lists", () => {
 	test("unordered", () => {
 		const input: Ast = {

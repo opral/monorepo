@@ -7,6 +7,15 @@ import type { Ast } from "./schemas.js"
 /**
  * Serialize an mdast-shaped AST (Root) back to a Markdown string.
  * - GFM is enabled by default for table/task-list/strikethrough serialization.
+ * - Output always ends with a newline to follow CommonMark/remark canonical formatting.
+ *
+ * @example
+ * ```ts
+ * import { parseMarkdown, serializeAst } from "@opral/markdown-wc/ast"
+ *
+ * const markdown = serializeAst(parseMarkdown("# Heading"))
+ * // => "# Heading\n"
+ * ```
  */
 export function serializeAst(ast: Ast): string {
 	const processor = unified()
@@ -26,8 +35,7 @@ export function serializeAst(ast: Ast): string {
 
 	// unified.stringify expects a compatible mdast Root
 	const result = processor.stringify(ast as any) as string
-	// Do not append a final trailing newline; normalize by dropping a single EOL
-	return result.replace(/\n$/, "")
+	return result
 }
 
 export type { Ast }

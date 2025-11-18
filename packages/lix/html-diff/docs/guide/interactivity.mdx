@@ -1,6 +1,6 @@
 # Adding Interactivity
 
-The HTML diff engine provides the foundation for building interactive diff experiences. By combining the `data-diff-key` attributes with CSS classes applied by the diff engine, you can create rich interactive features like hover cards, blame views, and detailed change histories.
+The HTML diff engine provides the foundation for building interactive diff experiences. By combining the `data-diff-key` attributes with the `data-diff-status` markers applied by the diff engine, you can create rich interactive features like hover cards, blame views, and detailed change histories.
 
 ## Live Example
 
@@ -12,21 +12,21 @@ import InteractiveShowcase from "../components/interactive-showcase";
 
 ## Understanding the Data Structure
 
-When the diff engine processes your HTML, it adds CSS classes to elements and preserves the `data-diff-key` attributes. This gives you everything needed to build interactive features:
+When the diff engine processes your HTML, it adds `data-diff-status` attributes to elements and preserves the `data-diff-key` attributes. This gives you everything needed to build interactive features:
 
 ```html
 <!-- After diff processing -->
-<p data-diff-key="intro" data-diff-mode="words" class="diff-modified">
-  Welcome to our <span class="diff-removed">comprehensive</span>
-  <span class="diff-added">updated</span> guide for new
-  <span class="diff-removed">users</span
-  ><span class="diff-added">developers</span>.
+<p data-diff-key="intro" data-diff-mode="words" data-diff-status="modified">
+  Welcome to our <span data-diff-status="removed">comprehensive</span>
+  <span data-diff-status="added">updated</span> guide for new
+  <span data-diff-status="removed">users</span
+  ><span data-diff-status="added">developers</span>.
 </p>
 ```
 
 ## Building Interactive Features
 
-The key insight is that after calling `renderHtmlDiff()`, you can query the result for elements with diff classes and their `data-diff-key` attributes to add any interactivity you want:
+The key insight is that after calling `renderHtmlDiff()`, you can query the result for elements with diff status attributes and their `data-diff-key` attributes to add any interactivity you want:
 
 ```javascript
 // 1. Generate the diff
@@ -39,11 +39,13 @@ container.innerHTML = diffResult;
 
 // 3. Query for interactive elements
 const modifiedElements = container.querySelectorAll(
-  ".diff-modified[data-diff-key]",
+  '[data-diff-status="modified"][data-diff-key]',
 );
-const addedElements = container.querySelectorAll(".diff-added[data-diff-key]");
+const addedElements = container.querySelectorAll(
+  '[data-diff-status="added"][data-diff-key]',
+);
 const removedElements = container.querySelectorAll(
-  ".diff-removed[data-diff-key]",
+  '[data-diff-status="removed"][data-diff-key]',
 );
 
 // 4. Add any interactivity you want
@@ -92,7 +94,7 @@ Here's a complete React component that implements interactive hover cards:
 
 ```javascript
 import { useRef, useEffect, useState } from "react";
-import { renderHtmlDiff } from "lix-html-diff";
+import { renderHtmlDiff } from "@lix-js/html-diff";
 
 export function InteractiveHtmlDiff() {
   const ref = useRef(null);
@@ -138,7 +140,7 @@ export function InteractiveHtmlDiff() {
 
     // Add event listeners to modified elements
     const modifiedElements = ref.current.querySelectorAll(
-      ".diff-modified[data-diff-key]",
+      '[data-diff-status="modified"][data-diff-key]',
     );
 
     const handleMouseEnter = (e) => {
@@ -189,12 +191,12 @@ export function InteractiveHtmlDiff() {
           border: 1px solid #e5e7eb;
           padding: 12px 16px;
         }
-        .diff-modified {
+        [data-diff-status="modified"] {
           color: #f59e0b;
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        .diff-modified:hover {
+        [data-diff-status="modified"]:hover {
           background-color: rgba(245, 158, 11, 0.1);
           transform: scale(1.02);
         }

@@ -32,7 +32,7 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 <Showcase
   before="<div><p data-diff-key='ixn4'>First paragraph</p></div>"
   after="<div><p data-diff-key='ixn4'>First paragraph</p><p data-diff-key='zm7q'>Second paragraph</p></div>"
-  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
+  css="[data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; }"
 />
 
 ### Example: Removing an element
@@ -53,18 +53,18 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 <Showcase
   before="<div><p data-diff-key='bw5c'>Keep this</p><p data-diff-key='ft9x'>Remove this</p></div>"
   after="<div><p data-diff-key='bw5c'>Keep this</p></div>"
-  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
+  css="[data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; }"
 />
 
 ## data-diff-mode
 
 **Optional attribute to control diffing behavior.**
 
-By default, when text content changes, elements with `data-diff-key` are marked as `diff-modified`. The `data-diff-mode` attribute allows you to specify different diffing behaviors for more control.
+By default, when text content changes, elements with `data-diff-key` are marked with `data-diff-status="modified"`. The `data-diff-mode` attribute allows you to specify different diffing behaviors for more control.
 
 ### element
 
-Use `data-diff-mode="element"` to explicitly mark the element for atomic element diffing. When content changes, the old element is shown as `diff-removed` and the new element is shown as `diff-added`.
+Use `data-diff-mode="element"` to explicitly mark the element for atomic element diffing. When content changes, the old element is shown with `data-diff-status="removed"` and the new element is shown with `data-diff-status="added"`.
 
 ```html
 <!-- Before -->
@@ -83,7 +83,7 @@ Use `data-diff-mode="element"` to explicitly mark the element for atomic element
 <Showcase
   before="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>Old Title</h3><p>Old content</p></div>"
   after="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>New Title</h3><p>New content</p></div>"
-  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; } .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }"
+  css="[data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; } .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }"
 />
 
 #### When to use element mode
@@ -118,7 +118,7 @@ Use `data-diff-mode="words"` to enable granular word-level diffing within the el
 <Showcase
   before="<p data-diff-key='qr8n'>Hello there</p>"
   after="<p data-diff-key='qr8n'>Hello world</p>"
-  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
+  css="[data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; }"
 />
 
 #### With data-diff-mode="words" (granular word diffing)
@@ -134,7 +134,7 @@ Use `data-diff-mode="words"` to enable granular word-level diffing within the el
 <Showcase
   before="<p data-diff-key='kv3m' data-diff-mode='words'>Hello there</p>"
   after="<p data-diff-key='kv3m' data-diff-mode='words'>Hello world</p>"
-  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
+  css="[data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; }"
 />
 
 #### When to use data-diff-mode="words"
@@ -172,7 +172,7 @@ This example shows how using `data-diff-mode="words"` on complex components brea
 <Showcase
   before="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>Old Title</h3><p>Some content here</p></div>"
   after="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>New Title</h3><p>Different content here</p></div>"
-  css=".diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
+  css="[data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
 />
 
 Notice how the word-level diffing breaks the HTML structure by inserting `<span>` elements, making the result invalid HTML. The correct approach is to use `data-diff-mode="element"` or no mode at all for complex components.
@@ -181,7 +181,7 @@ Notice how the word-level diffing breaks the HTML structure by inserting `<span>
 
 **Optional attribute to show removed elements in the diff result.**
 
-By default, when elements are removed, they are not inserted into the diff result - only existing elements get CSS classes. The `data-diff-show-when-removed` attribute tells the diff engine that this element should be displayed with strikethrough styling when removed.
+By default, when elements are removed, they are not inserted into the diff result—only existing elements receive diff attributes. The `data-diff-show-when-removed` attribute tells the diff engine that this element should be displayed with strikethrough styling when removed.
 
 ### When to use data-diff-show-when-removed
 
@@ -234,7 +234,7 @@ By default, when elements are removed, they are not inserted into the diff resul
 <Showcase
   before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2' data-diff-show-when-removed><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>"
   after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-removed><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3' data-diff-show-when-removed><td>Product C</td><td>$30</td></tr></tbody></table>"
-  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; text-decoration: line-through; }"
+  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } [data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; text-decoration: line-through; }"
 />
 
 Notice how the removed row (Product B) is inserted and shown with strikethrough styling.
@@ -261,7 +261,7 @@ Without the `data-diff-show-when-removed` attribute, removed elements are not in
 <Showcase
   before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2'><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>"
   after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>"
-  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-added { color: green; } .diff-modified { color: orange; } .diff-removed { color: red; }"
+  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } [data-diff-status='added'] { color: green; } [data-diff-status='modified'] { color: orange; } [data-diff-status='removed'] { color: red; }"
 />
 
 Only the existing rows are shown - the removed row is not inserted.

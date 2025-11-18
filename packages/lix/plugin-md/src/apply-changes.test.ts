@@ -1,8 +1,14 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import { applyChanges } from "./apply-changes.js";
-import { parseMarkdown, AstSchemas } from "@opral/markdown-wc";
-import type { Ast, MarkdownNode } from "@opral/markdown-wc";
+import {
+	parseMarkdown,
+	AstSchemas,
+	type Ast,
+	type MarkdownNode,
+} from "@opral/markdown-wc";
+import * as MarkdownWC from "@opral/markdown-wc";
 import type { Change, LixPlugin } from "@lix-js/sdk";
+import { createNodeIdPrefix } from "./node-id-prefix.js";
 
 type ApplyChangesArgs = Parameters<NonNullable<LixPlugin["applyChanges"]>>[0];
 type ApplyChangesFile = ApplyChangesArgs["file"];
@@ -172,4 +178,77 @@ describe("applyChanges", () => {
 	});
 
 	// The plugin no longer writes HTML id comments; those tests were removed.
+
+	test("minted nested IDs do not collide with existing block IDs", () => {
+		const markdown = "- First item\n\nSecond block";
+		const ast = parseMarkdown(markdown) as Ast;
+		const [listNode, paragraphNode] = ast.children as MarkdownNode[];
+
+		if (!listNode || !paragraphNode) {
+			throw new Error("Expected parsed markdown to produce two nodes");
+		}
+
+		listNode.data = { ...(listNode.data ?? {}), id: "list-block" };
+		const prefix = createNodeIdPrefix("mock");
+		paragraphNode.data = { ...(paragraphNode.data ?? {}), id: `${prefix}_1` };
+
+		const removeNestedIds = (node: MarkdownNode | undefined) => {
+			if (!node || typeof node !== "object") return;
+			const children = Array.isArray(node.children) ? node.children : [];
+			for (const child of children) {
+				if (child && typeof child === "object") {
+					if (child.data) {
+						delete child.data.id;
+					}
+					removeNestedIds(child as MarkdownNode);
+				}
+			}
+		};
+
+		// Ensure nested list nodes do not have ids so the mint function generates them.
+		removeNestedIds(listNode);
+
+		const createdAt = new Date().toISOString();
+		const nodeToChange = (node: MarkdownNode): Change => ({
+			id: `${node.data?.id}-change`,
+			entity_id: node.data?.id as string,
+			schema_key: AstSchemas.schemasByType[node.type]!["x-lix-key"],
+			schema_version: AstSchemas.schemasByType[node.type]!["x-lix-version"],
+			snapshot_content: node as any,
+			file_id: "mock",
+			plugin_key: "mock",
+			metadata: null,
+			created_at: createdAt,
+		});
+
+		const changes: Change[] = [
+			{
+				id: "root-change",
+				entity_id: "root",
+				schema_key: AstSchemas.DocumentSchema["x-lix-key"],
+				schema_version: AstSchemas.DocumentSchema["x-lix-version"],
+				snapshot_content: { order: ["list-block", `${prefix}_1`] },
+				file_id: "mock",
+				plugin_key: "mock",
+				created_at: createdAt,
+				metadata: null,
+			},
+			nodeToChange(listNode),
+			nodeToChange(paragraphNode),
+		];
+
+		const serializeSpy = vi.spyOn(MarkdownWC, "serializeAst");
+
+		applyChanges({
+			file: createMockFile(new TextEncoder().encode("")),
+			changes,
+		} as ApplyChangesArgs);
+
+		const serializedAst = serializeSpy.mock.calls.at(-1)?.[0] as
+			| Ast
+			| undefined;
+		serializeSpy.mockRestore();
+
+		expect(serializedAst?.children?.[1]?.data?.id).toBe(`${prefix}_1`);
+	});
 });

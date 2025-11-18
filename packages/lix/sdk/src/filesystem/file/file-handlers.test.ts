@@ -1,12 +1,52 @@
-import { describe, it, expect } from "vitest";
+import { describe, test, expect } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { createVersion } from "../../version/create-version.js";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
 import { randomNanoId } from "../../database/nano-id.js";
+import type { LixPlugin } from "../../plugin/lix-plugin.js";
+
+const testUniqueSchema = {
+	"x-lix-key": "test_unique_block",
+	"x-lix-version": "1.0",
+	description: "Test schema that enforces unique block_id",
+	type: "object",
+	"x-lix-unique": [["/block_id"]],
+	properties: {
+		block_id: { type: "string" },
+		content: { type: "string" },
+	},
+	required: ["block_id", "content"],
+	additionalProperties: false,
+} as const;
+
+const uniqueBlockPlugin: LixPlugin = {
+	key: "test_unique_plugin",
+	detectChangesGlob: "**/*",
+	detectChanges: ({ after }) => {
+		if (!after) return [];
+		const content = new TextDecoder().decode(after.data ?? new Uint8Array());
+		return [
+			{
+				entity_id: "test-entity",
+				schema: testUniqueSchema,
+				snapshot_content: {
+					block_id: "shared-block",
+					content,
+				},
+			},
+		];
+	},
+	applyChanges: ({ changes }) => {
+		const content = (
+			changes?.[0]?.snapshot_content as { content?: string } | undefined
+		)?.content;
+		return { fileData: new TextEncoder().encode(content ?? "") };
+	},
+};
 
 describe("file insert", () => {
-	it("should handle unknown file types with fallback plugin", async () => {
+	test("should handle unknown file types with fallback plugin", async () => {
 		const lix = await openLix({
 			keyValues: [
 				{
@@ -43,7 +83,7 @@ describe("file insert", () => {
 });
 
 describe("file update", () => {
-	it("should handle unknown file types with fallback plugin", async () => {
+	test("should handle unknown file types with fallback plugin", async () => {
 		const lix = await openLix({
 			keyValues: [
 				{
@@ -92,7 +132,7 @@ describe("file update", () => {
 		expect(logs.length).toBeGreaterThanOrEqual(1);
 	});
 
-	it("should handle deleted entities during file update", async () => {
+	test("should handle deleted entities during file update", async () => {
 		const lix = await openLix({
 			providePlugins: [mockJsonPlugin],
 		});
@@ -174,5 +214,177 @@ describe("file update", () => {
 			e.entity_id.includes("jane")
 		);
 		expect(janeEntities.length).toBe(0);
+	});
+
+	test("updates descriptor untracked state when only tracking flag changes", async () => {
+		const lix = await openLix({});
+		const version = await createVersion({ lix });
+		const fileId = randomNanoId();
+		const initialData = new TextEncoder().encode("no-op content");
+
+		// Seed a tracked file row
+		await lix.db
+			.insertInto("file_by_version")
+			.values({
+				id: fileId,
+				path: "/tracked-file.txt",
+				data: initialData,
+				lixcol_version_id: version.id,
+				metadata: null,
+				hidden: false,
+				lixcol_untracked: false,
+			})
+			.execute();
+
+		const [descriptorBefore] = await lix.db
+			.selectFrom("state_by_version")
+			.where("entity_id", "=", fileId)
+			.where("schema_key", "=", "lix_file_descriptor")
+			.where("version_id", "=", version.id)
+			.select(["untracked"])
+			.execute();
+
+		expect(Boolean(descriptorBefore?.untracked)).toBe(false);
+
+		// Update only the untracked flag
+		handleFileUpdate({
+			engine: lix.engine!,
+			file: {
+				id: fileId,
+				path: "/tracked-file.txt",
+				data: initialData,
+				metadata: null,
+				hidden: false,
+			},
+			versionId: version.id,
+			untracked: true,
+		});
+
+		const [descriptorAfter] = await lix.db
+			.selectFrom("state_by_version")
+			.where("entity_id", "=", fileId)
+			.where("schema_key", "=", "lix_file_descriptor")
+			.where("version_id", "=", version.id)
+			.select(["untracked"])
+			.execute();
+
+		expect(Boolean(descriptorAfter?.untracked)).toBe(true);
+	});
+
+	test("updates use updateTable under the hood to avoid insert constraint violations", async () => {
+		const lix = await openLix({
+			providePlugins: [uniqueBlockPlugin],
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: "enabled",
+					lixcol_version_id: "global",
+				},
+			],
+		});
+		const version = await createVersion({ lix });
+		const fileId = "test_unique_file";
+		const initialData = new TextEncoder().encode("# Title\n\nHello");
+
+		handleFileInsert({
+			engine: lix.engine!,
+			file: {
+				id: fileId,
+				path: "/doc.unique",
+				data: initialData,
+				metadata: null,
+				hidden: false,
+			},
+			versionId: version.id,
+		});
+
+		expect(() =>
+			handleFileUpdate({
+				engine: lix.engine!,
+				file: {
+					id: fileId,
+					path: "/doc.unique",
+					data: new TextEncoder().encode("# Title\n\nHello again"),
+					metadata: null,
+					hidden: false,
+				},
+				versionId: version.id,
+			})
+		).not.toThrow();
+	});
+
+	test("updates to entities are retrievable via state history", async () => {
+		const lix = await openLix({
+			providePlugins: [uniqueBlockPlugin],
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: "enabled",
+					lixcol_version_id: "global",
+				},
+			],
+		});
+		const version = await createVersion({ lix });
+		const fileId = "test_unique_file";
+		const initialData = new TextEncoder().encode("# Title\n\nHello");
+
+		handleFileInsert({
+			engine: lix.engine!,
+			file: {
+				id: fileId,
+				path: "/doc.unique",
+				data: initialData,
+				metadata: null,
+				hidden: false,
+			},
+			versionId: version.id,
+		});
+
+		handleFileUpdate({
+			engine: lix.engine!,
+			file: {
+				id: fileId,
+				path: "/doc.unique",
+				data: new TextEncoder().encode("# Title\n\nHello updated"),
+				metadata: null,
+				hidden: false,
+			},
+			versionId: version.id,
+		});
+
+		const versionRow = await lix.db
+			.selectFrom("version")
+			.select(["commit_id"])
+			.where("id", "=", version.id)
+			.executeTakeFirstOrThrow();
+
+		expect(versionRow.commit_id).toBeTruthy();
+
+		const rows = await lix.db
+			.selectFrom("state_history")
+			.where("entity_id", "=", "test-entity")
+			.where("schema_key", "=", testUniqueSchema["x-lix-key"])
+			.where("root_commit_id", "=", versionRow.commit_id!)
+			.select(["snapshot_content", "commit_id", "depth"])
+			.orderBy("depth", "asc")
+			.execute();
+
+		expect(rows).toMatchObject([
+			{
+				snapshot_content: {
+					block_id: "shared-block",
+					content: "# Title\n\nHello updated",
+				},
+				commit_id: versionRow.commit_id!,
+				depth: 0,
+			},
+			{
+				snapshot_content: {
+					block_id: "shared-block",
+					content: "# Title\n\nHello",
+				},
+				depth: 1,
+			},
+		]);
 	});
 });

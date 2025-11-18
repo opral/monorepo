@@ -17,7 +17,7 @@ export type SqlSelectOutput = Array<Record<string, unknown>>;
  *
  * Guardrails:
  * - Allows only a single SELECT/CTE (WITH ... SELECT) statement.
- * - Disallows selecting the file content columns: file.data or file_all.data.
+ * - Disallows selecting the file content columns: file.data or file_by_version.data.
  */
 export async function sqlSelect(
 	args: SqlSelectInput & { lix: Lix }

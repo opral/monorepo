@@ -4,13 +4,13 @@
 
 Your app's existing CSS continues to work exactly as before.
 
-When you render a diff using Lix HTML Diff, it only adds CSS classes to highlight changes. It does not modify your existing HTML structure or styling. The exception is when you opt-in to specific behaviors using [data-diff-mode](/guide/attributes.html#data-diff-mode) attributes, which allows for more control over how diffs are displayed.
+When you render a diff using Lix HTML Diff, it only adds `data-diff-status` attributes to highlight changes. It does not modify your existing HTML structure or styling. The exception is when you opt in to specific behaviors using [data-diff-mode](/guide/attributes.html#data-diff-mode) attributes, which allows for more control over how diffs are displayed.
 
-The diff renderer uses semantic CSS classes to highlight changes:
+Each changed element receives one of these attributes:
 
-- `.diff-added` — applied to newly added elements
-- `.diff-modified` — applied to modified elements
-- `.diff-removed` — applied to removed elements
+- `data-diff-status="added"` — applied to newly added elements
+- `data-diff-status="modified"` — applied to modified elements
+- `data-diff-status="removed"` — applied to removed elements
 
 ### Example: Your Styling is Preserved
 
@@ -22,9 +22,10 @@ The diff renderer uses semantic CSS classes to highlight changes:
 
 <!-- After diff processing (text changed) -->
 <button
-  class="diff-modified primary-btn large-size"
+  class="primary-btn large-size"
   id="submit-btn"
   data-diff-key="btn1"
+  data-diff-status="modified"
 >
   Complete Purchase
 </button>
@@ -34,7 +35,7 @@ Notice how:
 
 - Your `primary-btn` and `large-size` classes remain untouched
 - Your `id` and `data-diff-key` attributes are preserved
-- Only `diff-modified` was added to highlight the change
+- Only `data-diff-status="modified"` was added to highlight the change
 - All your existing CSS for `.primary-btn` and `.large-size` continues to work
 
 ## Default Styles
@@ -56,40 +57,40 @@ Or, add it to your HTML:
 You can override these styles in your own CSS for custom themes or branding:
 
 ```css
-.diff-added {
+[data-diff-status="added"] {
   color: #080;
   background: #efe;
 }
-.diff-modified {
+[data-diff-status="modified"] {
   color: #f60;
   background: #ffc;
 }
-.diff-removed {
+[data-diff-status="removed"] {
   color: #b00;
   background: #fee;
 }
 ```
 
-## Class Merging Strategy
+## Styling Strategy
 
-HTML diff uses a **prepend strategy** for CSS classes to ensure diff highlighting takes precedence while preserving your existing styles:
+Because diff metadata is attached via `data-diff-status`, your components keep their original classes intact. You simply target the attribute in CSS:
 
 ```html
 <!-- Original -->
 <div class="card featured">Content</div>
 
 <!-- After diff (added) -->
-<div class="diff-added card featured">Content</div>
+<div class="card featured" data-diff-status="added">Content</div>
 
 <!-- After diff (modified) -->
-<div class="diff-modified card featured">Content</div>
+<div class="card featured" data-diff-status="modified">Content</div>
 ```
 
-**Why prepend?** Diff classes are added first so they can override conflicting styles (like color) while your layout classes (like `card`, `featured`) continue to work.
+You can now scope your override styles with attribute selectors without worrying about class ordering.
 
 ### CSS Specificity Tips
 
-Since diff classes are prepended, you can rely on CSS cascade:
+Attribute selectors have the same specificity as classes, so you can rely on normal cascade rules:
 
 ```css
 /* Your existing styles work as normal */
@@ -102,13 +103,13 @@ Since diff classes are prepended, you can rely on CSS cascade:
 }
 
 /* Diff styles override conflicting properties */
-.diff-modified {
+[data-diff-status="modified"] {
   color: orange;
 } /* This color wins */
-.diff-added {
+[data-diff-status="added"] {
   color: green;
 } /* This color wins */
-.diff-removed {
+[data-diff-status="removed"] {
   color: red;
 } /* This color wins */
 ```

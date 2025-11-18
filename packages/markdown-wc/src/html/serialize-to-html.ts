@@ -23,14 +23,20 @@ export async function serializeToHtml(
 	// - Make lists "loose" so list items render paragraphs inside <li>
 	// - Promote node.data.* to hProperties data-* attributes
 	const remarkSerializeDataAttributes: Plugin<[], any> = () => (tree: any) => {
-		visit(tree, (node: any) => {
+		visit(tree, (node: any, _index: number | null | undefined, parent: any) => {
 			if (!node || typeof node !== "object") return
 			// loose lists
 			if (node.type === "list" || node.type === "listItem") (node as any).spread = true
 			// diff hints: set diff attributes when requested (non-destructive: don't override if present)
 			if (options.diffHints) {
 				const diffData = ((node as any).data ||= {}) as Record<string, any>
-				if (node.type === "paragraph" || node.type === "heading") {
+				const parentIsListItem = parent?.type === "listItem"
+				if (node.type === "listItem" && diffData["diff-mode"] == null) {
+					diffData["diff-mode"] = "element"
+				}
+				const supportsWordDiff =
+					node.type === "paragraph" || node.type === "heading" || node.type === "tableCell"
+				if (!parentIsListItem && supportsWordDiff) {
 					if (diffData["diff-mode"] == null) diffData["diff-mode"] = "words"
 				}
 				if (diffData["id"] != null && diffData["diff-show-when-removed"] == null) {
@@ -46,7 +52,8 @@ export async function serializeToHtml(
 					if (v == null) continue
 					const t = typeof v
 					if (t === "string" || t === "number" || t === "boolean") {
-						h[`data-${k}`] = String(v)
+						const attrName = k === "id" ? "data-diff-key" : `data-${k}`
+						h[attrName] = String(v)
 					}
 				}
 			}
@@ -57,10 +64,36 @@ export async function serializeToHtml(
 		.use(remarkSerializeDataAttributes as any)
 		.use(remarkRehype as any, { allowDangerousHtml: true })
 		.run(ast)
+
+	if (options.diffHints) {
+		addWrapperIdsToTables(hast)
+	}
 	// hast -> html
 	const html = unified()
 		.use(rehypeStringify, { allowDangerousHtml: true })
 		.stringify(hast as any)
 	// Normalize newlines to compact form matching TipTap's getHTML()
 	return String(html).replace(/\n/g, "")
+}
+
+function addWrapperIdsToTables(tree: any) {
+	visit(tree, (node: any) => {
+		if (!node || node.type !== "element" || node.tagName !== "table") return
+		const tableId =
+			typeof node.properties?.["data-diff-key"] === "string"
+				? (node.properties["data-diff-key"] as string)
+				: undefined
+		if (!tableId) return
+		for (const child of node.children ?? []) {
+			if (!child || child.type !== "element") continue
+			const tag = child.tagName
+			if (tag !== "thead" && tag !== "tbody" && tag !== "tfoot") continue
+			const props = (child.properties ||= {})
+			if (props["data-diff-key"]) continue
+			props["data-diff-key"] = `${tableId}_${tag}`
+			if (props["data-diff-show-when-removed"] == null) {
+				props["data-diff-show-when-removed"] = ""
+			}
+		}
+	})
 }

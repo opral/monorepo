@@ -14,7 +14,7 @@ test("serializeToHtml maps node.data.* to HTML data-* attributes", async () => {
 	}
 
 	const html = await serializeToHtml(ast)
-	expect(html).toContain('<p data-id="P1" data-foo="bar">')
+	expect(html).toContain('<p data-diff-key="P1" data-foo="bar">')
 	expect(html).toContain(">Hello</p>")
 })
 
@@ -31,7 +31,9 @@ test("serializeToHtml with diffHints adds data-diff-mode=words to paragraphs", a
 	}
 
 	const html = await serializeToHtml(ast, { diffHints: true })
-	expect(html).toContain('<p data-id="P1" data-diff-mode="words" data-diff-show-when-removed="">')
+	expect(html).toContain(
+		'<p data-diff-key="P1" data-diff-mode="words" data-diff-show-when-removed="">'
+	)
 })
 
 test("serializeToHtml with diffHints marks identified nodes to show when removed", async () => {
@@ -49,7 +51,9 @@ test("serializeToHtml with diffHints marks identified nodes to show when removed
 	}
 
 	const html = await serializeToHtml(ast, { diffHints: true })
-	expect(html).toContain('<p data-id="P1" data-diff-mode="words" data-diff-show-when-removed="">')
+	expect(html).toContain(
+		'<p data-diff-key="P1" data-diff-mode="words" data-diff-show-when-removed="">'
+	)
 })
 
 test.each([1, 2, 3, 4, 5, 6])(
@@ -69,7 +73,146 @@ test.each([1, 2, 3, 4, 5, 6])(
 
 		const html = await serializeToHtml(ast, { diffHints: true })
 		expect(html).toContain(
-			`<h${depth} data-id="H${depth}" data-diff-mode="words" data-diff-show-when-removed="">`
+			`<h${depth} data-diff-key="H${depth}" data-diff-mode="words" data-diff-show-when-removed="">`
 		)
 	}
 )
+
+test("serializeToHtml with diffHints adds data-diff-mode=words to table cells", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "table",
+				children: [
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "header-1" },
+								children: [{ type: "text", value: "Hello" }],
+							},
+						],
+					},
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "cell-1" },
+								children: [{ type: "text", value: "World" }],
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { diffHints: true })
+	expect(html).toContain(
+		'<td data-diff-key="cell-1" data-diff-mode="words" data-diff-show-when-removed="">World</td>'
+	)
+})
+
+test("serializeToHtml with diffHints assigns ids to table wrappers", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "table",
+				data: { id: "table-1" },
+				children: [
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "header-1" },
+								children: [{ type: "text", value: "Column 1" }],
+							},
+						],
+					},
+					{
+						type: "tableRow",
+						children: [
+							{
+								type: "tableCell",
+								data: { id: "cell-1" },
+								children: [{ type: "text", value: "Value" }],
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { diffHints: true })
+	expect(html).toContain('<thead data-diff-key="table-1_thead" data-diff-show-when-removed="">')
+	expect(html).toContain('<tbody data-diff-key="table-1_tbody" data-diff-show-when-removed="">')
+})
+
+test("serializeToHtml with diffHints treats list items as atomic elements", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "list",
+				ordered: false,
+				children: [
+					{
+						type: "listItem",
+						data: { id: "item-1" },
+						children: [
+							{
+								type: "paragraph",
+								data: { id: "para-1" },
+								children: [{ type: "text", value: "First task" }],
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { diffHints: true })
+	expect(html).toContain(
+		'<li data-diff-key="item-1" data-diff-mode="element" data-diff-show-when-removed="">'
+	)
+	expect(html).toContain('<p data-diff-key="para-1" data-diff-show-when-removed="">First task</p>')
+	expect(html).not.toMatch(/<p[^>]*data-diff-key="para-1"[^>]*data-diff-mode=/)
+})
+
+test("serializeToHtml with diffHints leaves task list checkboxes without diff ids", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "list",
+				ordered: false,
+				data: { id: "list-1" },
+				children: [
+					{
+						type: "listItem",
+						data: { id: "item-1" },
+						checked: true,
+						children: [
+							{
+								type: "paragraph",
+								data: { id: "para-1" },
+								children: [{ type: "text", value: "checkbox" }],
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { diffHints: true })
+	expect(html).not.toMatch(/data-diff-key="item-1_checkbox"/)
+	expect(html).not.toMatch(/item-1_checkbox[^>]*data-diff-show-when-removed=/)
+})
