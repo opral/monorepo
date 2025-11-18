@@ -540,37 +540,39 @@ export function AgentView({ context }: AgentViewProps) {
 				ref={scrollContainerRef}
 				className="flex-1 min-h-0 overflow-y-auto gap-4 flex flex-col"
 			>
-				{hasKey ? (
-					<>
-						{messages.map((message) => (
-							<ConversationMessage key={message.id} message={message} />
-						))}
-						{pendingMessage ? (
-							<ConversationMessage
-								key={pendingMessage.id || "agent-pending"}
-								message={pendingMessage}
-							/>
-						) : pending ? (
-							<div className="px-3 py-1 text-xs text-muted-foreground">
-								Thinking…
-							</div>
-						) : null}
-						{notice ? (
-							<div className="px-3 py-1 text-xs text-muted-foreground">
-								{notice}
-							</div>
-						) : null}
-						{error ? (
-							<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
-						) : null}
-					</>
-				) : keyLoaded ? (
-					<WelcomeScreen
-						value={apiKeyDraft}
-						onValueChange={handleApiKeyChange}
-						onSave={handleSaveApiKey}
-					/>
-				) : null}
+				<div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
+					{hasKey ? (
+						<>
+							{messages.map((message) => (
+								<ConversationMessage key={message.id} message={message} />
+							))}
+							{pendingMessage ? (
+								<ConversationMessage
+									key={pendingMessage.id || "agent-pending"}
+									message={pendingMessage}
+								/>
+							) : pending ? (
+								<div className="px-3 py-1 text-xs text-muted-foreground">
+									Thinking…
+								</div>
+							) : null}
+							{notice ? (
+								<div className="px-3 py-1 text-xs text-muted-foreground">
+									{notice}
+								</div>
+							) : null}
+							{error ? (
+								<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
+							) : null}
+						</>
+					) : keyLoaded ? (
+						<WelcomeScreen
+							value={apiKeyDraft}
+							onValueChange={handleApiKeyChange}
+							onSave={handleSaveApiKey}
+						/>
+					) : null}
+				</div>
 			</div>
 
 			{hasKey && (
@@ -614,7 +616,7 @@ export function AgentView({ context }: AgentViewProps) {
  */
 export const view = createReactViewDefinition({
 	key: "agent",
-	label: "Lix Agent",
+	label: "AI Agent",
 	description: "Chat with the project assistant.",
 	icon: Bot,
 	component: ({ context }) => (

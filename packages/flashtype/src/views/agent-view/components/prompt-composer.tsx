@@ -212,7 +212,7 @@ export function PromptComposer({
 		}
 
 		if (!hasKey) {
-			onNotice("Add an OpenRouter API key to enable the Lix Agent.");
+			onNotice("Add an OpenRouter API key to enable the AI Agent.");
 			return;
 		}
 
@@ -435,7 +435,7 @@ export function PromptComposer({
 			? customPlaceholderText
 			: hasKey
 				? "Ask Flashtype…"
-				: "Add an OpenRouter API key to enable the Lix Agent…";
+				: "Add an OpenRouter API key to enable the AI Agent…";
 	const sendDisabled = pending || !hasKey;
 
 	return (
