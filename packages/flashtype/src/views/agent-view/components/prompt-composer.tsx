@@ -439,7 +439,7 @@ export function PromptComposer({
 	const sendDisabled = pending || !hasKey;
 
 	return (
-		<div className="relative w-full max-w-3xl">
+		<div className="relative w-full max-w-2xl">
 			<div className="relative overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
 				<label htmlFor={textAreaId} className="sr-only">
 					Ask the assistant

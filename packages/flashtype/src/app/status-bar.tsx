@@ -14,10 +14,12 @@ export function StatusBar(props: { activePath?: string | null }) {
 
 	return (
 		<footer className="flex h-8 items-center px-3 text-xs text-neutral-600">
-			<span className="flex min-w-0 items-center gap-1 font-medium text-neutral-900">
-				<FileText className="h-3.5 w-3.5 shrink-0" />
-				<span className="truncate">{label ?? "No active file"}</span>
-			</span>
+			{label ? (
+				<span className="flex min-w-0 items-center gap-1 font-medium text-neutral-900">
+					<FileText className="h-3.5 w-3.5 shrink-0" />
+					<span className="truncate">{label}</span>
+				</span>
+			) : null}
 		</footer>
 	);
 }

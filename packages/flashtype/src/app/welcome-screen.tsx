@@ -240,13 +240,15 @@ function WelcomeScreenContent({
 					<h1 className="text-4xl font-semibold text-neutral-900">
 						What do you want to write?
 					</h1>
-					<p className="text-base text-neutral-600">
+					<p className="text-center text-base text-neutral-600">
 						Create markdown documents by chatting with AI
+						<br />
+						(or copy & paste existing content to get it reviewed).
 					</p>
 				</div>
 
 				{/* Prompt Composer */}
-				<div className="w-full [&>div>div:last-child]:hidden">
+				<div className="mt-4 flex w-full justify-center [&>div>div:last-child]:hidden">
 					<PromptComposer
 						hasKey={hasKey}
 						models={AVAILABLE_MODELS}
