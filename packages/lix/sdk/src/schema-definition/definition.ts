@@ -1,6 +1,8 @@
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 import type { JsonPointer } from "./json-pointer.js";
 
+export type LixForeignKeyScopeColumn = "version_id" | "file_id";
+
 /**
  * Foreign key constraint definition
  */
@@ -36,6 +38,13 @@ export type LixForeignKey = {
 	 *   still restrict deletion when referenced.
 	 */
 	mode?: "immediate" | "materialized";
+
+	/**
+	 * Implicit columns that scope the foreign key relationship.
+	 * When omitted, defaults to ["version_id", "file_id"] for state-backed schemas.
+	 * Provide an empty array to disable implicit scoping entirely.
+	 */
+	scope?: readonly LixForeignKeyScopeColumn[] | LixForeignKeyScopeColumn[];
 
 	// Future features - not implemented yet
 	// onDelete?: "cascade" | "restrict" | "set null";
@@ -134,6 +143,16 @@ export const LixSchemaDefinition = {
 								enum: ["immediate", "materialized"],
 								description:
 									"Validation mode: immediate (default) or materialized (defer insert/update existence checks)",
+							},
+							scope: {
+								type: "array",
+								items: {
+									type: "string",
+									enum: ["version_id", "file_id"],
+								},
+								uniqueItems: true,
+								description:
+									"Implicit columns (version_id and/or file_id) used to scope the foreign key relationship",
 							},
 							// onDelete: {
 							//   type: "string",

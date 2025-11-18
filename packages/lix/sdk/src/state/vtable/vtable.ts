@@ -692,6 +692,7 @@ export function applyStateVTable(
 						snapshot_content: parsedSnapshot,
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
+						file_id: String(file_id),
 						version_id: String(version_id),
 						untracked: Boolean(untracked),
 						existingVersionsCache,
@@ -1058,6 +1059,7 @@ export function handleStateDelete(
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
 		entity_id: String(entity_id),
+		file_id: String(file_id),
 		version_id: String(version_id),
 		existingVersionsCache: withVersionCache(engine),
 	});

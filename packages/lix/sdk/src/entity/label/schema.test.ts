@@ -4,7 +4,15 @@ import { createLabel } from "../../label/create-label.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
 
 test("entity_label mapping requires entity to exist in state", async () => {
-	const lix = await openLix({});
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	// First create a label
 	const needsTranslationLabel = await createLabel({

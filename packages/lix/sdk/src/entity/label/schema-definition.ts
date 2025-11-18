@@ -22,6 +22,9 @@ export const LixEntityLabelSchema = {
 				schemaKey: "state",
 				properties: ["/entity_id", "/schema_key", "/file_id"],
 			},
+			// Labels live in the shared "lix" file but reference entities in
+			// whatever file they originally came from, so we scope only by version.
+			scope: ["version_id"],
 		},
 		{
 			properties: ["/label_id"],
