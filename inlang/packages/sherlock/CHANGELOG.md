@@ -1,5 +1,9 @@
 # inlang-vs-code-extension
 
+## 2.1.2
+
+- remove the filesystem sync loop so Sherlock stops rewriting translation files during background syncs ([#173](https://github.com/opral/inlang-sherlock/issues/173))
+
 ## 2.1.1
 
 Re-release of 2.0.17 with a hotfix for https://github.com/opral/inlang-sherlock/issues/188

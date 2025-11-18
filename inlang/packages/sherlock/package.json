@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -233,15 +233,12 @@
 		}
 	},
 	"scripts": {
-		"build": "pnpm run editor:build && node ./build.js",
+		"build": "node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
 		"publish:open-vsx": "node --experimental-json-modules publish-openvsx.js",
 		"vscode:prepublish": "npm run build",
-		"---- EDITOR ----------------------------------------------------------": "",
-		"editor:build": "cd src/utilities/editor/sherlock-editor-app && pnpm run build",
-		"editor:dev": "cd src/utilities/editor/sherlock-editor-app && pnpm run dev",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
 		"test": "vitest run",
@@ -300,6 +297,7 @@
 		"node-fetch": "^3.3.2",
 		"ovsx": "^0.8.4",
 		"posthog-node": "^4.0.1",
+		"sherlock-editor-app": "workspace:*",
 		"ts-node": "^10.9.1",
 		"typescript": "5.3.2",
 		"wdio-vscode-service": "^6.0.0"

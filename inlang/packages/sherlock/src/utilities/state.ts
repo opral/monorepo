@@ -37,6 +37,19 @@ export function state(): State {
 	return _state
 }
 
+/**
+ * Returns the current state without throwing if it hasn't been initialized yet.
+ *
+ * @example
+ * const currentState = safeState()
+ * if (!currentState) {
+ *   // state is not ready yet
+ * }
+ */
+export function safeState(): State | undefined {
+	return _state
+}
+
 // --- Helper Functions / Remove this when plugins are all converted to the new API plugin.meta API from plugin.addCustomApi ---
 
 /**

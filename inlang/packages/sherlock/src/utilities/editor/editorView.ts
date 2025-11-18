@@ -269,10 +269,6 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 	 * including dev vs. prod, React Refresh, etc.
 	 */
 	function getHtmlForWebview(webview: vscode.Webview) {
-		const file = "src/main.tsx"
-		const localPort = "5173"
-		const localServerUrl = `localhost:${localPort}`
-
 		const stylesUri = getUri(webview, extensionUri, [
 			"assets",
 			"sherlock-editor-app",
@@ -280,40 +276,20 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 			"index.css",
 		])
 
-		let scriptUri: string | vscode.Uri
-		const isDev = process.env.DEV === "true"
-		const isProd = !isDev && context.extensionMode === vscode.ExtensionMode.Production
-
-		if (isProd) {
-			scriptUri = getUri(webview, extensionUri, [
-				"assets",
-				"sherlock-editor-app",
-				"assets",
-				"index.js",
-			])
-		} else {
-			scriptUri = `http://${localServerUrl}/${file}`
-		}
+		const scriptUri = getUri(webview, extensionUri, [
+			"assets",
+			"sherlock-editor-app",
+			"assets",
+			"index.js",
+		])
 
 		const nonce = getNonce()
-
-		// The dev-time React Refresh snippet
-		const reactRefresh = /*html*/ `
-      <script type="module">
-        import RefreshRuntime from "http://localhost:5173/@react-refresh"
-        RefreshRuntime.injectIntoGlobalHook(window)
-        window.$RefreshReg$ = () => {}
-        window.$RefreshSig$ = () => (type) => type
-        window.__vite_plugin_react_preamble_installed__ = true
-      </script>`
-
-		const reactRefreshHash = "sha256-YmMpkm5ow6h+lfI3ZRp0uys+EUCt6FOyLkJERkfVnTY="
 
 		const csp = [
 			`default-src 'none';`,
 
 			// Allow scripts from safe sources
-			`script-src 'self' https://* ${isProd ? `'nonce-${nonce}'` : `http://${localServerUrl} http://0.0.0.0:${localPort} '${reactRefreshHash}' 'unsafe-eval'`};`,
+			`script-src 'self' https://* 'nonce-${nonce}';`,
 
 			// Allow inline styles for better compatibility
 			`style-src ${webview.cspSource} 'self' 'unsafe-inline' https://*;`,
@@ -328,11 +304,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 			`media-src ${webview.cspSource} https://* data:;`,
 
 			// Allow connections to APIs, WebSockets, and data URIs - include http://localhost:3000 for RPC
-			`connect-src https://* http://localhost:3000 data: ${
-				isProd
-					? ``
-					: `ws://${localServerUrl} ws://0.0.0.0:${localPort} http://${localServerUrl} http://0.0.0.0:${localPort}`
-			};`,
+			`connect-src https://* http://localhost:3000 data:;`,
 
 			// Allow iframes only from trusted sources
 			`frame-src 'self' https://*;`,
@@ -349,8 +321,7 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
       </head>
       <body>
         <div id="root"></div>
-        ${isProd ? "" : reactRefresh}
-        <script type="module" src="${scriptUri}"></script>
+        <script nonce="${nonce}" type="module" src="${scriptUri}"></script>
       </body>
     </html>`
 	}
