@@ -8,6 +8,7 @@ import {
 } from "@opral/markdown-wc";
 import * as MarkdownWC from "@opral/markdown-wc";
 import type { Change, LixPlugin } from "@lix-js/sdk";
+import { createNodeIdPrefix } from "./node-id-prefix.js";
 
 type ApplyChangesArgs = Parameters<NonNullable<LixPlugin["applyChanges"]>>[0];
 type ApplyChangesFile = ApplyChangesArgs["file"];
@@ -188,7 +189,8 @@ describe("applyChanges", () => {
 		}
 
 		listNode.data = { ...(listNode.data ?? {}), id: "list-block" };
-		paragraphNode.data = { ...(paragraphNode.data ?? {}), id: "mdwc_1" };
+		const prefix = createNodeIdPrefix("mock");
+		paragraphNode.data = { ...(paragraphNode.data ?? {}), id: `${prefix}_1` };
 
 		const removeNestedIds = (node: MarkdownNode | undefined) => {
 			if (!node || typeof node !== "object") return;
@@ -225,7 +227,7 @@ describe("applyChanges", () => {
 				entity_id: "root",
 				schema_key: AstSchemas.DocumentSchema["x-lix-key"],
 				schema_version: AstSchemas.DocumentSchema["x-lix-version"],
-				snapshot_content: { order: ["list-block", "mdwc_1"] },
+				snapshot_content: { order: ["list-block", `${prefix}_1`] },
 				file_id: "mock",
 				plugin_key: "mock",
 				created_at: createdAt,
@@ -247,6 +249,6 @@ describe("applyChanges", () => {
 			| undefined;
 		serializeSpy.mockRestore();
 
-		expect(serializedAst?.children?.[1]?.data?.id).toBe("mdwc_1");
+		expect(serializedAst?.children?.[1]?.data?.id).toBe(`${prefix}_1`);
 	});
 });

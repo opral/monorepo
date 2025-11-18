@@ -1,7 +1,13 @@
 import { expect, test } from "vitest";
-import { createCheckpoint, openLix, selectWorkingDiff } from "@lix-js/sdk";
+import {
+	createCheckpoint,
+	createQuerySync,
+	openLix,
+	selectWorkingDiff,
+} from "@lix-js/sdk";
 import { plugin } from "./index.js";
 import { AstSchemas } from "@opral/markdown-wc";
+import { createNodeIdPrefix } from "./node-id-prefix.js";
 
 test("detects changes when inserting markdown file", async () => {
 	// Initialize Lix with the markdown plugin
@@ -143,8 +149,9 @@ test("deleting a bullet removes only the list item in diffs", async () => {
 		(diff) => diff.schema_key === "markdown_wc_document",
 	);
 
+	const listPrefix = createNodeIdPrefix("file_with_list");
 	expect(listDiff?.status).toBe("removed");
-	expect(listDiff?.entity_id).toBe("mdwc_1");
+	expect(listDiff?.entity_id).toBe(`${listPrefix}_1`);
 	expect(docDiff?.status).toBe("modified");
 	expect(docDiff?.entity_id).toBe("root");
 });
@@ -239,6 +246,35 @@ test("programatically mutating entities should be reflected in the file", async 
 	expect(updatedMarkdown).toContain("This is the updated title.");
 	expect(updatedMarkdown).toContain("This is the updated paragraph content.");
 	expect(updatedMarkdown).not.toContain("mdast_id");
+});
+
+test("detectChanges emits entity_id that matches snapshot data.id", async () => {
+	const lix = await openLix({
+		providePlugins: [plugin],
+	});
+	const querySync = createQuerySync({ engine: lix.engine! });
+	const after = {
+		id: "entity-id-check",
+		path: "/entity-id.md",
+		data: new TextEncoder().encode("# Title\n\nParagraph"),
+		metadata: {},
+	};
+
+	const changes = plugin.detectChanges?.({
+		querySync,
+		after: after as any,
+	});
+
+	expect(changes?.length ?? 0).toBeGreaterThan(0);
+	const blockChanges =
+		changes?.filter(
+			(change) =>
+				change.schema["x-lix-key"] !== AstSchemas.DocumentSchema["x-lix-key"],
+		) ?? [];
+	expect(blockChanges.length).toBeGreaterThan(0);
+	for (const change of blockChanges) {
+		expect(change.entity_id).toBe((change.snapshot_content as any)?.data?.id);
+	}
 });
 
 test("enforces unique markdown block ids via x-lix-unique for every schema", async () => {
@@ -348,7 +384,7 @@ test("enforces unique markdown block ids via x-lix-unique for every schema", asy
 						metadata: null,
 						untracked: false,
 					})
-					.execute()
+					.execute(),
 			).rejects.toThrow(/Unique constraint violation/i);
 		} finally {
 			await lix.db

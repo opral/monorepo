@@ -18,6 +18,7 @@ import { parseMarkdown, AstSchemas, serializeAst } from "@opral/markdown-wc";
 import type { Ast, MarkdownNode } from "@opral/markdown-wc";
 import { makeDiff, cleanupSemantic } from "@sanity/diff-match-patch";
 import { syncNodeIds } from "./sync-node-ids.js";
+import { createNodeIdPrefix } from "./node-id-prefix.js";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	querySync,
@@ -35,6 +36,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	const afterMarkdown = new TextDecoder().decode(
 		after?.data ?? new Uint8Array(),
 	);
+	const idPrefix = createNodeIdPrefix(after?.id);
 
 	const afterAst = parseMarkdown(afterMarkdown) as Ast;
 	const detectedChanges: DetectedChange[] = [];
@@ -226,11 +228,16 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	const seenIds = new Set<string>();
 	const reservedIds = new Set<string>(Array.from(beforeNodes.keys()));
 	let idCounter = 0;
-	const mintNewId = (): string => {
+	const generateCandidateId = (): string => {
 		let id: string;
 		do {
-			id = `mdwc_${(++idCounter).toString(36)}`;
+			id = `${idPrefix}_${(++idCounter).toString(36)}`;
 		} while (seenIds.has(id) || reservedIds.has(id));
+		reservedIds.add(id);
+		return id;
+	};
+	const mintNewId = (): string => {
+		const id = generateCandidateId();
 		seenIds.add(id);
 		return id;
 	};
@@ -395,7 +402,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 				id = chosen.b.id;
 			}
 		}
-		if (!id) id = mintNewId();
+		if (!id) id = generateCandidateId();
 		const beforeNode = beforeNodes.get(id);
 		a.node.data = { ...a.node.data, id };
 		ensureNestedIds(beforeNode, a.node);
