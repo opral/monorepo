@@ -147,7 +147,11 @@ const createWorkingVsCheckpointDiffConfig = (
 			.$castTo<RenderableDiff>(),
 });
 
-const DEFAULT_PANEL_FALLBACK_SIZES = normalizeLayoutSizes();
+const DEFAULT_PANEL_FALLBACK_SIZES = {
+	left: 20,
+	central: 60,
+	right: 20,
+};
 const MIN_VISIBLE_PANEL_SIZE = 1;
 const PANEL_TRANSITION_STYLE: CSSProperties = {
 	transitionProperty: "flex-grow, flex-basis",
@@ -843,18 +847,6 @@ export function V2LayoutShell() {
 		);
 	}, [activeCentralEntry]);
 
-	const sharedViewContext = useMemo(
-		() => ({
-			openFileView: handleOpenFile,
-			openCommitView: handleOpenCommit,
-			openDiffView: handleOpenDiff,
-			closeDiffView: handleCloseDiff,
-			setTabBadgeCount: () => {},
-			lix,
-		}),
-		[handleOpenFile, handleOpenCommit, handleOpenDiff, handleCloseDiff, lix],
-	);
-
 	const isLeftFocused = focusedPanel === "left";
 	const isCentralFocused = focusedPanel === "central";
 	const isRightFocused = focusedPanel === "right";
@@ -924,6 +916,124 @@ export function V2LayoutShell() {
 		[setPanelState],
 	);
 
+	const schedulePanelAnimation = useCallback(() => {
+		setShouldAnimatePanels(true);
+		if (animationTimeoutRef.current !== null) {
+			window.clearTimeout(animationTimeoutRef.current);
+		}
+		animationTimeoutRef.current = window.setTimeout(() => {
+			setShouldAnimatePanels(false);
+			animationTimeoutRef.current = null;
+		}, 220);
+	}, []);
+
+	const handleMoveViewToPanel = useCallback(
+		(targetPanel: PanelSide, instanceKey?: string) => {
+			// Find the view in any panel
+			const allViews = [
+				...leftPanel.views.map((v) => ({
+					...v,
+					sourcePanel: "left" as PanelSide,
+				})),
+				...centralPanel.views.map((v) => ({
+					...v,
+					sourcePanel: "central" as PanelSide,
+				})),
+				...rightPanel.views.map((v) => ({
+					...v,
+					sourcePanel: "right" as PanelSide,
+				})),
+			];
+
+			const viewToMove = instanceKey
+				? allViews.find((v) => v.instanceKey === instanceKey)
+				: allViews.find((v) => v.viewKey === "agent");
+
+			if (!viewToMove) return;
+
+			const sourcePanel = viewToMove.sourcePanel;
+			if (sourcePanel === targetPanel) return;
+
+			// Remove from source panel
+			setPanelState(sourcePanel, (panel) => {
+				const views = panel.views.filter(
+					(v) => v.instanceKey !== viewToMove.instanceKey,
+				);
+				const nextActive =
+					panel.activeInstanceKey === viewToMove.instanceKey
+						? (views[views.length - 1]?.instanceKey ?? null)
+						: panel.activeInstanceKey;
+				return { views, activeInstanceKey: nextActive };
+			});
+
+			// Add to target panel
+			setPanelState(
+				targetPanel,
+				(panel) => ({
+					views: [
+						...panel.views,
+						{
+							instanceKey: viewToMove.instanceKey,
+							viewKey: viewToMove.viewKey,
+							metadata: viewToMove.metadata,
+						},
+					],
+					activeInstanceKey: viewToMove.instanceKey,
+				}),
+				{ focus: true },
+			);
+		},
+		[leftPanel, centralPanel, rightPanel, setPanelState],
+	);
+
+	const handleResizePanel = useCallback(
+		(side: PanelSide, size: number) => {
+			const panel =
+				side === "left" ? leftPanelRef.current : rightPanelRef.current;
+			if (!panel) return;
+
+			const clampedSize = Math.max(10, Math.min(40, size));
+			setPanelSizes((prev) => ({
+				...prev,
+				[side]: clampedSize,
+			}));
+
+			if (side === "left") {
+				setIsLeftCollapsed(clampedSize <= MIN_VISIBLE_PANEL_SIZE);
+			} else {
+				setIsRightCollapsed(clampedSize <= MIN_VISIBLE_PANEL_SIZE);
+			}
+
+			schedulePanelAnimation();
+			panel.resize(clampedSize);
+		},
+		[schedulePanelAnimation],
+	);
+
+	const sharedViewContext = useMemo(
+		() => ({
+			openFileView: handleOpenFile,
+			openCommitView: handleOpenCommit,
+			openDiffView: handleOpenDiff,
+			closeDiffView: handleCloseDiff,
+			setTabBadgeCount: () => {},
+			moveViewToPanel: handleMoveViewToPanel,
+			resizePanel: handleResizePanel,
+			focusPanel: focusPanel,
+			lix,
+		}),
+		[
+			handleOpenFile,
+			handleOpenCommit,
+			handleOpenDiff,
+			handleCloseDiff,
+			handleMoveViewToPanel,
+			handleResizePanel,
+			focusPanel,
+			lix,
+		],
+	);
+
 	const leftViewContext = useMemo(
 		() => ({
 			...sharedViewContext,
@@ -953,17 +1063,6 @@ export function V2LayoutShell() {
 		}),
 		[sharedViewContext, handleOpenHistory, isRightFocused],
 	);
-
-	const schedulePanelAnimation = useCallback(() => {
-		setShouldAnimatePanels(true);
-		if (animationTimeoutRef.current !== null) {
-			window.clearTimeout(animationTimeoutRef.current);
-		}
-		animationTimeoutRef.current = window.setTimeout(() => {
-			setShouldAnimatePanels(false);
-			animationTimeoutRef.current = null;
-		}, 220);
-	}, []);
 
 	useEffect(() => {
 		return () => {

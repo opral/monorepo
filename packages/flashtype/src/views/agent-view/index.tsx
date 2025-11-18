@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	Suspense,
+} from "react";
 import { Bot } from "lucide-react";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
@@ -13,7 +20,7 @@ import {
 	type ChangeProposalSummary,
 	sendMessage,
 } from "@lix-js/agent-sdk";
-import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type {
 	ViewContext,
 	DiffViewConfig,
@@ -69,6 +76,8 @@ export function AgentView({ context }: AgentViewProps) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [conversationId, setConversationId] = useKeyValue(CONVERSATION_KEY);
+	const initializationRef = useRef(false);
+
 	const [storedApiKey, setStoredApiKey] = useState<string | null>(devApiKey);
 	const [apiKeyDraft, setApiKeyDraft] = useState(devApiKey ?? "");
 	const [keyLoaded, setKeyLoaded] = useState(usingDevApiKey);
@@ -92,12 +101,29 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [storedModel, setStoredModel]);
 
 	useEffect(() => {
-		(async () => {
-			if (!conversationId) {
+		console.log("[AgentView] conversationId changed", conversationId);
+	}, [conversationId]);
+
+	useEffect(() => {
+		if (conversationId) return;
+
+		const timer = setTimeout(async () => {
+			if (initializationRef.current) return;
+			console.log("[AgentView] Initializing conversation...");
+			initializationRef.current = true;
+			try {
 				const conversation = await createConversation({ lix });
-				setConversationId(conversation.id);
+				console.log("[AgentView] Created conversation", conversation.id);
+				await setConversationId(conversation.id);
+				console.log("[AgentView] Set conversationId", conversation.id);
+			} catch (err) {
+				console.error("[AgentView] Failed to create conversation", err);
+			} finally {
+				initializationRef.current = false;
 			}
-		})();
+		}, 100);
+
+		return () => clearTimeout(timer);
 	}, [conversationId, lix, setConversationId]);
 
 	useEffect(() => {
@@ -127,6 +153,7 @@ export function AgentView({ context }: AgentViewProps) {
 		reject: (reason?: string) => Promise<void>;
 	} | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
+	const isFirstProposalRef = useRef(true);
 	const handleAutoAcceptToggle = useCallback(
 		async (next: boolean) => {
 			await setAutoAccept(next);
@@ -165,6 +192,12 @@ export function AgentView({ context }: AgentViewProps) {
 			.selectAll()
 			.orderBy("lixcol_created_at", "asc")
 			.orderBy("id", "asc"),
+	);
+
+	const openProposals = useQuery(({ lix }) =>
+		(lix.db.selectFrom("change_proposal") as any)
+			.where("status", "=", "open")
+			.selectAll(),
 	);
 
 	const [agent, setAgent] = useState<LixAgent | null>(null);
@@ -289,11 +322,23 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [apiKeyDraft, devApiKey]);
 
 	const handleAcceptDecision = useCallback(
-		(id: string) => {
+		async (id: string) => {
 			if (!pendingProposal || pendingProposal.proposalId !== id) return;
-			acceptPendingProposal();
+			await acceptPendingProposal();
+
+			// After accepting, open the file in center view
+			if (
+				context &&
+				pendingProposal.details?.fileId &&
+				pendingProposal.details.filePath
+			) {
+				await context.openFileView?.(pendingProposal.details.fileId, {
+					focus: true,
+					filePath: pendingProposal.details.filePath,
+				});
+			}
 		},
-		[pendingProposal, acceptPendingProposal],
+		[pendingProposal, acceptPendingProposal, context],
 	);
 
 	const handleAcceptAlwaysDecision = useCallback(
@@ -396,6 +441,21 @@ export function AgentView({ context }: AgentViewProps) {
 								accept: event.accept,
 								reject: event.reject,
 							});
+
+							// On first proposal, move agent to right panel and set it up
+							if (isFirstProposalRef.current && context) {
+								isFirstProposalRef.current = false;
+
+								// Move agent view to right panel
+								context.moveViewToPanel?.("right");
+
+								// Resize right panel to at least 30
+								context.resizePanel?.("right", 30);
+
+								// Focus right panel
+								context.focusPanel?.("right");
+							}
+
 							if (context && details?.fileId && details.filePath) {
 								console.log("Proposal event", event);
 								const diffConfig = createProposalDiffConfig({
@@ -483,6 +543,55 @@ export function AgentView({ context }: AgentViewProps) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [hasKey, agent, send]);
 
+	useEffect(() => {
+		if (
+			pendingProposal ||
+			!agent ||
+			!openProposals ||
+			openProposals.length === 0
+		)
+			return;
+		// Try to find a proposal for this conversation (guessing column name)
+		// or fallback to the first one if there's only one (heuristic)
+		const proposal = (openProposals.find(
+			(p: any) =>
+				p.conversation_id === conversationId ||
+				p.lixcol_conversation_id === conversationId,
+		) ?? openProposals[0]) as any;
+
+		if (!proposal) return;
+
+		const details = getChangeProposalSummary(agent, proposal.id);
+
+		setPendingProposal({
+			proposalId: proposal.id,
+			summary: "Proposed changes",
+			details,
+			accept: async () => {
+				await send("I accept the changes.");
+			},
+			reject: async (reason) => {
+				await send(
+					reason ? `I reject the changes: ${reason}` : "I reject the changes.",
+				);
+			},
+		});
+
+		// Also open the diff view if not open and we have details
+		if (context && details?.fileId && details.filePath) {
+			const diffConfig = createProposalDiffConfig({
+				fileId: details.fileId,
+				filePath: details.filePath,
+				sourceVersionId: details.source_version_id,
+				targetVersionId: details.target_version_id,
+			});
+			context.openDiffView?.(details.fileId, details.filePath, {
+				focus: false, // Don't steal focus from agent view
+				diffConfig,
+			});
+		}
+	}, [openProposals, pendingProposal, agent, send, context]);
+
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
 			const normalized = raw.trim().toLowerCase();
@@ -543,10 +652,10 @@ export function AgentView({ context }: AgentViewProps) {
 				<div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
 					{hasKey ? (
 						<>
-							{messages.map((message) => (
+							{messages?.map((message) => (
 								<ConversationMessage key={message.id} message={message} />
 							))}
-							{pendingMessage ? (
+							{pendingMessage && !isMessageEmpty(pendingMessage) ? (
 								<ConversationMessage
 									key={pendingMessage.id || "agent-pending"}
 									message={pendingMessage}
@@ -621,7 +730,15 @@ export const view = createReactViewDefinition({
 	icon: Bot,
 	component: ({ context }) => (
 		<LixProvider lix={context.lix}>
-			<AgentView context={context} />
+			<Suspense
+				fallback={
+					<div className="p-4 text-sm text-muted-foreground">
+						Loading agent...
+					</div>
+				}
+			>
+				<AgentView context={context} />
+			</Suspense>
 		</LixProvider>
 	),
 });
@@ -674,4 +791,16 @@ function proposalDiffTitle(filePath: string): string {
 		const trimmed = filePath.startsWith("/") ? filePath.slice(1) : filePath;
 		return trimmed.length > 0 ? `Proposal: ${trimmed}` : "Proposal Diff";
 	}
+}
+
+function isMessageEmpty(message: AgentConversationMessage): boolean {
+	const metadata = message.lixcol_metadata as any;
+	const hasSteps =
+		Array.isArray(metadata?.lix_agent_sdk_steps) &&
+		metadata.lix_agent_sdk_steps.length > 0;
+	if (hasSteps) return false;
+
+	if (!message.body) return true;
+	const text = toPlainText(message.body as any);
+	return !text.trim();
 }

@@ -126,6 +126,9 @@ export interface ViewContext {
 	readonly closeDiffView?: (fileId: string) => void;
 	readonly isPanelFocused?: boolean;
 	readonly setTabBadgeCount: (count: number | null | undefined) => void;
+	readonly moveViewToPanel?: (targetPanel: PanelSide, instanceKey?: string) => void;
+	readonly resizePanel?: (side: PanelSide, size: number) => void;
+	readonly focusPanel?: (side: PanelSide) => void;
 	readonly lix: Lix;
 }
 
