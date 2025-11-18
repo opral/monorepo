@@ -15,6 +15,7 @@ import { matchesGlob } from "../util/glob.js";
 import { normalizeFilePath } from "../path.js";
 import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import type { DetectedChange } from "../../plugin/lix-plugin.js";
 
 type FileMutationInput = {
 	id: string;
@@ -518,22 +519,14 @@ export function handleFileUpdate(args: {
 								.compile()
 						);
 					} else {
-						// Handle update/insert: upsert the entity in state table
-						args.engine.executeSync(
-							internalQueryBuilder
-								.insertInto("state_by_version")
-								.values({
-									entity_id: change.entity_id,
-									schema_key: change.schema["x-lix-key"],
-									file_id: args.file.id,
-									plugin_key: plugin.key,
-									snapshot_content: change.snapshot_content as any,
-									schema_version: change.schema["x-lix-version"],
-									version_id: args.versionId,
-									untracked: args.untracked || false,
-								})
-								.compile()
-						);
+						upsertStateEntity({
+							engine: args.engine,
+							change,
+							pluginKey: plugin.key,
+							fileId: args.file.id,
+							versionId: args.versionId,
+							untracked: args.untracked || false,
+						});
 					}
 				}
 			}
@@ -583,22 +576,14 @@ export function handleFileUpdate(args: {
 									.compile()
 							);
 						} else {
-							// Handle update/insert: upsert the entity in state table
-							args.engine.executeSync(
-								internalQueryBuilder
-									.insertInto("state_by_version")
-									.values({
-										entity_id: change.entity_id,
-										schema_key: change.schema["x-lix-key"],
-										file_id: args.file.id,
-										plugin_key: lixUnknownFileFallbackPlugin.key,
-										snapshot_content: change.snapshot_content as any,
-										schema_version: change.schema["x-lix-version"],
-										version_id: args.versionId,
-										untracked: args.untracked || false,
-									})
-									.compile()
-							);
+							upsertStateEntity({
+								engine: args.engine,
+								change,
+								pluginKey: lixUnknownFileFallbackPlugin.key,
+								fileId: args.file.id,
+								versionId: args.versionId,
+								untracked: args.untracked || false,
+							});
 						}
 					}
 				}
@@ -626,3 +611,60 @@ export function handleFileUpdate(args: {
 
 	return 0;
 }
+
+const upsertStateEntity = (args: {
+	engine: Pick<LixEngine, "executeSync">;
+	change: DetectedChange;
+	pluginKey: string;
+	fileId: string;
+	versionId: string;
+	untracked: boolean;
+}): void => {
+	const { engine, change, pluginKey, fileId, versionId, untracked } = args;
+	const existingRows = engine.executeSync(
+		internalQueryBuilder
+			.selectFrom("lix_internal_state_vtable")
+			.select(["entity_id"])
+			.where("entity_id", "=", change.entity_id)
+			.where("schema_key", "=", change.schema["x-lix-key"])
+			.where("file_id", "=", fileId)
+			.where("version_id", "=", versionId)
+			.where("snapshot_content", "is not", null)
+			.limit(1)
+			.compile()
+	).rows;
+	const baseMutation = {
+		plugin_key: pluginKey,
+		snapshot_content: JSON.stringify(change.snapshot_content),
+		schema_version: change.schema["x-lix-version"],
+		untracked: untracked ? 1 : 0,
+	};
+	if (existingRows.length > 0) {
+		engine.executeSync(
+			internalQueryBuilder
+				.updateTable("lix_internal_state_vtable")
+				.set(baseMutation)
+				.where("entity_id", "=", change.entity_id)
+				.where("schema_key", "=", change.schema["x-lix-key"])
+				.where("file_id", "=", fileId)
+				.where("version_id", "=", versionId)
+				.compile()
+		);
+	} else {
+		engine.executeSync(
+			internalQueryBuilder
+				.insertInto("lix_internal_state_vtable")
+				.values({
+					entity_id: change.entity_id,
+					schema_key: change.schema["x-lix-key"],
+					file_id: fileId,
+					plugin_key: pluginKey,
+					snapshot_content: JSON.stringify(change.snapshot_content),
+					schema_version: change.schema["x-lix-version"],
+					version_id: versionId,
+					untracked: untracked ? 1 : 0,
+				})
+				.compile()
+		);
+	}
+};

@@ -1,6 +1,8 @@
 import { expect, test } from "vitest";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { createSchemaCacheTable } from "../../state/cache/create-schema-cache-table.js";
 import { simulationTest } from "../../test-utilities/simulation-test/simulation-test.js";
+import { selectActiveVersion } from "../../version/select-active-version.js";
 
 test("discovery", () => {});
 
@@ -23,7 +25,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],
@@ -130,6 +132,142 @@ simulationTest(
 	}
 );
 
+simulationTest(
+	"state view allows updating untracked entities",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_untracked_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "untracked-entity",
+				file_id: "file-untracked",
+				schema_key: mockSchema["x-lix-key"],
+				plugin_key: "lix_sdk",
+				schema_version: mockSchema["x-lix-version"],
+				snapshot_content: { value: "initial" },
+				untracked: true,
+			})
+			.execute();
+
+		await expect(
+			lix.db
+				.updateTable("state")
+				.where("entity_id", "=", "untracked-entity")
+				.set({ snapshot_content: { value: "updated" } })
+				.execute()
+		).resolves.toBeTruthy();
+
+		const updated = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "untracked-entity")
+			.select(["snapshot_content", "untracked"])
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(updated.snapshot_content).toEqual({ value: "updated" });
+		expectDeterministic(Boolean(updated.untracked)).toBe(true);
+	}
+);
+
+// delete after fixing the bug
+simulationTest(
+	"state allows updating untracked entities VTABLE REPRODUCTION",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_untracked_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const activeVersion = await selectActiveVersion(lix)
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		if (lix.engine) {
+			createSchemaCacheTable({ engine: lix.engine, schema: mockSchema });
+		}
+
+		await lix.db
+			.insertInto("lix_internal_state_vtable" as any)
+			.values({
+				entity_id: "untracked-entity",
+				file_id: "file-untracked",
+				schema_key: mockSchema["x-lix-key"],
+				plugin_key: "lix_sdk",
+				schema_version: mockSchema["x-lix-version"],
+				snapshot_content: JSON.stringify({ value: "initial" }),
+				untracked: true,
+				version_id: activeVersion.version_id,
+			})
+			.execute();
+
+		await expect(
+			lix.db
+				.updateTable("lix_internal_state_vtable" as any)
+				.where("version_id", "=", activeVersion.version_id)
+				.where("entity_id", "=", "untracked-entity")
+				.set({ snapshot_content: JSON.stringify({ value: "updated" }) })
+				.execute()
+		).resolves.toBeTruthy();
+
+		const updated = await lix.db
+			.selectFrom("lix_internal_state_vtable" as any)
+			.where("entity_id", "=", "untracked-entity")
+			.where("version_id", "=", activeVersion.version_id)
+			.select(["snapshot_content", "untracked"])
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(updated.snapshot_content).toEqual({ value: "updated" });
+		expectDeterministic(Boolean(updated.untracked)).toBe(true);
+	}
+);
+
 // https://github.com/opral/lix-sdk/issues/344
 simulationTest(
 	"deleting key_value entities from state should not cause infinite loop",
@@ -138,7 +276,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true, bootstrap: true },
+					value: { enabled: true },
 					lixcol_version_id: "global",
 				},
 			],

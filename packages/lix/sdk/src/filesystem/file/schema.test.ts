@@ -11,6 +11,8 @@ import { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { openLix } from "../../lix/open-lix.js";
 
+test("sim test discovery", () => {});
+
 simulationTest(
 	"insert, update, delete on the file view",
 	async ({ openSimulatedLix }) => {
