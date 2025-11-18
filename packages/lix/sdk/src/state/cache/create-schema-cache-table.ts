@@ -78,6 +78,12 @@ export function createSchemaCacheTable(args: {
 		preprocessMode: "none",
 	});
 
+	// 2b) Fast lookups when queries omit file_id (entity+version filters)
+	engine.executeSync({
+		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_ve ON ${tableName} (version_id, entity_id)`,
+		preprocessMode: "none",
+	});
+
 	// 3) Fast scans by file within a version
 	engine.executeSync({
 		sql: `CREATE INDEX IF NOT EXISTS idx_${tableName}_fv ON ${tableName} (file_id, version_id)`,
