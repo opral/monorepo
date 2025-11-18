@@ -1,10 +1,11 @@
 -- SQL (unique-nested)
-select "snapshot_content" from "lix_internal_state_vtable" where "schema_key" = ? and "version_id" = ? and "inherited_from_version_id" is null and "snapshot_content" is not null and json_extract(snapshot_content, '$.details.slug') = ?
+select "snapshot_content" from "lix_internal_state_vtable" where "schema_key" = ? and "version_id" = ? and "file_id" = ? and "inherited_from_version_id" is null and "snapshot_content" is not null and json_extract(snapshot_content, '$.details.slug') = ?
 
 -- parameters
 [
   "text_play_unique",
   "global",
+  "playground-file",
   "slug-new"
 ]
 
@@ -16,7 +17,7 @@ WITH
     SELECT 'global' AS version_id
   )
 SELECT
-  "w"."snapshot_content" as "snapshot_content", "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."inherited_from_version_id" as "inherited_from_version_id"
+  "w"."snapshot_content" as "snapshot_content", "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."file_id" as "file_id", "w"."inherited_from_version_id" as "inherited_from_version_id"
 FROM (
   SELECT
     c.entity_id AS entity_id,
@@ -45,7 +46,7 @@ FROM (
         2 AS priority
       FROM lix_internal_state_all_untracked unt
       JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
-      WHERE (unt.schema_key IN ('text_play_unique')) AND ((json_extract(unt.snapshot_content, '$.details.slug') = 'slug-new'))
+      WHERE (unt.schema_key IN ('text_play_unique')) AND (unt.file_id IN ('playground-file')) AND ((json_extract(unt.snapshot_content, '$.details.slug') = 'slug-new'))
 
           UNION ALL
 
@@ -61,7 +62,7 @@ FROM (
         3 AS priority
       FROM "lix_internal_state_cache_v1_text_play_unique" cache
       JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
-      WHERE (cache.schema_key IN ('text_play_unique')) AND ((json_extract(cache.snapshot_content, '$.details.slug') = 'slug-new'))
+      WHERE (cache.schema_key IN ('text_play_unique')) AND (cache.file_id IN ('playground-file')) AND ((json_extract(cache.snapshot_content, '$.details.slug') = 'slug-new'))
   ) AS c
 ) AS w
 
@@ -69,7 +70,7 @@ FROM (
 
 WHERE w.rn = 1
 ) AS "lix_internal_state_vtable"
-WHERE "schema_key" = ? AND "version_id" = ? AND "inherited_from_version_id" IS NULL AND "snapshot_content" IS NOT NULL AND json_extract(snapshot_content, '$.details.slug') = ?
+WHERE "schema_key" = ? AND "version_id" = ? AND "file_id" = ? AND "inherited_from_version_id" IS NULL AND "snapshot_content" IS NOT NULL AND json_extract(snapshot_content, '$.details.slug') = ?
 
 -- query plan
 [
@@ -116,57 +117,57 @@ WHERE "schema_key" = ? AND "version_id" = ? AND "inherited_from_version_id" IS N
     "detail": "SCAN CONSTANT ROW"
   },
   {
-    "id": 27,
+    "id": 30,
     "parent": 9,
     "notused": 16,
     "detail": "SCAN wv_unt"
   },
   {
-    "id": 33,
+    "id": 36,
     "parent": 9,
-    "notused": 61,
-    "detail": "SEARCH unt USING INDEX idx_lix_internal_state_all_untracked_version_id (version_id=?)"
+    "notused": 60,
+    "detail": "SEARCH unt USING INDEX ix_unt_v_f_s_e (version_id=? AND file_id=? AND schema_key=?)"
   },
   {
-    "id": 58,
+    "id": 65,
     "parent": 8,
     "notused": 0,
     "detail": "UNION ALL"
   },
   {
-    "id": 66,
-    "parent": 58,
+    "id": 76,
+    "parent": 65,
     "notused": 47,
-    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_unique_unique_version_id_json_extract_snapsho_c3jqlx (version_id=? AND <expr>=?)"
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_text_play_unique_unique_version_id_json_extract_snapsho_file_id_b04j56 (version_id=? AND <expr>=? AND file_id=?)"
   },
   {
-    "id": 79,
-    "parent": 58,
+    "id": 92,
+    "parent": 65,
     "notused": 216,
     "detail": "SCAN wv_cache"
   },
   {
-    "id": 100,
+    "id": 113,
     "parent": 5,
-    "notused": 195,
+    "notused": 194,
     "detail": "SCAN c"
   },
   {
-    "id": 134,
+    "id": 155,
     "parent": 5,
     "notused": 0,
-    "detail": "USE TEMP B-TREE FOR ORDER BY"
+    "detail": "USE TEMP B-TREE FOR LAST 9 TERMS OF ORDER BY"
   },
   {
-    "id": 167,
+    "id": 192,
     "parent": 2,
-    "notused": 175,
+    "notused": 174,
     "detail": "SCAN (subquery-7)"
   },
   {
-    "id": 235,
+    "id": 260,
     "parent": 0,
-    "notused": 175,
+    "notused": 174,
     "detail": "SCAN w"
   }
 ]
