@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest";
-import type { Change, DetectedChange, LixFile, LixPlugin } from "@lix-js/sdk";
+import {
+	type Change,
+	type DetectedChange,
+	type LixFile,
+	type LixPlugin,
+	openLix,
+} from "@lix-js/sdk";
 import { detectChanges } from "./detect-changes.js";
 import { applyChanges } from "./apply-changes.js";
 import { JSONPointerValueSchema } from "./schemas/json-pointer-value.js";
@@ -339,6 +345,59 @@ describe("plugin-json integration", () => {
 				changes: [],
 			}),
 		).toThrow(SyntaxError);
+	});
+
+	test("primary key constraint rejects duplicate pointer paths", async () => {
+		const lix = await openLix({});
+		try {
+			await lix.db
+				.insertInto("stored_schema")
+				.values({ value: JSONPointerValueSchema })
+				.execute();
+
+			const activeVersion = await lix.db
+				.selectFrom("active_version")
+				.select("version_id")
+				.executeTakeFirstOrThrow();
+
+			const pointer = "/primary/key";
+
+			await lix.db
+				.insertInto("state_by_version")
+				.values({
+					entity_id: pointer,
+					file_id: "json-plugin-e2e",
+					schema_key: JSONPointerValueSchema["x-lix-key"],
+					schema_version: JSONPointerValueSchema["x-lix-version"],
+					plugin_key: "plugin_json",
+					version_id: activeVersion.version_id,
+					snapshot_content: {
+						path: pointer,
+						value: "first",
+					},
+				})
+				.execute();
+
+			await expect(
+				lix.db
+					.insertInto("state_by_version")
+					.values({
+						entity_id: pointer,
+						file_id: "json-plugin-e2e",
+						schema_key: JSONPointerValueSchema["x-lix-key"],
+						schema_version: JSONPointerValueSchema["x-lix-version"],
+						plugin_key: "plugin_json",
+						version_id: activeVersion.version_id,
+						snapshot_content: {
+							path: pointer,
+							value: "duplicate",
+						},
+					})
+					.execute(),
+			).rejects.toThrow(/primary key constraint/i);
+		} finally {
+			await lix.close();
+		}
 	});
 
 	test("handles deeply nested structures without stack issues", () => {
