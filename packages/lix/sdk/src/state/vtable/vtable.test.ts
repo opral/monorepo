@@ -2100,7 +2100,7 @@ simulationTest(
 );
 
 simulationTest(
-	"inherited_from_version_id is read-only",
+	"inherited_from_version_id is treated as a generated column",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [

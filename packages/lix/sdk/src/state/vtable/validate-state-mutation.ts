@@ -55,6 +55,9 @@ ajv.addFormat("cel", {
 });
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
+const generatedColumnMutationError = (column: string): Error =>
+	new Error(`Cannot mutate generated column '${column}'.`);
+
 const normalizeSchemaPath = (value: string): string => {
 	if (typeof value !== "string") {
 		return "";
@@ -195,9 +198,7 @@ export function validateStateMutation(args: ValidateStateMutationArgs): void {
 		attemptedInheritedOverride !== undefined &&
 		attemptedInheritedOverride !== null
 	) {
-		throw new Error(
-			"`inherited_from_version_id` is read-only and cannot be mutated."
-		);
+		throw generatedColumnMutationError("inherited_from_version_id");
 	}
 
 	if (!args.version_id) {
