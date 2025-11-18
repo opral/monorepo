@@ -8,14 +8,20 @@ import {
 	fireEvent,
 } from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
-import { openLix, type Lix } from "@lix-js/sdk";
+import {
+	openLix,
+	type Lix,
+	createVersion,
+	switchVersion,
+	createCheckpoint,
+	selectWorkingDiff,
+} from "@lix-js/sdk";
 import { TipTapEditor } from "./tip-tap-editor";
 import { KeyValueProvider } from "@/hooks/key-value/use-key-value";
 import { KEY_VALUE_DEFINITIONS } from "@/hooks/key-value/schema";
 import { EditorProvider } from "./editor-context";
 import { AstSchemas } from "@opral/markdown-wc";
 import type { Editor } from "@tiptap/core";
-import { createVersion, switchVersion } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { insertMarkdownSchemas } from "../../../lib/insert-markdown-schemas";
 
@@ -667,4 +673,93 @@ test("preserves main content when switching to a new version and back", async ()
 			"Hello world",
 		);
 	});
+});
+
+test("opening a markdown file without edits should not create a working diff", async () => {
+	const fileId = "agents_temp_repro";
+	const AGENTS_SEED = `Dear User,
+
+Use this file to give instructions of how you want the lix agent to work for you. You can use any language you'd like (English, German, Spanish, etc). You can find more information on <https://agents.md/>.
+
+For example:
+
+- What's the writing style you prefer?
+- Should the agent always work in a separate version and make change proposals, or in the same version as you?
+- What are things the agent should always do, never do, or remember?
+
+> @Lix Agent **Check if the user has files other than the /AGENTS.md file then**
+>
+> 1. If they have no other files:
+>
+> The user is likely using Flashtype for the first time. Greet the user and prompt them for their favorite city. Then write a 3-5 paragraph blog post about it. Then ask the user in one turn what you should change.
+>
+> 2. If they have other files:
+>
+> Greet the user, tell them that they already played around with Flashtype. Thus, they should now modify the AGENTS.md to specify how they want you to collaborate with them.
+`;
+	const lix = await openLix({
+		providePlugins: [mdPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+		],
+	});
+	await insertMarkdownSchemas({ lix });
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: fileId,
+			path: "/AGENTS.md",
+			data: new TextEncoder().encode(AGENTS_SEED),
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("key_value_by_version")
+		.values({
+			key: "flashtype_active_file_id",
+			value: fileId,
+			lixcol_version_id: "global",
+			lixcol_untracked: true,
+		})
+		.execute();
+
+	await createCheckpoint({ lix });
+
+	const diffBefore = await selectWorkingDiff({ lix })
+		.select(["diff.entity_id"])
+		.where("diff.file_id", "=", fileId)
+		.where("diff.status", "!=", "unchanged")
+		.execute();
+	expect(diffBefore).toEqual([]);
+	await act(async () => {
+		render(
+			<StrictMode>
+				<Suspense>
+					<Providers lix={lix}>
+						<TipTapEditor persistDebounceMs={0} />
+					</Providers>
+				</Suspense>
+			</StrictMode>,
+		);
+	});
+
+	await screen.findByTestId("tiptap-editor");
+
+	let diffAfter: Array<{ entity_id: string }> = [];
+	for (let i = 0; i < 10; i++) {
+		diffAfter = await selectWorkingDiff({ lix })
+			.select(["diff.entity_id", "diff.status"])
+			.where("diff.file_id", "=", fileId)
+			.where("diff.status", "!=", "unchanged")
+			.execute();
+		if (diffAfter.length > 0) break;
+		await new Promise((resolve) => setTimeout(resolve, 20));
+	}
+
+	expect(diffAfter).toEqual([]);
 });

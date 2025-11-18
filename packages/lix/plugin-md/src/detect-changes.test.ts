@@ -15,8 +15,9 @@ async function seedMarkdownState(args: {
 	fileId: string;
 	markdown: string;
 	ids?: string[];
+	transformNode?: (node: any, idx: number) => void;
 }) {
-	const { lix, fileId, markdown, ids } = args;
+	const { lix, fileId, markdown, ids, transformNode } = args;
 	const ast = parseMarkdown(markdown) as Ast;
 
 	const schemas = AstSchemas.allSchemas.map((schema) => ({
@@ -38,6 +39,7 @@ async function seedMarkdownState(args: {
 		const n: any = (ast.children as any[])[i];
 		const id = ids?.[i] ?? `n${i + 1}`;
 		n.data = { ...(n.data || {}), id };
+		if (transformNode) transformNode(n, i);
 		order.push(id);
 		values.push({
 			entity_id: id,
@@ -100,6 +102,26 @@ function makeBigDoc(n: number) {
 	const paras = Array.from({ length: n }, (_, i) => `P${i + 1}`);
 	const beforeIds = Array.from({ length: n }, (_, i) => `p${i + 1}`);
 	return { paras, beforeIds, markdown: paras.join("\n\n") };
+}
+
+function expectAllDescendantsHaveIds(node: any, ctx: string) {
+	const stack: { node: any; path: string }[] = [{ node, path: ctx }];
+	while (stack.length) {
+		const current = stack.pop()!;
+		const curNode = current.node;
+		if (!curNode || typeof curNode !== "object") continue;
+		const type = String(curNode.type || "unknown");
+		if (type !== "text") {
+			expect(
+				curNode?.data?.id,
+				`missing data.id on ${current.path} (${type})`,
+			).toBeTruthy();
+		}
+		const children = Array.isArray(curNode.children) ? curNode.children : [];
+		for (let i = 0; i < children.length; i++) {
+			stack.push({ node: children[i], path: `${current.path}.${type}[${i}]` });
+		}
+	}
 }
 function applySmallEdits(paras: string[], count: number, seed = 7): string[] {
 	const r = rng(seed);
@@ -356,6 +378,302 @@ test("delete emits deletion and preserves other ids", async () => {
 	expect(deletion?.snapshot_content).toBeNull();
 });
 
+test("detect assigns ids to nested list structures", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "nested_list";
+	const afterMarkdown = `- Alpha
+- Beta
+  - Beta nested
+`;
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: {
+			id: fileId,
+			path: "nested.md",
+			data: encode(afterMarkdown),
+			metadata: {},
+		},
+	} as DetectChangesArgs);
+
+	const listChange = changes.find((c) => c.snapshot_content?.type === "list");
+	expect(listChange).toBeTruthy();
+	expectAllDescendantsHaveIds(listChange!.snapshot_content, "list");
+});
+
+test("detect assigns ids to nested table structures", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "nested_table";
+	const afterMarkdown = `| A | B |
+| --- | --- |
+| Cell 1 | Cell 2 |
+`;
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: {
+			id: fileId,
+			path: "table.md",
+			data: encode(afterMarkdown),
+			metadata: {},
+		},
+	} as DetectChangesArgs);
+
+	const tableChange = changes.find((c) => c.snapshot_content?.type === "table");
+	expect(tableChange).toBeTruthy();
+	expectAllDescendantsHaveIds(tableChange!.snapshot_content, "table");
+});
+
+test("blockquote nested content receives ids", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "blockquote_nested";
+	const afterMarkdown = `> Quote line
+>
+> - item inside
+`;
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: {
+			id: fileId,
+			path: "blockquote.md",
+			data: encode(afterMarkdown),
+			metadata: {},
+		},
+	} as DetectChangesArgs);
+	const blockquote = changes.find(
+		(c) => c.snapshot_content?.type === "blockquote",
+	);
+	expect(blockquote).toBeTruthy();
+	expectAllDescendantsHaveIds(blockquote!.snapshot_content, "blockquote");
+	const list = (blockquote!.snapshot_content?.children ?? []).find(
+		(n: any) => n.type === "list",
+	);
+	expect(list).toBeTruthy();
+	expect(list?.data?.id).toBeTruthy();
+	const listItem = (list?.children ?? []).find(
+		(n: any) => n.type === "listItem",
+	);
+	expect(listItem).toBeTruthy();
+	expect(listItem?.data?.id).toBeTruthy();
+	const paragraphInList = (listItem?.children ?? []).find(
+		(n: any) => n.type === "paragraph",
+	);
+	expect(paragraphInList).toBeTruthy();
+	expect(paragraphInList?.data?.id).toBeTruthy();
+});
+
+test("list item grandchildren paragraphs keep ids", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "list_grandchild";
+	const afterMarkdown = `- Parent
+  - Child
+`;
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: {
+			id: fileId,
+			path: "list-grandchild.md",
+			data: encode(afterMarkdown),
+			metadata: {},
+		},
+	} as DetectChangesArgs);
+	const list = changes.find((c) => c.snapshot_content?.type === "list");
+	expect(list).toBeTruthy();
+	expectAllDescendantsHaveIds(list!.snapshot_content, "list");
+	const firstItem = (list!.snapshot_content?.children ?? [])[0];
+	expect(firstItem).toBeTruthy();
+	expect(firstItem?.data?.id).toBeTruthy();
+	const nestedList = (firstItem?.children ?? []).find(
+		(n: any) => n.type === "list",
+	);
+	expect(nestedList).toBeTruthy();
+	expect(nestedList?.data?.id).toBeTruthy();
+	const nestedItem = (nestedList?.children ?? [])[0];
+	expect(nestedItem).toBeTruthy();
+	expect(nestedItem?.data?.id).toBeTruthy();
+	const nestedParagraph = (nestedItem?.children ?? []).find(
+		(n: any) => n.type === "paragraph",
+	);
+	expect(nestedParagraph).toBeTruthy();
+	expect(nestedParagraph?.data?.id).toBeTruthy();
+});
+
+test("list item text edit preserves nested ids", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "list_edit";
+	const before = `- Item one
+- Item two`;
+	const after = `- Item one
+- Item updated`;
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before,
+		ids: ["list_main"],
+		transformNode: (node) => {
+			if (node.type !== "list") return;
+			node.children?.forEach((item: any, idx: number) => {
+				item.data = { ...(item.data || {}), id: `item_${idx}` };
+				item.children?.forEach((child: any, childIdx: number) => {
+					if (child.type === "paragraph")
+						child.data = {
+							...(child.data || {}),
+							id: `para_${idx}_${childIdx}`,
+						};
+				});
+			});
+		},
+	});
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "list.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
+	const mod = changes.find((c) => c.entity_id === "list_main");
+	expect(mod).toBeTruthy();
+	const secondItem = mod?.snapshot_content?.children?.[1];
+	expect(secondItem?.data?.id).toBe("item_1");
+	const nestedParagraph = secondItem?.children?.find(
+		(n: any) => n.type === "paragraph",
+	);
+	expect(nestedParagraph?.data?.id).toBe("para_1_0");
+	expect(nestedParagraph?.children?.[0]?.value).toBe("Item updated");
+});
+
+test("list reorder preserves item ids", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "list_reorder";
+	const before = `- Item 1
+- Item 2
+- Item 3
+- Item 4
+- Item 5`;
+	const after = `- Item 1
+- Item 5
+- Item 3
+- Item 4
+- Item 2`;
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before,
+		ids: ["list_reorder"],
+		transformNode: (node) => {
+			if (node.type !== "list") return;
+			node.children?.forEach((item: any, idx: number) => {
+				item.data = { ...(item.data || {}), id: `item_${idx + 1}` };
+				item.children?.forEach((child: any, childIdx: number) => {
+					if (child.type === "paragraph")
+						child.data = {
+							...(child.data || {}),
+							id: `para_${idx + 1}_${childIdx}`,
+						};
+				});
+			});
+		},
+	});
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "list.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
+	const listSchemaKey = AstSchemas.schemasByType.list?.["x-lix-key"] as
+		| string
+		| undefined;
+	expect(listSchemaKey).toBeTruthy();
+	const mod = changes.find((c) => c.schema["x-lix-key"] === listSchemaKey);
+	expect(mod).toBeTruthy();
+	expect(mod?.entity_id).toBe("list_reorder");
+	expect(mod?.snapshot_content?.type).toBe("list");
+	const childIds = (mod?.snapshot_content?.children ?? []).map(
+		(child: any) => child?.data?.id,
+	);
+	expect(childIds).toEqual(["item_1", "item_5", "item_3", "item_4", "item_2"]);
+});
+
+test("table headers and cells receive ids", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "table_header";
+	const afterMarkdown = `| H1 | H2 |
+| --- | --- |
+| *Cell* | Cell 2 |
+`;
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: {
+			id: fileId,
+			path: "table-header.md",
+			data: encode(afterMarkdown),
+			metadata: {},
+		},
+	} as DetectChangesArgs);
+	const table = changes.find((c) => c.snapshot_content?.type === "table");
+	expect(table).toBeTruthy();
+	expectAllDescendantsHaveIds(table!.snapshot_content, "table");
+	const headerRow = (table!.snapshot_content?.children ?? [])[0];
+	expect(headerRow?.type).toBe("tableRow");
+	expect(headerRow?.data?.id).toBeTruthy();
+	const bodyRow = (table!.snapshot_content?.children ?? [])[1];
+	expect(bodyRow?.type).toBe("tableRow");
+	expect(bodyRow?.data?.id).toBeTruthy();
+	const emphasis = bodyRow?.children?.[0]?.children?.find(
+		(n: any) => n.type === "emphasis",
+	);
+	expect(emphasis).toBeTruthy();
+	expect(emphasis?.data?.id).toBeTruthy();
+});
+
+test("raw html blocks receive ids", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "html_block";
+	const afterMarkdown = `<div>
+<p>One</p>
+<span>Two</span>
+</div>`;
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: {
+			id: fileId,
+			path: "html-block.md",
+			data: encode(afterMarkdown),
+			metadata: {},
+		},
+	} as DetectChangesArgs);
+	const htmlNode = changes.find((c) => c.snapshot_content?.type === "html");
+	expect(htmlNode).toBeTruthy();
+	expect(htmlNode!.snapshot_content?.data?.id).toBeTruthy();
+});
+
+test("deeply nested structures assign ids throughout", async () => {
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "deep_mix";
+	const afterMarkdown = `- Level 1
+  > Nested quote
+  >
+  > | A | B |
+  > | --- | --- |
+  > | Cell A | Cell B |
+`;
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: {
+			id: fileId,
+			path: "deep-mix.md",
+			data: encode(afterMarkdown),
+			metadata: {},
+		},
+	} as DetectChangesArgs);
+	const list = changes.find((c) => c.snapshot_content?.type === "list");
+	expect(list).toBeTruthy();
+	expectAllDescendantsHaveIds(list!.snapshot_content, "list");
+	const nestedBlockquote = (list!.snapshot_content?.children ??
+		[])[0]?.children?.find((n: any) => n.type === "blockquote");
+	expect(nestedBlockquote).toBeTruthy();
+	expect(nestedBlockquote?.data?.id).toBeTruthy();
+	const nestedTable = (nestedBlockquote?.children ?? []).find(
+		(n: any) => n.type === "table",
+	);
+	expect(nestedTable).toBeTruthy();
+	expect(nestedTable?.data?.id).toBeTruthy();
+	expectAllDescendantsHaveIds(nestedTable!, "table");
+});
+
 test("cross-type: do not map heading id to paragraph", async () => {
 	const before = `# Heading`;
 	const after = `Paragraph`;
@@ -530,6 +848,39 @@ test("table cell edit preserves table id", async () => {
 	const rows = (mod?.snapshot_content as { children?: any[] })?.children || [];
 	const lastRowCells = rows[1]?.children || [];
 	expect(lastRowCells[1]?.children?.[0]?.value).toBe("3");
+});
+
+test("table cell edit preserves individual cell id", async () => {
+	const before = `| a | b |\n| - | - |\n| 1 | 2 |`;
+	const after = `| a | b |\n| - | - |\n| 1 | 3 |`;
+	const lix = await openLix({ providePlugins: [plugin] });
+	const fileId = "table_cell_id";
+	await seedMarkdownState({
+		lix,
+		fileId,
+		markdown: before,
+		ids: ["table_main"],
+		transformNode: (node) => {
+			if (node.type !== "table") return;
+			node.children?.forEach((row: any, rowIdx: number) => {
+				row.data = { ...(row.data || {}), id: `row_${rowIdx}` };
+				row.children?.forEach((cell: any, cellIdx: number) => {
+					cell.data = { ...(cell.data || {}), id: `cell_${rowIdx}_${cellIdx}` };
+				});
+			});
+		},
+	});
+	const changes = detectChanges({
+		querySync: createQuerySync({ engine: lix.engine! }),
+		after: { id: fileId, path: "/f.md", data: encode(after), metadata: {} },
+	} as DetectChangesArgs);
+	const mod = changes.find((c) => c.entity_id === "table_main");
+	expect(mod).toBeTruthy();
+	const bodyRow = mod?.snapshot_content?.children?.[1];
+	expect(bodyRow?.data?.id).toBe("row_1");
+	const editedCell = bodyRow?.children?.[1];
+	expect(editedCell?.data?.id).toBe("cell_1_1");
+	expect(editedCell?.children?.[0]?.value).toBe("3");
 });
 
 test("duplicate paragraphs: edit the 2nd, keep p2 and no root change", async () => {

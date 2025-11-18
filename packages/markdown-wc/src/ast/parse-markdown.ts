@@ -3,6 +3,7 @@ import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
 import remarkFrontmatter from "remark-frontmatter"
 import type { Ast } from "./schemas.js"
+import { normalizeAst } from "./normalize-ast.js"
 
 /**
  * Parse a Markdown string into an mdast-shaped AST (Root).
@@ -34,5 +35,5 @@ export function parseMarkdown(markdown: string): Ast {
 
 	// unified.parse returns a unist tree; cast to mdast Root for consumers
 	const tree = processor.parse(markdown) as unknown as Ast
-	return tree
+	return normalizeAst(tree)
 }

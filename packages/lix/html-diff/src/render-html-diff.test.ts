@@ -29,5 +29,5 @@ test("supports custom diffAttribute option (data-id)", () => {
     diffAttribute: "data-id",
   });
   // Should granular-diff the word 'world'
-  expect(result).toContain('<span class="diff-added">world</span>');
+  expect(result).toContain('<span data-diff-status="added">world</span>');
 });

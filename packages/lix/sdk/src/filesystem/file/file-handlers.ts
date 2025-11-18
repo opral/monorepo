@@ -15,6 +15,7 @@ import { matchesGlob } from "../util/glob.js";
 import { normalizeFilePath } from "../path.js";
 import { deriveDescriptorFieldsFromPath } from "./descriptor-utils.js";
 import { internalQueryBuilder } from "../../engine/internal-query-builder.js";
+import type { DetectedChange } from "../../plugin/lix-plugin.js";
 
 type FileMutationInput = {
 	id: string;
@@ -22,6 +23,36 @@ type FileMutationInput = {
 	data: Uint8Array;
 	metadata: unknown;
 	hidden?: boolean;
+};
+
+const normalizeMetadataValue = (value: unknown): unknown => {
+	if (value === null || value === undefined) {
+		return null;
+	}
+
+	if (Array.isArray(value)) {
+		return value.map((item) => normalizeMetadataValue(item));
+	}
+
+	if (typeof value === "object") {
+		return Object.keys(value as Record<string, unknown>)
+			.sort()
+			.reduce<Record<string, unknown>>((acc, key) => {
+				acc[key] = normalizeMetadataValue(
+					(value as Record<string, unknown>)[key]
+				);
+				return acc;
+			}, {});
+	}
+
+	return value;
+};
+
+const metadataEquals = (left: unknown, right: unknown): boolean => {
+	return (
+		JSON.stringify(normalizeMetadataValue(left)) ===
+		JSON.stringify(normalizeMetadataValue(right))
+	);
 };
 
 export function handleFileInsert(args: {
@@ -339,27 +370,64 @@ export function handleFileUpdate(args: {
 		data: args.file.data,
 	};
 
-	// Update the file metadata in state table FIRST
-	args.engine.executeSync(
+	// Only fetch descriptor-related columns to determine if descriptor needs updating
+	const currentDescriptorRows = args.engine.executeSync(
 		internalQueryBuilder
-			.updateTable("state_by_version")
-			.set({
-				snapshot_content: {
-					id: args.file.id,
-					directory_id: descriptorFields.directoryId,
-					name: descriptorFields.name,
-					extension: descriptorFields.extension ?? null,
-					metadata: descriptorFields.metadata ?? null,
-					hidden: descriptorFields.hidden,
-				},
-				metadata: descriptorFields.metadata ?? null,
-				untracked: args.untracked || false,
-			})
-			.where("entity_id", "=", args.file.id)
-			.where("schema_key", "=", "lix_file_descriptor")
-			.where("version_id", "=", args.versionId)
+			.selectFrom("file_by_version")
+			.where("id", "=", args.file.id)
+			.where("lixcol_version_id", "=", args.versionId)
+			.select([
+				"directory_id",
+				"name",
+				"extension",
+				"metadata",
+				"hidden",
+				"lixcol_untracked",
+			])
 			.compile()
-	);
+	).rows as (Pick<
+		LixFile,
+		"directory_id" | "name" | "extension" | "metadata" | "hidden"
+	> & {
+		lixcol_untracked: number;
+	})[];
+	const currentDescriptor = currentDescriptorRows[0];
+	const desiredUntrackedState = args.untracked || false;
+
+	const descriptorChanged =
+		!currentDescriptor ||
+		currentDescriptor.directory_id !== pluginFile.directory_id ||
+		currentDescriptor.name !== pluginFile.name ||
+		currentDescriptor.extension !== pluginFile.extension ||
+		Boolean(currentDescriptor.hidden) !== pluginFile.hidden ||
+		Boolean(currentDescriptor.lixcol_untracked) !== desiredUntrackedState ||
+		!metadataEquals(
+			currentDescriptor.metadata ?? null,
+			pluginFile.metadata ?? null
+		);
+
+	if (descriptorChanged) {
+		args.engine.executeSync(
+			internalQueryBuilder
+				.updateTable("state_by_version")
+				.set({
+					snapshot_content: {
+						id: args.file.id,
+						directory_id: descriptorFields.directoryId,
+						name: descriptorFields.name,
+						extension: descriptorFields.extension ?? null,
+						metadata: descriptorFields.metadata ?? null,
+						hidden: descriptorFields.hidden,
+					},
+					metadata: descriptorFields.metadata ?? null,
+					untracked: desiredUntrackedState,
+				})
+				.where("entity_id", "=", args.file.id)
+				.where("schema_key", "=", "lix_file_descriptor")
+				.where("version_id", "=", args.versionId)
+				.compile()
+		);
+	}
 
 	updateFilePathCache({
 		engine: args.engine,
@@ -371,7 +439,7 @@ export function handleFileUpdate(args: {
 		path: normalizedPath,
 	});
 
-	// Get current file data for comparison
+	// Fetch the full file row for plugin diffing and other mutation handling
 	const currentFileRows = args.engine.executeSync(
 		internalQueryBuilder
 			.selectFrom("file_by_version")
@@ -451,22 +519,14 @@ export function handleFileUpdate(args: {
 								.compile()
 						);
 					} else {
-						// Handle update/insert: upsert the entity in state table
-						args.engine.executeSync(
-							internalQueryBuilder
-								.insertInto("state_by_version")
-								.values({
-									entity_id: change.entity_id,
-									schema_key: change.schema["x-lix-key"],
-									file_id: args.file.id,
-									plugin_key: plugin.key,
-									snapshot_content: change.snapshot_content as any,
-									schema_version: change.schema["x-lix-version"],
-									version_id: args.versionId,
-									untracked: args.untracked || false,
-								})
-								.compile()
-						);
+						upsertStateEntity({
+							engine: args.engine,
+							change,
+							pluginKey: plugin.key,
+							fileId: args.file.id,
+							versionId: args.versionId,
+							untracked: args.untracked || false,
+						});
 					}
 				}
 			}
@@ -516,22 +576,14 @@ export function handleFileUpdate(args: {
 									.compile()
 							);
 						} else {
-							// Handle update/insert: upsert the entity in state table
-							args.engine.executeSync(
-								internalQueryBuilder
-									.insertInto("state_by_version")
-									.values({
-										entity_id: change.entity_id,
-										schema_key: change.schema["x-lix-key"],
-										file_id: args.file.id,
-										plugin_key: lixUnknownFileFallbackPlugin.key,
-										snapshot_content: change.snapshot_content as any,
-										schema_version: change.schema["x-lix-version"],
-										version_id: args.versionId,
-										untracked: args.untracked || false,
-									})
-									.compile()
-							);
+							upsertStateEntity({
+								engine: args.engine,
+								change,
+								pluginKey: lixUnknownFileFallbackPlugin.key,
+								fileId: args.file.id,
+								versionId: args.versionId,
+								untracked: args.untracked || false,
+							});
 						}
 					}
 				}
@@ -559,3 +611,60 @@ export function handleFileUpdate(args: {
 
 	return 0;
 }
+
+const upsertStateEntity = (args: {
+	engine: Pick<LixEngine, "executeSync">;
+	change: DetectedChange;
+	pluginKey: string;
+	fileId: string;
+	versionId: string;
+	untracked: boolean;
+}): void => {
+	const { engine, change, pluginKey, fileId, versionId, untracked } = args;
+	const existingRows = engine.executeSync(
+		internalQueryBuilder
+			.selectFrom("lix_internal_state_vtable")
+			.select(["entity_id"])
+			.where("entity_id", "=", change.entity_id)
+			.where("schema_key", "=", change.schema["x-lix-key"])
+			.where("file_id", "=", fileId)
+			.where("version_id", "=", versionId)
+			.where("snapshot_content", "is not", null)
+			.limit(1)
+			.compile()
+	).rows;
+	const baseMutation = {
+		plugin_key: pluginKey,
+		snapshot_content: JSON.stringify(change.snapshot_content),
+		schema_version: change.schema["x-lix-version"],
+		untracked: untracked ? 1 : 0,
+	};
+	if (existingRows.length > 0) {
+		engine.executeSync(
+			internalQueryBuilder
+				.updateTable("lix_internal_state_vtable")
+				.set(baseMutation)
+				.where("entity_id", "=", change.entity_id)
+				.where("schema_key", "=", change.schema["x-lix-key"])
+				.where("file_id", "=", fileId)
+				.where("version_id", "=", versionId)
+				.compile()
+		);
+	} else {
+		engine.executeSync(
+			internalQueryBuilder
+				.insertInto("lix_internal_state_vtable")
+				.values({
+					entity_id: change.entity_id,
+					schema_key: change.schema["x-lix-key"],
+					file_id: fileId,
+					plugin_key: pluginKey,
+					snapshot_content: JSON.stringify(change.snapshot_content),
+					schema_version: change.schema["x-lix-version"],
+					version_id: versionId,
+					untracked: untracked ? 1 : 0,
+				})
+				.compile()
+		);
+	}
+};

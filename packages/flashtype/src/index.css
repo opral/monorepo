@@ -145,22 +145,54 @@
 }
 
 /* Diff rendering helpers (scoped to plugin output) */
-.lix-diff-content .diff-added {
+.lix-diff-content [data-diff-status="added"] {
 	color: #1f883d;
 	text-decoration: none;
 	outline: none;
 }
 
-.lix-diff-content .diff-modified {
+.lix-diff-content [data-diff-status="modified"] {
 	color: #f59e0b;
 	text-decoration: none;
 	outline: none;
 }
 
-.lix-diff-content .diff-removed {
+.lix-diff-content [data-diff-status="removed"] {
 	color: #d1242f;
 	text-decoration: line-through;
 	text-decoration-color: currentColor;
+}
+
+.lix-diff-content input[data-diff-status="added"],
+.lix-diff-content input[data-diff-status="removed"],
+.lix-diff-content input[data-diff-status="modified"] {
+	margin-right: 4px;
+	border-radius: 4px;
+}
+
+.lix-diff-content input[data-diff-status="added"] {
+	outline: 2px solid #1f883d;
+	outline-offset: 2px;
+}
+
+.lix-diff-content input[data-diff-status="removed"] {
+	outline: 2px solid #d1242f;
+	outline-offset: 2px;
+	opacity: 0.6;
+}
+
+.lix-diff-content input[data-diff-status="modified"] {
+	outline: 2px solid #f59e0b;
+	outline-offset: 2px;
+}
+
+.lix-diff-content
+	input[data-diff-status="removed"]
+	+ input[data-diff-status="added"],
+.lix-diff-content
+	input[data-diff-status="added"]
+	+ input[data-diff-status="removed"] {
+	margin-left: 6px;
 }
 
 .dark {

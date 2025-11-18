@@ -10,6 +10,15 @@ export type AssignDataIdOptions = { idProvider?: () => string }
 
 export function createAssignDataIdExtension(opts?: AssignDataIdOptions) {
 	const idProvider = opts?.idProvider ?? defaultGenId
+	const supportsDataAttr = (node: any) =>
+		Boolean(node?.type?.spec?.attrs && "data" in node.type.spec.attrs)
+	const nextUniqueId = (seen: Set<string>) => {
+		let next: string | null = null
+		while (!next || seen.has(next)) {
+			next = idProvider()
+		}
+		return next
+	}
 	return Extension.create({
 		name: "markdownWcAssignDataId",
 		addProseMirrorPlugins() {
@@ -22,27 +31,24 @@ export function createAssignDataIdExtension(opts?: AssignDataIdOptions) {
 						let modified = false
 						const seen = new Set<string>()
 
-						// Iterate top-level children and ensure data.id
-						const doc = newState.doc
-						let pos = 0
-						for (let i = 0; i < doc.childCount; i++) {
-							const node = doc.child(i) as any
+						newState.doc.descendants((node: any, pos: number) => {
+							if (!supportsDataAttr(node)) return
 							const attrs = node.attrs || {}
 							const data = attrs.data || null
 							let id: string | null =
 								data && typeof data.id === "string" && data.id.length > 0
 									? (data.id as string)
 									: null
-							if (!id || seen.has(id)) {
-								id = idProvider()
+							if (id && seen.has(id)) id = null
+							if (!id) {
+								id = nextUniqueId(seen)
 								const nextData = { ...(data || {}), id }
 								const nextAttrs = { ...attrs, data: nextData }
-								tr.setNodeMarkup(pos, undefined, nextAttrs)
+								tr.setNodeMarkup(pos, undefined, nextAttrs, node.marks)
 								modified = true
 							}
 							seen.add(id!)
-							pos += node.nodeSize
-						}
+						})
 
 						return modified ? tr : null
 					},

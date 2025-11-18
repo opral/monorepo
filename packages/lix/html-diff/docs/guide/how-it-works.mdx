@@ -43,7 +43,7 @@ graph TD
 
 The diagram above shows two approaches to building diff views. The **Custom Diff** approach (🟧) requires building and maintaining specialized diff logic and custom renderers for each document type. This means more development effort and one-off solutions that don't generalize.
 
-In contrast, the **HTML Diff** approach (🟩) leverages the fact that most applications ultimately render to HTML. Rather than building custom diff logic, it works directly with the rendered HTML output. This requires no adjustments from developers in terms of creating diffed data structures or modifying renderers - it simply takes your existing HTML and adds CSS classes to highlight changes. This approach generalizes across any application UI that renders to HTML, making it a reusable solution.
+In contrast, the **HTML Diff** approach (🟩) leverages the fact that most applications ultimately render to HTML. Rather than building custom diff logic, it works directly with the rendered HTML output. This requires no adjustments from developers in terms of creating diffed data structures or modifying renderers—it simply takes your existing HTML and adds `data-diff-status` attributes to highlight changes. This approach generalizes across any application UI that renders to HTML, making it a reusable solution.
 
 ## How Elements Are Tracked
 
@@ -51,10 +51,10 @@ HTML diff uses `data-diff-key` attributes to track elements across before/after 
 
 ### Structure Preservation
 
-Adding `data-diff-key` to elements **only adds CSS classes** - it doesn't modify the HTML structure:
+Adding `data-diff-key` to elements **only adds diff attributes**—it doesn't modify the HTML structure:
 
 - ✅ **No structural changes**: Elements keep their original structure, attributes, and content
-- ✅ **Only CSS classes added**: Elements get `diff-added`, `diff-modified`, or `diff-removed` classes
+- ✅ **Only `data-diff-status` added**: Elements get `data-diff-status="added"`, `"modified"`, or `"removed"`
 - ✅ **Preserves layout**: No new elements inserted, so CSS layouts (tables, flexbox, grid) remain intact
 
 <Showcase
@@ -78,7 +78,7 @@ Adding `data-diff-key` to elements **only adds CSS classes** - it doesn't modify
       border: 1px solid #ccc;
       padding: 8px;
     }
-    .diff-modified {
+    [data-diff-status="modified"] {
       background-color: #fff3cd;
       color: #856404;
     }
@@ -88,7 +88,7 @@ Adding `data-diff-key` to elements **only adds CSS classes** - it doesn't modify
 Notice how in the diff result:
 
 - Table structure remains intact (no broken layout)
-- Only CSS classes are added to the `<td>` elements
+- Only the `data-diff-status` attribute is added to the `<td>` elements
 - No wrapper elements or structural modifications
 
 ### Diffing Modes
@@ -96,7 +96,7 @@ Notice how in the diff result:
 The progression of diffing granularity:
 
 1. **No attributes**: No diffing, HTML unchanged
-2. **`data-diff-key` only**: CSS classes added to changed elements
+2. **`data-diff-key` only**: `data-diff-status` attributes added to changed elements
 3. **`data-diff-key` + `data-diff-mode="element"`**: Explicit atomic element diffing (entire element marked as updated)
 4. **`data-diff-key` + `data-diff-mode="words"`**: Granular word-level diffing with spans
 

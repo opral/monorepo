@@ -244,6 +244,7 @@ export function commit(args: {
 	let totalTracked = 0;
 	for (const [, cs] of trackedChangesByVersion) totalTracked += cs.length;
 	if (totalTracked === 0) {
+		invalidateFileDataCacheForPendingTransactions({ engine });
 		// Clear the transaction table after handling any untracked updates
 		engine.executeSync(
 			db.deleteFrom("lix_internal_transaction_state").compile()
@@ -322,6 +323,7 @@ export function commit(args: {
 		);
 	}
 
+	invalidateFileDataCacheForPendingTransactions({ engine });
 	// Clear the transaction table after committing
 	engine.executeSync(db.deleteFrom("lix_internal_transaction_state").compile());
 	setHasOpenTransaction(engine, false);
@@ -476,4 +478,31 @@ export function commit(args: {
 	);
 	engine.hooks._emit("state_commit", { changes: hookChanges });
 	return 0;
+}
+
+/**
+ * Removes file data cache entries for every file/version combination referenced
+ * by the pending transaction state. The SQL engine handles deduplication via EXISTS,
+ * so we only pay for a single delete regardless of the number of touched rows.
+ *
+ * @example
+ * invalidateFileDataCacheForPendingTransactions({ engine });
+ */
+function invalidateFileDataCacheForPendingTransactions(args: {
+	engine: Pick<LixEngine, "sqlite">;
+}): void {
+	args.engine.sqlite.exec({
+		sql: `
+			DELETE FROM lix_internal_file_data_cache AS cache
+			WHERE EXISTS (
+				SELECT 1
+				FROM lix_internal_transaction_state AS pending
+				WHERE pending.file_id IS NOT NULL
+				  AND pending.version_id IS NOT NULL
+				  AND pending.file_id = cache.file_id
+				  AND pending.version_id = cache.version_id
+			)
+		`,
+		returnValue: "resultRows",
+	});
 }

@@ -52,6 +52,6 @@ export async function renderDiff(args: RenderDiffArgs): Promise<string> {
 	return renderHtmlDiff({
 		beforeHtml,
 		afterHtml,
-		diffAttribute: "data-id",
+		diffAttribute: "data-diff-key",
 	});
 }

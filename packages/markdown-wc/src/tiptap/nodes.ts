@@ -195,6 +195,59 @@ export function markdownWcNodes(): Extensions {
 				return ["hr"]
 			},
 		}),
+		// Unsupported blocks (html, yaml, etc.)
+		Node.create({
+			name: "markdownUnsupported",
+			group: "block",
+			atom: true,
+			selectable: true,
+			defining: true,
+			addAttributes() {
+				return {
+					kind: { default: "html" },
+					value: { default: "" },
+					data: { default: null },
+				}
+			},
+			renderHTML({ node }) {
+				const kind = (node as any).attrs?.kind ?? "unsupported"
+				const label = kind === "yaml" ? "YAML frontmatter (read only)" : "HTML block (read only)"
+				const value = (node as any).attrs?.value ?? ""
+				return [
+					"div",
+					{
+						"data-markdown-wc-unsupported": kind,
+						class: "markdown-wc-unsupported-block",
+					},
+					["strong", label],
+					["pre", ["code", value]],
+				]
+			},
+		}),
+		// Inline HTML placeholder
+		Node.create({
+			name: "markdownInlineHtml",
+			group: "inline",
+			inline: true,
+			atom: true,
+			selectable: true,
+			addAttributes() {
+				return {
+					value: { default: "" },
+					data: { default: null },
+				}
+			},
+			renderHTML({ node }) {
+				return [
+					"span",
+					{
+						"data-markdown-inline-html": "true",
+						class: "markdown-wc-inline-html",
+					},
+					["code", (node as any).attrs?.value ?? ""],
+				]
+			},
+		}),
 		// hard break
 		Node.create({
 			name: "hardBreak",

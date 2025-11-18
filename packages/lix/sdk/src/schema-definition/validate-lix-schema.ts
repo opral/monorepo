@@ -34,6 +34,50 @@ ajv.addFormat("cel", {
 
 const _validateLixSchemaDefinition = ajv.compile(LixSchemaDefinition);
 
+function assertPrimaryKeyPointers(schema: LixSchemaDefinition) {
+	const primaryKey = (schema as any)["x-lix-primary-key"];
+	if (!Array.isArray(primaryKey)) return;
+	for (const pointer of primaryKey) {
+		if (typeof pointer !== "string") continue;
+		const segments = parseJsonPointer(pointer);
+		if (!segments.length || !schemaHasProperty(schema, segments)) {
+			throw new Error(
+				`Invalid Lix schema definition: x-lix-primary-key references missing property "${pointer}".`
+			);
+		}
+	}
+}
+
+function assertUniquePointers(schema: LixSchemaDefinition) {
+	const uniqueGroups = (schema as any)["x-lix-unique"];
+	if (!Array.isArray(uniqueGroups)) return;
+	for (const group of uniqueGroups) {
+		if (!Array.isArray(group)) continue;
+		for (const pointer of group) {
+			if (typeof pointer !== "string") continue;
+			const segments = parseJsonPointer(pointer);
+			if (!segments.length || !schemaHasProperty(schema, segments)) {
+				throw new Error(
+					`Invalid Lix schema definition: x-lix-unique references missing property "${pointer}".`
+				);
+			}
+		}
+	}
+}
+
+function schemaHasProperty(current: any, segments: readonly string[]): boolean {
+	let node: any = current;
+	for (const segment of segments) {
+		if (!node || typeof node !== "object") return false;
+		const props = (node as any).properties;
+		if (!props || typeof props !== "object" || !(segment in props)) {
+			return false;
+		}
+		node = (props as any)[segment];
+	}
+	return true;
+}
+
 /**
  * Validates that a schema conforms to the LixSchemaDefinition format
  * and then validates data against that schema.
@@ -78,6 +122,8 @@ export function validateLixSchema(schema: unknown, data: unknown): boolean {
 			`Invalid Lix schema definition: ${JSON.stringify(_validateLixSchemaDefinition.errors, null, 2)}`
 		);
 	}
+	assertPrimaryKeyPointers(schema as LixSchemaDefinition);
+	assertUniquePointers(schema as LixSchemaDefinition);
 
 	// Then validate the data against the schema
 	const dataValidator = ajv.compile(schema as LixSchemaDefinition);
@@ -124,5 +170,7 @@ export function validateLixSchemaDefinition(schema: unknown): boolean {
 			`Invalid Lix schema definition: ${JSON.stringify(_validateLixSchemaDefinition.errors, null, 2)}`
 		);
 	}
+	assertPrimaryKeyPointers(schema as LixSchemaDefinition);
+	assertUniquePointers(schema as LixSchemaDefinition);
 	return valid;
 }

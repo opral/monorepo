@@ -1,4 +1,30 @@
 // Remove mdast dependency; operate on structural shapes
+import { normalizeAst } from "../ast/normalize-ast.js"
+
+const SPREAD_META_KEY = "__mdwc_spread"
+
+function extractNodeData(attrs: PMNode["attrs"]): {
+	data?: Record<string, any>
+	spread?: boolean
+} {
+	const raw = attrs?.data
+	if (!raw || typeof raw !== "object") {
+		return { data: undefined }
+	}
+	const clone: Record<string, any> = { ...raw }
+	let spread: boolean | undefined
+	if (SPREAD_META_KEY in clone) {
+		const value = clone[SPREAD_META_KEY]
+		if (typeof value === "boolean") {
+			spread = value
+		}
+		delete clone[SPREAD_META_KEY]
+	}
+	return {
+		data: Object.keys(clone).length > 0 ? clone : undefined,
+		spread,
+	}
+}
 
 export type PMMark = {
 	type: "bold" | "italic" | "strike" | "code" | "link"
@@ -22,95 +48,129 @@ export function tiptapDocToAst(doc: PMNode): any {
 		}
 		outChildren.push(pmBlockToAst(n))
 	}
-	return { type: "root", children: outChildren } as any
+	return normalizeAst({ type: "root", children: outChildren } as any)
 }
 
 function pmBlockToAst(node: PMNode): any {
 	switch (node.type) {
 		case "paragraph":
+			const paraData = extractNodeData(node.attrs)
 			return {
 				type: "paragraph",
-				data: node.attrs?.data ?? undefined,
+				data: paraData.data,
 				children: pmInlineToMd(node.content || []),
 			}
 		case "heading":
+			const headingData = extractNodeData(node.attrs)
 			return {
 				type: "heading",
 				depth: node.attrs?.level || 1,
-				data: node.attrs?.data ?? undefined,
+				data: headingData.data,
 				children: pmInlineToMd(node.content || []),
 			}
 		case "bulletList":
-			return {
-				type: "list",
-				ordered: false,
-				data: node.attrs?.data ?? undefined,
-				children: (node.content || []).map(pmBlockToAst),
-			} as any
 		case "orderedList": {
-			const out: any = {
+			const listData = extractNodeData(node.attrs)
+			const spread = listData.spread === undefined ? undefined : listData.spread
+			const ordered = node.type === "orderedList"
+			const base: any = {
 				type: "list",
-				ordered: true,
-				data: node.attrs?.data ?? undefined,
+				ordered,
+				data: listData.data,
 				children: (node.content || []).map(pmBlockToAst),
 			}
-			if (node.attrs?.start != null && node.attrs.start !== 1) out.start = node.attrs.start
-			return out
+			if (spread !== undefined) base.spread = spread
+			if (ordered && node.attrs?.start != null && node.attrs.start !== 1)
+				base.start = node.attrs.start
+			return base as any
 		}
 		case "listItem": {
-			const out: any = { type: "listItem", children: (node.content || []).map(pmBlockToAst) }
-			if (node.attrs?.data != null) out.data = node.attrs.data
+			const listItemData = extractNodeData(node.attrs)
+			const out: any = {
+				type: "listItem",
+				children: (node.content || []).map(pmBlockToAst),
+			}
+			if (listItemData.data) out.data = listItemData.data
+			if (listItemData.spread !== undefined) out.spread = listItemData.spread
 			if (node.attrs && (node.attrs.checked === true || node.attrs.checked === false))
 				out.checked = node.attrs.checked
 			return out
 		}
 
 		case "blockquote":
+			const blockquoteData = extractNodeData(node.attrs)
 			return {
 				type: "blockquote",
-				data: node.attrs?.data ?? undefined,
+				data: blockquoteData.data,
 				children: (node.content || []).map(pmBlockToAst),
 			}
 		case "codeBlock": {
 			const text = collectText(node.content || [])
 			const lang = node.attrs?.language
 			const out: any = { type: "code", value: text }
-			if (node.attrs?.data != null) out.data = node.attrs.data
+			const codeData = extractNodeData(node.attrs)
+			if (codeData.data) out.data = codeData.data
 			if (lang != null) out.lang = lang
 			return out
 		}
-		case "horizontalRule":
-			return { type: "thematicBreak", data: node.attrs?.data ?? undefined }
+		case "horizontalRule": {
+			const hrData = extractNodeData(node.attrs)
+			return { type: "thematicBreak", data: hrData.data }
+		}
 		case "table": {
 			const align = node.attrs?.align ?? []
+			const tableData = extractNodeData(node.attrs)
 			return {
 				type: "table",
 				align,
-				data: node.attrs?.data ?? undefined,
+				data: tableData.data,
 				children: (node.content || []).map(pmBlockToAst),
 			} as any
 		}
-		case "tableRow":
+		case "tableRow": {
+			const rowData = extractNodeData(node.attrs)
 			return {
 				type: "tableRow",
-				data: node.attrs?.data ?? undefined,
+				data: rowData.data,
 				children: (node.content || []).map(pmBlockToAst),
 			}
-		case "tableCell":
+		}
+		case "tableCell": {
+			const cellData = extractNodeData(node.attrs)
 			return {
 				type: "tableCell",
-				data: node.attrs?.data ?? undefined,
+				data: cellData.data,
 				children: pmInlineToMd(node.content || []),
 			}
+		}
+		case "markdownUnsupported": {
+			const unsupportedData = extractNodeData(node.attrs)
+			const kind = node.attrs?.kind ?? "html"
+			const value = node.attrs?.value ?? ""
+			if (kind === "yaml") {
+				return {
+					type: "yaml",
+					value: value as string,
+					data: unsupportedData.data,
+				}
+			}
+			return {
+				type: "html",
+				value: value as string,
+				data: unsupportedData.data,
+			}
+		}
 		default:
 			if (node.content && node.content.length && isInline(node.content[0] as any)) {
+				const inlineData = extractNodeData(node.attrs)
 				return {
 					type: "paragraph",
-					data: node.attrs?.data ?? undefined,
+					data: inlineData.data,
 					children: pmInlineToMd(node.content),
 				}
 			}
-			return { type: "paragraph", data: node.attrs?.data ?? undefined, children: [] }
+			const fallbackData = extractNodeData(node.attrs)
+			return { type: "paragraph", data: fallbackData.data, children: [] }
 	}
 }
 
@@ -123,6 +183,12 @@ function pmInlineToMd(nodes: PMNode[]): any[] {
 			const br: any = { type: "break" }
 			if (n.attrs?.data != null) br.data = n.attrs.data
 			out.push(br as any)
+		} else if (n.type === "markdownInlineHtml") {
+			const htmlValue = (n.attrs?.value ?? "") as string
+			const htmlData = n.attrs?.data ?? null
+			const htmlNode: any = { type: "html", value: htmlValue }
+			if (htmlData != null) htmlNode.data = htmlData
+			out.push(htmlNode)
 		} else if (n.type === "image") {
 			const src = n.attrs?.src ?? null
 			const title = n.attrs?.title ?? null
@@ -158,7 +224,7 @@ function applyMarksToText(value: string, marks: PMMark[]): any {
 }
 
 function isInline(n: PMNode) {
-	return !n.content && (n.text != null || n.type === "hardBreak")
+	return !n.content && (n.text != null || n.type === "hardBreak" || n.type === "markdownInlineHtml")
 }
 
 function collectText(nodes: PMNode[]): string {

@@ -40,7 +40,7 @@ export function applyStateView(args: {
     CREATE TRIGGER IF NOT EXISTS state_insert
     INSTEAD OF INSERT ON state
     BEGIN
-      INSERT INTO state_by_version (
+      INSERT INTO lix_internal_state_vtable (
         entity_id,
         schema_key,
         file_id,
@@ -66,12 +66,11 @@ export function applyStateView(args: {
     CREATE TRIGGER IF NOT EXISTS state_update
     INSTEAD OF UPDATE ON state
     BEGIN
-      UPDATE state_by_version
+      UPDATE lix_internal_state_vtable
       SET
         entity_id = NEW.entity_id,
         schema_key = NEW.schema_key,
         file_id = NEW.file_id,
-        version_id = (SELECT version_id FROM active_version),
         plugin_key = NEW.plugin_key,
         snapshot_content = NEW.snapshot_content,
         schema_version = NEW.schema_version,
@@ -87,7 +86,7 @@ export function applyStateView(args: {
     CREATE TRIGGER IF NOT EXISTS state_delete
     INSTEAD OF DELETE ON state
     BEGIN
-      DELETE FROM state_by_version
+      DELETE FROM lix_internal_state_vtable
       WHERE 
         entity_id = OLD.entity_id
         AND schema_key = OLD.schema_key

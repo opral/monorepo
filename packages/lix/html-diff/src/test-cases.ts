@@ -49,7 +49,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <div>
           <p data-diff-key="p1">Para 1</p>
-          <p data-diff-key="p2" class="diff-added">New Para</p>
+          <p data-diff-key="p2" data-diff-status="added">New Para</p>
         </div>
       `,
     },
@@ -62,7 +62,19 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <div class="tool-container" data-diff-key="complex-component">New complex component</div>
       `,
       expectedHtml: dedent`
-        <div class="diff-modified tool-container" data-diff-key="complex-component">New complex component</div>
+        <div class="tool-container" data-diff-key="complex-component" data-diff-status="modified">New complex component</div>
+      `,
+    },
+    {
+      name: "should preserve escaped attribute values when text changes",
+      beforeHtml: dedent`
+        <div data-diff-key="meta" data-info="&lt;tag&gt; &amp; &quot;'">Old value</div>
+      `,
+      afterHtml: dedent`
+        <div data-diff-key="meta" data-info="&lt;tag&gt; &amp; &quot;'">New value</div>
+      `,
+      expectedHtml: dedent`
+        <div data-diff-key="meta" data-info="&lt;tag&gt; &amp; &quot;&#39;" data-diff-status="modified">New value</div>
       `,
     },
   ],
@@ -76,7 +88,25 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <div class="card" data-diff-key="complex" data-diff-mode="element">New content here</div>
       `,
       expectedHtml: dedent`
-        <div><div class="diff-removed card" data-diff-key="complex" data-diff-mode="element" contenteditable="false">Old content here</div><div class="diff-added card" data-diff-key="complex" data-diff-mode="element">New content here</div></div>
+        <div><div class="card" data-diff-key="complex" data-diff-mode="element" data-diff-status="removed" contenteditable="false">Old content here</div><div class="card" data-diff-key="complex" data-diff-mode="element" data-diff-status="added">New content here</div></div>
+      `,
+    },
+    {
+      name: "should not duplicate identical element-mode nodes",
+      beforeHtml: dedent`
+        <li data-diff-key="item-1" data-diff-mode="element">
+          <p><input type="checkbox"></input> nice</p>
+        </li>
+      `,
+      afterHtml: dedent`
+        <li data-diff-key="item-1" data-diff-mode="element">
+          <p><input type="checkbox"></input> nice</p>
+        </li>
+      `,
+      expectedHtml: dedent`
+        <li data-diff-key="item-1" data-diff-mode="element">
+          <p><input type="checkbox"></input> nice</p>
+        </li>
       `,
     },
     {
@@ -88,7 +118,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p class="highlight important" data-diff-key="text" data-diff-mode="element">After text</p>
       `,
       expectedHtml: dedent`
-        <div><p class="diff-removed highlight important" data-diff-key="text" data-diff-mode="element" contenteditable="false">Before text</p><p class="diff-added highlight important" data-diff-key="text" data-diff-mode="element">After text</p></div>
+        <div><p class="highlight important" data-diff-key="text" data-diff-mode="element" data-diff-status="removed" contenteditable="false">Before text</p><p class="highlight important" data-diff-key="text" data-diff-mode="element" data-diff-status="added">After text</p></div>
       `,
     },
   ],
@@ -102,7 +132,25 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="ksu4" data-diff-mode="words">Hello World</p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="ksu4" data-diff-mode="words">Hello <span class="diff-added">World</span></p>
+        <p data-diff-key="ksu4" data-diff-mode="words">Hello <span data-diff-status="added">World</span></p>
+      `,
+    },
+    {
+      name: "should keep escaped text when doing word-level diffing",
+      beforeHtml: dedent`
+        <p data-diff-key="escaped" data-diff-mode="words">
+          &lt;script&gt;alert("one")&lt;/script&gt;
+        </p>
+      `,
+      afterHtml: dedent`
+        <p data-diff-key="escaped" data-diff-mode="words">
+          &lt;script&gt;alert("two")&lt;/script&gt;
+        </p>
+      `,
+      expectedHtml: dedent`
+        <p data-diff-key="escaped" data-diff-mode="words">
+          &lt;script&gt;alert("<span data-diff-status="removed">one</span><span data-diff-status="added">two</span>")&lt;/script&gt;
+        </p>
       `,
     },
     {
@@ -114,7 +162,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="rem" data-diff-mode="words">Remove </p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="rem" data-diff-mode="words">Remove <span class="diff-removed">This</span></p>
+        <p data-diff-key="rem" data-diff-mode="words">Remove <span data-diff-status="removed">This</span></p>
       `,
     },
     {
@@ -126,7 +174,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <span data-diff-key="complex" data-diff-mode="words">New text there</span>
       `,
       expectedHtml: dedent`
-        <span data-diff-key="complex" data-diff-mode="words"><span class="diff-removed">Old</span><span class="diff-added">New</span> text <span class="diff-removed">here</span><span class="diff-added">there</span></span>
+        <span data-diff-key="complex" data-diff-mode="words"><span data-diff-status="removed">Old</span><span data-diff-status="added">New</span> text <span data-diff-status="removed">here</span><span data-diff-status="added">there</span></span>
       `,
     },
     {
@@ -138,7 +186,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="merge" class="foo bar" data-diff-mode="words">New</p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="merge" class="foo bar" data-diff-mode="words"><span class="diff-removed">Old</span><span class="diff-added">New</span></p>
+        <p data-diff-key="merge" class="foo bar" data-diff-mode="words"><span data-diff-status="removed">Old</span><span data-diff-status="added">New</span></p>
       `,
     },
   ],
@@ -161,7 +209,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <ul data-diff-key="list">
           <li data-diff-key="item1">First item</li>
-          <li data-diff-key="item2" data-diff-show-when-removed="" class="diff-removed" contenteditable="false">Second item</li>
+          <li data-diff-key="item2" data-diff-show-when-removed="" data-diff-status="removed" contenteditable="false">Second item</li>
           <li data-diff-key="item3">Third item</li>
         </ul>
       `,
@@ -214,14 +262,38 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <table>
           <tbody data-diff-key="table-body">
-            <tr data-diff-key="row1" data-diff-show-when-removed="" class="diff-removed" contenteditable="false">
+            <tr data-diff-key="row1" data-diff-show-when-removed="" data-diff-status="removed" contenteditable="false">
               <td>Safe row</td>
             </tr>
-            <tr data-diff-key="row3" data-diff-show-when-removed="" class="diff-removed" contenteditable="false">
+            <tr data-diff-key="row3" data-diff-show-when-removed="" data-diff-status="removed" contenteditable="false">
               <td>Another safe row</td>
             </tr>
           </tbody>
         </table>
+      `,
+    },
+    {
+      name: "should preserve escaped text when re-inserting removed elements",
+      beforeHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1" data-diff-show-when-removed>
+            &lt;script&gt;alert("remove me")&lt;/script&gt;
+          </li>
+          <li data-diff-key="item2">keep me</li>
+        </ul>
+      `,
+      afterHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item2">keep me</li>
+        </ul>
+      `,
+      expectedHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1" data-diff-show-when-removed="" data-diff-status="removed" contenteditable="false">
+            &lt;script&gt;alert("remove me")&lt;/script&gt;
+          </li>
+          <li data-diff-key="item2">keep me</li>
+        </ul>
       `,
     },
   ],

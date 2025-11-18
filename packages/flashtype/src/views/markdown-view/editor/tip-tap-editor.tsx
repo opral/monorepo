@@ -38,22 +38,43 @@ export function TipTapEditor({
 				.where("id", "=", activeFileId ?? ""),
 		{ subscribe: false },
 	);
+	const initialMarkdown = useMemo(() => {
+		if (!initialFile?.data) return "";
+		return new TextDecoder().decode(initialFile.data);
+	}, [initialFile]);
 
 	const { setEditor } = useEditorCtx();
 
 	const PERSIST_DEBOUNCE_MS = persistDebounceMs ?? 200;
 	const writerKey = `flashtype_tiptap_editor`;
 
+	const [initialAst, setInitialAst] = useState<any | null>(null);
+	const [initialAstLoaded, setInitialAstLoaded] = useState(false);
+
 	const editor = useMemo(() => {
-		if (!activeFileId || !initialFile) return null;
+		if (!activeFileId || !initialFile || !initialAstLoaded) return null;
+		// Prefer persisted AST (already contains plugin-issued data.id values) so we never churn ids
+		// when opening an existing markdown document.
+		const hasStateSnapshot =
+			Array.isArray(initialAst?.children) && initialAst.children.length > 0;
 		return createEditor({
 			lix,
-			initialMarkdown: new TextDecoder().decode(initialFile.data),
+			initialMarkdown,
+			contentAst: hasStateSnapshot ? initialAst : undefined,
 			fileId: activeFileId,
 			persistDebounceMs: PERSIST_DEBOUNCE_MS,
 			writerKey,
 		});
-	}, [lix, activeFileId, PERSIST_DEBOUNCE_MS, writerKey, initialFile]);
+	}, [
+		lix,
+		activeFileId,
+		PERSIST_DEBOUNCE_MS,
+		writerKey,
+		initialFile,
+		initialAst,
+		initialAstLoaded,
+		initialMarkdown,
+	]);
 
 	const [isEditorFocused, setIsEditorFocused] = useState(false);
 
@@ -108,6 +129,32 @@ export function TipTapEditor({
 	const activeVersionRow = useQuery(() =>
 		lix.db.selectFrom("active_version").select(["version_id"]).limit(1),
 	);
+	const activeVersionId =
+		Array.isArray(activeVersionRow) && activeVersionRow.length > 0
+			? activeVersionRow[0]?.version_id
+			: ((activeVersionRow as any)?.version_id ?? null);
+
+	useEffect(() => {
+		let cancelled = false;
+		if (!activeFileId) {
+			setInitialAst(null);
+			setInitialAstLoaded(true);
+			return;
+		}
+		// Load the assembled AST snapshot from state so persisted ids are preserved. When the file has
+		// never been persisted before (brand-new doc), assembleMdAst returns an empty root which cues
+		// the editor to parse markdown and mint ids during the first persist cycle.
+		setInitialAstLoaded(false);
+		(async () => {
+			const ast = await assembleMdAst({ lix, fileId: activeFileId });
+			if (cancelled) return;
+			setInitialAst(ast);
+			setInitialAstLoaded(true);
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [lix, activeFileId, activeVersionId]);
 
 	useEffect(() => {
 		if (!editor || !activeFileId) return;

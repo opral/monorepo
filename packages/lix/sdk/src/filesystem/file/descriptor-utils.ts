@@ -260,7 +260,15 @@ export function readFileDescriptorAtCommit(args: {
 			.where("schema_key", "=", "lix_file_descriptor")
 			.where("entity_id", "=", args.fileId)
 			.where("root_commit_id", "=", args.rootCommitId)
-			.where("depth", "=", args.depth)
+			.where("depth", "=", (eb) =>
+				eb
+					.selectFrom("state_history")
+					.select((eb) => eb.fn.min("depth").as("min_depth"))
+					.where("schema_key", "=", "lix_file_descriptor")
+					.where("entity_id", "=", args.fileId)
+					.where("root_commit_id", "=", args.rootCommitId)
+					.where("depth", ">=", args.depth)
+			)
 			.select(["snapshot_content"])
 			.compile()
 	).rows;

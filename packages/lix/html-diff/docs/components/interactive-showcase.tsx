@@ -96,7 +96,7 @@ export default function InteractiveShowcase() {
 
     // Add event listeners to modified elements
     const updatedElements = ref.current.querySelectorAll(
-      ".diff-modified[data-diff-key]",
+      '[data-diff-status="modified"][data-diff-key]',
     );
 
     const handleMouseEnter = (e: Event) => {
@@ -160,13 +160,13 @@ export default function InteractiveShowcase() {
           font-weight: 500;
           color: #1f2937;
         }
-        .diff-modified {
+        [data-diff-status="modified"] {
           color: #f59e0b;
           cursor: pointer;
           transition: all 0.2s ease;
           position: relative;
         }
-        .diff-modified:hover {
+        [data-diff-status="modified"]:hover {
           background-color: rgba(245, 158, 11, 0.1);
           transform: scale(1.02);
         }

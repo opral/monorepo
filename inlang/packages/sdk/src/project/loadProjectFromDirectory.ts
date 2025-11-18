@@ -232,6 +232,7 @@ type FsFileState = Record<
 		mtimeMs?: number;
 		size?: number;
 		writerKey?: string | null;
+		fileId?: string;
 	}
 >;
 
@@ -289,6 +290,7 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 		fsFileStates: {} as FsFileState,
 		lixFileStates: {} as FsFileState,
 	};
+	const lixFilePathById = new Map<string, string>();
 
 	const supportsWatch =
 		typeof (args.fs as Partial<typeof fs>).watch === "function";
@@ -445,28 +447,33 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 	}
 
 	async function checkLixState(currentLixState: FsFileState) {
+		lixFilePathById.clear();
 		// go through all files in lix and check there state
 		const filesInLix = await args.lix.db
 			.selectFrom("file" as any)
 			.where("path", "not like", "%db.sqlite")
-			.select(["path", "data", "lixcol_writer_key"])
+			.select(["id", "path", "data", "lixcol_writer_key"])
 			.execute();
 
 		for (const fileInLix of filesInLix) {
+			const fileId = (fileInLix as any).id as string;
 			const writerKey = (fileInLix as any).lixcol_writer_key ?? null;
 			const dataView = new Uint8Array(fileInLix.data as Uint8Array);
 			const buffer = dataView.slice().buffer as ArrayBuffer;
 			const currentStateOfFileInLix = currentLixState[fileInLix.path];
+			lixFilePathById.set(fileId, fileInLix.path);
 			if (!currentStateOfFileInLix) {
 				currentLixState[fileInLix.path] = {
 					content: buffer,
 					state: "unknown",
 					writerKey,
+					fileId,
 				};
 				continue;
 			}
 
 			currentStateOfFileInLix.writerKey = writerKey;
+			currentStateOfFileInLix.fileId = fileId;
 			if (arrayBuffersEqual(currentStateOfFileInLix.content, buffer)) {
 				currentStateOfFileInLix.state = "known";
 			} else {
@@ -793,7 +800,7 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 	async function refreshLixEntry(path: string) {
 		const row = await args.lix.db
 			.selectFrom("file" as any)
-			.select(["path", "data", "lixcol_writer_key"])
+			.select(["id", "path", "data", "lixcol_writer_key"])
 			.where("path", "=", path)
 			.executeTakeFirst();
 
@@ -801,22 +808,30 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 		if (!row) {
 			if (current) {
 				current.state = "gone";
+				if (current.fileId) {
+					lixFilePathById.delete(current.fileId);
+					current.fileId = undefined;
+				}
 			}
 			return;
 		}
 
+		const fileId = (row as any).id as string;
 		const writerKey = (row as any).lixcol_writer_key ?? null;
 		const dataView = new Uint8Array(row.data as Uint8Array);
 		const buffer = dataView.slice().buffer as ArrayBuffer;
+		lixFilePathById.set(fileId, row.path);
 		if (!current) {
 			fileStates.lixFileStates[path] = {
 				content: buffer,
 				state: "unknown",
 				writerKey,
+				fileId,
 			};
 			return;
 		}
 		current.writerKey = writerKey;
+		current.fileId = fileId;
 		if (arrayBuffersEqual(current.content, buffer)) {
 			current.state = "known";
 			return;
@@ -926,17 +941,20 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 			}
 			let shouldScan = false;
 			for (const change of changes) {
-				if (!change.schema_key.startsWith("lix_file")) {
+				if (!change.file_id || change.file_id === "lix") {
 					continue;
 				}
 				if (change.writer_key === FS_WRITER_KEY) {
 					continue;
 				}
-				const path = (change.snapshot_content as any)?.path as
+				const descriptorPath = (change.snapshot_content as any)?.path as
 					| string
 					| undefined;
-				if (typeof path === "string") {
-					lixPendingPaths.add(path);
+				const pathFromCache = descriptorPath
+					? descriptorPath
+					: lixFilePathById.get(change.file_id);
+				if (typeof pathFromCache === "string") {
+					lixPendingPaths.add(pathFromCache);
 				} else {
 					fullLixScanPending = true;
 				}

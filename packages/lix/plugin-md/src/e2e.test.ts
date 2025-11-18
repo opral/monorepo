@@ -1,7 +1,13 @@
 import { expect, test } from "vitest";
-import { openLix } from "@lix-js/sdk";
+import {
+	createCheckpoint,
+	createQuerySync,
+	openLix,
+	selectWorkingDiff,
+} from "@lix-js/sdk";
 import { plugin } from "./index.js";
 import { AstSchemas } from "@opral/markdown-wc";
+import { createNodeIdPrefix } from "./node-id-prefix.js";
 
 test("detects changes when inserting markdown file", async () => {
 	// Initialize Lix with the markdown plugin
@@ -98,6 +104,58 @@ Another paragraph here.`;
 	expect(hasAnotherParagraph).toBe(true);
 });
 
+test("deleting a bullet removes only the list item in diffs", async () => {
+	const lix = await openLix({
+		providePlugins: [plugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	// Seed file with a single bullet
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file_with_list",
+			path: "/init.md",
+			data: new TextEncoder().encode("- init\n"),
+		})
+		.execute();
+
+	await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new TextEncoder().encode(""),
+		})
+		.where("id", "=", "file_with_list")
+		.execute();
+
+	const diffs = await selectWorkingDiff({ lix })
+		.where("status", "!=", "unchanged")
+		.orderBy("schema_key")
+		.selectAll()
+		.execute();
+
+	expect(diffs.length).toBe(2);
+
+	const listDiff = diffs.find((diff) => diff.schema_key === "markdown_wc_list");
+	const docDiff = diffs.find(
+		(diff) => diff.schema_key === "markdown_wc_document",
+	);
+
+	const listPrefix = createNodeIdPrefix("file_with_list");
+	expect(listDiff?.status).toBe("removed");
+	expect(listDiff?.entity_id).toBe(`${listPrefix}_1`);
+	expect(docDiff?.status).toBe("modified");
+	expect(docDiff?.entity_id).toBe("root");
+});
+
 test("programatically mutating entities should be reflected in the file", async () => {
 	// Initialize Lix with the markdown plugin
 	const lix = await openLix({
@@ -188,4 +246,153 @@ test("programatically mutating entities should be reflected in the file", async 
 	expect(updatedMarkdown).toContain("This is the updated title.");
 	expect(updatedMarkdown).toContain("This is the updated paragraph content.");
 	expect(updatedMarkdown).not.toContain("mdast_id");
+});
+
+test("detectChanges emits entity_id that matches snapshot data.id", async () => {
+	const lix = await openLix({
+		providePlugins: [plugin],
+	});
+	const querySync = createQuerySync({ engine: lix.engine! });
+	const after = {
+		id: "entity-id-check",
+		path: "/entity-id.md",
+		data: new TextEncoder().encode("# Title\n\nParagraph"),
+		metadata: {},
+	};
+
+	const changes = plugin.detectChanges?.({
+		querySync,
+		after: after as any,
+	});
+
+	expect(changes?.length ?? 0).toBeGreaterThan(0);
+	const blockChanges =
+		changes?.filter(
+			(change) =>
+				change.schema["x-lix-key"] !== AstSchemas.DocumentSchema["x-lix-key"],
+		) ?? [];
+	expect(blockChanges.length).toBeGreaterThan(0);
+	for (const change of blockChanges) {
+		expect(change.entity_id).toBe((change.snapshot_content as any)?.data?.id);
+	}
+});
+
+test("enforces unique markdown block ids via x-lix-unique for every schema", async () => {
+	const lix = await openLix({
+		providePlugins: [plugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const { version_id: versionId } = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("stored_schema_by_version")
+		.values(
+			AstSchemas.allSchemas.map((schema) => ({
+				value: schema,
+				lixcol_version_id: "global",
+			})),
+		)
+		.execute();
+
+	const schemaEntries = Object.entries(AstSchemas.schemasByType).filter(
+		([, schema]) => schema && schema["x-lix-key"],
+	);
+
+	const buildSnapshot = (type: string, schema: any, id: string) => {
+		const node: Record<string, any> = {
+			type,
+			data: { id },
+		};
+		const props = schema?.properties ?? {};
+		if (props.children) {
+			node.children = [];
+		}
+		if (props.value) {
+			node.value = `${type}-value`;
+		}
+		if (props.depth) {
+			node.depth = 1;
+		}
+		if (props.url) {
+			node.url = "https://example.com";
+		}
+		if (props.ordered) {
+			node.ordered = false;
+		}
+		if (props.start) {
+			node.start = 1;
+		}
+		if (props.spread) {
+			node.spread = false;
+		}
+		if (props.checked) {
+			node.checked = false;
+		}
+		if (props.align) {
+			node.align = [];
+		}
+		return node;
+	};
+
+	for (const [type, schema] of schemaEntries) {
+		const schemaKey = schema["x-lix-key"] as string;
+		const schemaVersion = schema["x-lix-version"] as string;
+		const baseId = `unique-${type}`;
+		const firstEntityId = `${type}-entity-a`;
+		const secondEntityId = `${type}-entity-b`;
+		const fileId = `${type}-file`;
+
+		const snapshot = buildSnapshot(type, schema, baseId);
+
+		await lix.db
+			.insertInto("state_by_version")
+			.values({
+				entity_id: firstEntityId,
+				file_id: fileId,
+				schema_key: schemaKey,
+				plugin_key: plugin.key,
+				version_id: versionId,
+				snapshot_content: snapshot,
+				schema_version: schemaVersion,
+				metadata: null,
+				untracked: false,
+			})
+			.execute();
+
+		try {
+			await expect(
+				lix.db
+					.insertInto("state_by_version")
+					.values({
+						entity_id: secondEntityId,
+						file_id: fileId,
+						schema_key: schemaKey,
+						plugin_key: plugin.key,
+						version_id: versionId,
+						snapshot_content: buildSnapshot(type, schema, baseId),
+						schema_version: schemaVersion,
+						metadata: null,
+						untracked: false,
+					})
+					.execute(),
+			).rejects.toThrow(/Unique constraint violation/i);
+		} finally {
+			await lix.db
+				.deleteFrom("state_by_version")
+				.where("entity_id", "=", firstEntityId)
+				.where("schema_key", "=", schemaKey)
+				.where("version_id", "=", versionId)
+				.execute();
+		}
+	}
 });

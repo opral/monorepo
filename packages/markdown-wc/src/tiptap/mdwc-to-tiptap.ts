@@ -1,5 +1,7 @@
 // Avoid tight compile-time coupling to mdast types; operate on structural shape
 
+const SPREAD_META_KEY = "__mdwc_spread"
+
 export type PMMark = {
 	type: "bold" | "italic" | "strike" | "code" | "link"
 	attrs?: Record<string, any>
@@ -19,21 +21,27 @@ export function astToTiptapDoc(ast: any): PMNode {
 function astBlockToPM(node: any): PMNode {
 	switch (node.type) {
 		case "paragraph":
+			const paragraphData = buildNodeData((node as any).data)
 			return {
 				type: "paragraph",
-				attrs: { data: (node as any).data ?? null },
+				attrs: { data: paragraphData },
 				content: flattenInline((node as any).children || [], []),
 			}
 		case "heading":
+			const headingData = buildNodeData((node as any).data)
 			return {
 				type: "heading",
-				attrs: { level: (node as any).depth, data: (node as any).data ?? null },
+				attrs: { level: (node as any).depth, data: headingData },
 				content: flattenInline((node as any).children || [], []),
 			}
 		case "list": {
 			const n = node as any
 			const type = n.ordered ? "orderedList" : "bulletList"
-			let attrs: any = { data: n.data ?? null }
+			let attrs: any = {
+				data: buildNodeData(n.data, {
+					[SPREAD_META_KEY]: typeof n.spread === "boolean" ? n.spread : undefined,
+				}),
+			}
 			if (n.ordered && n.start != null && n.start !== 1) attrs = { ...attrs, start: n.start }
 
 			// Mark bullet lists as task lists if any item has checked set
@@ -49,14 +57,19 @@ function astBlockToPM(node: any): PMNode {
 		case "listItem": {
 			const n = node as any
 			const hasChecked = n.checked === true || n.checked === false
-			const attrs = { data: n.data ?? null, ...(hasChecked ? { checked: n.checked } : {}) }
+			const attrs = {
+				data: buildNodeData(n.data, {
+					[SPREAD_META_KEY]: typeof n.spread === "boolean" ? n.spread : undefined,
+				}),
+				...(hasChecked ? { checked: n.checked } : {}),
+			}
 			return { type: "listItem", attrs, content: (n.children || []).map(astBlockToPM) }
 		}
 		case "blockquote": {
 			const n = node as any
 			return {
 				type: "blockquote",
-				attrs: { data: n.data ?? null },
+				attrs: { data: buildNodeData(n.data) },
 				content: (n.children || []).map(astBlockToPM),
 			}
 		}
@@ -64,17 +77,41 @@ function astBlockToPM(node: any): PMNode {
 			const n = node as any
 			return {
 				type: "codeBlock",
-				attrs: { language: n.lang ?? null, data: n.data ?? null },
+				attrs: { language: n.lang ?? null, data: buildNodeData(n.data) },
 				content: textContent(n.value || ""),
 			}
 		}
-		case "thematicBreak":
-			return { type: "horizontalRule", attrs: { data: (node as any).data ?? null } }
+		case "html": {
+			const n = node as any
+			return {
+				type: "markdownUnsupported",
+				attrs: {
+					kind: "html",
+					value: n.value ?? "",
+					data: buildNodeData(n.data),
+				},
+			}
+		}
+		case "yaml": {
+			const n = node as any
+			return {
+				type: "markdownUnsupported",
+				attrs: {
+					kind: "yaml",
+					value: n.value ?? "",
+					data: buildNodeData(n.data),
+				},
+			}
+		}
+		case "thematicBreak": {
+			const hrData = buildNodeData((node as any).data)
+			return { type: "horizontalRule", attrs: { data: hrData } }
+		}
 		case "table": {
 			const n = node as any
 			return {
 				type: "table",
-				attrs: { align: Array.isArray(n.align) ? n.align : [], data: n.data ?? null },
+				attrs: { align: Array.isArray(n.align) ? n.align : [], data: buildNodeData(n.data) },
 				content: (n.children || []).map(astBlockToPM),
 			}
 		}
@@ -82,7 +119,7 @@ function astBlockToPM(node: any): PMNode {
 			const n = node as any
 			return {
 				type: "tableRow",
-				attrs: { data: n.data ?? null },
+				attrs: { data: buildNodeData(n.data) },
 				content: (n.children || []).map(astBlockToPM),
 			}
 		}
@@ -90,32 +127,39 @@ function astBlockToPM(node: any): PMNode {
 			const n = node as any
 			return {
 				type: "tableCell",
-				attrs: { data: n.data ?? null },
+				attrs: { data: buildNodeData(n.data) },
 				content: flattenInline((n.children || []) as any, []),
 			}
 		}
-		case "yaml":
-			// Not represented in editor surface; drop
-			return {
-				type: "paragraph",
-				attrs: { data: (node as any).data ?? null },
-				content: textContent(""),
-			}
 		default:
 			// Fallback: paragraph of inline content if present
 			// @ts-ignore
 			if ((node as any).children)
 				return {
 					type: "paragraph",
-					attrs: { data: (node as any).data ?? null },
+					attrs: { data: buildNodeData((node as any).data) },
 					content: flattenInline((node as any).children, []),
 				}
 			return {
 				type: "paragraph",
-				attrs: { data: (node as any).data ?? null },
+				attrs: { data: buildNodeData((node as any).data) },
 				content: textContent(""),
 			}
 	}
+}
+
+function buildNodeData(
+	data: Record<string, any> | null | undefined,
+	extras?: Record<string, unknown>
+): Record<string, any> | null {
+	const base = data && typeof data === "object" ? { ...data } : {}
+	if (extras) {
+		for (const [key, value] of Object.entries(extras)) {
+			if (value === undefined) continue
+			base[key] = value
+		}
+	}
+	return Object.keys(base).length > 0 ? base : null
 }
 
 function textContent(str: string): PMNode[] {
@@ -170,6 +214,14 @@ function flattenInline(nodes: any[], active: PMMark[]): PMNode[] {
 			case "break":
 				out.push({ type: "hardBreak", attrs: { data: (n as any).data ?? null } as any })
 				break
+			case "html": {
+				const html = n as any
+				out.push({
+					type: "markdownInlineHtml",
+					attrs: { value: html.value ?? "", data: html.data ?? null },
+				})
+				break
+			}
 			default:
 				// ignore unsupported inline nodes in this minimal pass
 				break
