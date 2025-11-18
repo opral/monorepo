@@ -27,6 +27,9 @@ export const LixEntityConversationSchema = {
 				schemaKey: "state",
 				properties: ["/entity_id", "/schema_key", "/file_id"],
 			},
+			// Conversation links are stored in the shared lix file but target
+			// entities in their original files, so only version_id scoping applies.
+			scope: ["version_id"],
 		},
 		{
 			properties: ["/conversation_id"],

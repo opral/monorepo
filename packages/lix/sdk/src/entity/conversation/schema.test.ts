@@ -25,6 +25,7 @@ test("entity_conversation schema should be properly defined", () => {
 			schemaKey: "state",
 			properties: ["/entity_id", "/schema_key", "/file_id"],
 		},
+		scope: ["version_id"],
 	});
 	expect(LixEntityConversationSchema["x-lix-foreign-keys"]![1]).toEqual({
 		properties: ["/conversation_id"],

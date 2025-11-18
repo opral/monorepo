@@ -3,11 +3,13 @@ import type { LixEngine } from "../../engine/boot.js";
 import {
 	LixSchemaDefinition,
 	type LixForeignKey,
+	type LixForeignKeyScopeColumn,
 } from "../../schema-definition/definition.js";
 import {
 	parseJsonPointer,
 	parsePointerPaths,
 	extractValueAtPath,
+	type JsonPointerPath,
 } from "../../schema-definition/json-pointer.js";
 import { sql, type Kysely } from "kysely";
 import type { LixChange } from "../../change/schema-definition.js";
@@ -71,6 +73,45 @@ const normalizeSchemaPathArray = (
 		.filter((value): value is string => value.length > 0);
 };
 
+type ForeignKeyScopeColumn = LixForeignKeyScopeColumn;
+
+const ALL_SCOPE_COLUMNS: readonly ForeignKeyScopeColumn[] = [
+	"version_id",
+	"file_id",
+] as const;
+const DEFAULT_STATE_SCOPE: ForeignKeyScopeColumn[] = ["version_id", "file_id"];
+const EMPTY_SCOPE: ForeignKeyScopeColumn[] = [];
+
+const normalizeForeignKeyScope = (
+	scope?: readonly ForeignKeyScopeColumn[] | ForeignKeyScopeColumn[] | undefined
+): ForeignKeyScopeColumn[] | undefined => {
+	if (!Array.isArray(scope)) {
+		return undefined;
+	}
+	const normalized: ForeignKeyScopeColumn[] = [];
+	for (const value of scope) {
+		if (
+			ALL_SCOPE_COLUMNS.includes(value) &&
+			!normalized.includes(value as ForeignKeyScopeColumn)
+		) {
+			normalized.push(value as ForeignKeyScopeColumn);
+		}
+	}
+	return normalized;
+};
+
+const getDefaultForeignKeyScope = (
+	referencedSchemaKey: string
+): ForeignKeyScopeColumn[] => {
+	if (referencedSchemaKey === "state") {
+		return DEFAULT_STATE_SCOPE;
+	}
+	if (SPECIAL_ENTITIES.includes(referencedSchemaKey as any)) {
+		return EMPTY_SCOPE;
+	}
+	return DEFAULT_STATE_SCOPE;
+};
+
 type NormalizedForeignKey = {
 	properties: string[];
 	references: {
@@ -79,6 +120,7 @@ type NormalizedForeignKey = {
 		schemaVersion?: string;
 	};
 	mode?: "immediate" | "materialized";
+	scope?: ForeignKeyScopeColumn[];
 };
 
 const normalizeForeignKeys = (
@@ -95,7 +137,39 @@ const normalizeForeignKeys = (
 			schemaVersion: foreignKey.references.schemaVersion,
 		},
 		mode: foreignKey.mode,
+		scope: normalizeForeignKeyScope(foreignKey.scope),
 	}));
+};
+
+const pointerIncludesColumn = (
+	paths: JsonPointerPath[],
+	column: "file_id"
+): boolean => {
+	return paths.some((path) => {
+		const lastSegment = path.segments[path.segments.length - 1];
+		return lastSegment === column;
+	});
+};
+
+const applyScopeFiltersToStateQuery = <T extends any>(
+	query: T,
+	scope: Set<ForeignKeyScopeColumn>,
+	values: { versionId: string; fileId?: string }
+): T => {
+	let result = query;
+
+	if (scope.has("version_id")) {
+		result = (result as any).where("version_id", "=", values.versionId);
+	}
+
+	if (scope.has("file_id")) {
+		const fileId = values.fileId;
+		if (typeof fileId === "string" && fileId.length > 0) {
+			result = (result as any).where("file_id", "=", fileId);
+		}
+	}
+
+	return result;
 };
 
 type BaseStateMutationArgs = {
@@ -104,6 +178,7 @@ type BaseStateMutationArgs = {
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
+	file_id?: string;
 	version_id: string;
 	untracked?: boolean;
 	inherited_from_version_id?: string | null;
@@ -266,6 +341,7 @@ export function validateStateMutation(args: ValidateStateMutationArgs): void {
 			engine: args.engine,
 			schema: effectiveSchema,
 			entity_id: args.entity_id,
+			file_id: args.file_id,
 			version_id: args.version_id,
 		});
 	} else {
@@ -280,6 +356,7 @@ export function validateStateMutation(args: ValidateStateMutationArgs): void {
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
+				file_id: args.file_id,
 				version_id: args.version_id,
 			});
 		}
@@ -292,6 +369,7 @@ export function validateStateMutation(args: ValidateStateMutationArgs): void {
 				snapshot_content: args.snapshot_content,
 				operation: args.operation,
 				entity_id: args.entity_id,
+				file_id: args.file_id,
 				version_id: args.version_id,
 			});
 		}
@@ -304,6 +382,7 @@ export function validateStateMutation(args: ValidateStateMutationArgs): void {
 				snapshot_content: args.snapshot_content,
 				version_id: args.version_id,
 				untracked: args.untracked,
+				file_id: args.file_id,
 			});
 		}
 	}
@@ -367,6 +446,7 @@ function validatePrimaryKeyConstraints(args: {
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
+	file_id?: string;
 	version_id: string;
 }): void {
 	const primaryKeyPaths = parsePointerPaths(args.schema["x-lix-primary-key"]);
@@ -396,6 +476,9 @@ function validatePrimaryKeyConstraints(args: {
 
 	// Constrain by version – lix_internal_state_vtable exposes child version_id directly
 	query = query.where("version_id", "=", args.version_id);
+	if (typeof args.file_id === "string" && args.file_id.length > 0) {
+		query = query.where("file_id", "=", args.file_id);
+	}
 
 	// Ignore inherited entities so that primary key validation only considers
 	// rows that are local to the active version context.
@@ -440,6 +523,7 @@ function validateUniqueConstraints(args: {
 	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
+	file_id?: string;
 	version_id: string;
 }): void {
 	const uniqueConstraints = (args.schema["x-lix-unique"] ?? [])
@@ -482,6 +566,9 @@ function validateUniqueConstraints(args: {
 			.where("schema_key", "=", args.schema["x-lix-key"]);
 
 		query = query.where("version_id", "=", args.version_id);
+		if (typeof args.file_id === "string" && args.file_id.length > 0) {
+			query = query.where("file_id", "=", args.file_id);
+		}
 		query = query.where("inherited_from_version_id", "is", null);
 		// Exclude tombstones
 		query = query.where("snapshot_content", "is not", null);
@@ -531,6 +618,7 @@ function validateForeignKeyConstraints(args: {
 	schema: LixSchemaDefinition;
 	snapshot_content: LixChange["snapshot_content"];
 	version_id: string;
+	file_id?: string;
 	untracked?: boolean;
 }): void {
 	const foreignKeys = normalizeForeignKeys(args.schema["x-lix-foreign-keys"]);
@@ -542,6 +630,12 @@ function validateForeignKeyConstraints(args: {
 	for (const foreignKey of foreignKeys) {
 		const localPaths = parsePointerPaths(foreignKey.properties);
 		const refPaths = parsePointerPaths(foreignKey.references.properties);
+		const scopeColumns =
+			foreignKey.scope !== undefined
+				? foreignKey.scope
+				: getDefaultForeignKeyScope(foreignKey.references.schemaKey);
+		const scopeSet = new Set(scopeColumns);
+
 		// Validation mode: default to immediate
 		const mode = foreignKey.mode ?? "immediate";
 		// Validate that properties arrays have same length
@@ -614,6 +708,10 @@ function validateForeignKeyConstraints(args: {
 					const localValue = localValues[i]!;
 					query = query.where(refPath.segments[0] as any, "=", localValue);
 				}
+				query = applyScopeFiltersToStateQuery(query, scopeSet, {
+					versionId: args.version_id,
+					fileId: args.file_id,
+				}).where("inherited_from_version_id", "is", null);
 			} else {
 				// For other special entities, we only support single property references
 				if (localPaths.length !== 1 || refPaths.length !== 1) {
@@ -644,6 +742,10 @@ function validateForeignKeyConstraints(args: {
 				);
 				query = query.where(columnExpr as any, "=", localValue);
 			}
+			query = applyScopeFiltersToStateQuery(query, scopeSet, {
+				versionId: args.version_id,
+				fileId: args.file_id,
+			}).where("inherited_from_version_id", "is", null);
 		}
 
 		// Add version constraint if specified (only for regular schema entities)
@@ -673,18 +775,7 @@ function validateForeignKeyConstraints(args: {
 			}
 		}
 
-		const referencedStates = args.engine.executeSync(
-			(isSpecialEntity
-				? foreignKey.references.schemaKey === "state"
-					? query
-							.where("version_id", "=", args.version_id)
-							.where("inherited_from_version_id", "is", null)
-					: query
-				: query
-						.where("version_id", "=", args.version_id)
-						.where("inherited_from_version_id", "is", null)
-			).compile()
-		).rows;
+		const referencedStates = args.engine.executeSync(query.compile()).rows;
 
 		if (referencedStates.length === 0) {
 			// Get version name for the error message
@@ -745,8 +836,12 @@ function validateForeignKeyConstraints(args: {
 				.selectFrom("state_by_version")
 				.select("entity_id")
 				.where("schema_key", "=", foreignKey.references.schemaKey)
-				.where("version_id", "=", args.version_id)
 				.where("untracked", "=", true);
+
+			untrackedQuery = applyScopeFiltersToStateQuery(untrackedQuery, scopeSet, {
+				versionId: args.version_id,
+				fileId: args.file_id,
+			});
 
 			// Add WHERE conditions for each property
 			for (let i = 0; i < localPaths.length; i++) {
@@ -796,7 +891,9 @@ function assertEntityIsLocal(args: {
 			.where("version_id", "=", args.version_id)
 			.limit(1)
 			.compile()
-	).rows as Array<{ inherited_from_version_id: string | null }>;
+	).rows as Array<{
+		inherited_from_version_id: string | null;
+	}>;
 
 	if (!rows || rows.length === 0) {
 		const verb = args.operation === "delete" ? "delete" : "update";
@@ -818,10 +915,15 @@ function validateDeletionConstraints(args: {
 	engine: Pick<LixEngine, "executeSync">;
 	schema: LixSchemaDefinition;
 	entity_id?: string;
+	file_id?: string;
 	version_id: string;
 }): void {
 	if (!args.entity_id) {
 		throw new Error("entity_id is required for delete operations");
+	}
+	const fileId = args.file_id;
+	if (typeof fileId !== "string" || fileId.length === 0) {
+		throw new Error("file_id is required for delete operations");
 	}
 
 	// Get the current entity data to check what's being referenced
@@ -833,6 +935,7 @@ function validateDeletionConstraints(args: {
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
 			.where("version_id", "=", args.version_id)
+			.where("file_id", "=", fileId)
 			.compile()
 	).rows;
 
@@ -858,6 +961,7 @@ function validateDeletionConstraints(args: {
 				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
 				.where("entity_id", "=", args.entity_id)
 				.where("schema_key", "=", args.schema["x-lix-key"])
+				.where("file_id", "=", fileId)
 				.compile()
 		).rows;
 
@@ -920,6 +1024,15 @@ function validateDeletionConstraints(args: {
 		for (const foreignKey of foreignKeys) {
 			const localPaths = parsePointerPaths(foreignKey.properties);
 			const refPaths = parsePointerPaths(foreignKey.references.properties);
+			const localIncludesFileProperty = pointerIncludesColumn(
+				localPaths,
+				"file_id"
+			);
+			const scopeColumns =
+				foreignKey.scope !== undefined
+					? foreignKey.scope
+					: getDefaultForeignKeyScope(foreignKey.references.schemaKey);
+			const scopeSet = new Set(scopeColumns);
 			// Skip if this foreign key doesn't reference our schema
 			if (foreignKey.references.schemaKey !== args.schema["x-lix-key"]) {
 				continue;
@@ -953,8 +1066,12 @@ function validateDeletionConstraints(args: {
 			let query = internalQueryBuilder
 				.selectFrom("state_by_version")
 				.select("entity_id")
-				.where("schema_key", "=", schema["x-lix-key"])
-				.where("version_id", "=", args.version_id);
+				.where("schema_key", "=", schema["x-lix-key"]);
+
+			query = applyScopeFiltersToStateQuery(query, scopeSet, {
+				versionId: args.version_id,
+				fileId: fileId,
+			});
 
 			// Add WHERE conditions for each property
 			for (let i = 0; i < localPaths.length; i++) {
