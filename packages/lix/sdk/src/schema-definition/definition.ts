@@ -148,11 +148,11 @@ export const LixSchemaDefinition = {
 								type: "array",
 								items: {
 									type: "string",
-									enum: ["version_id", "file_id", "schema_key"],
+									enum: ["version_id", "file_id"],
 								},
 								uniqueItems: true,
 								description:
-									"Implicit columns (e.g., version_id, file_id) used to scope the foreign key relationship",
+									"Implicit columns (version_id and/or file_id) used to scope the foreign key relationship",
 							},
 							// onDelete: {
 							//   type: "string",
