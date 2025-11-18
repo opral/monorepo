@@ -1,0 +1,291 @@
+-- label --
+state_by_version select • tracked entity
+
+-- original SQL --
+SELECT entity_id, snapshot_content
+        FROM state_by_version
+        WHERE schema_key = ? AND entity_id = ? AND version_id = ?
+
+-- rewritten SQL --
+SELECT
+  entity_id,
+  snapshot_content
+FROM (SELECT
+  entity_id,
+  schema_key,
+  version_id,
+  snapshot_content
+FROM (
+WITH
+  wanted_versions AS (
+    SELECT 'boot_0000000000' AS version_id
+  )
+SELECT
+  "w"."entity_id" as "entity_id", "w"."schema_key" as "schema_key", "w"."version_id" as "version_id", "w"."snapshot_content" as "snapshot_content"
+FROM (
+  SELECT
+    c.entity_id AS entity_id,
+    c.schema_key AS schema_key,
+    c.file_id AS file_id,
+    c.snapshot_content AS snapshot_content,
+    c.version_id AS version_id,
+    c.created_at AS created_at,
+    c.change_id AS change_id,
+    c.priority AS priority,
+    ROW_NUMBER() OVER (
+            PARTITION BY c.file_id, c.schema_key, c.entity_id, c.version_id
+            ORDER BY c.priority, c.created_at DESC, c.file_id, c.schema_key, c.entity_id, c.version_id, c.change_id
+          ) AS rn
+  FROM (
+      SELECT
+        unt.entity_id AS entity_id,
+        unt.schema_key AS schema_key,
+        unt.file_id AS file_id,
+        json(unt.snapshot_content) AS snapshot_content,
+        unt.version_id AS version_id,
+        unt.created_at AS created_at,
+        'untracked' AS change_id,
+        2 AS priority
+      FROM lix_internal_state_all_untracked unt
+      JOIN wanted_versions wv_unt ON wv_unt.version_id = unt.version_id
+      WHERE (unt.schema_key IN ('bench_state_by_version_view')) AND (unt.entity_id IN ('bench_sbvv_tracked_anchor'))
+
+          UNION ALL
+
+      SELECT
+        cache.entity_id AS entity_id,
+        cache.schema_key AS schema_key,
+        cache.file_id AS file_id,
+        json(cache.snapshot_content) AS snapshot_content,
+        cache.version_id AS version_id,
+        cache.created_at AS created_at,
+        cache.change_id AS change_id,
+        3 AS priority
+      FROM "lix_internal_state_cache_v1_bench_state_by_version_view" cache
+      JOIN wanted_versions wv_cache ON wv_cache.version_id = cache.version_id
+      WHERE (cache.schema_key IN ('bench_state_by_version_view')) AND (cache.entity_id IN ('bench_sbvv_tracked_anchor'))
+
+          UNION ALL
+
+      		SELECT
+          cache.entity_id AS entity_id,
+          cache.schema_key AS schema_key,
+          cache.file_id AS file_id,
+          json(cache.snapshot_content) AS snapshot_content,
+          vi.version_id AS version_id,
+          cache.created_at AS created_at,
+          cache.change_id AS change_id,
+          4 AS priority
+      		FROM (
+      SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
+      ) AS vi
+      		JOIN wanted_versions wv_vi ON wv_vi.version_id = vi.version_id
+      		JOIN "lix_internal_state_cache_v1_bench_state_by_version_view" cache ON cache.version_id = vi.ancestor_version_id
+      		WHERE cache.is_tombstone = 0
+      		  AND cache.snapshot_content IS NOT NULL AND (cache.schema_key IN ('bench_state_by_version_view')) AND (cache.entity_id IN ('bench_sbvv_tracked_anchor'))
+
+          UNION ALL
+
+      		SELECT
+          unt.entity_id AS entity_id,
+          unt.schema_key AS schema_key,
+          unt.file_id AS file_id,
+          json(unt.snapshot_content) AS snapshot_content,
+          vi.version_id AS version_id,
+          unt.created_at AS created_at,
+          'untracked' AS change_id,
+          5 AS priority
+      		FROM (
+      SELECT 'boot_0000000000' AS version_id, 'global' AS ancestor_version_id
+      ) AS vi
+      		JOIN wanted_versions wv_vi ON wv_vi.version_id = vi.version_id
+      		JOIN lix_internal_state_all_untracked unt ON unt.version_id = vi.ancestor_version_id
+      		WHERE unt.is_tombstone = 0
+      		  AND unt.snapshot_content IS NOT NULL AND (unt.schema_key IN ('bench_state_by_version_view')) AND (unt.entity_id IN ('bench_sbvv_tracked_anchor'))
+  ) AS c
+) AS w
+
+
+
+WHERE w.rn = 1
+) AS "lix_internal_state_vtable"
+WHERE snapshot_content IS NOT NULL) AS state_by_version
+WHERE schema_key = ? AND entity_id = ? AND version_id = ?
+
+-- plan --
+[
+  {
+    "id": 2,
+    "parent": 0,
+    "notused": 0,
+    "detail": "CO-ROUTINE w"
+  },
+  {
+    "id": 5,
+    "parent": 2,
+    "notused": 0,
+    "detail": "CO-ROUTINE (subquery-12)"
+  },
+  {
+    "id": 7,
+    "parent": 5,
+    "notused": 0,
+    "detail": "CO-ROUTINE c"
+  },
+  {
+    "id": 8,
+    "parent": 7,
+    "notused": 0,
+    "detail": "COMPOUND QUERY"
+  },
+  {
+    "id": 9,
+    "parent": 8,
+    "notused": 0,
+    "detail": "LEFT-MOST SUBQUERY"
+  },
+  {
+    "id": 12,
+    "parent": 9,
+    "notused": 0,
+    "detail": "MATERIALIZE wanted_versions"
+  },
+  {
+    "id": 14,
+    "parent": 12,
+    "notused": 0,
+    "detail": "SCAN CONSTANT ROW"
+  },
+  {
+    "id": 30,
+    "parent": 9,
+    "notused": 16,
+    "detail": "SCAN wv_unt"
+  },
+  {
+    "id": 36,
+    "parent": 9,
+    "notused": 61,
+    "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
+  },
+  {
+    "id": 60,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 71,
+    "parent": 60,
+    "notused": 47,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_by_version_view_version_id (version_id=? AND entity_id=?)"
+  },
+  {
+    "id": 86,
+    "parent": 60,
+    "notused": 216,
+    "detail": "SCAN wv_cache"
+  },
+  {
+    "id": 104,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 106,
+    "parent": 104,
+    "notused": 0,
+    "detail": "CO-ROUTINE vi"
+  },
+  {
+    "id": 107,
+    "parent": 106,
+    "notused": 0,
+    "detail": "SCAN CONSTANT ROW"
+  },
+  {
+    "id": 129,
+    "parent": 104,
+    "notused": 16,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 134,
+    "parent": 104,
+    "notused": 27,
+    "detail": "SEARCH cache USING INDEX idx_lix_internal_state_cache_v1_bench_state_by_version_view_ve (version_id=? AND entity_id=?)"
+  },
+  {
+    "id": 153,
+    "parent": 104,
+    "notused": 216,
+    "detail": "SCAN wv_vi"
+  },
+  {
+    "id": 171,
+    "parent": 8,
+    "notused": 0,
+    "detail": "UNION ALL"
+  },
+  {
+    "id": 173,
+    "parent": 171,
+    "notused": 0,
+    "detail": "CO-ROUTINE vi"
+  },
+  {
+    "id": 174,
+    "parent": 173,
+    "notused": 0,
+    "detail": "SCAN CONSTANT ROW"
+  },
+  {
+    "id": 196,
+    "parent": 171,
+    "notused": 61,
+    "detail": "SEARCH unt USING INDEX sqlite_autoindex_lix_internal_state_all_untracked_1 (entity_id=? AND schema_key=?)"
+  },
+  {
+    "id": 212,
+    "parent": 171,
+    "notused": 0,
+    "detail": "BLOOM FILTER ON wv_vi (version_id=?)"
+  },
+  {
+    "id": 230,
+    "parent": 171,
+    "notused": 53,
+    "detail": "SEARCH wv_vi USING AUTOMATIC PARTIAL COVERING INDEX (version_id=?)"
+  },
+  {
+    "id": 236,
+    "parent": 171,
+    "notused": 16,
+    "detail": "SCAN vi"
+  },
+  {
+    "id": 259,
+    "parent": 5,
+    "notused": 195,
+    "detail": "SCAN c"
+  },
+  {
+    "id": 294,
+    "parent": 5,
+    "notused": 0,
+    "detail": "USE TEMP B-TREE FOR ORDER BY"
+  },
+  {
+    "id": 326,
+    "parent": 2,
+    "notused": 175,
+    "detail": "SCAN (subquery-12)"
+  },
+  {
+    "id": 392,
+    "parent": 0,
+    "notused": 175,
+    "detail": "SCAN w"
+  }
+]

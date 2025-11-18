@@ -1,0 +1,21 @@
+-- label --
+state_by_version insert • tracked row
+
+-- original SQL --
+INSERT INTO state_by_version (
+        entity_id,
+        schema_key,
+        file_id,
+        version_id,
+        plugin_key,
+        snapshot_content,
+        schema_version,
+        metadata,
+        untracked
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+-- rewritten SQL --
+INSERT INTO state_by_version (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, metadata, untracked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+-- plan --
+[]
