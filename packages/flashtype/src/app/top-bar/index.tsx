@@ -42,8 +42,6 @@ export function TopBar({
 			.where("path", "is not", "/AGENTS.md"),
 	);
 
-	console.log("fileCount", fileCount);
-
 	const hasFiles = (fileCount?.count ?? 0) > 0;
 
 	return (
