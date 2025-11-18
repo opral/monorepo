@@ -240,3 +240,123 @@ test("programatically mutating entities should be reflected in the file", async 
 	expect(updatedMarkdown).toContain("This is the updated paragraph content.");
 	expect(updatedMarkdown).not.toContain("mdast_id");
 });
+
+test("enforces unique markdown block ids via x-lix-unique for every schema", async () => {
+	const lix = await openLix({
+		providePlugins: [plugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: "enabled",
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const { version_id: versionId } = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("stored_schema_by_version")
+		.values(
+			AstSchemas.allSchemas.map((schema) => ({
+				value: schema,
+				lixcol_version_id: "global",
+			})),
+		)
+		.execute();
+
+	const schemaEntries = Object.entries(AstSchemas.schemasByType).filter(
+		([, schema]) => schema && schema["x-lix-key"],
+	);
+
+	const buildSnapshot = (type: string, schema: any, id: string) => {
+		const node: Record<string, any> = {
+			type,
+			data: { id },
+		};
+		const props = schema?.properties ?? {};
+		if (props.children) {
+			node.children = [];
+		}
+		if (props.value) {
+			node.value = `${type}-value`;
+		}
+		if (props.depth) {
+			node.depth = 1;
+		}
+		if (props.url) {
+			node.url = "https://example.com";
+		}
+		if (props.ordered) {
+			node.ordered = false;
+		}
+		if (props.start) {
+			node.start = 1;
+		}
+		if (props.spread) {
+			node.spread = false;
+		}
+		if (props.checked) {
+			node.checked = false;
+		}
+		if (props.align) {
+			node.align = [];
+		}
+		return node;
+	};
+
+	for (const [type, schema] of schemaEntries) {
+		const schemaKey = schema["x-lix-key"] as string;
+		const schemaVersion = schema["x-lix-version"] as string;
+		const baseId = `unique-${type}`;
+		const firstEntityId = `${type}-entity-a`;
+		const secondEntityId = `${type}-entity-b`;
+		const fileId = `${type}-file`;
+
+		const snapshot = buildSnapshot(type, schema, baseId);
+
+		await lix.db
+			.insertInto("state_by_version")
+			.values({
+				entity_id: firstEntityId,
+				file_id: fileId,
+				schema_key: schemaKey,
+				plugin_key: plugin.key,
+				version_id: versionId,
+				snapshot_content: snapshot,
+				schema_version: schemaVersion,
+				metadata: null,
+				untracked: false,
+			})
+			.execute();
+
+		try {
+			await expect(
+				lix.db
+					.insertInto("state_by_version")
+					.values({
+						entity_id: secondEntityId,
+						file_id: fileId,
+						schema_key: schemaKey,
+						plugin_key: plugin.key,
+						version_id: versionId,
+						snapshot_content: buildSnapshot(type, schema, baseId),
+						schema_version: schemaVersion,
+						metadata: null,
+						untracked: false,
+					})
+					.execute()
+			).rejects.toThrow(/Unique constraint violation/i);
+		} finally {
+			await lix.db
+				.deleteFrom("state_by_version")
+				.where("entity_id", "=", firstEntityId)
+				.where("schema_key", "=", schemaKey)
+				.where("version_id", "=", versionId)
+				.execute();
+		}
+	}
+});

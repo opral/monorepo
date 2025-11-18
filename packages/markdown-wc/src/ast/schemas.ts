@@ -14,16 +14,27 @@ export type BaseNode = {
 }
 type WithBase<T> = Omit<T, "children" | "position" | "data"> & BaseNode
 
+const nodeDataSchema = {
+	type: "object",
+	properties: {
+		id: { type: "string" },
+	},
+	additionalProperties: true,
+} as const
+
+const dataIdUniqueConstraint = [["/data/id"]] as const
+
 export const RootSchema = {
 	"x-lix-key": "markdown_wc_root",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown AST root node (mdast-shaped). Holds all top-level children.",
 	type: "object",
 	properties: {
 		type: { const: "root" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type", "children"],
 	additionalProperties: false,
@@ -47,13 +58,14 @@ export type ParagraphNode = WithBase<FromSchema<typeof ParagraphSchema>>
 export const ParagraphSchema = {
 	"x-lix-key": "markdown_wc_paragraph",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown paragraph block.",
 	type: "object",
 	properties: {
 		type: { const: "paragraph" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -63,6 +75,7 @@ export type HeadingNode = WithBase<FromSchema<typeof HeadingSchema>>
 export const HeadingSchema = {
 	"x-lix-key": "markdown_wc_heading",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown heading block (depth 1–6).",
 	type: "object",
 	properties: {
@@ -70,7 +83,7 @@ export const HeadingSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		depth: { type: "integer", minimum: 1, maximum: 6 },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -80,6 +93,7 @@ export type ListNode = WithBase<FromSchema<typeof ListSchema>>
 export const ListSchema = {
 	"x-lix-key": "markdown_wc_list",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown list block (ordered or unordered).",
 	type: "object",
 	properties: {
@@ -89,7 +103,7 @@ export const ListSchema = {
 		ordered: { type: "boolean" },
 		start: { type: ["integer", "null"] },
 		spread: { type: ["boolean", "null"] },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -99,6 +113,7 @@ export type ListItemNode = WithBase<FromSchema<typeof ListItemSchema>>
 export const ListItemSchema = {
 	"x-lix-key": "markdown_wc_list_item",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown list item.",
 	type: "object",
 	properties: {
@@ -107,7 +122,7 @@ export const ListItemSchema = {
 		position: { type: "object" },
 		checked: { type: ["boolean", "null"] },
 		spread: { type: ["boolean", "null"] },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -117,13 +132,14 @@ export type BlockquoteNode = WithBase<FromSchema<typeof BlockquoteSchema>>
 export const BlockquoteSchema = {
 	"x-lix-key": "markdown_wc_blockquote",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown blockquote block.",
 	type: "object",
 	properties: {
 		type: { const: "blockquote" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -133,6 +149,7 @@ export type CodeNode = WithBase<FromSchema<typeof CodeSchema>>
 export const CodeSchema = {
 	"x-lix-key": "markdown_wc_code",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown fenced code block.",
 	type: "object",
 	properties: {
@@ -142,7 +159,7 @@ export const CodeSchema = {
 		value: { type: "string" },
 		lang: { type: ["string", "null"] },
 		meta: { type: ["string", "null"] },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -152,6 +169,7 @@ export type InlineCodeNode = WithBase<FromSchema<typeof InlineCodeSchema>>
 export const InlineCodeSchema = {
 	"x-lix-key": "markdown_wc_inline_code",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Inline code span.",
 	type: "object",
 	properties: {
@@ -159,7 +177,7 @@ export const InlineCodeSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -169,13 +187,14 @@ export type ThematicBreakNode = WithBase<FromSchema<typeof ThematicBreakSchema>>
 export const ThematicBreakSchema = {
 	"x-lix-key": "markdown_wc_thematic_break",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Horizontal rule (thematic break).",
 	type: "object",
 	properties: {
 		type: { const: "thematicBreak" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -185,13 +204,14 @@ export type BreakNode = WithBase<FromSchema<typeof BreakSchema>>
 export const BreakSchema = {
 	"x-lix-key": "markdown_wc_break",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Hard line break.",
 	type: "object",
 	properties: {
 		type: { const: "break" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -201,6 +221,7 @@ export type HtmlNode = WithBase<FromSchema<typeof HtmlSchema>>
 export const HtmlSchema = {
 	"x-lix-key": "markdown_wc_html",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Raw HTML block.",
 	type: "object",
 	properties: {
@@ -208,7 +229,7 @@ export const HtmlSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -218,6 +239,7 @@ export type ImageNode = WithBase<FromSchema<typeof ImageSchema>>
 export const ImageSchema = {
 	"x-lix-key": "markdown_wc_image",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Image node.",
 	type: "object",
 	properties: {
@@ -227,7 +249,7 @@ export const ImageSchema = {
 		url: { type: "string" },
 		title: { type: ["string", "null"] },
 		alt: { type: ["string", "null"] },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -237,6 +259,7 @@ export type LinkNode = WithBase<FromSchema<typeof LinkSchema>>
 export const LinkSchema = {
 	"x-lix-key": "markdown_wc_link",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Link node containing inline children.",
 	type: "object",
 	properties: {
@@ -245,7 +268,7 @@ export const LinkSchema = {
 		position: { type: "object" },
 		url: { type: "string" },
 		title: { type: ["string", "null"] },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -255,13 +278,14 @@ export type EmphasisNode = WithBase<FromSchema<typeof EmphasisSchema>>
 export const EmphasisSchema = {
 	"x-lix-key": "markdown_wc_emphasis",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Emphasis (italic) inline node.",
 	type: "object",
 	properties: {
 		type: { const: "emphasis" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -270,13 +294,14 @@ export type StrongNode = WithBase<FromSchema<typeof StrongSchema>>
 export const StrongSchema = {
 	"x-lix-key": "markdown_wc_strong",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Strong (bold) inline node.",
 	type: "object",
 	properties: {
 		type: { const: "strong" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -285,13 +310,14 @@ export type DeleteNode = WithBase<FromSchema<typeof DeleteSchema>>
 export const DeleteSchema = {
 	"x-lix-key": "markdown_wc_delete",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Delete/Strikethrough inline node.",
 	type: "object",
 	properties: {
 		type: { const: "delete" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -301,6 +327,7 @@ export type TableNode = WithBase<FromSchema<typeof TableSchema>>
 export const TableSchema = {
 	"x-lix-key": "markdown_wc_table",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Markdown table block (GFM).",
 	type: "object",
 	properties: {
@@ -311,7 +338,7 @@ export const TableSchema = {
 			type: "array",
 			items: { type: ["string", "null"], enum: ["left", "right", "center", null] },
 		},
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -320,13 +347,14 @@ export type TableRowNode = WithBase<FromSchema<typeof TableRowSchema>>
 export const TableRowSchema = {
 	"x-lix-key": "markdown_wc_table_row",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Table row (GFM).",
 	type: "object",
 	properties: {
 		type: { const: "tableRow" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -335,13 +363,14 @@ export type TableCellNode = WithBase<FromSchema<typeof TableCellSchema>>
 export const TableCellSchema = {
 	"x-lix-key": "markdown_wc_table_cell",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Table cell (GFM).",
 	type: "object",
 	properties: {
 		type: { const: "tableCell" },
 		children: { type: "array" },
 		position: { type: "object" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -351,6 +380,7 @@ export type TextNode = WithBase<FromSchema<typeof TextSchema>>
 export const TextSchema = {
 	"x-lix-key": "markdown_wc_text",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "Plain text leaf node.",
 	type: "object",
 	properties: {
@@ -358,7 +388,7 @@ export const TextSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,
@@ -368,6 +398,7 @@ export type YamlNode = WithBase<FromSchema<typeof YamlSchema>>
 export const YamlSchema = {
 	"x-lix-key": "markdown_wc_yaml",
 	"x-lix-version": "1.0",
+	"x-lix-unique": dataIdUniqueConstraint,
 	description: "YAML frontmatter block.",
 	type: "object",
 	properties: {
@@ -375,7 +406,7 @@ export const YamlSchema = {
 		children: { type: "array" },
 		position: { type: "object" },
 		value: { type: "string" },
-		data: { type: "object" },
+		data: nodeDataSchema,
 	},
 	required: ["type"],
 	additionalProperties: false,

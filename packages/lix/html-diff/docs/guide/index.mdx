@@ -198,13 +198,13 @@ function DiffViewer({ diff }: { diff: string }) {
 }
 
 /* Only these selectors needed for diff highlighting */
-[data-diff-status='added'] {
+[data-diff-status="added"] {
   color: #22c55e;
 }
-[data-diff-status='modified'] {
+[data-diff-status="modified"] {
   color: #f59e0b;
 }
-[data-diff-status='removed'] {
+[data-diff-status="removed"] {
   color: #ef4444;
 }
 ```
@@ -224,7 +224,7 @@ function DiffViewer({ diff }: { diff: string }) {
   line-height: 1.4;
 }
 
-/* Only these selectors needed for diff highlighting */
+/_ Only these selectors needed for diff highlighting _/
 [data-diff-status='added'] { color: #22c55e }
 [data-diff-status='modified'] { color: #f59e0b }
 [data-diff-status='removed'] { color: #ef4444 }`}

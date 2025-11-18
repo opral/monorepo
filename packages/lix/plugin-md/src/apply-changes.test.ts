@@ -242,7 +242,9 @@ describe("applyChanges", () => {
 			changes,
 		} as ApplyChangesArgs);
 
-		const serializedAst = serializeSpy.mock.calls.at(-1)?.[0] as Ast | undefined;
+		const serializedAst = serializeSpy.mock.calls.at(-1)?.[0] as
+			| Ast
+			| undefined;
 		serializeSpy.mockRestore();
 
 		expect(serializedAst?.children?.[1]?.data?.id).toBe("mdwc_1");

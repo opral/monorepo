@@ -182,9 +182,7 @@ test("serializeToHtml with diffHints treats list items as atomic elements", asyn
 	expect(html).toContain(
 		'<li data-diff-key="item-1" data-diff-mode="element" data-diff-show-when-removed="">'
 	)
-	expect(html).toContain(
-		'<p data-diff-key="para-1" data-diff-show-when-removed="">First task</p>'
-	)
+	expect(html).toContain('<p data-diff-key="para-1" data-diff-show-when-removed="">First task</p>')
 	expect(html).not.toMatch(/<p[^>]*data-diff-key="para-1"[^>]*data-diff-mode=/)
 })
 
