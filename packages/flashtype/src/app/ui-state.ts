@@ -37,13 +37,13 @@ export type FlashtypeUiState = {
 export type PanelLayoutSizes = Record<PanelSide, number>;
 
 const DEFAULT_LAYOUT_SIZES: PanelLayoutSizes = {
-	left: 20,
-	central: 60,
-	right: 20,
+	left: 0,
+	central: 100,
+	right: 0,
 };
 
 export const DEFAULT_FLASHTYPE_UI_STATE: FlashtypeUiState = {
-	focusedPanel: "left",
+	focusedPanel: "central",
 	panels: {
 		left: {
 			views: [
