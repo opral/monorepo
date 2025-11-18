@@ -7,6 +7,7 @@ import type { PanelState, ViewContext } from "./types";
 import type { Lix } from "@lix-js/sdk";
 import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { ViewHostRegistryProvider } from "./view-host-registry";
 
 vi.mock("./view-registry", () => {
 	const definitions = [
@@ -56,9 +57,11 @@ const renderWithProviders = async (ui: ReactNode) => {
 	let result: ReturnType<typeof render> | undefined;
 	await act(async () => {
 		result = render(
-			<Suspense fallback={<div data-testid="loading-state" />}>
-				{ui}
-			</Suspense>,
+			<ViewHostRegistryProvider>
+				<Suspense fallback={<div data-testid="loading-state" />}>
+					{ui}
+				</Suspense>
+			</ViewHostRegistryProvider>,
 		);
 	});
 	return result!;

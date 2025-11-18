@@ -39,6 +39,7 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { PanelV2 } from "./panel-v2";
+import { ViewHostRegistryProvider } from "./view-host-registry";
 import type { PanelState, ViewContext, ViewDefinition } from "./types";
 import type { Lix } from "@lix-js/sdk";
 import { Flag, Search } from "lucide-react";
@@ -84,9 +85,12 @@ const searchViewOverride: ViewDefinition = {
 	},
 };
 
+const renderWithinProvider = (ui: React.ReactNode) =>
+	render(<ViewHostRegistryProvider>{ui}</ViewHostRegistryProvider>);
+
 describe("PanelV2", () => {
 	test("renders content container without padding or margin utilities", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={emptyPanel}
@@ -127,7 +131,7 @@ describe("PanelV2", () => {
 	});
 
 	test("renders the active view content", async () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -147,7 +151,7 @@ describe("PanelV2", () => {
 	test("registers the panel container as a droppable target", () => {
 		const droppableMock = vi.mocked(useDroppable);
 		droppableMock.mockClear();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -167,7 +171,7 @@ describe("PanelV2", () => {
 	});
 
 	test("uses the tab label resolver when provided", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -189,7 +193,7 @@ describe("PanelV2", () => {
 	test("registers sortable handlers for tabs", () => {
 		const sortableMock = vi.mocked(useSortable);
 		sortableMock.mockClear();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -215,7 +219,7 @@ describe("PanelV2", () => {
 	});
 
 	test("renders any extra tab bar content", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -234,7 +238,7 @@ describe("PanelV2", () => {
 
 	test("invokes the pending finalizer when the active view is interacted with", async () => {
 		const finalize = vi.fn();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={pendingSearchPanel}
@@ -254,7 +258,7 @@ describe("PanelV2", () => {
 	});
 
 	test("renders the provided empty state placeholder when no views are open", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={emptyPanel}
@@ -274,7 +278,7 @@ describe("PanelV2", () => {
 	test("passes the custom drop id and panel metadata to useDroppable", () => {
 		const mocked = vi.mocked(useDroppable);
 		mocked.mockClear();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={emptyPanel}
@@ -324,7 +328,7 @@ describe("PanelV2", () => {
 			},
 		};
 
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={badgePanel}

@@ -32,6 +32,10 @@ import type {
 import { VIEW_MAP } from "./view-registry";
 import styles from "./panel.module.css";
 import { useViewContext } from "./view-context";
+import {
+	useViewHostRegistry,
+	type ViewHostRecord,
+} from "./view-host-registry";
 import { Activity } from "react";
 
 /**
@@ -374,15 +378,35 @@ function ViewRenderer({
 	instance: ViewInstance;
 	context: ViewContext;
 }) {
-	const containerRef = useRef<HTMLDivElement | null>(null);
+	const registry = useViewHostRegistry();
+	const [host, setHost] = useState<ViewHostRecord | null>(null);
+
 	useEffect(() => {
-		const target = containerRef.current;
-		if (!view || !target) return;
-		const cleanup = view.render({ context, instance, target });
+		const record = registry.ensureHost({ view, instance, context });
+		setHost(record);
+	}, [registry, view, instance, context]);
+
+	return <ViewHostMount host={host} />;
+}
+
+function ViewHostMount({
+	host,
+}: {
+	host: ViewHostRecord | null;
+}) {
+	const containerRef = useRef<HTMLDivElement | null>(null);
+
+	useLayoutEffect(() => {
+		const mountPoint = containerRef.current;
+		if (!mountPoint || !host) return;
+		const node = host.container;
+		mountPoint.appendChild(node);
 		return () => {
-			cleanup?.();
+			if (node.parentElement === mountPoint) {
+				mountPoint.removeChild(node);
+			}
 		};
-	}, [view, instance, context]);
+	}, [host]);
 
 	return (
 		<div

@@ -29,6 +29,10 @@ import { SidePanel } from "./side-panel";
 import { CentralPanel } from "./central-panel";
 import { TopBar } from "./top-bar";
 import { StatusBar } from "./status-bar";
+import {
+	ViewHostRegistryProvider,
+	useViewHostRegistry,
+} from "./view-host-registry";
 import type {
 	PanelSide,
 	PanelState,
@@ -200,13 +204,21 @@ function deriveUntitledMarkdownPath(existingPaths: Set<string>): string {
 	return normalizeFilePath(`/${baseStem}-${Date.now()}.md`);
 }
 
+export function V2LayoutShell() {
+	return (
+		<ViewHostRegistryProvider>
+			<LayoutShellContent />
+		</ViewHostRegistryProvider>
+	);
+}
+
 /**
  * App layout shell with independent left and right islands.
  *
  * @example
  * <V2LayoutShell />
  */
-export function V2LayoutShell() {
+function LayoutShellContent() {
 	const [uiStateKV, setUiStateKV] = useKeyValue(FLASHTYPE_UI_STATE_KEY);
 	const lix = useLix();
 	if (!uiStateKV) {
@@ -250,6 +262,19 @@ export function V2LayoutShell() {
 	});
 	const leftPanelRef = useRef<ImperativePanelHandle | null>(null);
 	const rightPanelRef = useRef<ImperativePanelHandle | null>(null);
+	const viewHostRegistry = useViewHostRegistry();
+
+	const activeInstanceKeys = useMemo(() => {
+		const keys = new Set<string>();
+		for (const view of leftPanel.views) keys.add(view.instanceKey);
+		for (const view of centralPanel.views) keys.add(view.instanceKey);
+		for (const view of rightPanel.views) keys.add(view.instanceKey);
+		return keys;
+	}, [leftPanel.views, centralPanel.views, rightPanel.views]);
+
+	useEffect(() => {
+		viewHostRegistry.pruneHosts(activeInstanceKeys);
+	}, [viewHostRegistry, activeInstanceKeys]);
 
 	const lastPersistedRef = useRef<string>(
 		JSON.stringify({

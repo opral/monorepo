@@ -9,7 +9,12 @@ import {
 import { Bot } from "lucide-react";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
-import { createConversation, selectVersionDiff } from "@lix-js/sdk";
+import {
+	acceptChangeProposal,
+	createConversation,
+	selectVersionDiff,
+	rejectChangeProposal,
+} from "@lix-js/sdk";
 import {
 	ChangeProposalRejectedError,
 	createLixAgent,
@@ -237,27 +242,38 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		};
 	}, [hasKey, lix, model, storedApiKey]);
 
+	const clearPendingProposal = useCallback(() => {
+		setPendingProposal((prev) => {
+			if (context && prev?.details?.fileId) {
+				context.closeDiffView?.(prev.details.fileId);
+			}
+			return null;
+		});
+	}, [context]);
+
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
 		try {
 			await pendingProposal.accept();
+			clearPendingProposal();
 		} catch (error_) {
 			const message =
 				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
 			setError(`Error: ${message}`);
 		}
-	}, [pendingProposal]);
+	}, [pendingProposal, clearPendingProposal]);
 
 	const rejectPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
 		try {
 			await pendingProposal.reject();
+			clearPendingProposal();
 		} catch (error_) {
 			const message =
 				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
 			setError(`Error: ${message}`);
 		}
-	}, [pendingProposal]);
+	}, [pendingProposal, clearPendingProposal]);
 
 	const clear = useCallback(async () => {
 		if (!agent) throw new Error("Agent not ready");
@@ -334,17 +350,18 @@ export function AgentView({ context, instance }: AgentViewProps) {
 	const handleAcceptDecision = useCallback(
 		async (id: string) => {
 			if (!pendingProposal || pendingProposal.proposalId !== id) return;
+			const details = pendingProposal.details;
 			await acceptPendingProposal();
 
 			// After accepting, open the file in center view
 			if (
 				context &&
-				pendingProposal.details?.fileId &&
-				pendingProposal.details.filePath
+				details?.fileId &&
+				details.filePath
 			) {
-				await context.openFileView?.(pendingProposal.details.fileId, {
+				await context.openFileView?.(details.fileId, {
 					focus: true,
-					filePath: pendingProposal.details.filePath,
+					filePath: details.filePath,
 				});
 			}
 		},
@@ -482,15 +499,10 @@ export function AgentView({ context, instance }: AgentViewProps) {
 							break;
 						}
 						case "proposal:closed": {
-							if (autoAcceptEnabled) {
-								break;
+							if (!autoAcceptEnabled) {
+								clearPendingProposal();
+								activeProposal = null;
 							}
-							const details = activeProposal?.details;
-							if (context && details?.fileId) {
-								context.closeDiffView?.(details.fileId);
-							}
-							setPendingProposal(null);
-							activeProposal = null;
 							break;
 						}
 						case "message":
@@ -537,7 +549,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				setPending(false);
 			}
 		},
-		[agent, conversationId, context, autoAcceptEnabled],
+		[agent, conversationId, context, autoAcceptEnabled, clearPendingProposal],
 	);
 
 	useEffect(() => {
@@ -552,6 +564,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		if (
 			pendingProposal ||
 			!agent ||
+			pending ||
 			!openProposals ||
 			openProposals.length === 0
 		)
@@ -573,12 +586,16 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			summary: "Proposed changes",
 			details,
 			accept: async () => {
-				await send("I accept the changes.");
+				await acceptChangeProposal({
+					lix,
+					proposal: { id: proposal.id },
+				});
 			},
-			reject: async (reason) => {
-				await send(
-					reason ? `I reject the changes: ${reason}` : "I reject the changes.",
-				);
+			reject: async () => {
+				await rejectChangeProposal({
+					lix,
+					proposal: { id: proposal.id },
+				});
 			},
 		});
 
@@ -595,7 +612,14 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				diffConfig,
 			});
 		}
-	}, [openProposals, pendingProposal, agent, send, context]);
+	}, [
+		openProposals,
+		pendingProposal,
+		pending,
+		agent,
+		lix,
+		context,
+	]);
 
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
