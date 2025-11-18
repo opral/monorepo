@@ -470,6 +470,19 @@ export function AgentView({ context }: AgentViewProps) {
 		[agent, conversationId, context, autoAcceptEnabled],
 	);
 
+	// Check for pending message from welcome screen
+	useEffect(() => {
+		if (typeof window === "undefined" || !hasKey || !agent) return;
+		const pendingMessage = sessionStorage.getItem(
+			"flashtype_pending_welcome_message",
+		);
+		if (pendingMessage) {
+			sessionStorage.removeItem("flashtype_pending_welcome_message");
+			void send(pendingMessage);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [hasKey, agent, send]);
+
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
 			const normalized = raw.trim().toLowerCase();

@@ -1095,6 +1095,7 @@ export function V2LayoutShell() {
 								}
 								viewContext={centralViewContext}
 								onCreateNewFile={handleCreateNewFile}
+								onAddView={handleAddView}
 							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">

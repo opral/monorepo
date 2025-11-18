@@ -84,6 +84,10 @@ type PromptComposerProps = {
 	 * await onSendMessage("What changed in commit abc?");
 	 */
 	onSendMessage(value: string): Promise<void>;
+	/**
+	 * Optional custom placeholder text. If provided, overrides the default placeholder.
+	 */
+	placeholderText?: string;
 };
 
 /**
@@ -102,6 +106,7 @@ export function PromptComposer({
 	onNotice,
 	onSlashCommand,
 	onSendMessage,
+	placeholderText: customPlaceholderText,
 }: PromptComposerProps) {
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -425,9 +430,12 @@ export function PromptComposer({
 		slashIdx,
 	]);
 
-	const placeholder = hasKey
-		? "Ask Lix Agent…"
-		: "Add an OpenRouter API key to enable the Lix Agent…";
+	const placeholder =
+		customPlaceholderText !== undefined
+			? customPlaceholderText
+			: hasKey
+				? "Ask Flashtype…"
+				: "Add an OpenRouter API key to enable the Lix Agent…";
 	const sendDisabled = pending || !hasKey;
 
 	return (

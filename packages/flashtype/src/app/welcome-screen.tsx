@@ -1,130 +1,267 @@
-import { useCallback, type JSX } from "react";
-import { ArrowRight, Zap } from "lucide-react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type JSX,
+} from "react";
+import { Zap } from "lucide-react";
+import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
+import { PromptComposer } from "@/views/agent-view/components/prompt-composer";
+import { COMMANDS } from "@/views/agent-view/commands";
+import { selectFilePaths } from "@/views/agent-view/select-file-paths";
+import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
+import { useKeyValue } from "@/hooks/key-value/use-key-value";
+import type { ViewContext } from "./types";
+
+const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
+const AVAILABLE_MODELS = [
+	{ id: "anthropic/claude-4.5-sonnet", label: "Claude 4.5 Sonnet" },
+	{ id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+	{ id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+	{ id: "z-ai/glm-4.6", label: "GLM 4.6 by ZAI" },
+	{ id: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
+	{ id: "openai/gpt-5", label: "GPT-5" },
+	{ id: "openai/gpt-5-codex", label: "GPT-5 Codex" },
+] as const;
+const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";
 
 type WelcomeScreenProps = {
-	readonly onCreateNewFile?: () => void | Promise<void>;
+	/**
+	 * View context for opening views and accessing Lix.
+	 */
+	readonly context: ViewContext;
+	/**
+	 * Callback to open the agent view.
+	 */
+	readonly onOpenAgentView: () => void;
 };
 
 /**
- * Minimal welcome screen that introduces Flashtype and nudges first actions.
+ * Welcome screen with a prompt composer to reduce onboarding friction.
+ * Users can immediately start typing what they want to write.
  *
  * @example
- * return <WelcomeScreen onCreateNewFile={() => console.log("create")} />;
+ * return (
+ *   <WelcomeScreen
+ *     context={viewContext}
+ *     onOpenAgentView={() => console.log("open agent")}
+ *   />
+ * );
  */
-export function WelcomeScreen({
-	onCreateNewFile,
+function WelcomeScreenContent({
+	context,
+	onOpenAgentView,
 }: WelcomeScreenProps): JSX.Element {
-	const handleCreateNewFile = useCallback(() => {
-		if (!onCreateNewFile) return;
-		void onCreateNewFile();
-	}, [onCreateNewFile]);
+	const devApiKey =
+		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
+			? VITE_DEV_OPENROUTER_API_KEY.trim()
+			: null;
+	const usingDevApiKey = Boolean(devApiKey);
+
+	const [storedApiKey, setStoredApiKey] = useState<string | null>(devApiKey);
+	const [keyLoaded, setKeyLoaded] = useState(usingDevApiKey);
+	const [storedModel, setStoredModel] = useKeyValue("flashtype_agent_model");
+	const [autoAcceptRaw, setAutoAccept] = useKeyValue(
+		"flashtype_auto_accept_session",
+	);
+	const [notice, setNotice] = useState<string | null>(null);
+	const [pending, setPending] = useState(false);
+	const [placeholderText, setPlaceholderText] = useState("");
+
+	const selectedModelId = useMemo(() => {
+		if (!storedModel) return DEFAULT_MODEL_ID;
+		const match = AVAILABLE_MODELS.find((option) => option.id === storedModel);
+		return match ? match.id : DEFAULT_MODEL_ID;
+	}, [storedModel]);
+	const autoAcceptEnabled = Boolean(autoAcceptRaw);
+	const hasKey = Boolean(storedApiKey);
+
+	const suggestions = useMemo(
+		() => [
+			"write a blog post about...",
+			"review your resume",
+			"draft an email",
+			"write a love letter",
+			"shorten your LinkedIn post",
+		],
+		[],
+	);
+	const animationRef = useRef<{
+		currentIndex: number;
+		charIndex: number;
+		isDeleting: boolean;
+		timeoutId: ReturnType<typeof setTimeout> | null;
+	}>({
+		currentIndex: 0,
+		charIndex: 0,
+		isDeleting: false,
+		timeoutId: null,
+	});
+
+	useEffect(() => {
+		if (!hasKey) {
+			if (animationRef.current.timeoutId) {
+				clearTimeout(animationRef.current.timeoutId);
+				animationRef.current.timeoutId = null;
+			}
+			setPlaceholderText("");
+			return;
+		}
+
+		const type = () => {
+			const { currentIndex, charIndex, isDeleting } = animationRef.current;
+			const currentSuggestion = suggestions[currentIndex];
+			if (isDeleting) {
+				const newCharIndex = charIndex - 1;
+				animationRef.current.charIndex = newCharIndex;
+				setPlaceholderText(
+					`Ask Flashtype to ${currentSuggestion.slice(0, newCharIndex)}`,
+				);
+				if (newCharIndex === 0) {
+					animationRef.current.isDeleting = false;
+					animationRef.current.currentIndex =
+						(currentIndex + 1) % suggestions.length;
+					animationRef.current.timeoutId = setTimeout(type, 500);
+				} else {
+					animationRef.current.timeoutId = setTimeout(type, 50);
+				}
+			} else {
+				const newCharIndex = charIndex + 1;
+				animationRef.current.charIndex = newCharIndex;
+				setPlaceholderText(
+					`Ask Flashtype to ${currentSuggestion.slice(0, newCharIndex)}`,
+				);
+				if (newCharIndex === currentSuggestion.length) {
+					animationRef.current.isDeleting = true;
+					animationRef.current.timeoutId = setTimeout(type, 2000);
+				} else {
+					animationRef.current.timeoutId = setTimeout(type, 100);
+				}
+			}
+		};
+
+		animationRef.current.timeoutId = setTimeout(type, 500);
+
+		return () => {
+			if (animationRef.current.timeoutId) {
+				clearTimeout(animationRef.current.timeoutId);
+				animationRef.current.timeoutId = null;
+			}
+		};
+	}, [hasKey, suggestions]);
+
+	useEffect(() => {
+		if (devApiKey) {
+			setStoredApiKey(devApiKey);
+			setKeyLoaded(true);
+			return;
+		}
+		if (typeof window === "undefined") {
+			setKeyLoaded(true);
+			return;
+		}
+		const existing = window.localStorage.getItem(OPENROUTER_KEY_STORAGE_KEY);
+		if (existing) {
+			setStoredApiKey(existing);
+		}
+		setKeyLoaded(true);
+	}, [devApiKey]);
+
+	const fileRows = useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 }));
+	const filePaths = useMemo(
+		() => (fileRows ?? []).map((row: any) => String(row.path)),
+		[fileRows],
+	);
+
+	const handleModelChange = useCallback(
+		(next: string) => {
+			void setStoredModel(next);
+		},
+		[setStoredModel],
+	);
+
+	const handleAutoAcceptToggle = useCallback(
+		async (next: boolean) => {
+			await setAutoAccept(next);
+			setNotice(null);
+		},
+		[setAutoAccept],
+	);
+
+	const handleSlashCommand = useCallback(
+		async (command: string) => {
+			// For welcome screen, slash commands should open agent view
+			onOpenAgentView();
+		},
+		[onOpenAgentView],
+	);
+
+	const handleSendMessage = useCallback(
+		async (message: string) => {
+			// Open agent view first, then the agent view will handle sending
+			onOpenAgentView();
+			// Store the message to send it when agent view opens
+			// This is a simple approach - in a real implementation, you might want
+			// to pass the message through context or state
+			if (typeof window !== "undefined") {
+				sessionStorage.setItem("flashtype_pending_welcome_message", message);
+			}
+		},
+		[onOpenAgentView],
+	);
+
+	if (!keyLoaded) {
+		return (
+			<div
+				className="flex h-full flex-col items-center justify-center px-6 text-neutral-900"
+				data-testid="welcome-screen"
+			>
+				<div className="text-neutral-600">Loading...</div>
+			</div>
+		);
+	}
 
 	return (
 		<div
 			className="flex h-full flex-col items-center justify-center px-6 text-neutral-900"
 			data-testid="welcome-screen"
 		>
-			<main className="flex flex-col items-center gap-6 text-center">
+			<main className="flex w-full max-w-3xl flex-col items-center gap-8">
 				{/* Logo/Brand */}
-				<div className="flex items-center gap-2 text-xl">
-					<Zap className="h-5 w-5 text-brand-600" />
+				<div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm mb-16 -mt-32">
+					<Zap className="h-3.5 w-3.5 text-brand-600" />
 					<span className="font-semibold text-neutral-900">flashtype.ai</span>
 				</div>
 
-				{/* Description */}
-				<div className="flex flex-col items-center gap-1">
+				{/* Main prompt */}
+				<div className="flex flex-col items-center gap-2">
+					<h1 className="text-4xl font-semibold text-neutral-900">
+						What do you want to write?
+					</h1>
 					<p className="text-base text-neutral-600">
-						A Claude Code-style WYSIWYG markdown editor in the browser.
-					</p>
-					<p className="text-base text-neutral-600">
-						Zero install. AI-powered. Built on top of
-						<a href="https://lix.dev" target="_blank" rel="noreferrer">
-							<svg
-								width="17"
-								height="12"
-								viewBox="0 0 105 72"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-								className="inline -translate-y-1/7 ml-1.5"
-							>
-								<path
-									d="M59.8478 22.6263L68.7495 39.5774L91.2057 0.403687H105L77.6196 46.8692L92.0454 71.1121H78.314L68.7495 54.3504L59.3428 71.1121H45.4536L59.8478 46.8692L45.9587 22.6263H59.8478Z"
-									fill="#07B6D4"
-								/>
-								<path
-									d="M24.3909 71.1119V22.6262H37.8381V71.1119H24.3909Z"
-									fill="#07B6D4"
-								/>
-								<path
-									d="M13.5052 0.549194V71.6616H0.171631V0.549194H13.5052Z"
-									fill="#07B6D4"
-								/>
-								<path
-									d="M24.6166 0.549194H60.1728V11.6605H24.6166V0.549194Z"
-									fill="#07B6D4"
-								/>
-							</svg>
-						</a>
-						.
+						Create markdown documents by chatting with AI
 					</p>
 				</div>
 
-				{/* CTAs */}
-				<div className="flex items-center gap-3">
-					<button
-						type="button"
-						onClick={handleCreateNewFile}
-						className="cursor-pointer rounded-lg border border-neutral-200 bg-neutral-0 px-3.5 py-2 shadow-sm transition hover:border-brand-600 hover:shadow focus-visible:!bg-brand-200 focus-visible:!outline-none"
-					>
-						<div className="flex items-center gap-2">
-							<span className="text-sm font-medium leading-none text-neutral-900">
-								Create a new file
-							</span>
-							<span className="flex items-center gap-1">
-								<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-xs font-medium text-neutral-600">
-									⌘
-								</kbd>
-								<kbd className="rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-xs font-medium text-neutral-600">
-									.
-								</kbd>
-							</span>
-						</div>
-					</button>
-
-					<a
-						href="https://lix.dev"
-						target="_blank"
-						rel="noreferrer"
-						className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-brand-600"
-					>
-						Explore{" "}
-						<svg
-							width="16"
-							height="12"
-							viewBox="0 0 105 72"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-							className="inline"
-						>
-							<path
-								d="M59.8478 22.6263L68.7495 39.5774L91.2057 0.403687H105L77.6196 46.8692L92.0454 71.1121H78.314L68.7495 54.3504L59.3428 71.1121H45.4536L59.8478 46.8692L45.9587 22.6263H59.8478Z"
-								fill="currentColor"
-							/>
-							<path
-								d="M24.3909 71.1119V22.6262H37.8381V71.1119H24.3909Z"
-								fill="currentColor"
-							/>
-							<path
-								d="M13.5052 0.549194V71.6616H0.171631V0.549194H13.5052Z"
-								fill="currentColor"
-							/>
-							<path
-								d="M24.6166 0.549194H60.1728V11.6605H24.6166V0.549194Z"
-								fill="currentColor"
-							/>
-						</svg>
-						<ArrowRight className="h-3.5 w-3.5" />
-					</a>
+				{/* Prompt Composer */}
+				<div className="w-full [&>div>div:last-child]:hidden">
+					<PromptComposer
+						hasKey={hasKey}
+						models={AVAILABLE_MODELS}
+						modelId={selectedModelId}
+						onModelChange={handleModelChange}
+						autoAcceptEnabled={autoAcceptEnabled}
+						onAutoAcceptToggle={handleAutoAcceptToggle}
+						commands={COMMANDS}
+						files={filePaths}
+						pending={pending}
+						onNotice={setNotice}
+						onSlashCommand={handleSlashCommand}
+						onSendMessage={handleSendMessage}
+						placeholderText={placeholderText || "Ask Flashtype to..."}
+					/>
 				</div>
 
 				{/* Social Links */}
@@ -186,5 +323,22 @@ export function WelcomeScreen({
 				</div>
 			</main>
 		</div>
+	);
+}
+
+/**
+ * Welcome screen wrapper that provides agent state and Lix context.
+ */
+export function WelcomeScreen({
+	context,
+	onOpenAgentView,
+}: WelcomeScreenProps): JSX.Element {
+	return (
+		<LixProvider lix={context.lix}>
+			<WelcomeScreenContent
+				context={context}
+				onOpenAgentView={onOpenAgentView}
+			/>
+		</LixProvider>
 	);
 }
