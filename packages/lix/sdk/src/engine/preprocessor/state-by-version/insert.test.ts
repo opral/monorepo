@@ -124,24 +124,3 @@ test("throws when encountering unsupported columns", () => {
 		});
 	}).toThrowError(/Unsupported column/i);
 });
-
-test("ignores read-only timestamp columns when present", () => {
-	const sql = `
-		INSERT INTO state_by_version (
-			entity_id,
-			schema_key,
-			file_id,
-			version_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			created_at,
-			updated_at
-		) VALUES ('row', 'schema', 'file', 'version', 'plugin', json('{}'), '1.0', '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:00.000Z')
-	`;
-
-	const rewritten = rewriteSql(sql);
-	expect(rewritten).toContain("INSERT INTO lix_internal_state_vtable");
-	expect(rewritten).not.toContain("created_at");
-	expect(rewritten).not.toContain("updated_at");
-});

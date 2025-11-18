@@ -54,9 +54,9 @@ test("state_by_version insert statements are rewritten via preprocessor", async 
 	});
 
 	expect(sql.toLowerCase()).toContain("lix_internal_state_vtable");
-	expect(trace?.some((entry) => entry.step === "rewrite_state_by_version_insert")).toBe(
-		true
-	);
+	expect(
+		trace?.some((entry) => entry.step === "rewrite_state_by_version_insert")
+	).toBe(true);
 
 	await lix.close();
 });

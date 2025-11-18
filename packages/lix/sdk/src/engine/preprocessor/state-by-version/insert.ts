@@ -1,12 +1,8 @@
 import {
-	type BinaryExpressionNode,
 	type ExpressionNode,
-	type FunctionCallArgumentNode,
-	type FunctionCallExpressionNode,
 	identifier,
 	type InsertStatementNode,
 	type ObjectNameNode,
-	type ParameterExpressionNode,
 	type SegmentedStatementNode,
 	type StatementSegmentNode,
 } from "../sql-parser/nodes.js";
@@ -31,7 +27,6 @@ const WRITABLE_COLUMNS: readonly string[] = [
 const REQUIRED_COLUMNS = new Set(
 	WRITABLE_COLUMNS.slice(0, 7 /* required subset */)
 );
-const WRITABLE_COLUMN_SET = new Set(WRITABLE_COLUMNS);
 const SKIPPABLE_COLUMNS = new Set([
 	"created_at",
 	"updated_at",
@@ -40,6 +35,7 @@ const SKIPPABLE_COLUMNS = new Set([
 	"writer_key",
 	"source_tag",
 ]);
+const ALLOWED_COLUMNS = new Set([...WRITABLE_COLUMNS, ...SKIPPABLE_COLUMNS]);
 
 /**
  * Rewrites INSERT statements targeting the state_by_version view to write
@@ -119,17 +115,15 @@ function rewriteInsertStatement(
 	const keptColumns: IdentifierNode[] = [];
 	const keptColumnNames: string[] = [];
 	const filteredRows = insert.source.rows.map(() => [] as ExpressionNode[]);
-	const parameterSource = context.parameters ?? [];
-	let sequentialCursor = 0;
-	const reorderedParameters: unknown[] = [];
 
-	for (let columnIndex = 0; columnIndex < insert.columns.length; columnIndex++) {
+	for (
+		let columnIndex = 0;
+		columnIndex < insert.columns.length;
+		columnIndex++
+	) {
 		const column = insert.columns[columnIndex]!;
 		const normalized = normalizeIdentifierValue(column.value);
-		const isWritable = WRITABLE_COLUMN_SET.has(normalized);
-		const isSkippable = SKIPPABLE_COLUMNS.has(normalized);
-
-		if (!isWritable && !isSkippable) {
+		if (!ALLOWED_COLUMNS.has(normalized)) {
 			throw new Error(
 				`Unsupported column '${normalized}' in INSERT INTO state_by_version`
 			);
@@ -140,24 +134,11 @@ function rewriteInsertStatement(
 			if (!expression) {
 				return null;
 			}
-			const values = extractParameterValues(expression, parameterSource, {
-				sequentialCursorRef: () => sequentialCursor,
-				setSequentialCursor: (value) => {
-					sequentialCursor = value;
-				},
-			});
-			if (isWritable) {
-				filteredRows[rowIndex]!.push(expression);
-				if (values.length > 0) {
-					reorderedParameters.push(...values);
-				}
-			}
+			filteredRows[rowIndex]!.push(expression);
 		}
 
-		if (isWritable) {
-			keptColumns.push(column);
-			keptColumnNames.push(normalized);
-		}
+		keptColumns.push(column);
+		keptColumnNames.push(normalized);
 	}
 
 	const finalColumns: IdentifierNode[] = [...keptColumns];
@@ -181,14 +162,6 @@ function rewriteInsertStatement(
 	);
 	if (!rewrittenRows) {
 		return null;
-	}
-
-	if (reorderedParameters.length > 0 || sequentialCursor > 0) {
-		const remaining =
-			sequentialCursor < parameterSource.length
-				? parameterSource.slice(sequentialCursor)
-				: [];
-		context.setParameters?.([...reorderedParameters, ...remaining]);
 	}
 
 	context.trace?.push({
@@ -286,69 +259,4 @@ function extractTableName(name: ObjectNameNode): string | null {
 	}
 	const last = name.parts[name.parts.length - 1];
 	return last?.value ?? null;
-}
-
-function extractParameterValues(
-	node: ExpressionNode,
-	source: ReadonlyArray<unknown>,
-	cursor: {
-		sequentialCursorRef: () => number;
-		setSequentialCursor: (value: number) => void;
-	}
-): unknown[] {
-	const values: unknown[] = [];
-	const visit = (expression: ExpressionNode | null | undefined): void => {
-		if (!expression) return;
-		switch (expression.node_kind) {
-			case "parameter": {
-				const value = consumeParameterValue(expression, source, cursor);
-				if (value !== undefined) {
-					values.push(value);
-				}
-				break;
-			}
-			case "binary_expression":
-				visit(expression.left);
-				visit(expression.right);
-				break;
-			case "unary_expression":
-				visit(expression.operand);
-				break;
-			case "function_call_expression":
-				for (const arg of expression.arguments as FunctionCallArgumentNode[]) {
-					if (arg.kind === "expression") {
-						visit(arg.expression);
-					}
-				}
-				break;
-			case "grouped_expression":
-				visit(expression.expression);
-				break;
-			case "case_expression":
-				for (const whenThen of expression.cases) {
-					visit(whenThen.when);
-					visit(whenThen.then);
-				}
-				visit(expression.else);
-				break;
-			default:
-				break;
-		}
-	};
-	visit(node);
-	return values;
-}
-
-function consumeParameterValue(
-	_node: ParameterExpressionNode,
-	source: ReadonlyArray<unknown>,
-	cursor: {
-		sequentialCursorRef: () => number;
-		setSequentialCursor: (value: number) => void;
-	}
-): unknown {
-	const index = cursor.sequentialCursorRef();
-	const value = source[index];
-	cursor.setSequentialCursor(index + 1);
-	return value;
 }

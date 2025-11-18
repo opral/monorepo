@@ -48,7 +48,6 @@ export type PreprocessorContext = {
 	readonly getVersionInheritance?: () => VersionInheritanceMap;
 	readonly getActiveVersionId?: () => string | null;
 	readonly trace?: PreprocessorTrace;
-	readonly setParameters?: (next: ReadonlyArray<unknown>) => void;
 };
 
 /**

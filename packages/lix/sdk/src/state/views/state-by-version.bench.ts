@@ -354,7 +354,12 @@ function deleteStateByVersionRow(
 ) {
 	lix.engine!.executeSync({
 		sql: STATE_BY_VERSION_DELETE_SQL,
-		parameters: [args.entityId, BENCH_SCHEMA_KEY, BENCH_FILE_ID, args.versionId],
+		parameters: [
+			args.entityId,
+			BENCH_SCHEMA_KEY,
+			BENCH_FILE_ID,
+			args.versionId,
+		],
 	});
 }
 

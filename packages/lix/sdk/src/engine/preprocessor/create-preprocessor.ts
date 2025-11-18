@@ -81,7 +81,6 @@ export function createPreprocessor(args: {
 	}: PreprocessorArgs) => {
 		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
-		let activeParameters = parameters;
 
 		if (mode === "none") {
 			if (traceEntries) {
@@ -103,10 +102,7 @@ export function createPreprocessor(args: {
 			(current, step) =>
 				step({
 					statements: current,
-					parameters: activeParameters,
-					setParameters: (next) => {
-						activeParameters = next;
-					},
+					parameters,
 					getStoredSchemas: context.getStoredSchemas,
 					getCacheTables: context.getCacheTables,
 					getSqlViews: context.getSqlViews,
@@ -131,7 +127,7 @@ export function createPreprocessor(args: {
 
 		return {
 			sql: compiled.sql,
-			parameters: activeParameters,
+			parameters,
 			trace: traceEntries,
 		};
 	};
