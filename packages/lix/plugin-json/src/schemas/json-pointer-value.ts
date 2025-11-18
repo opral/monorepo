@@ -3,6 +3,7 @@ import { JSONTypeSchema, type LixSchemaDefinition } from "@lix-js/sdk";
 export const JSONPointerValueSchema = {
 	"x-lix-key": "plugin_json_pointer_value",
 	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["/path"],
 	type: "object",
 	properties: {
 		path: {

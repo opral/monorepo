@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest";
-import type { Change, DetectedChange, LixFile, LixPlugin } from "@lix-js/sdk";
+import {
+	type Change,
+	type DetectedChange,
+	type LixFile,
+	type LixPlugin,
+	openLix,
+} from "@lix-js/sdk";
 import { detectChanges } from "./detect-changes.js";
 import { applyChanges } from "./apply-changes.js";
 import { JSONPointerValueSchema } from "./schemas/json-pointer-value.js";
@@ -341,6 +347,59 @@ describe("plugin-json integration", () => {
 		).toThrow(SyntaxError);
 	});
 
+	test("primary key constraint rejects duplicate pointer paths", async () => {
+		const lix = await openLix({});
+		try {
+			await lix.db
+				.insertInto("stored_schema")
+				.values({ value: JSONPointerValueSchema })
+				.execute();
+
+			const activeVersion = await lix.db
+				.selectFrom("active_version")
+				.select("version_id")
+				.executeTakeFirstOrThrow();
+
+			const pointer = "/primary/key";
+
+			await lix.db
+				.insertInto("state_by_version")
+				.values({
+					entity_id: pointer,
+					file_id: "json-plugin-e2e",
+					schema_key: JSONPointerValueSchema["x-lix-key"],
+					schema_version: JSONPointerValueSchema["x-lix-version"],
+					plugin_key: "plugin_json",
+					version_id: activeVersion.version_id,
+					snapshot_content: {
+						path: pointer,
+						value: "first",
+					},
+				})
+				.execute();
+
+			await expect(
+				lix.db
+					.insertInto("state_by_version")
+					.values({
+						entity_id: pointer,
+						file_id: "json-plugin-e2e",
+						schema_key: JSONPointerValueSchema["x-lix-key"],
+						schema_version: JSONPointerValueSchema["x-lix-version"],
+						plugin_key: "plugin_json",
+						version_id: activeVersion.version_id,
+						snapshot_content: {
+							path: pointer,
+							value: "duplicate",
+						},
+					})
+					.execute(),
+			).rejects.toThrow(/primary key constraint/i);
+		} finally {
+			await lix.close();
+		}
+	});
+
 	test("handles deeply nested structures without stack issues", () => {
 		const buildDeep = (depth: number, leaf: JSONValue): JSONValue => {
 			let current: JSONValue = leaf;
@@ -361,6 +420,58 @@ describe("plugin-json integration", () => {
 			const before = { root: randomTree(rand, 0, 3) };
 			const after = mutateRandomly(before, rand);
 			expectRoundTrip(before, after);
+		}
+	});
+
+	test("two different files with same path do not conflict", async () => {
+		const lix = await openLix({});
+		try {
+			await lix.db
+				.insertInto("stored_schema")
+				.values({ value: JSONPointerValueSchema })
+				.execute();
+
+			const activeVersion = await lix.db
+				.selectFrom("active_version")
+				.select("version_id")
+				.executeTakeFirstOrThrow();
+
+			const pointer = "/shared/path";
+
+			await lix.db
+				.insertInto("state_by_version")
+				.values({
+					entity_id: pointer,
+					file_id: "file-1",
+					schema_key: JSONPointerValueSchema["x-lix-key"],
+					schema_version: JSONPointerValueSchema["x-lix-version"],
+					plugin_key: "plugin_json",
+					version_id: activeVersion.version_id,
+					snapshot_content: {
+						path: pointer,
+						value: "value1",
+					},
+				})
+				.execute();
+
+			// This should NOT throw
+			await lix.db
+				.insertInto("state_by_version")
+				.values({
+					entity_id: pointer,
+					file_id: "file-2", // Different file
+					schema_key: JSONPointerValueSchema["x-lix-key"],
+					schema_version: JSONPointerValueSchema["x-lix-version"],
+					plugin_key: "plugin_json",
+					version_id: activeVersion.version_id,
+					snapshot_content: {
+						path: pointer,
+						value: "value2",
+					},
+				})
+				.execute();
+		} finally {
+			await lix.close();
 		}
 	});
 });

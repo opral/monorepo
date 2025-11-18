@@ -1,6 +1,10 @@
-import { test, expect } from "vitest";
-import { validateLixSchema } from "@lix-js/sdk";
+import { expect, test } from "vitest";
 import { JSONPointerValueSchema } from "./json-pointer-value.js";
+import { validateLixSchema } from "../../../sdk/dist/schema-definition/index.js";
+
+test("JSONPointerValueSchema declares path as the primary key", () => {
+	expect(JSONPointerValueSchema["x-lix-primary-key"]).toEqual(["/path"]);
+});
 
 test("JSONPointerValueSchema validates data with both path and value", () => {
 	const validData = {
