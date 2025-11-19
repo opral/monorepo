@@ -22,6 +22,50 @@ interface ActiveObservable {
 }
 
 /**
+ * Detects merge commits from state commit payloads.
+ *
+ * Returns version IDs whose latest tip references a commit with multiple parent edges.
+ */
+function detectMergedVersions(
+	changes: StateCommitChange[]
+): Set<string> {
+	const commitsWithMultipleParents = new Set<string>();
+	for (const change of changes) {
+		if (change.schema_key !== "lix_commit") continue;
+		const snapshot = change.snapshot_content as
+			| { parent_commit_ids?: unknown }
+			| null;
+		const parentIds = Array.isArray(snapshot?.parent_commit_ids)
+			? snapshot!.parent_commit_ids.filter(
+					(parent): parent is string =>
+						typeof parent === "string" && parent.length > 0
+				)
+			: [];
+		if (parentIds.length >= 2) {
+			commitsWithMultipleParents.add(change.entity_id);
+		}
+	}
+
+	if (commitsWithMultipleParents.size === 0) {
+		return new Set();
+	}
+
+	const mergedVersionIds = new Set<string>();
+	for (const change of changes) {
+		if (change.schema_key !== "lix_version_tip") continue;
+		const commitId = (change.snapshot_content as any)?.commit_id;
+		if (
+			typeof commitId === "string" &&
+			commitsWithMultipleParents.has(commitId)
+		) {
+			mergedVersionIds.add(change.entity_id);
+		}
+	}
+
+	return mergedVersionIds;
+}
+
+/**
  * Deep equality check for query results.
  * Compares arrays element by element using JSON.stringify for simplicity.
  */
@@ -152,6 +196,20 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			// If no schema keys extracted, always re-execute for safety
 			if (!schemaKeys.length) {
 				return true;
+			}
+
+			// Detect merge commits (identified by commits with two parent edges)
+			// and force re-execution for queries targeting the affected versions.
+			const mergedVersionIds = detectMergedVersions(changes);
+			if (mergedVersionIds.size > 0) {
+				if (watchedVersions.size === 0) {
+					return true;
+				}
+				for (const vid of mergedVersionIds) {
+					if (watchedVersions.has(vid)) {
+						return true;
+					}
+				}
 			}
 
 			// Check if any of the changed entities match our query's schema keys

@@ -1,5 +1,8 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
+import { createVersion } from "../version/create-version.js";
+import { mergeVersion } from "../version/merge-version.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 /**
  * These tests use the key_value table as an example entity in the state.
@@ -397,6 +400,78 @@ test("observing specific key should not emit when unrelated key is inserted", as
 
 	subscriptionA.unsubscribe();
 	subscriptionB.unsubscribe();
+	await lix.close();
+});
+
+test("observing a state emits when a version merge happens", async () => {
+	const schema: LixSchemaDefinition = {
+		"x-lix-key": "observe_merge_entity",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			v: { type: "string" },
+		},
+		required: ["v"],
+		additionalProperties: false,
+	} as const;
+
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const target = await createVersion({ lix, name: "target" });
+	const source = await createVersion({ lix, name: "source" });
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "entity-from-source",
+			schema_key: "observe_merge_entity",
+			file_id: "file-observe",
+			version_id: source.id,
+			plugin_key: "test_plugin",
+			snapshot_content: { v: "from-source" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	const emissions: Array<
+		{ entity_id: string; snapshot_content: Record<string, unknown> }[]
+	> = [];
+
+	const targetVersionQuery = lix.db
+		.selectFrom("state_by_version")
+		.select(["entity_id", "snapshot_content"])
+		.where("version_id", "=", target.id)
+		.where("schema_key", "=", "observe_merge_entity");
+
+	const subscription = lix
+		.observe(targetVersionQuery)
+		.subscribe({ next: (rows) => emissions.push(rows) });
+
+	await new Promise((resolve) => setTimeout(resolve, 20));
+	expect(emissions).toHaveLength(1);
+	expect(emissions[0]).toEqual([]);
+
+	await mergeVersion({ lix, source, target });
+	await new Promise((resolve) => setTimeout(resolve, 50));
+	expect(emissions).toHaveLength(2);
+	expect(emissions[1]).toEqual([
+		{
+			entity_id: "entity-from-source",
+			snapshot_content: { v: "from-source" },
+		},
+	]);
+
+	subscription.unsubscribe();
 	await lix.close();
 });
 

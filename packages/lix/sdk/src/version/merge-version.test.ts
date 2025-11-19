@@ -9,6 +9,7 @@ import { selectWorkingDiff } from "../diff/select-working-diff.js";
 import { insertTransactionState } from "../state/transaction/insert-transaction-state.js";
 import { commit } from "../state/vtable/commit.js";
 import { openLix } from "../lix/open-lix.js";
+import type { StateCommitChange } from "../hooks/create-hooks.js";
 
 test("simulationTest discovery", () => {});
 
@@ -139,6 +140,79 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(changeRowsForKeys.length).toBe(2);
+	}
+);
+
+simulationTest(
+	"emits state_commit for merge-created changes",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await storeMergeTestSchemas(lix);
+
+		const source = await createVersion({ lix, name: "source" });
+		const target = await createVersion({ lix, name: "target" });
+
+		// Seed source with an entity that should flow into the target on merge
+		await lix.db
+			.insertInto("state_by_version")
+			.values({
+				entity_id: "emit-merge-entity",
+				schema_key: "test_entity",
+				file_id: "fileEmit",
+				version_id: source.id,
+				plugin_key: "test_plugin",
+				snapshot_content: { v: "from-source" },
+				schema_version: "1.0",
+			})
+			.execute();
+
+		const emissions: StateCommitChange[][] = [];
+		const unsubscribe = lix.hooks.onStateCommit(({ changes }) =>
+			emissions.push(changes)
+		);
+
+		await mergeVersion({ lix, source, target });
+
+		const targetVersion = await lix.db
+			.selectFrom("version")
+			.where("id", "=", target.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(emissions.length).toBe(1);
+		const mergedChanges = emissions[0]!;
+
+		// Merge should emit commit metadata and the merged domain state so observers react.
+		expectDeterministic(
+			mergedChanges.some(
+				(c) =>
+					c.schema_key === "test_entity" &&
+					c.entity_id === "emit-merge-entity" &&
+					c.version_id === target.id &&
+					c.commit_id === targetVersion.commit_id &&
+					c.snapshot_content?.v === "from-source"
+			)
+		).toBe(true);
+		expectDeterministic(
+			mergedChanges.some(
+				(c) =>
+					c.schema_key === "lix_commit" &&
+					c.commit_id === targetVersion.commit_id &&
+					c.version_id === "global"
+			)
+		).toBe(true);
+
+		unsubscribe();
+		await lix.close();
 	}
 );
 
