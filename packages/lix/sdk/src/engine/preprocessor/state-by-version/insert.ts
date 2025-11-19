@@ -10,32 +10,12 @@ import { normalizeIdentifierValue } from "../sql-parser/ast-helpers.js";
 import { normalizeSegmentedStatement } from "../sql-parser/parse.js";
 import type { PreprocessorStep, PreprocessorStepContext } from "../types.js";
 import { INTERNAL_STATE_VTABLE } from "../steps/rewrite-vtable-selects.js";
-
-const STATE_BY_VERSION_VIEW = "state_by_version";
-const WRITABLE_COLUMNS: readonly string[] = [
-	"entity_id",
-	"schema_key",
-	"file_id",
-	"version_id",
-	"plugin_key",
-	"snapshot_content",
-	"schema_version",
-	"inherited_from_version_id",
-	"metadata",
-	"untracked",
-];
-const REQUIRED_COLUMNS = new Set(
-	WRITABLE_COLUMNS.slice(0, 7 /* required subset */)
-);
-const SKIPPABLE_COLUMNS = new Set([
-	"created_at",
-	"updated_at",
-	"change_id",
-	"commit_id",
-	"writer_key",
-	"source_tag",
-]);
-const ALLOWED_COLUMNS = new Set([...WRITABLE_COLUMNS, ...SKIPPABLE_COLUMNS]);
+import {
+	ALLOWED_COLUMNS,
+	OPTIONAL_INSERT_COLUMNS,
+	REQUIRED_WRITABLE_COLUMNS,
+	STATE_BY_VERSION_VIEW,
+} from "./shared.js";
 
 /**
  * Rewrites INSERT statements targeting the state_by_version view to write
@@ -144,11 +124,7 @@ function rewriteInsertStatement(
 	const finalColumns: IdentifierNode[] = [...keptColumns];
 	const finalColumnNames: string[] = [...keptColumnNames];
 
-	for (const optional of [
-		"inherited_from_version_id",
-		"metadata",
-		"untracked",
-	] as const) {
+	for (const optional of OPTIONAL_INSERT_COLUMNS) {
 		if (!finalColumnNames.includes(optional)) {
 			finalColumns.push(identifier(optional));
 			finalColumnNames.push(optional);
@@ -202,7 +178,7 @@ function rewriteRows(
 			map.set(column, expression);
 		}
 
-		for (const required of REQUIRED_COLUMNS) {
+		for (const required of REQUIRED_WRITABLE_COLUMNS) {
 			if (!map.has(required)) {
 				return null;
 			}

@@ -42,7 +42,9 @@ test("rewrites updates for stored schema views", async () => {
 		parameters: ["Updated", "row-1"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_by_version");
+	expect(updateResult.sql).toContain(
+		"UPDATE lix_internal_state_vtable"
+	);
 	expect(updateResult.sql).toContain(
 		"json_extract(state_by_version.snapshot_content, '$.id') = ?"
 	);
@@ -137,7 +139,9 @@ test("rewrites quoted updates for stored schema views", async () => {
 		parameters: [updatedPattern, messageId],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_by_version");
+	expect(updateResult.sql).toContain(
+		"UPDATE lix_internal_state_vtable"
+	);
 	expect(updateResult.sql).toContain("'pattern', ?");
 	expect(updateResult.sql).toContain("$.messageId");
 	expect(updateResult.parameters).toEqual([updatedPattern, messageId]);
@@ -177,7 +181,9 @@ test("rewrites updates even when predicate omits primary key", async () => {
 		parameters: [updatePattern, messageId],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_by_version");
+	expect(updateResult.sql).toContain(
+		"UPDATE lix_internal_state_vtable"
+	);
 	expect(updateResult.sql).toContain(
 		"json_extract(state_by_version.snapshot_content, '$.messageId') = ?"
 	);
@@ -225,7 +231,7 @@ test("base view updates honour lixcol_version_id overrides", async () => {
 		parameters: ["Updated", "v-1"],
 	});
 	const sql = updateResult.sql;
-	expect(sql).toContain("UPDATE state_by_version");
+	expect(sql).toContain("UPDATE lix_internal_state_vtable");
 	expect(sql).toContain("'global'");
 	expect(updateResult.parameters).toEqual(["Updated", "v-1"]);
 
@@ -268,7 +274,9 @@ test("prefixless alias updates target stored schema key", async () => {
 		parameters: ["baz", "alias"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_by_version");
+	expect(updateResult.sql).toContain(
+		"UPDATE lix_internal_state_vtable"
+	);
 	expect(updateResult.sql).toContain("lix_key_value");
 	expect(updateResult.parameters).toEqual(["baz", "alias"]);
 
@@ -402,7 +410,9 @@ test("base-only views reuse metadata version defaults on update", async () => {
 		parameters: ["Changed", "meta-1"],
 	});
 
-	expect(updateResult.sql).toContain("UPDATE state_by_version");
+	expect(updateResult.sql).toContain(
+		"UPDATE lix_internal_state_vtable"
+	);
 	expect(updateResult.sql).toContain("'global'");
 
 	lix.engine!.executeSync({

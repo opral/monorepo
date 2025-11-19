@@ -78,7 +78,6 @@ export type PreprocessorArgs = {
 	readonly parameters: ReadonlyArray<unknown>;
 	readonly trace?: boolean;
 	readonly mode?: PreprocessMode;
-	readonly steps?: readonly PreprocessorStep[];
 };
 
 /**

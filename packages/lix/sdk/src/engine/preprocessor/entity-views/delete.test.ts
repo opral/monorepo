@@ -189,7 +189,7 @@ test("rewrites deletes for stored schema views", async () => {
 	});
 
 	const ast = getDeleteAst(preprocessedDelete);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
@@ -326,7 +326,7 @@ test("prefixless alias deletes target stored schema key", async () => {
 	});
 
 	const ast = getDeleteAst(preprocessedDelete);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
@@ -414,7 +414,7 @@ test("rewrites deletes for _by_version views", async () => {
 	});
 
 	const ast = getDeleteAst(deleteResult);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
@@ -549,7 +549,7 @@ test("base-only views apply metadata version defaults on delete", async () => {
 	});
 
 	const ast = getDeleteAst(deleteResult);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
@@ -629,7 +629,7 @@ test("base view delete uses schema default version when omitted", async () => {
 	});
 
 	const ast = getDeleteAst(deleteResult);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 	const equalities = collectEqualityExpressions(ast.where_clause);
 
 	expect(
@@ -714,7 +714,7 @@ test("rewrites delete with OR predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 
 	const trace = rewritten.trace ?? [];
 	expect(
@@ -766,7 +766,7 @@ test("rewrites delete with NOT predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 
 	const trace = rewritten.trace ?? [];
 	expect(
@@ -817,7 +817,7 @@ test("rewrites delete with inequality predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 
 	const trace = rewritten.trace ?? [];
 	expect(
@@ -886,7 +886,7 @@ test("rewrites delete with subquery predicates referencing other views", async (
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 
 	const trace = rewritten.trace ?? [];
 	expect(
@@ -921,7 +921,9 @@ test("rewrites delete with subquery predicates referencing other views", async (
 		}
 		const relation = fromClause.relation;
 		if (relation.node_kind === "table_reference") {
-			expect(relation.name.parts[0]?.value).toBe("state_by_version");
+			expect(["lix_internal_state_vtable", "state_by_version"]).toContain(
+				relation.name.parts[0]?.value
+			);
 			return;
 		}
 		if (relation.node_kind === "subquery") {
@@ -974,7 +976,7 @@ test("rewrites delete with IS NULL predicates", async () => {
 	});
 
 	const ast = getDeleteAst(rewritten);
-	expect(ast.target.name.parts[0]?.value).toBe("state_by_version");
+	expect(ast.target.name.parts[0]?.value).toBe("lix_internal_state_vtable");
 
 	const trace = rewritten.trace ?? [];
 	expect(

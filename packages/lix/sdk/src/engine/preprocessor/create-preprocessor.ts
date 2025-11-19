@@ -27,6 +27,8 @@ import { rewriteEntityViewUpdate } from "./entity-views/update.js";
 import { rewriteEntityViewDelete } from "./entity-views/delete.js";
 import { getVersionInheritanceSnapshot } from "./inheritance/version-inheritance-cache.js";
 import { rewriteStateByVersionInsert } from "./state-by-version/insert.js";
+import { rewriteStateByVersionUpdate } from "./state-by-version/update.js";
+import { rewriteStateByVersionDelete } from "./state-by-version/delete.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -43,6 +45,8 @@ const fullPipeline: PreprocessorStep[] = [
 	rewriteEntityViewUpdate,
 	rewriteEntityViewDelete,
 	rewriteStateByVersionInsert,
+	rewriteStateByVersionUpdate,
+	rewriteStateByVersionDelete,
 	rewriteEntityViewSelect,
 	expandSqlViews,
 	cachePopulator,
@@ -52,6 +56,8 @@ const fullPipeline: PreprocessorStep[] = [
 
 const vtableOnlyPipeline: PreprocessorStep[] = [
 	rewriteStateByVersionInsert,
+	rewriteStateByVersionUpdate,
+	rewriteStateByVersionDelete,
 	cachePopulator,
 	rewriteActiveVersionSubquery,
 	rewriteVtableSelects,
@@ -72,13 +78,7 @@ export function createPreprocessor(args: {
 }): PreprocessorFn {
 	const { engine } = args;
 
-	return ({
-		sql,
-		parameters,
-		trace,
-		mode = "full",
-		steps,
-	}: PreprocessorArgs) => {
+		return ({ sql, parameters, trace, mode = "full" }: PreprocessorArgs) => {
 		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
 
@@ -97,7 +97,7 @@ export function createPreprocessor(args: {
 		}
 
 		const statements = parse(sql);
-		const pipeline = selectPipeline(mode, steps);
+		const pipeline = selectPipeline(mode);
 		const rewritten = pipeline.reduce(
 			(current, step) =>
 				step({
@@ -133,13 +133,7 @@ export function createPreprocessor(args: {
 	};
 }
 
-function selectPipeline(
-	mode: PreprocessMode,
-	override: readonly PreprocessorStep[] | undefined
-): readonly PreprocessorStep[] {
-	if (override && override.length > 0) {
-		return override;
-	}
+function selectPipeline(mode: PreprocessMode): readonly PreprocessorStep[] {
 	if (mode === "vtable-select-only") {
 		return vtableOnlyPipeline;
 	}

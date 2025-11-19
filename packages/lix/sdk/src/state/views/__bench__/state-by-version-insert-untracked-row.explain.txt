@@ -15,7 +15,7 @@ INSERT INTO state_by_version (
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 -- rewritten SQL --
-INSERT INTO lix_internal_state_vtable (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, metadata, untracked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO lix_internal_state_vtable (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, metadata, untracked, inherited_from_version_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
 
 -- plan --
 []

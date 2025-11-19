@@ -6,7 +6,7 @@ DELETE FROM state_by_version
       WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?
 
 -- rewritten SQL --
-DELETE FROM state_by_version WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?
+DELETE FROM lix_internal_state_vtable AS state_by_version WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?
 
 -- plan --
 [
@@ -14,48 +14,6 @@ DELETE FROM state_by_version WHERE entity_id = ? AND schema_key = ? AND file_id 
     "id": 3,
     "parent": 0,
     "notused": 176,
-    "detail": "SCAN lix_internal_state_vtable VIRTUAL TABLE INDEX 0:entity_id,schema_key,file_id,version_id"
-  },
-  {
-    "id": 36,
-    "parent": 0,
-    "notused": 0,
-    "detail": "CORRELATED SCALAR SUBQUERY 3"
-  },
-  {
-    "id": 38,
-    "parent": 36,
-    "notused": 0,
-    "detail": "COMPOUND QUERY"
-  },
-  {
-    "id": 39,
-    "parent": 38,
-    "notused": 0,
-    "detail": "LEFT-MOST SUBQUERY"
-  },
-  {
-    "id": 43,
-    "parent": 39,
-    "notused": 46,
-    "detail": "SEARCH c USING INDEX sqlite_autoindex_lix_internal_change_1 (id=?)"
-  },
-  {
-    "id": 55,
-    "parent": 38,
-    "notused": 0,
-    "detail": "UNION ALL"
-  },
-  {
-    "id": 58,
-    "parent": 55,
-    "notused": 39,
-    "detail": "SEARCH t USING INDEX sqlite_autoindex_lix_internal_transaction_state_1 (id=?)"
-  },
-  {
-    "id": 79,
-    "parent": 0,
-    "notused": 216,
-    "detail": "SCAN state_by_version"
+    "detail": "SCAN state_by_version VIRTUAL TABLE INDEX 0:entity_id,schema_key,file_id,version_id"
   }
 ]
