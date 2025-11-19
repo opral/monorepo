@@ -156,8 +156,11 @@ export function FilesView({ context }: FilesViewProps) {
 					panel: "central",
 					kind: FILE_VIEW_KIND,
 					instance: fileViewInstance(id),
-					props: buildFileViewProps({ fileId: id, filePath: path }),
-					focus: false,
+					props: {
+						...buildFileViewProps({ fileId: id, filePath: path }),
+						focusOnLoad: true,
+					},
+					focus: true,
 				});
 			} catch (error) {
 				console.error("Failed to create file", error);

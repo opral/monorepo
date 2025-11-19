@@ -99,8 +99,9 @@ describe("FilesView", () => {
 					fileId: createdId,
 					filePath: "/notes.md",
 					label: "notes.md",
+					focusOnLoad: true,
 				},
-				focus: false,
+				focus: true,
 			});
 		});
 

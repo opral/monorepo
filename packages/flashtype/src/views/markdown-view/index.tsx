@@ -14,6 +14,7 @@ type MarkdownViewProps = {
 	readonly fileId?: string;
 	readonly filePath?: string;
 	readonly isActiveView?: boolean;
+	readonly focusOnLoad?: boolean;
 };
 
 /**
@@ -26,6 +27,7 @@ export function MarkdownView({
 	fileId,
 	filePath,
 	isActiveView = true,
+	focusOnLoad = false,
 }: MarkdownViewProps) {
 	return (
 		<Suspense fallback={<MarkdownLoadingSpinner />}>
@@ -33,6 +35,7 @@ export function MarkdownView({
 				fileId={fileId}
 				filePath={filePath}
 				isActiveView={isActiveView}
+				focusOnLoad={focusOnLoad}
 			/>
 		</Suspense>
 	);
@@ -42,6 +45,7 @@ function MarkdownViewContent({
 	fileId,
 	filePath,
 	isActiveView = true,
+	focusOnLoad = false,
 }: MarkdownViewProps) {
 	const [activeFileId, setActiveFileId] = useKeyValue(
 		"flashtype_active_file_id",
@@ -84,7 +88,12 @@ function MarkdownViewContent({
 			<EditorProvider>
 				<div className="markdown-view flex h-full flex-col bg-background">
 					<FormattingToolbar className="mb-3" />
-					<TipTapEditor className="flex-1" fileId={fileRow.id} />
+					<TipTapEditor
+						className="flex-1"
+						fileId={fileRow.id}
+						isActiveView={isActiveView}
+						focusOnLoad={focusOnLoad}
+					/>
 				</div>
 			</EditorProvider>
 		);
@@ -123,6 +132,7 @@ export const view = createReactViewDefinition({
 				fileId={instance.props?.fileId}
 				filePath={instance.props?.filePath}
 				isActiveView={context.isActiveView ?? false}
+				focusOnLoad={Boolean(instance.props?.focusOnLoad)}
 			/>
 		</LixProvider>
 	),

@@ -7,12 +7,15 @@ import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { createEditor } from "./create-editor";
 import { assembleMdAst } from "./assemble-md-ast";
 import { astToTiptapDoc } from "@opral/markdown-wc/tiptap";
+import { useRef } from "react";
 
 type TipTapEditorProps = {
 	fileId?: string | null;
 	className?: string;
 	onReady?: (editor: Editor) => void;
 	persistDebounceMs?: number;
+	focusOnLoad?: boolean;
+	isActiveView?: boolean;
 };
 
 /**
@@ -26,6 +29,7 @@ type TipTapEditorProps = {
  *   fileId="file-123"
  *   className="grow"
  *   onReady={(editor) => editor.commands.focus()}
+ *   focusOnLoad
  * />
  */
 export function TipTapEditor({
@@ -33,6 +37,8 @@ export function TipTapEditor({
 	className,
 	onReady,
 	persistDebounceMs,
+	focusOnLoad,
+	isActiveView = true,
 }: TipTapEditorProps) {
 	const lix = useLix();
 	const [activeFileIdKV] = useKeyValue("flashtype_active_file_id");
@@ -57,6 +63,7 @@ export function TipTapEditor({
 
 	const [initialAst, setInitialAst] = useState<any | null>(null);
 	const [initialAstLoaded, setInitialAstLoaded] = useState(false);
+	const hasAutoFocusedRef = useRef(false);
 
 	const editor = useMemo(() => {
 		if (!activeFileId || !initialFile || !initialAstLoaded) return null;
@@ -140,6 +147,25 @@ export function TipTapEditor({
 		Array.isArray(activeVersionRow) && activeVersionRow.length > 0
 			? activeVersionRow[0]?.version_id
 			: ((activeVersionRow as any)?.version_id ?? null);
+
+	useEffect(() => {
+		hasAutoFocusedRef.current = false;
+	}, [activeFileId]);
+
+	useEffect(() => {
+		if (!editor) return;
+		if (!focusOnLoad) return;
+		if (!isActiveView) return;
+		if (hasAutoFocusedRef.current) return;
+		const docSize = editor.state.doc.content.size;
+		const caretPos = Math.max(1, docSize);
+		editor
+			.chain()
+			.focus("end")
+			.setTextSelection({ from: caretPos, to: caretPos })
+			.run();
+		hasAutoFocusedRef.current = true;
+	}, [editor, focusOnLoad, isActiveView, activeFileId]);
 
 	useEffect(() => {
 		let cancelled = false;
