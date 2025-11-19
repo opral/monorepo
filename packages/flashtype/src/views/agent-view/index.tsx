@@ -98,7 +98,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [conversationId, setConversationId] = useKeyValue(CONVERSATION_KEY);
-	const initializationRef = useRef(false);
+	const conversationInitRef = useRef<Promise<string> | null>(null);
 
 	const [storedApiKey, setStoredApiKey] = useState<string | null>(devApiKey);
 	const [apiKeyDraft, setApiKeyDraft] = useState(devApiKey ?? "");
@@ -126,27 +126,35 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		console.log("[AgentView] conversationId changed", conversationId);
 	}, [conversationId]);
 
+	const ensureConversationId = useCallback(async () => {
+		if (conversationId) return conversationId;
+		if (!conversationInitRef.current) {
+			conversationInitRef.current = (async () => {
+				console.log("[AgentView] Initializing conversation...");
+				try {
+					const conversation = await createConversation({ lix });
+					console.log("[AgentView] Created conversation", conversation.id);
+					await setConversationId(conversation.id);
+					console.log("[AgentView] Set conversationId", conversation.id);
+					return conversation.id;
+				} catch (err) {
+					console.error("[AgentView] Failed to create conversation", err);
+					throw err;
+				} finally {
+					conversationInitRef.current = null;
+				}
+			})();
+		}
+		return await conversationInitRef.current;
+	}, [conversationId, lix, setConversationId]);
+
 	useEffect(() => {
 		if (conversationId) return;
-
-		const timer = setTimeout(async () => {
-			if (initializationRef.current) return;
-			console.log("[AgentView] Initializing conversation...");
-			initializationRef.current = true;
-			try {
-				const conversation = await createConversation({ lix });
-				console.log("[AgentView] Created conversation", conversation.id);
-				await setConversationId(conversation.id);
-				console.log("[AgentView] Set conversationId", conversation.id);
-			} catch (err) {
-				console.error("[AgentView] Failed to create conversation", err);
-			} finally {
-				initializationRef.current = false;
-			}
+		const timer = setTimeout(() => {
+			void ensureConversationId();
 		}, 100);
-
 		return () => clearTimeout(timer);
-	}, [conversationId, lix, setConversationId]);
+	}, [conversationId, ensureConversationId]);
 
 	useEffect(() => {
 		if (devApiKey) {
@@ -415,6 +423,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			},
 		) => {
 			if (!agent) throw new Error("Agent not ready");
+			const activeConversationId = await ensureConversationId();
 			const trimmed = text.trim();
 			if (!trimmed) return;
 			setError(null);
@@ -423,13 +432,13 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			setPending(true);
 			try {
 				console.log("[agent] send", {
-					conversationId: conversationId!,
+					conversationId: activeConversationId,
 					proposalMode: !autoAcceptEnabled,
 				});
 				const turn = sendMessage({
 					agent,
 					prompt: fromPlainText(trimmed),
-					conversationId: conversationId!,
+					conversationId: activeConversationId,
 					signal: opts?.signal,
 					proposalMode: !autoAcceptEnabled,
 				});
@@ -594,7 +603,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 					setPending(false);
 			}
 		},
-		[agent, conversationId, context, autoAcceptEnabled, clearPendingProposal],
+		[agent, ensureConversationId, context, autoAcceptEnabled, clearPendingProposal],
 	);
 
 	useEffect(() => {

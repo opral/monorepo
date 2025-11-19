@@ -58,10 +58,7 @@ export const DEFAULT_FLASHTYPE_UI_STATE: FlashtypeUiState = {
 			activeInstance: "files-default",
 		},
 		central: { views: [], activeInstance: null },
-		right: {
-			views: [{ instance: "agent-default", kind: AGENT_VIEW_KIND }],
-			activeInstance: "agent-default",
-		},
+		right: { views: [], activeInstance: null },
 	},
 	layout: { sizes: { ...DEFAULT_LAYOUT_SIZES } },
 };
