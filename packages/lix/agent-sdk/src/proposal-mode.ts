@@ -208,6 +208,7 @@ export class ProposalModeController {
 			lix: this.lix,
 			proposal: { id: state.proposal.id },
 		});
+		await this.discardPendingProposal(state);
 		this.emitProposalEvent("rejected", state);
 		this.pending = null;
 		state.reject(new ChangeProposalRejectedError());
