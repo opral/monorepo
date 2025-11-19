@@ -19,6 +19,7 @@ import type { ViewContext, ViewInstanceProps } from "./types";
 import { AGENT_VIEW_KIND } from "./view-instance-helpers";
 
 const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
+const DEFAULT_PLACEHOLDER = "Ask Flashtype to...";
 const AVAILABLE_MODELS = [
 	{ id: "anthropic/claude-4.5-sonnet", label: "Claude 4.5 Sonnet" },
 	{ id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
@@ -39,17 +40,22 @@ type LandingScreenProps = {
 	 * Optional callback to create a new file directly from the landing screen.
 	 */
 	readonly onCreateNewFile?: () => void | Promise<void>;
+	/**
+	 * When `false`, pauses animated UI so the composer is static while unfocused.
+	 */
+	readonly isPanelFocused: boolean;
 };
 
 /**
  * Landing screen with a prompt composer to reduce onboarding friction.
  * Users can immediately start typing what they want to write.
- * This screen is shown only when no files exist in the lix (first time user).
+ * This screen acts as the default empty-state view in the central panel.
  *
  * @example
  * return (
  *   <LandingScreen
  *     context={viewContext}
+ *     isPanelFocused={true}
  *     onCreateNewFile={() => console.log("create doc")}
  *   />
  * );
@@ -57,6 +63,7 @@ type LandingScreenProps = {
 function LandingScreenContent({
 	context,
 	onCreateNewFile: _onCreateNewFile,
+	isPanelFocused,
 }: LandingScreenProps): JSX.Element {
 	const devApiKey =
 		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
@@ -107,6 +114,30 @@ function LandingScreenContent({
 	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
+		const clearScheduledAnimation = () => {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+				timeoutRef.current = null;
+			}
+		};
+
+		if (!isPanelFocused) {
+			clearScheduledAnimation();
+			animationRef.current = {
+				...animationRef.current,
+				charIndex: 0,
+				isDeleting: false,
+			};
+			setPlaceholderText(DEFAULT_PLACEHOLDER);
+			return clearScheduledAnimation;
+		}
+
+		animationRef.current = {
+			...animationRef.current,
+			charIndex: 0,
+			isDeleting: false,
+		};
+
 		const type = () => {
 			const { currentIndex, charIndex, isDeleting } = animationRef.current;
 			const currentSuggestion = suggestions[currentIndex];
@@ -142,13 +173,9 @@ function LandingScreenContent({
 		timeoutRef.current = setTimeout(type, 500);
 
 		return () => {
-			// eslint-disable-next-line react-hooks/exhaustive-deps -- timeoutRef tracks the latest timeout ID
-			const timeoutId = timeoutRef.current;
-			if (timeoutId) {
-				clearTimeout(timeoutId);
-			}
+			clearScheduledAnimation();
 		};
-	}, [suggestions]);
+	}, [isPanelFocused, suggestions]);
 
 	useEffect(() => {
 		if (devApiKey) {
@@ -273,10 +300,51 @@ function LandingScreenContent({
 			data-testid="landing-screen"
 		>
 			{/* Logo/Brand */}
-			<div className="-translate-x-1/2 absolute left-1/2 top-6 sm:top-12 flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm [@media(max-height:640px)]:hidden">
-				<Zap className="h-3.5 w-3.5 text-brand-600" />
-				<span className="font-semibold text-neutral-900">flashtype.ai</span>
-			</div>
+			<a
+				href="https://lix.dev"
+				target="_blank"
+				rel="noopener noreferrer"
+				className="-translate-x-1/2 absolute left-1/2 top-6 sm:top-12 flex flex-col items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50 px-5 py-1.5 text-sm cursor-pointer transition hover:border-neutral-300 hover:bg-neutral-100 [@media(max-height:640px)]:hidden"
+			>
+				<div className="flex items-center gap-2">
+					<Zap className="h-3.5 w-3.5 text-brand-600" />
+					<span className="font-semibold text-neutral-900">flashtype.ai</span>
+				</div>
+				<div className="flex items-center gap-1 text-xs text-neutral-600">
+					<span>powered by</span>
+					<svg
+						width="14"
+						height="10"
+						viewBox="0 0 26 18"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+						className="inline-block"
+					>
+						<g id="Group 162">
+							<path
+								id="Vector"
+								d="M14.7618 5.74842L16.9208 9.85984L22.3675 0.358398H25.7133L19.0723 11.6284L22.5712 17.5085H19.2407L16.9208 13.443L14.6393 17.5085H11.2705L14.7618 11.6284L11.393 5.74842H14.7618Z"
+								fill="#06B6D4"
+							/>
+							<path
+								id="Vector_2"
+								d="M6.16211 17.5081V5.74805H9.42368V17.5081H6.16211Z"
+								fill="#06B6D4"
+							/>
+							<path
+								id="Vector_3"
+								d="M3.52112 0.393555V17.6416H0.287109V0.393555H3.52112Z"
+								fill="#06B6D4"
+							/>
+							<path
+								id="Rectangle 391"
+								d="M6.21582 0.393555H14.8399V3.08856H6.21582V0.393555Z"
+								fill="#06B6D4"
+							/>
+						</g>
+					</svg>
+				</div>
+			</a>
 
 			<main className="flex h-full w-full max-w-3xl flex-col items-center justify-center gap-8 py-20 sm:py-24 text-center">
 				{/* Main prompt */}
@@ -304,7 +372,7 @@ function LandingScreenContent({
 						onNotice={setNotice}
 						onSlashCommand={handleSlashCommand}
 						onSendMessage={handleSendMessage}
-						placeholderText={placeholderText || "Ask Flashtype to..."}
+						placeholderText={placeholderText || DEFAULT_PLACEHOLDER}
 					/>
 				</div>
 
@@ -447,9 +515,14 @@ function LandingScreenContent({
 export function LandingScreen({
 	context,
 	onCreateNewFile,
+	isPanelFocused,
 }: LandingScreenProps): JSX.Element {
 	return (
-		<LandingScreenContent context={context} onCreateNewFile={onCreateNewFile} />
+		<LandingScreenContent
+			context={context}
+			onCreateNewFile={onCreateNewFile}
+			isPanelFocused={isPanelFocused}
+		/>
 	);
 }
 

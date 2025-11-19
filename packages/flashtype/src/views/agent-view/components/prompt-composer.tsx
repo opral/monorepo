@@ -1,7 +1,9 @@
 import {
+	forwardRef,
 	useCallback,
 	useEffect,
 	useId,
+	useImperativeHandle,
 	useLayoutEffect,
 	useMemo,
 	useRef,
@@ -93,21 +95,27 @@ type PromptComposerProps = {
 /**
  * Prompt composer textarea with slash-command support.
  */
-export function PromptComposer({
-	hasKey,
-	models,
-	modelId,
-	onModelChange,
-	autoAcceptEnabled,
-	onAutoAcceptToggle,
-	commands,
-	files,
-	pending,
-	onNotice,
-	onSlashCommand,
-	onSendMessage,
-	placeholderText: customPlaceholderText,
-}: PromptComposerProps) {
+export const PromptComposer = forwardRef<
+	HTMLTextAreaElement | null,
+	PromptComposerProps
+>(function PromptComposer(
+	{
+		hasKey,
+		models,
+		modelId,
+		onModelChange,
+		autoAcceptEnabled,
+		onAutoAcceptToggle,
+		commands,
+		files,
+		pending,
+		onNotice,
+		onSlashCommand,
+		onSendMessage,
+		placeholderText: customPlaceholderText,
+	}: PromptComposerProps,
+	forwardedRef,
+) {
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 	const [value, setValue] = useState("");
@@ -157,6 +165,16 @@ export function PromptComposer({
 	useEffect(() => {
 		updateMentions(textAreaRef.current);
 	}, [value, updateMentions]);
+
+	useImperativeHandle<HTMLTextAreaElement | null, HTMLTextAreaElement | null>(
+		forwardedRef,
+		() => textAreaRef.current,
+	);
+
+	useEffect(() => {
+		if (pending) return;
+		moveCaretToEnd(textAreaRef.current);
+	}, [pending]);
 
 	const insertMention = useCallback(
 		(path: string) => {
@@ -536,7 +554,7 @@ export function PromptComposer({
 			</div>
 		</div>
 	);
-}
+});
 
 function ModelSelector({
 	options,

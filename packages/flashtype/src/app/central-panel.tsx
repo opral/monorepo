@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { LixProvider, useQueryTakeFirst } from "@lix-js/react-utils";
+import { LixProvider } from "@lix-js/react-utils";
 import type {
 	PanelState,
 	PanelSide,
@@ -7,7 +7,6 @@ import type {
 	ViewDefinition,
 } from "./types";
 import { PanelV2 } from "./panel-v2";
-import { WelcomeScreen } from "./welcome-screen";
 import { LandingScreen } from "./landing-screen";
 
 type CentralPanelProps = {
@@ -19,8 +18,6 @@ type CentralPanelProps = {
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
 	readonly onFinalizePendingView?: (key: string) => void;
-	readonly leftPanel?: PanelState;
-	readonly rightPanel?: PanelState;
 };
 
 /**
@@ -43,8 +40,6 @@ export function CentralPanel({
 	onFocusPanel,
 	onFinalizePendingView,
 	onCreateNewFile,
-	leftPanel,
-	rightPanel,
 }: CentralPanelProps) {
 	const finalizePendingIfNeeded = useCallback(
 		(key: string) => {
@@ -62,9 +57,7 @@ export function CentralPanel({
 			<EmptyStateContent
 				viewContext={viewContext}
 				onCreateNewFile={onCreateNewFile}
-				leftPanel={leftPanel}
-				rightPanel={rightPanel}
-				centralPanel={panel}
+				isFocused={isFocused}
 			/>
 		</LixProvider>
 	);
@@ -93,43 +86,22 @@ export function CentralPanel({
 }
 
 /**
- * Content component that checks for files and conditionally renders landing or welcome screen.
+ * Empty central panel content that renders the landing screen.
  */
 function EmptyStateContent({
 	viewContext,
 	onCreateNewFile,
-	leftPanel,
-	rightPanel,
-	centralPanel,
+	isFocused,
 }: {
 	viewContext: ViewContext;
 	onCreateNewFile?: () => void | Promise<void>;
-	leftPanel?: PanelState;
-	rightPanel?: PanelState;
-	centralPanel: PanelState;
+	isFocused: boolean;
 }) {
-	// Check if files exist in lix (excluding AGENTS.md, same query as top bar alpha warning)
-	const fileCount = useQueryTakeFirst(({ lix }) =>
-		lix.db
-			.selectFrom("file")
-			.select(({ fn }) => [fn.count<number>("id").as("count")])
-			.where("path", "is not", "/AGENTS.md"),
-	);
-
-	const hasFiles = (fileCount?.count ?? 0) > 0;
-
-	if (hasFiles) {
-		return (
-			<WelcomeScreen
-				viewContext={viewContext}
-				onCreateNewFile={onCreateNewFile}
-				leftPanel={leftPanel}
-				rightPanel={rightPanel}
-				centralPanel={centralPanel}
-			/>
-		);
-	}
 	return (
-		<LandingScreen context={viewContext} onCreateNewFile={onCreateNewFile} />
+		<LandingScreen
+			context={viewContext}
+			onCreateNewFile={onCreateNewFile}
+			isPanelFocused={isFocused}
+		/>
 	);
 }
