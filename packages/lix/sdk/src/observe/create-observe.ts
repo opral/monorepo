@@ -6,6 +6,11 @@ import {
 	extractLiteralFilters,
 } from "./determine-schema-keys.js";
 import type { StateCommitChange } from "../hooks/create-hooks.js";
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
+
+const entityViewSchemaKeys = new Set(
+	Object.values(LixSchemaViewMap).map((schema) => schema["x-lix-key"])
+);
 
 /**
  * Options for the observe method.
@@ -26,15 +31,13 @@ interface ActiveObservable {
  *
  * Returns version IDs whose latest tip references a commit with multiple parent edges.
  */
-function detectMergedVersions(
-	changes: StateCommitChange[]
-): Set<string> {
+function detectMergedVersions(changes: StateCommitChange[]): Set<string> {
 	const commitsWithMultipleParents = new Set<string>();
 	for (const change of changes) {
 		if (change.schema_key !== "lix_commit") continue;
-		const snapshot = change.snapshot_content as
-			| { parent_commit_ids?: unknown }
-			| null;
+		const snapshot = change.snapshot_content as {
+			parent_commit_ids?: unknown;
+		} | null;
 		const parentIds = Array.isArray(snapshot?.parent_commit_ids)
 			? snapshot!.parent_commit_ids.filter(
 					(parent): parent is string =>
@@ -192,6 +195,10 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			const filters = extractLiteralFilters(recompiled);
 			const watchedVersions = new Set(filters.versionIds);
 			const watchedEntityIds = new Set(filters.entityIds);
+			const targetsActiveVersion =
+				watchedVersions.size === 0 &&
+				(schemaKeys.includes("state") ||
+					schemaKeys.some((key) => entityViewSchemaKeys.has(key)));
 
 			// If no schema keys extracted, always re-execute for safety
 			if (!schemaKeys.length) {
@@ -210,6 +217,14 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 						return true;
 					}
 				}
+			}
+
+			// Active version flips must re-run any query using the active 'state' view.
+			if (
+				targetsActiveVersion &&
+				changes.some((change) => change.schema_key === "lix_active_version")
+			) {
+				return true;
 			}
 
 			// Check if any of the changed entities match our query's schema keys
