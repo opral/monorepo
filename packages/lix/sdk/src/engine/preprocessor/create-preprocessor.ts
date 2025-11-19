@@ -29,6 +29,7 @@ import { getVersionInheritanceSnapshot } from "./inheritance/version-inheritance
 import { rewriteStateByVersionInsert } from "./state-by-version/insert.js";
 import { rewriteStateByVersionUpdate } from "./state-by-version/update.js";
 import { rewriteStateByVersionDelete } from "./state-by-version/delete.js";
+import { rewriteStateByVersionSelect } from "./state-by-version/select.js";
 
 type EngineShape = Pick<
 	LixEngine,
@@ -47,6 +48,7 @@ const fullPipeline: PreprocessorStep[] = [
 	rewriteStateByVersionInsert,
 	rewriteStateByVersionUpdate,
 	rewriteStateByVersionDelete,
+	rewriteStateByVersionSelect,
 	rewriteEntityViewSelect,
 	expandSqlViews,
 	cachePopulator,
@@ -58,6 +60,7 @@ const vtableOnlyPipeline: PreprocessorStep[] = [
 	rewriteStateByVersionInsert,
 	rewriteStateByVersionUpdate,
 	rewriteStateByVersionDelete,
+	rewriteStateByVersionSelect,
 	cachePopulator,
 	rewriteActiveVersionSubquery,
 	rewriteVtableSelects,
@@ -78,7 +81,7 @@ export function createPreprocessor(args: {
 }): PreprocessorFn {
 	const { engine } = args;
 
-		return ({ sql, parameters, trace, mode = "full" }: PreprocessorArgs) => {
+	return ({ sql, parameters, trace, mode = "full" }: PreprocessorArgs) => {
 		const traceEntries: PreprocessorTrace | undefined = trace ? [] : undefined;
 		const context = buildContext(engine, traceEntries);
 

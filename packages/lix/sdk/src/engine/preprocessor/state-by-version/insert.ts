@@ -1,6 +1,7 @@
 import {
 	type ExpressionNode,
 	identifier,
+	type IdentifierNode,
 	type InsertStatementNode,
 	type ObjectNameNode,
 	type SegmentedStatementNode,
@@ -172,7 +173,7 @@ function rewriteRows(
 		for (let i = 0; i < row.length; i++) {
 			const column = sourceColumns[i];
 			const expression = row[i];
-			if (!column || !expression) {
+			if (!column || expression === undefined) {
 				return null;
 			}
 			map.set(column, expression);
@@ -187,8 +188,11 @@ function rewriteRows(
 		const expressions: ExpressionNode[] = [];
 		for (let i = 0; i < targetColumns.length; i++) {
 			const column = targetColumns[i];
+			if (!column) {
+				return null;
+			}
 			let resolved = map.get(column);
-			if (!resolved) {
+			if (resolved === undefined) {
 				resolved = defaultExpressionFor(column);
 				if (!resolved) {
 					return null;
@@ -203,14 +207,14 @@ function rewriteRows(
 	return rewritten;
 }
 
-function defaultExpressionFor(column: string): ExpressionNode | null {
+function defaultExpressionFor(column: string): ExpressionNode | undefined {
 	if (column === "metadata" || column === "inherited_from_version_id") {
 		return createLiteralNode(null);
 	}
 	if (column === "untracked") {
 		return createLiteralNode(0);
 	}
-	return null;
+	return undefined;
 }
 
 function createLiteralNode(

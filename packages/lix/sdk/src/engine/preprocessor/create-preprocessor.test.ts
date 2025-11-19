@@ -18,6 +18,7 @@ test("state_by_version view is rewritten", async () => {
 	const { sql, parameters, trace } = result;
 
 	const steps = trace?.map((entry) => entry.step) ?? [];
+	expect(steps).toContain("rewrite_state_by_version_select");
 	expect(steps).toContain("rewrite_vtable_selects");
 	expect(steps).toContain("complete");
 

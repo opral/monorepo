@@ -252,9 +252,7 @@ test("defaults version for _by_version view when schema defines lixcol_version_i
 		sql: "INSERT INTO insertable_schema_by_version (id, name) VALUES (?, ?)",
 		parameters: ["acc-1", "Defaulted"],
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 	expect(rewritten.sql).toContain("'global'");
 	expect(rewritten.parameters).toEqual(["acc-1", "Defaulted"]);
 
@@ -312,9 +310,7 @@ test("base-only view applies lixcol version id override", async () => {
 		sql: `INSERT INTO ${table} (id, name) VALUES (?, ?)`,
 		parameters: ["base-1", "Base Entity"],
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 	expect(rewritten.sql).toContain("'global'");
 	expect(rewritten.parameters).toEqual(["base-1", "Base Entity"]);
 
@@ -378,9 +374,7 @@ test("default values insert populates schema defaults", async () => {
 		sql: "INSERT INTO default_values_schema DEFAULT VALUES",
 		parameters: [],
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 	expect(rewritten.sql).toContain("default-id-value");
 	expect(rewritten.parameters).toEqual([]);
 
@@ -443,9 +437,7 @@ test("rewrites inserts for composite primary key entity views", async () => {
 		sql: "INSERT INTO mock_composite_schema (category, id, payload) VALUES (?, ?, ?)",
 		parameters: ["catA", "idB", "example"],
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 	expect(rewritten.sql).toMatch(/\(\?\d+\s*\|\|\s*'~'\s*\|\|\s*\?\d+\)/);
 	expect(rewritten.parameters.slice(0, 2)).toEqual(["catA", "idB"]);
 
@@ -589,9 +581,7 @@ test("nested primary key pointer is used for state's entity id", async () => {
 		sql: "INSERT INTO pointer_entity_schema (payload) VALUES (?)",
 		parameters: [JSON.stringify({ id: "nested-id", value: "payload-value" })],
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
@@ -684,9 +674,7 @@ test("uses stored schema key when inserting via prefixless alias", async () => {
 		sql: "INSERT INTO key_value (key, value) VALUES (?, ?)",
 		parameters: ["alias", JSON.stringify({ foo: "bar" })],
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 	expect(rewritten.sql).toContain("lix_key_value");
 	expect(rewritten.parameters).toEqual(["alias", '{"foo":"bar"}']);
 
@@ -799,9 +787,7 @@ test("applies JSON defaults when column is omitted", async () => {
 		sql: "INSERT INTO mock_default_schema (id) VALUES (?)",
 		parameters: ["row-default"],
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 
 	lix.engine!.executeSync({
 		sql: rewritten.sql,
@@ -1117,9 +1103,7 @@ test("regression: handles json function call parameters when deriving entity_id"
 	const rewritten = preprocess({
 		...insertArgs,
 	});
-	expect(rewritten.sql).toContain(
-		"INSERT INTO lix_internal_state_vtable"
-	);
+	expect(rewritten.sql).toContain("INSERT INTO lix_internal_state_vtable");
 	expect(rewritten.parameters).toEqual([
 		JSON.stringify("row-1"),
 		"Function Call",

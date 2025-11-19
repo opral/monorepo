@@ -37,6 +37,7 @@ test("preserves aliases in delete rewrites", () => {
 	`;
 
 	const rewritten = rewriteSql(sql);
+
 	const normalized = rewritten.replace(/\s+/g, " ").trim();
 
 	expect(normalized).toContain(`DELETE FROM ${INTERNAL_VTABLE} AS sbv`);

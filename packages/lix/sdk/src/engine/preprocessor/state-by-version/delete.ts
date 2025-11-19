@@ -67,8 +67,7 @@ function rewriteDeleteStatement(
 		return null;
 	}
 
-	const aliasNode =
-		statement.target.alias ?? identifier(STATE_BY_VERSION_VIEW);
+	const aliasNode = statement.target.alias ?? identifier(STATE_BY_VERSION_VIEW);
 	const rewritten: DeleteStatementNode = {
 		...statement,
 		target: buildTableReference(INTERNAL_STATE_VTABLE, aliasNode),

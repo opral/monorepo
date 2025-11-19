@@ -27,7 +27,9 @@ test("rewrites state_by_version updates to the internal vtable", () => {
 	const normalized = rewritten.replace(/\s+/g, " ").trim();
 
 	expect(normalized).toContain(`UPDATE ${INTERNAL_VTABLE}`);
-	expect(normalized).toContain("SET snapshot_content = json('{\"value\":\"next\"}')");
+	expect(normalized).toContain(
+		'SET snapshot_content = json(\'{"value":"next"}\')'
+	);
 });
 
 test("preserves aliases when rewriting", () => {
