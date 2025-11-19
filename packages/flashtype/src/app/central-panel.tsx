@@ -10,13 +10,13 @@ import { WelcomeScreen } from "./welcome-screen";
 
 type CentralPanelProps = {
 	readonly panel: PanelState;
-	readonly onSelectView: (instanceKey: string) => void;
-	readonly onRemoveView: (instanceKey: string) => void;
+	readonly onSelectView: (key: string) => void;
+	readonly onRemoveView: (key: string) => void;
 	readonly viewContext: ViewContext;
 	readonly onCreateNewFile?: () => void | Promise<void>;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
-	readonly onFinalizePendingView?: (instanceKey: string) => void;
+	readonly onFinalizePendingView?: (key: string) => void;
 };
 
 /**
@@ -41,23 +41,23 @@ export function CentralPanel({
 	onCreateNewFile,
 }: CentralPanelProps) {
 	const finalizePendingIfNeeded = useCallback(
-		(instanceKey: string) => {
+		(key: string) => {
 			if (!onFinalizePendingView) return;
-			const entry = panel.views.find(
-				(view) => view.instanceKey === instanceKey,
-			);
+			const entry = panel.views.find((view) => view.instance === key);
 			if (entry?.isPending) {
-				onFinalizePendingView(instanceKey);
+				onFinalizePendingView(key);
 			}
 		},
 		[onFinalizePendingView, panel.views],
 	);
 
-	const emptyState = <WelcomeScreen onCreateNewFile={onCreateNewFile} />;
+	const emptyState = (
+		<WelcomeScreen context={viewContext} onCreateNewFile={onCreateNewFile} />
+	);
 
 	const labelResolver = useCallback(
 		(view: ViewDefinition, entry: (typeof panel.views)[number]) =>
-			entry.metadata?.label ?? view.label,
+			entry.props?.label ?? view.label,
 		[],
 	);
 

@@ -7,6 +7,7 @@ import { EditorProvider } from "@/views/markdown-view/editor/editor-context";
 import { TipTapEditor } from "@/views/markdown-view/editor/tip-tap-editor";
 import "./style.css";
 import { createReactViewDefinition } from "../../app/react-view";
+import { FILE_VIEW_KIND } from "../../app/view-instance-helpers";
 import { FormattingToolbar } from "./components/formatting-toolbar";
 
 type MarkdownViewProps = {
@@ -98,15 +99,15 @@ function MarkdownLoadingSpinner(): ReactNode {
  * import { view as markdownView } from "@/views/markdown-view";
  */
 export const view = createReactViewDefinition({
-	key: "file-content",
+	kind: FILE_VIEW_KIND,
 	label: "File",
 	description: "Display file contents.",
 	icon: FileText,
 	component: ({ context, instance }) => (
 		<LixProvider lix={context.lix}>
 			<MarkdownView
-				fileId={instance.metadata?.fileId}
-				filePath={instance.metadata?.filePath}
+				fileId={instance.props?.fileId}
+				filePath={instance.props?.filePath}
 			/>
 		</LixProvider>
 	),

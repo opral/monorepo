@@ -5,6 +5,11 @@ import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { selectCheckpoints } from "@/queries";
 import type { ViewContext } from "../../app/types";
 import { createReactViewDefinition } from "../../app/react-view";
+import {
+	COMMIT_VIEW_KIND,
+	HISTORY_VIEW_KIND,
+	commitViewInstance,
+} from "../../app/view-instance-helpers";
 
 type HistoryCheckpoint = {
 	id: string;
@@ -84,11 +89,18 @@ export function HistoryView({ context }: HistoryViewProps) {
 									data-testid={`history-checkpoint-${item.id}`}
 									onClick={() => {
 										setSelectedId(item.id);
-										context?.openCommitView?.(
-											item.id,
-											item.label,
-											context?.isPanelFocused ? { focus: false } : undefined,
-										);
+										if (!context?.openView) return;
+										const focus = context?.isPanelFocused ? false : undefined;
+										context.openView({
+											panel: "central",
+											kind: COMMIT_VIEW_KIND,
+											instance: commitViewInstance(item.id),
+											props: {
+												checkpointId: item.id,
+												label: item.label,
+											},
+											focus,
+										});
 									}}
 									className={clsx(
 										"group relative flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
@@ -117,7 +129,7 @@ export function HistoryView({ context }: HistoryViewProps) {
  * import { view as historyView } from "@/views/history-view";
  */
 export const view = createReactViewDefinition({
-	key: "history",
+	kind: HISTORY_VIEW_KIND,
 	label: "History",
 	description: "Browse saved checkpoints in chronological order.",
 	icon: GitCommitVertical,

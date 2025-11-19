@@ -39,22 +39,24 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { PanelV2 } from "./panel-v2";
+import { ViewHostRegistryProvider } from "./view-host-registry";
 import type { PanelState, ViewContext, ViewDefinition } from "./types";
 import type { Lix } from "@lix-js/sdk";
 import { Flag, Search } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
+import { SEARCH_VIEW_KIND } from "./view-instance-helpers";
 
-const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
+const emptyPanel: PanelState = { views: [], activeInstance: null };
 
 const singleSearchPanel: PanelState = {
-	views: [{ instanceKey: "search-1", viewKey: "search" }],
-	activeInstanceKey: "search-1",
+	views: [{ instance: "search-1", kind: SEARCH_VIEW_KIND }],
+	activeInstance: "search-1",
 };
 
 const pendingSearchPanel: PanelState = {
-	views: [{ instanceKey: "search-1", viewKey: "search", isPending: true }],
-	activeInstanceKey: "search-1",
+	views: [{ instance: "search-1", kind: SEARCH_VIEW_KIND, isPending: true }],
+	activeInstance: "search-1",
 };
 
 const mockLix = {} as Lix;
@@ -69,7 +71,7 @@ const createViewContext = (
 });
 
 const searchViewOverride: ViewDefinition = {
-	key: "search",
+	kind: SEARCH_VIEW_KIND,
 	label: "Search",
 	description: "Test search view",
 	icon: Search,
@@ -84,9 +86,12 @@ const searchViewOverride: ViewDefinition = {
 	},
 };
 
+const renderWithinProvider = (ui: React.ReactNode) =>
+	render(<ViewHostRegistryProvider>{ui}</ViewHostRegistryProvider>);
+
 describe("PanelV2", () => {
 	test("renders content container without padding or margin utilities", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={emptyPanel}
@@ -127,7 +132,7 @@ describe("PanelV2", () => {
 	});
 
 	test("renders the active view content", async () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -147,7 +152,7 @@ describe("PanelV2", () => {
 	test("registers the panel container as a droppable target", () => {
 		const droppableMock = vi.mocked(useDroppable);
 		droppableMock.mockClear();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -167,7 +172,7 @@ describe("PanelV2", () => {
 	});
 
 	test("uses the tab label resolver when provided", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -189,7 +194,7 @@ describe("PanelV2", () => {
 	test("registers sortable handlers for tabs", () => {
 		const sortableMock = vi.mocked(useSortable);
 		sortableMock.mockClear();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -206,7 +211,7 @@ describe("PanelV2", () => {
 			expect.objectContaining({
 				id: "search-1",
 				data: expect.objectContaining({
-					instanceKey: "search-1",
+					instance: "search-1",
 					panel: "left",
 					fromPanel: "left",
 				}),
@@ -215,7 +220,7 @@ describe("PanelV2", () => {
 	});
 
 	test("renders any extra tab bar content", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={singleSearchPanel}
@@ -234,7 +239,7 @@ describe("PanelV2", () => {
 
 	test("invokes the pending finalizer when the active view is interacted with", async () => {
 		const finalize = vi.fn();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={pendingSearchPanel}
@@ -254,7 +259,7 @@ describe("PanelV2", () => {
 	});
 
 	test("renders the provided empty state placeholder when no views are open", () => {
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={emptyPanel}
@@ -274,7 +279,7 @@ describe("PanelV2", () => {
 	test("passes the custom drop id and panel metadata to useDroppable", () => {
 		const mocked = vi.mocked(useDroppable);
 		mocked.mockClear();
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={emptyPanel}
@@ -298,12 +303,12 @@ describe("PanelV2", () => {
 		let updateBadge: ((value: number | null) => void) | undefined;
 
 		const badgePanel: PanelState = {
-			views: [{ instanceKey: "badge-1", viewKey: "badge-view" }],
-			activeInstanceKey: "badge-1",
+			views: [{ instance: "badge-1", kind: "badge-view" }],
+			activeInstance: "badge-1",
 		};
 
 		const badgeView: ViewDefinition = {
-			key: "badge-view",
+			kind: "badge-view",
 			label: "Badge",
 			description: "Test badge view",
 			icon: Flag,
@@ -324,7 +329,7 @@ describe("PanelV2", () => {
 			},
 		};
 
-		render(
+		renderWithinProvider(
 			<PanelV2
 				side="left"
 				panel={badgePanel}

@@ -5,7 +5,7 @@ import type {
 	ViewContext,
 	ViewDefinition,
 	ViewInstance,
-	ViewKey,
+	ViewKind,
 } from "./types";
 
 type ReactRenderer = (args: {
@@ -19,7 +19,7 @@ type ReactActivator = (args: {
 }) => void | (() => void);
 
 export function createReactViewDefinition(args: {
-	key: ViewKey;
+	kind: ViewKind;
 	label: string;
 	description: string;
 	icon: LucideIcon;
@@ -29,7 +29,7 @@ export function createReactViewDefinition(args: {
 	const ROOT_SLOT = Symbol.for("flashtype.reactRoot");
 
 	return {
-		key: args.key,
+		kind: args.kind,
 		label: args.label,
 		description: args.description,
 		icon: args.icon,

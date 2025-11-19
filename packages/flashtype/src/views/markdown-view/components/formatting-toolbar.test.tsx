@@ -18,7 +18,7 @@ function createEditor(content: JSONContent): EditorSetup {
 
 	const editor = new Editor({
 		element,
-		extensions: MarkdownWc(),
+		extensions: MarkdownWc() as any,
 		content,
 	});
 

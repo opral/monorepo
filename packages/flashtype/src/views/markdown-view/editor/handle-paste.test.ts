@@ -14,7 +14,7 @@ function makeClipboardEvent(md: string): any {
 
 function createEditor(initialContent?: any): Editor {
 	return new Editor({
-		extensions: MarkdownWc(),
+		extensions: MarkdownWc() as any,
 		content: initialContent || { type: "doc", content: [] },
 	});
 }

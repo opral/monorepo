@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import { useViewContext } from "./view-context";
 import type { PanelState, ViewContext } from "./types";
 import type { Lix } from "@lix-js/sdk";
@@ -18,8 +18,8 @@ const createParentContext = (
 describe("useViewContext", () => {
 	test("tracks badge counts via setTabBadgeCount", () => {
 		const panel: PanelState = {
-			views: [{ instanceKey: "alpha", viewKey: "custom" }],
-			activeInstanceKey: "alpha",
+			views: [{ instance: "alpha", kind: "custom" }],
+			activeInstance: "alpha",
 		};
 
 		const parent = createParentContext({ isPanelFocused: true });
@@ -43,7 +43,7 @@ describe("useViewContext", () => {
 		expect(result.current.badgeCounts).toEqual({});
 
 		rerender({
-			panel: { views: [], activeInstanceKey: null },
+			panel: { views: [], activeInstance: null },
 			isFocused: true,
 			parentContext: parent,
 		});
@@ -53,11 +53,10 @@ describe("useViewContext", () => {
 	test("derives base context from parent", () => {
 		const parent: ViewContext = createParentContext({
 			isPanelFocused: false,
-			openFileView: vi.fn(),
 		});
 		const panel: PanelState = {
-			views: [{ instanceKey: "beta", viewKey: "custom" }],
-			activeInstanceKey: "beta",
+			views: [{ instance: "beta", kind: "custom" }],
+			activeInstance: "beta",
 		};
 
 		const { result } = renderHook(useViewContext, {

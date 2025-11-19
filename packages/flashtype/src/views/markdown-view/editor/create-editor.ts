@@ -196,9 +196,11 @@ export function createEditor(args: CreateEditorArgs): Editor {
 			node.childCount === 0,
 	};
 
+	const markdownExtensions = MarkdownWc({}) as any[];
+
 	return new Editor({
 		extensions: [
-			...MarkdownWc({}),
+			...markdownExtensions,
 			History.configure({
 				depth: 200,
 				newGroupDelay: 500,

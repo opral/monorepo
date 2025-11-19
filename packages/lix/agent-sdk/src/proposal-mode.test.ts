@@ -247,6 +247,64 @@ describe("proposal review mode", () => {
 		expect(proposalsAfterReject).toHaveLength(0);
 	});
 
+	test("rejecting a proposal cleans up the review version", async () => {
+		const lix = await openLix({});
+		const model = createStreamingModel();
+		const agent = await createLixAgent({ lix, model });
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select(["version_id"])
+			.executeTakeFirstOrThrow();
+		const activeVersionId = activeVersion.version_id as string;
+
+		model.setToolHandler(() =>
+			createToolCallStreamChunks({
+				toolCallId: "reject-cleanup",
+				input: {
+					version_id: activeVersionId,
+					path: "/reject-cleanup.txt",
+					content: "reject-cleanup",
+				},
+				text: "cleanup",
+			})
+		);
+
+		let reviewVersionId: string | null = null;
+
+		const stream = sendMessage({
+			agent,
+			prompt: fromPlainText("reject and cleanup proposal"),
+			proposalMode: true,
+		});
+
+		for await (const event of stream) {
+			if (event.type === "proposal:open") {
+				const summary = getChangeProposalSummary(agent, event.proposal.id);
+				reviewVersionId = summary?.source_version_id ?? null;
+				expect(reviewVersionId).toBeTruthy();
+				await event.reject("reject-cleanup");
+			} else if (event.type === "done") {
+				break;
+			}
+		}
+
+		expect(reviewVersionId).toBeTruthy();
+
+		const reviewVersion = await lix.db
+			.selectFrom("version")
+			.where("id", "=", reviewVersionId as unknown as any)
+			.select(["id"])
+			.executeTakeFirst();
+		expect(reviewVersion).toBeUndefined();
+
+		const proposalsAfterReject = await lix.db
+			.selectFrom("change_proposal")
+			.select(["id"])
+			.execute();
+		expect(proposalsAfterReject).toHaveLength(0);
+	});
+
 	test("proposal mode disabled writes directly to the active version", async () => {
 		const lix = await openLix({});
 		const model = createStreamingModel();

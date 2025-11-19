@@ -1,4 +1,5 @@
 import type { PanelSide, PanelState } from "./types";
+import { CHECKPOINT_VIEW_KIND, FILES_VIEW_KIND } from "./view-instance-helpers";
 
 export const FLASHTYPE_UI_STATE_KEY = "flashtype_ui_state" as const;
 
@@ -6,16 +7,16 @@ export const FLASHTYPE_UI_STATE_KEY = "flashtype_ui_state" as const;
  * Serialized layout snapshot persisted in Lix under `flashtype_ui_state`.
  *
  * The structure mirrors the in-memory panel model so we can revive the exact
- * view arrangement (active views, metadata, focused panel, and optional
+ * view arrangement (active views, props, focused panel, and optional
  * panel sizes) when the prototype boots.
  *
  * @example
  * const uiState: FlashtypeUiState = {
  *   focusedPanel: "left",
  *   panels: {
- *     left: { views: [...], activeInstanceKey: "files-1" },
- *     central: { views: [], activeInstanceKey: null },
- *     right: { views: [], activeInstanceKey: null },
+ *     left: { views: [...], activeInstance: "files-1" },
+ *     central: { views: [], activeInstance: null },
+ *     right: { views: [], activeInstance: null },
  *   },
  *   layout: { sizes: { left: 20, central: 60, right: 20 } },
  * };
@@ -37,26 +38,23 @@ export type FlashtypeUiState = {
 export type PanelLayoutSizes = Record<PanelSide, number>;
 
 const DEFAULT_LAYOUT_SIZES: PanelLayoutSizes = {
-	left: 20,
-	central: 60,
-	right: 20,
+	left: 0,
+	central: 100,
+	right: 0,
 };
 
 export const DEFAULT_FLASHTYPE_UI_STATE: FlashtypeUiState = {
-	focusedPanel: "left",
+	focusedPanel: "central",
 	panels: {
 		left: {
 			views: [
-				{ instanceKey: "files-default", viewKey: "files" },
-				{ instanceKey: "checkpoint-default", viewKey: "checkpoint" },
+				{ instance: "files-default", kind: FILES_VIEW_KIND },
+				{ instance: "checkpoint-default", kind: CHECKPOINT_VIEW_KIND },
 			],
-			activeInstanceKey: "files-default",
+			activeInstance: "files-default",
 		},
-		central: { views: [], activeInstanceKey: null },
-		right: {
-			views: [{ instanceKey: "agent-default", viewKey: "agent" }],
-			activeInstanceKey: "agent-default",
-		},
+		central: { views: [], activeInstance: null },
+		right: { views: [], activeInstance: null },
 	},
 	layout: { sizes: { ...DEFAULT_LAYOUT_SIZES } },
 };

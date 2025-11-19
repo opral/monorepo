@@ -1,5 +1,8 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
+import { createVersion } from "../version/create-version.js";
+import { mergeVersion } from "../version/merge-version.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 /**
  * These tests use the key_value table as an example entity in the state.
@@ -397,6 +400,242 @@ test("observing specific key should not emit when unrelated key is inserted", as
 
 	subscriptionA.unsubscribe();
 	subscriptionB.unsubscribe();
+	await lix.close();
+});
+
+test("observing a state emits when a version merge happens", async () => {
+	const schema: LixSchemaDefinition = {
+		"x-lix-key": "observe_merge_entity",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			v: { type: "string" },
+		},
+		required: ["v"],
+		additionalProperties: false,
+	} as const;
+
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const target = await createVersion({ lix, name: "target" });
+	const source = await createVersion({ lix, name: "source" });
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "entity-from-source",
+			schema_key: "observe_merge_entity",
+			file_id: "file-observe",
+			version_id: source.id,
+			plugin_key: "test_plugin",
+			snapshot_content: { v: "from-source" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	const emissions: Array<
+		{ entity_id: string; snapshot_content: Record<string, unknown> }[]
+	> = [];
+
+	const targetVersionQuery = lix.db
+		.selectFrom("state_by_version")
+		.select(["entity_id", "snapshot_content"])
+		.where("version_id", "=", target.id)
+		.where("schema_key", "=", "observe_merge_entity");
+
+	const subscription = lix
+		.observe(targetVersionQuery)
+		.subscribe({ next: (rows) => emissions.push(rows) });
+
+	await new Promise((resolve) => setTimeout(resolve, 20));
+	expect(emissions).toHaveLength(1);
+	expect(emissions[0]).toEqual([]);
+
+	await mergeVersion({ lix, source, target });
+	await new Promise((resolve) => setTimeout(resolve, 50));
+	expect(emissions).toHaveLength(2);
+	expect(emissions[1]).toEqual([
+		{
+			entity_id: "entity-from-source",
+			snapshot_content: { v: "from-source" },
+		},
+	]);
+
+	subscription.unsubscribe();
+	await lix.close();
+});
+
+test("observing active state re-emits when active_version changes", async () => {
+	const schema: LixSchemaDefinition = {
+		"x-lix-key": "observe_active_switch_entity",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			v: { type: "string" },
+		},
+		required: ["v"],
+		additionalProperties: false,
+	} as const;
+
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	const versionA = await createVersion({ lix, name: "active-a" });
+	const versionB = await createVersion({ lix, name: "active-b" });
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "active-entity",
+			schema_key: schema["x-lix-key"],
+			file_id: "file-active",
+			version_id: versionA.id,
+			plugin_key: "test_plugin",
+			snapshot_content: { v: "from-a" },
+			schema_version: schema["x-lix-version"],
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "active-entity",
+			schema_key: schema["x-lix-key"],
+			file_id: "file-active",
+			version_id: versionB.id,
+			plugin_key: "test_plugin",
+			snapshot_content: { v: "from-b" },
+			schema_version: schema["x-lix-version"],
+		})
+		.execute();
+
+	// Start from version A so the first emission includes its state.
+	await lix.db
+		.updateTable("active_version")
+		.set({ version_id: versionA.id })
+		.execute();
+
+	const emissions: Array<
+		Array<{ entity_id: string; snapshot_content: Record<string, unknown> }>
+	> = [];
+
+	const activeStateQuery = lix.db
+		.selectFrom("state")
+		.select(["entity_id", "snapshot_content"])
+		.where("schema_key", "=", schema["x-lix-key"]);
+
+	const subscription = lix
+		.observe(activeStateQuery)
+		.subscribe({ next: (rows) => emissions.push(rows) });
+
+	await new Promise((resolve) => setTimeout(resolve, 20));
+	expect(emissions).toHaveLength(1);
+	expect(emissions[0]).toEqual([
+		{ entity_id: "active-entity", snapshot_content: { v: "from-a" } },
+	]);
+
+	// Switch to version B by updating active_version; observer should re-run.
+	await lix.db.transaction().execute(async (trx) => {
+		await trx
+			.updateTable("active_version")
+			.set({ version_id: versionB.id })
+			.execute();
+	});
+
+	await new Promise((resolve) => setTimeout(resolve, 50));
+
+	expect(emissions).toHaveLength(2);
+	expect(emissions[1]).toEqual([
+		{ entity_id: "active-entity", snapshot_content: { v: "from-b" } },
+	]);
+
+	subscription.unsubscribe();
+	await lix.close();
+});
+
+test("observing entity views re-emits when active_version changes", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const versionA = await createVersion({ lix, name: "kv-active-a" });
+	const versionB = await createVersion({ lix, name: "kv-active-b" });
+
+	await lix.db
+		.insertInto("key_value_by_version")
+		.values({
+			key: "kv_active_key",
+			value: "from-a",
+			lixcol_version_id: versionA.id,
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("key_value_by_version")
+		.values({
+			key: "kv_active_key",
+			value: "from-b",
+			lixcol_version_id: versionB.id,
+		})
+		.execute();
+
+	await lix.db
+		.updateTable("active_version")
+		.set({ version_id: versionA.id })
+		.execute();
+
+	const emissions: Array<Array<{ key: string; value: unknown }>> = [];
+
+	const subscription = lix
+		.observe(
+			lix.db
+				.selectFrom("key_value")
+				.select(["key", "value"])
+				.where("key", "=", "kv_active_key")
+		)
+		.subscribe({ next: (rows) => emissions.push(rows) });
+
+	await new Promise((resolve) => setTimeout(resolve, 20));
+	expect(emissions).toHaveLength(1);
+	expect(emissions[0]).toEqual([{ key: "kv_active_key", value: "from-a" }]);
+
+	await lix.db.transaction().execute(async (trx) => {
+		await trx
+			.updateTable("active_version")
+			.set({ version_id: versionB.id })
+			.execute();
+	});
+
+	await new Promise((resolve) => setTimeout(resolve, 50));
+	expect(emissions).toHaveLength(2);
+	expect(emissions[1]).toEqual([{ key: "kv_active_key", value: "from-b" }]);
+
+	subscription.unsubscribe();
 	await lix.close();
 });
 

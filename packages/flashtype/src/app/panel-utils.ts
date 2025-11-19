@@ -2,21 +2,21 @@ import type { PanelState, ViewInstance } from "./types";
 
 /**
  * Returns a shallow clone of a view instance stored in a panel, including a
- * copied metadata object to keep state transitions immutable when moving tabs
+ * copied props object to keep state transitions immutable when moving tabs
  * between panels.
  *
  * @example
- * const cloned = cloneViewInstanceByKey(panelState, "files-1");
+ * const cloned = cloneViewInstance(panelState, "files-1");
  */
-export const cloneViewInstanceByKey = (
+export const cloneViewInstance = (
 	panel: PanelState,
-	instanceKey: string,
+	instance: string,
 ): ViewInstance | null => {
-	const view = panel.views.find((entry) => entry.instanceKey === instanceKey);
+	const view = panel.views.find((entry) => entry.instance === instance);
 	if (!view) return null;
 	return {
 		...view,
-		metadata: view.metadata ? { ...view.metadata } : undefined,
+		props: view.props ? { ...view.props } : undefined,
 	};
 };
 
@@ -40,9 +40,9 @@ export const reorderPanelViewsByIndex = (
 	views.splice(toIndex, 0, moving);
 	return {
 		views,
-		activeInstanceKey:
-			panel.activeInstanceKey === moving.instanceKey
-				? moving.instanceKey
-				: panel.activeInstanceKey,
+		activeInstance:
+			panel.activeInstance === moving.instance
+				? moving.instance
+				: panel.activeInstance,
 	};
 };

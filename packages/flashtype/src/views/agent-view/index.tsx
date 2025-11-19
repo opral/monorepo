@@ -1,8 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	Suspense,
+} from "react";
 import { Bot } from "lucide-react";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
-import { createConversation, selectVersionDiff } from "@lix-js/sdk";
+import {
+	acceptChangeProposal,
+	createConversation,
+	selectVersionDiff,
+	rejectChangeProposal,
+} from "@lix-js/sdk";
 import {
 	ChangeProposalRejectedError,
 	createLixAgent,
@@ -13,9 +25,10 @@ import {
 	type ChangeProposalSummary,
 	sendMessage,
 } from "@lix-js/agent-sdk";
-import { fromPlainText } from "@lix-js/sdk/dependency/zettel-ast";
+import { fromPlainText, toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type {
 	ViewContext,
+	ViewInstance,
 	DiffViewConfig,
 	RenderableDiff,
 } from "../../app/types";
@@ -30,9 +43,25 @@ import { PromptComposer } from "./components/prompt-composer";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { WelcomeScreen } from "./components/welcome-screen";
+import {
+	AGENT_VIEW_KIND,
+	DIFF_VIEW_KIND,
+	FILE_VIEW_KIND,
+	buildDiffViewProps,
+	buildFileViewProps,
+	diffViewInstance,
+	fileViewInstance,
+} from "../../app/view-instance-helpers";
+
+type AgentViewLaunchProps = {
+	readonly initialMessage?: string;
+	readonly invocationId?: string;
+	readonly source?: string;
+};
 
 type AgentViewProps = {
 	readonly context?: ViewContext;
+	readonly instance?: ViewInstance;
 };
 
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
@@ -58,7 +87,7 @@ const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";
  * @example
  * <AgentView />
  */
-export function AgentView({ context }: AgentViewProps) {
+export function AgentView({ context, instance }: AgentViewProps) {
 	const lix = useLix();
 	const devApiKey =
 		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
@@ -69,6 +98,8 @@ export function AgentView({ context }: AgentViewProps) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [conversationId, setConversationId] = useKeyValue(CONVERSATION_KEY);
+	const conversationInitRef = useRef<Promise<string> | null>(null);
+
 	const [storedApiKey, setStoredApiKey] = useState<string | null>(devApiKey);
 	const [apiKeyDraft, setApiKeyDraft] = useState(devApiKey ?? "");
 	const [keyLoaded, setKeyLoaded] = useState(usingDevApiKey);
@@ -92,13 +123,38 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [storedModel, setStoredModel]);
 
 	useEffect(() => {
-		(async () => {
-			if (!conversationId) {
-				const conversation = await createConversation({ lix });
-				setConversationId(conversation.id);
-			}
-		})();
+		console.log("[AgentView] conversationId changed", conversationId);
+	}, [conversationId]);
+
+	const ensureConversationId = useCallback(async () => {
+		if (conversationId) return conversationId;
+		if (!conversationInitRef.current) {
+			conversationInitRef.current = (async () => {
+				console.log("[AgentView] Initializing conversation...");
+				try {
+					const conversation = await createConversation({ lix });
+					console.log("[AgentView] Created conversation", conversation.id);
+					await setConversationId(conversation.id);
+					console.log("[AgentView] Set conversationId", conversation.id);
+					return conversation.id;
+				} catch (err) {
+					console.error("[AgentView] Failed to create conversation", err);
+					throw err;
+				} finally {
+					conversationInitRef.current = null;
+				}
+			})();
+		}
+		return await conversationInitRef.current;
 	}, [conversationId, lix, setConversationId]);
+
+	useEffect(() => {
+		if (conversationId) return;
+		const timer = setTimeout(() => {
+			void ensureConversationId();
+		}, 100);
+		return () => clearTimeout(timer);
+	}, [conversationId, ensureConversationId]);
 
 	useEffect(() => {
 		if (devApiKey) {
@@ -125,8 +181,20 @@ export function AgentView({ context }: AgentViewProps) {
 		details?: ChangeProposalSummary | null;
 		accept: () => Promise<void>;
 		reject: (reason?: string) => Promise<void>;
+		diffInstance?: string;
 	} | null>(null);
+	const clearPendingProposal = useCallback(() => {
+		setPendingProposal((prev) => {
+			if (context && prev?.diffInstance) {
+				context.closeView?.({ instance: prev.diffInstance });
+			}
+			return null;
+		});
+	}, [context]);
 	const [notice, setNotice] = useState<string | null>(null);
+	const isFirstProposalRef = useRef(true);
+	const resolvedProposalIdsRef = useRef<Set<string>>(new Set());
+	const suppressedProposalErrorRef = useRef<string | null>(null);
 	const handleAutoAcceptToggle = useCallback(
 		async (next: boolean) => {
 			await setAutoAccept(next);
@@ -137,13 +205,8 @@ export function AgentView({ context }: AgentViewProps) {
 
 	useEffect(() => {
 		if (!autoAcceptEnabled) return;
-		setPendingProposal((prev) => {
-			if (prev?.details?.fileId) {
-				context?.closeDiffView?.(prev.details.fileId);
-			}
-			return null;
-		});
-	}, [autoAcceptEnabled, context]);
+		clearPendingProposal();
+	}, [autoAcceptEnabled, clearPendingProposal]);
 
 	const provider = useMemo(() => {
 		if (!storedApiKey) return null;
@@ -157,6 +220,7 @@ export function AgentView({ context }: AgentViewProps) {
 		[provider, selectedModelId],
 	);
 	const hasKey = Boolean(storedApiKey);
+	const launchProps = instance?.props as AgentViewLaunchProps | undefined;
 
 	const messages = useQuery(({ lix }) =>
 		lix.db
@@ -165,6 +229,12 @@ export function AgentView({ context }: AgentViewProps) {
 			.selectAll()
 			.orderBy("lixcol_created_at", "asc")
 			.orderBy("id", "asc"),
+	);
+
+	const openProposals = useQuery(({ lix }) =>
+		(lix.db.selectFrom("change_proposal") as any)
+			.where("status", "=", "open")
+			.selectAll(),
 	);
 
 	const [agent, setAgent] = useState<LixAgent | null>(null);
@@ -197,32 +267,45 @@ export function AgentView({ context }: AgentViewProps) {
 
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
+		const { proposalId } = pendingProposal;
 		try {
 			await pendingProposal.accept();
+			resolvedProposalIdsRef.current.add(proposalId);
+			clearPendingProposal();
 		} catch (error_) {
 			const message =
 				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
 			setError(`Error: ${message}`);
 		}
-	}, [pendingProposal]);
+	}, [pendingProposal, clearPendingProposal]);
 
 	const rejectPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
+		const { proposalId } = pendingProposal;
+		const shouldSuppressError = pending;
+		if (shouldSuppressError) {
+			suppressedProposalErrorRef.current = proposalId;
+		}
 		try {
 			await pendingProposal.reject();
+			resolvedProposalIdsRef.current.add(proposalId);
+			clearPendingProposal();
 		} catch (error_) {
+			if (shouldSuppressError) {
+				suppressedProposalErrorRef.current = null;
+			}
 			const message =
 				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
 			setError(`Error: ${message}`);
 		}
-	}, [pendingProposal]);
+	}, [pendingProposal, clearPendingProposal, pending]);
 
 	const clear = useCallback(async () => {
 		if (!agent) throw new Error("Agent not ready");
 		await runClearConversation({ agent, conversationId });
-		setPendingProposal(null);
+		clearPendingProposal();
 		setPendingMessage(null);
-	}, [agent, conversationId]);
+	}, [agent, clearPendingProposal, conversationId]);
 
 	const handleModelChange = useCallback(
 		(next: string) => {
@@ -244,6 +327,7 @@ export function AgentView({ context }: AgentViewProps) {
 
 	const [pendingMessage, setPendingMessage] =
 		useState<AgentConversationMessage | null>(null);
+	const launchPropsRef = useRef<string | null>(null);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const messageCount = messages?.length ?? 0;
 
@@ -289,11 +373,26 @@ export function AgentView({ context }: AgentViewProps) {
 	}, [apiKeyDraft, devApiKey]);
 
 	const handleAcceptDecision = useCallback(
-		(id: string) => {
+		async (id: string) => {
 			if (!pendingProposal || pendingProposal.proposalId !== id) return;
-			acceptPendingProposal();
+			const details = pendingProposal.details;
+			await acceptPendingProposal();
+
+			// After accepting, open the file in center view
+			if (context && details?.fileId) {
+				context.openView?.({
+					panel: "central",
+					kind: FILE_VIEW_KIND,
+					instance: fileViewInstance(details.fileId),
+					props: buildFileViewProps({
+						fileId: details.fileId,
+						filePath: details.filePath,
+					}),
+					focus: true,
+				});
+			}
 		},
-		[pendingProposal, acceptPendingProposal],
+		[pendingProposal, acceptPendingProposal, context],
 	);
 
 	const handleAcceptAlwaysDecision = useCallback(
@@ -324,20 +423,22 @@ export function AgentView({ context }: AgentViewProps) {
 			},
 		) => {
 			if (!agent) throw new Error("Agent not ready");
+			const activeConversationId = await ensureConversationId();
 			const trimmed = text.trim();
 			if (!trimmed) return;
 			setError(null);
-			setPendingProposal(null);
+			clearPendingProposal();
+			suppressedProposalErrorRef.current = null;
 			setPending(true);
 			try {
 				console.log("[agent] send", {
-					conversationId: conversationId!,
+					conversationId: activeConversationId,
 					proposalMode: !autoAcceptEnabled,
 				});
 				const turn = sendMessage({
 					agent,
 					prompt: fromPlainText(trimmed),
-					conversationId: conversationId!,
+					conversationId: activeConversationId,
 					signal: opts?.signal,
 					proposalMode: !autoAcceptEnabled,
 				});
@@ -347,7 +448,7 @@ export function AgentView({ context }: AgentViewProps) {
 				updatePending();
 				let finalMessage: AgentConversationMessage | null = null;
 				let errorEvent: Extract<AgentEvent, { type: "error" }> | null = null;
-				let activeProposal: {
+				let _activeProposal: {
 					id: string;
 					summary?: string;
 					details?: ChangeProposalSummary | null;
@@ -384,7 +485,10 @@ export function AgentView({ context }: AgentViewProps) {
 							const details = agent
 								? getChangeProposalSummary(agent, event.proposal.id)
 								: null;
-							activeProposal = {
+							const diffInstance = details?.fileId
+								? diffViewInstance(details.fileId)
+								: undefined;
+							_activeProposal = {
 								id: event.proposal.id,
 								summary: event.proposal.summary,
 								details,
@@ -393,10 +497,31 @@ export function AgentView({ context }: AgentViewProps) {
 								proposalId: event.proposal.id,
 								summary: event.proposal.summary,
 								details,
+								diffInstance,
 								accept: event.accept,
 								reject: event.reject,
 							});
-							if (context && details?.fileId && details.filePath) {
+
+							// On first proposal, move agent to right panel and set it up
+							if (isFirstProposalRef.current && context) {
+								isFirstProposalRef.current = false;
+
+								// Move agent view to right panel
+								context.moveViewToPanel?.("right", instance?.instance);
+
+								// Resize right panel to at least 30
+								context.resizePanel?.("right", 30);
+
+								// Focus right panel
+								context.focusPanel?.("right");
+							}
+
+							if (
+								context &&
+								details?.fileId &&
+								details.filePath &&
+								diffInstance
+							) {
 								console.log("Proposal event", event);
 								const diffConfig = createProposalDiffConfig({
 									fileId: details.fileId,
@@ -404,23 +529,25 @@ export function AgentView({ context }: AgentViewProps) {
 									sourceVersionId: details.source_version_id,
 									targetVersionId: details.target_version_id,
 								});
-								context.openDiffView?.(details.fileId, details.filePath, {
+								context.openView?.({
+									panel: "central",
+									kind: DIFF_VIEW_KIND,
+									instance: diffInstance,
+									props: buildDiffViewProps({
+										fileId: details.fileId,
+										filePath: details.filePath,
+										diffConfig,
+									}),
 									focus: true,
-									diffConfig,
 								});
 							}
 							break;
 						}
 						case "proposal:closed": {
-							if (autoAcceptEnabled) {
-								break;
+							if (!autoAcceptEnabled) {
+								clearPendingProposal();
+								_activeProposal = null;
 							}
-							const details = activeProposal?.details;
-							if (context && details?.fileId) {
-								context.closeDiffView?.(details.fileId);
-							}
-							setPendingProposal(null);
-							activeProposal = null;
 							break;
 						}
 						case "message":
@@ -455,20 +582,134 @@ export function AgentView({ context }: AgentViewProps) {
 				setPendingMessage(null);
 				const message =
 					err instanceof Error ? err.message : String(err ?? "unknown");
+				let shouldRethrow = true;
 				if (err instanceof ChangeProposalRejectedError) {
-					setError(
-						"Change proposal rejected. Tell the agent what to do differently.",
-					);
+					if (suppressedProposalErrorRef.current) {
+						suppressedProposalErrorRef.current = null;
+						shouldRethrow = false;
+					} else {
+						setError(
+							"Change proposal rejected. Tell the agent what to do differently.",
+						);
+					}
 				} else {
 					setError(`Error: ${message}`);
 				}
-				throw err;
+				if (shouldRethrow) {
+					throw err;
+				}
 			} finally {
+				suppressedProposalErrorRef.current = null;
 				setPending(false);
 			}
 		},
-		[agent, conversationId, context, autoAcceptEnabled],
+		[
+			agent,
+			ensureConversationId,
+			context,
+			autoAcceptEnabled,
+			clearPendingProposal,
+			instance?.instance,
+		],
 	);
+
+	useEffect(() => {
+		if (!launchProps?.initialMessage || !launchProps.invocationId) return;
+		if (!hasKey || !agent) return;
+		if (launchPropsRef.current === launchProps.invocationId) return;
+		launchPropsRef.current = launchProps.invocationId;
+		void send(launchProps.initialMessage);
+	}, [agent, hasKey, launchProps, send]);
+
+	useEffect(() => {
+		if (!openProposals) {
+			resolvedProposalIdsRef.current.clear();
+		} else {
+			const openIds = new Set(
+				openProposals.map((proposal: any) => String(proposal.id)),
+			);
+			for (const id of Array.from(resolvedProposalIdsRef.current)) {
+				if (!openIds.has(id)) {
+					resolvedProposalIdsRef.current.delete(id);
+				}
+			}
+		}
+
+		if (
+			pendingProposal ||
+			!agent ||
+			pending ||
+			!openProposals ||
+			openProposals.length === 0
+		)
+			return;
+		// Try to find a proposal for this conversation (guessing column name)
+		// or fallback to the first one if there's only one (heuristic)
+		const proposal = (openProposals.find(
+			(p: any) =>
+				p.conversation_id === conversationId ||
+				p.lixcol_conversation_id === conversationId,
+		) ?? openProposals[0]) as any;
+
+		if (!proposal) return;
+		const fallbackProposalId = String(proposal.id);
+		if (resolvedProposalIdsRef.current.has(fallbackProposalId)) {
+			return;
+		}
+
+		const details = getChangeProposalSummary(agent, proposal.id);
+		const diffInstance = details?.fileId
+			? diffViewInstance(details.fileId)
+			: undefined;
+
+		setPendingProposal({
+			proposalId: fallbackProposalId,
+			summary: "Proposed changes",
+			details,
+			diffInstance,
+			accept: async () => {
+				await acceptChangeProposal({
+					lix,
+					proposal: { id: proposal.id },
+				});
+			},
+			reject: async () => {
+				await rejectChangeProposal({
+					lix,
+					proposal: { id: proposal.id },
+				});
+			},
+		});
+
+		// Also open the diff view if not open and we have details
+		if (context && details?.fileId && details.filePath && diffInstance) {
+			const diffConfig = createProposalDiffConfig({
+				fileId: details.fileId,
+				filePath: details.filePath,
+				sourceVersionId: details.source_version_id,
+				targetVersionId: details.target_version_id,
+			});
+			context.openView?.({
+				panel: "central",
+				kind: DIFF_VIEW_KIND,
+				instance: diffInstance,
+				props: buildDiffViewProps({
+					fileId: details.fileId,
+					filePath: details.filePath,
+					diffConfig,
+				}),
+				focus: false,
+			});
+		}
+	}, [
+		openProposals,
+		pendingProposal,
+		pending,
+		agent,
+		lix,
+		context,
+		conversationId,
+	]);
 
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
@@ -527,37 +768,39 @@ export function AgentView({ context }: AgentViewProps) {
 				ref={scrollContainerRef}
 				className="flex-1 min-h-0 overflow-y-auto gap-4 flex flex-col"
 			>
-				{hasKey ? (
-					<>
-						{messages.map((message) => (
-							<ConversationMessage key={message.id} message={message} />
-						))}
-						{pendingMessage ? (
-							<ConversationMessage
-								key={pendingMessage.id || "agent-pending"}
-								message={pendingMessage}
-							/>
-						) : pending ? (
-							<div className="px-3 py-1 text-xs text-muted-foreground">
-								Thinking…
-							</div>
-						) : null}
-						{notice ? (
-							<div className="px-3 py-1 text-xs text-muted-foreground">
-								{notice}
-							</div>
-						) : null}
-						{error ? (
-							<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
-						) : null}
-					</>
-				) : keyLoaded ? (
-					<WelcomeScreen
-						value={apiKeyDraft}
-						onValueChange={handleApiKeyChange}
-						onSave={handleSaveApiKey}
-					/>
-				) : null}
+				<div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
+					{hasKey ? (
+						<>
+							{messages?.map((message) => (
+								<ConversationMessage key={message.id} message={message} />
+							))}
+							{pendingMessage && !isMessageEmpty(pendingMessage) ? (
+								<ConversationMessage
+									key={pendingMessage.id || "agent-pending"}
+									message={pendingMessage}
+								/>
+							) : pending ? (
+								<div className="px-3 py-1 text-xs text-muted-foreground">
+									Thinking…
+								</div>
+							) : null}
+							{notice ? (
+								<div className="px-3 py-1 text-xs text-muted-foreground">
+									{notice}
+								</div>
+							) : null}
+							{error ? (
+								<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
+							) : null}
+						</>
+					) : keyLoaded ? (
+						<WelcomeScreen
+							value={apiKeyDraft}
+							onValueChange={handleApiKeyChange}
+							onSave={handleSaveApiKey}
+						/>
+					) : null}
+				</div>
 			</div>
 
 			{hasKey && (
@@ -600,13 +843,21 @@ export function AgentView({ context }: AgentViewProps) {
  * import { view as agentView } from "@/views/agent-view";
  */
 export const view = createReactViewDefinition({
-	key: "agent",
-	label: "Lix Agent",
+	kind: AGENT_VIEW_KIND,
+	label: "AI Agent",
 	description: "Chat with the project assistant.",
 	icon: Bot,
-	component: ({ context }) => (
+	component: ({ context, instance }) => (
 		<LixProvider lix={context.lix}>
-			<AgentView context={context} />
+			<Suspense
+				fallback={
+					<div className="p-4 text-sm text-muted-foreground">
+						Loading agent...
+					</div>
+				}
+			>
+				<AgentView context={context} instance={instance} />
+			</Suspense>
 		</LixProvider>
 	),
 });
@@ -659,4 +910,16 @@ function proposalDiffTitle(filePath: string): string {
 		const trimmed = filePath.startsWith("/") ? filePath.slice(1) : filePath;
 		return trimmed.length > 0 ? `Proposal: ${trimmed}` : "Proposal Diff";
 	}
+}
+
+function isMessageEmpty(message: AgentConversationMessage): boolean {
+	const metadata = message.lixcol_metadata as any;
+	const hasSteps =
+		Array.isArray(metadata?.lix_agent_sdk_steps) &&
+		metadata.lix_agent_sdk_steps.length > 0;
+	if (hasSteps) return false;
+
+	if (!message.body) return true;
+	const text = toPlainText(message.body as any);
+	return !text.trim();
 }

@@ -84,6 +84,10 @@ type PromptComposerProps = {
 	 * await onSendMessage("What changed in commit abc?");
 	 */
 	onSendMessage(value: string): Promise<void>;
+	/**
+	 * Optional custom placeholder text. If provided, overrides the default placeholder.
+	 */
+	placeholderText?: string;
 };
 
 /**
@@ -102,6 +106,7 @@ export function PromptComposer({
 	onNotice,
 	onSlashCommand,
 	onSendMessage,
+	placeholderText: customPlaceholderText,
 }: PromptComposerProps) {
 	const textAreaId = useId();
 	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -206,13 +211,14 @@ export function PromptComposer({
 			return;
 		}
 
-		if (!hasKey) {
-			onNotice("Add an OpenRouter API key to enable the Lix Agent.");
-			return;
-		}
+		// Note: hasKey check is now handled by the parent component
+		// This allows users to type their prompt first, then prompt for key
 
 		onNotice(null);
 		pushHistory(trimmedEnd);
+
+		// Reset composer before sending - if no key, parent will handle showing prompt
+		// and the message will be stored separately
 		resetComposer();
 
 		try {
@@ -239,7 +245,6 @@ export function PromptComposer({
 		filteredCommands,
 		commands,
 		onSlashCommand,
-		hasKey,
 		onNotice,
 		pushHistory,
 		onSendMessage,
@@ -425,13 +430,14 @@ export function PromptComposer({
 		slashIdx,
 	]);
 
-	const placeholder = hasKey
-		? "Ask Lix Agent…"
-		: "Add an OpenRouter API key to enable the Lix Agent…";
-	const sendDisabled = pending || !hasKey;
+	const placeholder =
+		customPlaceholderText !== undefined
+			? customPlaceholderText
+			: "Ask Flashtype…";
+	const sendDisabled = pending;
 
 	return (
-		<div className="relative w-full max-w-3xl">
+		<div className="relative w-full max-w-2xl">
 			<div className="relative overflow-visible rounded-md border border-border/80 bg-background transition focus-within:border-amber-500 focus-within:shadow-[0_0_0_1px_rgba(245,158,11,0.35)]">
 				<label htmlFor={textAreaId} className="sr-only">
 					Ask the assistant
@@ -441,7 +447,7 @@ export function PromptComposer({
 					id={textAreaId}
 					data-testid="agent-composer-input"
 					placeholder={placeholder}
-					disabled={!hasKey}
+					disabled={pending}
 					value={value}
 					onChange={(event) => {
 						const next = event.target.value;

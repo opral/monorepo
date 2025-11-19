@@ -16,6 +16,7 @@ import {
 	refreshWorkingChangeSet,
 	type WorkingChange,
 } from "../state/working-change-set/refresh-working-change-set.js";
+import type { StateCommitChange } from "../hooks/create-hooks.js";
 export async function mergeVersion(args: {
 	lix: Lix;
 	source: Pick<LixVersion, "id">;
@@ -407,6 +408,35 @@ export async function mergeVersion(args: {
 		};
 
 		const cacheBatch: Mat[] = [];
+		const convertToHookChange = (change: Mat): StateCommitChange | null => {
+			const versionId = (change as any).lixcol_version_id;
+			const commitId = (change as any).lixcol_commit_id;
+			if (!versionId || !commitId) return null;
+			const snapshot =
+				typeof change.snapshot_content === "string"
+					? JSON.parse(change.snapshot_content)
+					: (change.snapshot_content ?? null);
+			const metadataRaw = (change as any).metadata;
+			const metadata =
+				typeof metadataRaw === "string"
+					? JSON.parse(metadataRaw)
+					: (metadataRaw ?? null);
+			return {
+				id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				schema_version: change.schema_version,
+				file_id: change.file_id,
+				plugin_key: change.plugin_key,
+				created_at: change.created_at,
+				snapshot_content: snapshot,
+				metadata,
+				version_id: versionId,
+				commit_id: commitId,
+				untracked: 0,
+				writer_key: (change as any).writer_key ?? null,
+			};
+		};
 
 		// Global scope: commit row (derives edges + ensures change_set entry)
 		cacheBatch.push({
@@ -528,6 +558,16 @@ export async function mergeVersion(args: {
 			// Delegate cache updates to engine via router when engine is not exposed
 			await lix.call("lix_update_state_cache", { changes: cacheBatch });
 			await lix.call("lix_mark_state_cache_as_fresh");
+
+			// Emit state_commit so observables can detect merge-created changes.
+			const hookChanges = cacheBatch
+				.map((change) => convertToHookChange(change))
+				.filter((change): change is StateCommitChange => change !== null);
+			if (hookChanges.length > 0) {
+				lix.hooks._emit("state_commit", {
+					changes: hookChanges,
+				});
+			}
 		}
 
 		if (workingChangesForRefresh.length > 0) {

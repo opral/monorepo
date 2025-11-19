@@ -3,7 +3,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import type { FilesystemEntryRow } from "@/queries";
 import { SidePanel } from "./side-panel";
+import { ViewHostRegistryProvider } from "./view-host-registry";
 import type { PanelState, ViewContext } from "./types";
+import {
+	FILES_VIEW_KIND,
+	FILE_VIEW_KIND,
+	fileViewInstance,
+} from "./view-instance-helpers";
 import type { Lix } from "@lix-js/sdk";
 
 const mockEntries: FilesystemEntryRow[] = [
@@ -63,7 +69,7 @@ vi.mock("@lix-js/react-utils", async () => {
 vi.mock("./view-registry", async () => {
 	const definitions = [
 		{
-			key: "files" as const,
+			kind: "flashtype_files" as const,
 			label: "Files",
 			description: "Files view",
 			icon: () => <svg></svg>,
@@ -78,9 +84,16 @@ vi.mock("./view-registry", async () => {
 				button.type = "button";
 				button.textContent = "writing-style.md";
 				button.addEventListener("click", () => {
-					context.openFileView?.("file-writing", {
+					context.openView?.({
+						panel: "central",
+						kind: "flashtype_file",
+						instance: "flashtype_file:file-writing",
+						props: {
+							fileId: "file-writing",
+							filePath: "/docs/guides/writing-style.md",
+							label: "writing-style.md",
+						},
 						focus: false,
-						filePath: "/docs/guides/writing-style.md",
 					});
 				});
 				target.replaceChildren(button);
@@ -92,7 +105,7 @@ vi.mock("./view-registry", async () => {
 	];
 	return {
 		VIEW_DEFINITIONS: definitions,
-		VIEW_MAP: new Map(definitions.map((def) => [def.key, def])),
+		VIEW_MAP: new Map(definitions.map((def) => [def.kind, def])),
 	};
 });
 
@@ -109,22 +122,24 @@ const createViewContext = (
 
 describe("SidePanel", () => {
 	test("renders the empty state helper when nothing is open", () => {
-		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
+		const emptyPanel: PanelState = { views: [], activeInstance: null };
 
 		render(
-			<DndContext>
-				<SidePanel
-					side="left"
-					title="Navigator"
-					panel={emptyPanel}
-					onSelectView={() => {}}
-					onAddView={() => {}}
-					onRemoveView={() => {}}
-					viewContext={createViewContext()}
-					isFocused={false}
-					onFocusPanel={vi.fn()}
-				/>
-			</DndContext>,
+			<ViewHostRegistryProvider>
+				<DndContext>
+					<SidePanel
+						side="left"
+						title="Navigator"
+						panel={emptyPanel}
+						onSelectView={() => {}}
+						onAddView={() => {}}
+						onRemoveView={() => {}}
+						viewContext={createViewContext()}
+						isFocused={false}
+						onFocusPanel={vi.fn()}
+					/>
+				</DndContext>
+			</ViewHostRegistryProvider>,
 		);
 
 		expect(screen.getByText("Left Panel")).toBeInTheDocument();
@@ -135,32 +150,34 @@ describe("SidePanel", () => {
 
 	test("renders the active view and forwards interactions", async () => {
 		const panelState: PanelState = {
-			views: [{ instanceKey: "files-1", viewKey: "files" }],
-			activeInstanceKey: "files-1",
+			views: [{ instance: "files-1", kind: FILES_VIEW_KIND }],
+			activeInstance: "files-1",
 		};
 		const handleSelect = vi.fn();
 		const handleAdd = vi.fn();
 		const handleRemove = vi.fn();
 		const handleOpenFile = vi.fn();
 		const viewContext = createViewContext({
-			openFileView: handleOpenFile,
+			openView: handleOpenFile,
 			isPanelFocused: true,
 		});
 
 		render(
-			<DndContext>
-				<SidePanel
-					side="left"
-					title="Navigator"
-					panel={panelState}
-					onSelectView={handleSelect}
-					onAddView={handleAdd}
-					onRemoveView={handleRemove}
-					viewContext={viewContext}
-					isFocused={true}
-					onFocusPanel={vi.fn()}
-				/>
-			</DndContext>,
+			<ViewHostRegistryProvider>
+				<DndContext>
+					<SidePanel
+						side="left"
+						title="Navigator"
+						panel={panelState}
+						onSelectView={handleSelect}
+						onAddView={handleAdd}
+						onRemoveView={handleRemove}
+						viewContext={viewContext}
+						isFocused={true}
+						onFocusPanel={vi.fn()}
+					/>
+				</DndContext>
+			</ViewHostRegistryProvider>,
 		);
 
 		const filesTab = await screen.findByRole("button", { name: "Files" });
@@ -176,32 +193,41 @@ describe("SidePanel", () => {
 			{ timeout: 5000 },
 		);
 		fireEvent.click(fileRow);
-		expect(handleOpenFile).toHaveBeenCalledWith("file-writing", {
+		expect(handleOpenFile).toHaveBeenCalledWith({
+			panel: "central",
+			kind: FILE_VIEW_KIND,
+			instance: fileViewInstance("file-writing"),
+			props: {
+				fileId: "file-writing",
+				filePath: "/docs/guides/writing-style.md",
+				label: "writing-style.md",
+			},
 			focus: false,
-			filePath: "/docs/guides/writing-style.md",
 		});
 	});
 
 	test("removes focus flag when panel not focused", async () => {
 		const panelState: PanelState = {
-			views: [{ instanceKey: "files-1", viewKey: "files" }],
-			activeInstanceKey: "files-1",
+			views: [{ instance: "files-1", kind: FILES_VIEW_KIND }],
+			activeInstance: "files-1",
 		};
 
 		render(
-			<DndContext>
-				<SidePanel
-					side="left"
-					title="Navigator"
-					panel={panelState}
-					onSelectView={() => {}}
-					onAddView={() => {}}
-					onRemoveView={() => {}}
-					viewContext={createViewContext()}
-					isFocused={false}
-					onFocusPanel={vi.fn()}
-				/>
-			</DndContext>,
+			<ViewHostRegistryProvider>
+				<DndContext>
+					<SidePanel
+						side="left"
+						title="Navigator"
+						panel={panelState}
+						onSelectView={() => {}}
+						onAddView={() => {}}
+						onRemoveView={() => {}}
+						viewContext={createViewContext()}
+						isFocused={false}
+						onFocusPanel={vi.fn()}
+					/>
+				</DndContext>
+			</ViewHostRegistryProvider>,
 		);
 
 		const filesTab = await screen.findByRole("button", { name: "Files" });

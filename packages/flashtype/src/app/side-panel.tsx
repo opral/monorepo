@@ -10,7 +10,7 @@ import { ChevronDown, PanelLeft, PanelRight, Plus } from "lucide-react";
 import type {
 	PanelSide,
 	PanelState,
-	ViewKey,
+	ViewKind,
 	ViewContext,
 	ViewDefinition,
 } from "./types";
@@ -21,9 +21,9 @@ interface SidePanelProps {
 	readonly side: PanelSide;
 	readonly title: string;
 	readonly panel: PanelState;
-	readonly onSelectView: (instanceKey: string) => void;
-	readonly onAddView: (toolId: ViewKey) => void;
-	readonly onRemoveView: (instanceKey: string) => void;
+	readonly onSelectView: (key: string) => void;
+	readonly onAddView: (toolId: ViewKind) => void;
+	readonly onRemoveView: (key: string) => void;
 	readonly viewContext: ViewContext;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
@@ -47,21 +47,21 @@ export function SidePanel({
 	isFocused,
 	onFocusPanel,
 }: SidePanelProps) {
-	const panelViewKeySignature = useMemo(() => {
+	const panelViewKindSignature = useMemo(() => {
 		if (panel.views.length === 0) {
 			return "";
 		}
-		const keys = panel.views.map((entry) => entry.viewKey).sort();
+		const keys = panel.views.map((entry) => entry.kind).sort();
 		return keys.join("|");
 	}, [panel.views]);
 
 	const availableViews = useMemo(() => {
-		if (panelViewKeySignature === "") {
+		if (panelViewKindSignature === "") {
 			return VIEW_DEFINITIONS;
 		}
-		const activeKeys = new Set(panelViewKeySignature.split("|"));
-		return VIEW_DEFINITIONS.filter((view) => !activeKeys.has(view.key));
-	}, [panelViewKeySignature]);
+		const activeInstances = new Set(panelViewKindSignature.split("|"));
+		return VIEW_DEFINITIONS.filter((view) => !activeInstances.has(view.kind));
+	}, [panelViewKindSignature]);
 	const canAddMoreViews = availableViews.length > 0;
 
 	const addViewButton = canAddMoreViews ? (
@@ -81,8 +81,8 @@ export function SidePanel({
 			>
 				{availableViews.map((ext) => (
 					<DropdownMenuItem
-						key={ext.key}
-						onSelect={() => onAddView(ext.key)}
+						key={ext.kind}
+						onSelect={() => onAddView(ext.kind)}
 						className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
 					>
 						<ext.icon className="h-4 w-4" />
@@ -117,7 +117,7 @@ export function SidePanel({
 
 interface EmptyPanelStateProps {
 	side: PanelSide;
-	onAddView: (viewKey: ViewKey) => void;
+	onAddView: (kind: ViewKind) => void;
 	availableViews?: ViewDefinition[];
 }
 
@@ -161,8 +161,8 @@ function EmptyPanelState({
 				>
 					{menuViews.map((ext) => (
 						<DropdownMenuItem
-							key={ext.key}
-							onSelect={() => onAddView(ext.key)}
+							key={ext.kind}
+							onSelect={() => onAddView(ext.kind)}
 							className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-900 focus:bg-neutral-100"
 						>
 							<ext.icon className="h-4 w-4" />

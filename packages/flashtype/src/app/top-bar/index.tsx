@@ -1,11 +1,17 @@
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { Button } from "@/components/ui/button";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { FlashtypeMenu } from "./flashtype-menu";
 import { VersionSwitcher } from "./version-switcher";
 
@@ -34,84 +40,124 @@ export function TopBar({
 	isRightSidebarVisible = true,
 }: TopBarProps) {
 	const alphaDescriptionId = useId();
+	const fileCount = useQueryTakeFirst(({ lix }) =>
+		lix.db
+			.selectFrom("file")
+			.select(({ fn }) => [fn.count<number>("id").as("count")])
+			.where("path", "is not", "/AGENTS.md"),
+	);
+
+	const hasFiles = (fileCount?.count ?? 0) > 0;
+
+	const isMacPlatform = useMemo(() => {
+		if (typeof navigator === "undefined") return false;
+		const platformCandidates = [
+			((navigator as any).userAgentData?.platform as string | undefined) ??
+				null,
+			navigator.platform ?? null,
+			navigator.userAgent ?? null,
+		].filter(Boolean) as string[];
+		const combined = platformCandidates.join(" ").toLowerCase();
+		return /mac|iphone|ipad|ipod/.test(combined);
+	}, []);
+
+	const modifierKey = isMacPlatform ? "⌘" : "Ctrl";
+	const leftShortcut = isMacPlatform ? `${modifierKey}1` : `${modifierKey}+1`;
+	const rightShortcut = isMacPlatform ? `${modifierKey}3` : `${modifierKey}+3`;
 
 	return (
 		<header className="flex h-10 items-center px-2 text-neutral-600">
 			<div className="flex flex-1 items-center gap-1 text-sm">
 				<FlashtypeMenu />
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
-					type="button"
-					onClick={onToggleLeftSidebar}
-					title="Toggle left sidebar"
-					aria-label="Toggle left sidebar"
-					aria-pressed={isLeftSidebarVisible}
-					data-state={isLeftSidebarVisible ? "on" : "off"}
-				>
-					<PanelToggleIcon side="left" isActive={isLeftSidebarVisible} />
-				</Button>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
-					type="button"
-					onClick={onToggleRightSidebar}
-					title="Toggle right sidebar"
-					aria-label="Toggle right sidebar"
-					aria-pressed={isRightSidebarVisible}
-					data-state={isRightSidebarVisible ? "on" : "off"}
-				>
-					<PanelToggleIcon side="right" isActive={isRightSidebarVisible} />
-				</Button>
+				<Tooltip delayDuration={500}>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+							type="button"
+							onClick={onToggleLeftSidebar}
+							aria-label="Toggle left panel"
+							aria-pressed={isLeftSidebarVisible}
+							data-state={isLeftSidebarVisible ? "on" : "off"}
+						>
+							<PanelToggleIcon side="left" isActive={isLeftSidebarVisible} />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent className="bg-neutral-900 text-neutral-0 [&_[class*='bg-secondary']]:bg-neutral-900 [&_[class*='fill-secondary']]:fill-neutral-900">
+						Toggle left panel ({leftShortcut})
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip delayDuration={500}>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+							type="button"
+							onClick={onToggleRightSidebar}
+							aria-label="Toggle right panel"
+							aria-pressed={isRightSidebarVisible}
+							data-state={isRightSidebarVisible ? "on" : "off"}
+						>
+							<PanelToggleIcon side="right" isActive={isRightSidebarVisible} />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent className="bg-neutral-900 text-neutral-0 [&_[class*='bg-secondary']]:bg-neutral-900 [&_[class*='fill-secondary']]:fill-neutral-900">
+						Toggle right panel ({rightShortcut})
+					</TooltipContent>
+				</Tooltip>
 				<VersionSwitcher />
 			</div>
 			<div className="flex flex-1 justify-center">
-				<Popover>
-					<PopoverTrigger asChild>
-						<button
-							type="button"
-							className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700 transition hover:bg-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
-							aria-describedby={alphaDescriptionId}
-						>
-							<AlertTriangle className="h-3.5 w-3.5" aria-hidden />
-							<span>Flashtype is in alpha, back up your files regularly.</span>
-						</button>
-					</PopoverTrigger>
-					<PopoverContent className="w-80 text-sm" sideOffset={8}>
-						<div className="flex flex-col gap-4" id={alphaDescriptionId}>
-							<div>
-								<p className="font-medium text-foreground">
-									Flashtype is in alpha.
-								</p>
-								<p className="text-muted-foreground">
-									Breaking changes may occur at any time. Please share feedback
-									so we can improve the experience.
-								</p>
+				{hasFiles ? (
+					<Popover>
+						<PopoverTrigger asChild>
+							<button
+								type="button"
+								className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700 transition hover:bg-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+								aria-describedby={alphaDescriptionId}
+							>
+								<AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+								<span>
+									Flashtype is in alpha, back up your files regularly.
+								</span>
+							</button>
+						</PopoverTrigger>
+						<PopoverContent className="w-80 text-sm" sideOffset={8}>
+							<div className="flex flex-col gap-4" id={alphaDescriptionId}>
+								<div>
+									<p className="font-medium text-foreground">
+										Flashtype is in alpha.
+									</p>
+									<p className="text-muted-foreground">
+										Breaking changes may occur at any time. Please share
+										feedback so we can improve the experience.
+									</p>
+								</div>
+								<div className="flex items-center gap-2 text-xs">
+									<a
+										className="text-primary underline-offset-4 hover:underline"
+										href="https://github.com/opral/flashtype/issues"
+										target="_blank"
+										rel="noreferrer"
+									>
+										Report an issue
+									</a>
+									<span aria-hidden>·</span>
+									<a
+										className="text-primary underline-offset-4 hover:underline"
+										href="https://discord.gg/StVekJpyBp"
+										target="_blank"
+										rel="noreferrer"
+									>
+										Join the community
+									</a>
+								</div>
 							</div>
-							<div className="flex items-center gap-2 text-xs">
-								<a
-									className="text-primary underline-offset-4 hover:underline"
-									href="https://github.com/opral/flashtype/issues"
-									target="_blank"
-									rel="noreferrer"
-								>
-									Report an issue
-								</a>
-								<span aria-hidden>·</span>
-								<a
-									className="text-primary underline-offset-4 hover:underline"
-									href="https://discord.gg/StVekJpyBp"
-									target="_blank"
-									rel="noreferrer"
-								>
-									Join the community
-								</a>
-							</div>
-						</div>
-					</PopoverContent>
-				</Popover>
+						</PopoverContent>
+					</Popover>
+				) : null}
 			</div>
 			<div className="flex flex-1 items-center justify-end gap-0.5">
 				<Button

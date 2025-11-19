@@ -6,6 +6,11 @@ import {
 	extractLiteralFilters,
 } from "./determine-schema-keys.js";
 import type { StateCommitChange } from "../hooks/create-hooks.js";
+import { LixSchemaViewMap } from "../database/schema-view-map.js";
+
+const entityViewSchemaKeys = new Set(
+	Object.values(LixSchemaViewMap).map((schema) => schema["x-lix-key"])
+);
 
 /**
  * Options for the observe method.
@@ -19,6 +24,48 @@ export interface ObserveOptions {
  */
 interface ActiveObservable {
 	unsubscribeFromStateCommit: () => void;
+}
+
+/**
+ * Detects merge commits from state commit payloads.
+ *
+ * Returns version IDs whose latest tip references a commit with multiple parent edges.
+ */
+function detectMergedVersions(changes: StateCommitChange[]): Set<string> {
+	const commitsWithMultipleParents = new Set<string>();
+	for (const change of changes) {
+		if (change.schema_key !== "lix_commit") continue;
+		const snapshot = change.snapshot_content as {
+			parent_commit_ids?: unknown;
+		} | null;
+		const parentIds = Array.isArray(snapshot?.parent_commit_ids)
+			? snapshot!.parent_commit_ids.filter(
+					(parent): parent is string =>
+						typeof parent === "string" && parent.length > 0
+				)
+			: [];
+		if (parentIds.length >= 2) {
+			commitsWithMultipleParents.add(change.entity_id);
+		}
+	}
+
+	if (commitsWithMultipleParents.size === 0) {
+		return new Set();
+	}
+
+	const mergedVersionIds = new Set<string>();
+	for (const change of changes) {
+		if (change.schema_key !== "lix_version_tip") continue;
+		const commitId = (change.snapshot_content as any)?.commit_id;
+		if (
+			typeof commitId === "string" &&
+			commitsWithMultipleParents.has(commitId)
+		) {
+			mergedVersionIds.add(change.entity_id);
+		}
+	}
+
+	return mergedVersionIds;
 }
 
 /**
@@ -148,9 +195,35 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			const filters = extractLiteralFilters(recompiled);
 			const watchedVersions = new Set(filters.versionIds);
 			const watchedEntityIds = new Set(filters.entityIds);
+			const targetsActiveVersion =
+				watchedVersions.size === 0 &&
+				(schemaKeys.includes("state") ||
+					schemaKeys.some((key) => entityViewSchemaKeys.has(key)));
 
 			// If no schema keys extracted, always re-execute for safety
 			if (!schemaKeys.length) {
+				return true;
+			}
+
+			// Detect merge commits (identified by commits with two parent edges)
+			// and force re-execution for queries targeting the affected versions.
+			const mergedVersionIds = detectMergedVersions(changes);
+			if (mergedVersionIds.size > 0) {
+				if (watchedVersions.size === 0) {
+					return true;
+				}
+				for (const vid of mergedVersionIds) {
+					if (watchedVersions.has(vid)) {
+						return true;
+					}
+				}
+			}
+
+			// Active version flips must re-run any query using the active 'state' view.
+			if (
+				targetsActiveVersion &&
+				changes.some((change) => change.schema_key === "lix_active_version")
+			) {
 				return true;
 			}
 

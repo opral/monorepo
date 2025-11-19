@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { createReactViewDefinition } from "../../app/react-view";
+import { SEARCH_VIEW_KIND } from "../../app/view-instance-helpers";
 
 /**
  * Search view - Quickly locate files, symbols, or commands
@@ -42,7 +43,7 @@ export function SearchView() {
  * import { view as searchView } from "@/views/search-view";
  */
 export const view = createReactViewDefinition({
-	key: "search",
+	kind: SEARCH_VIEW_KIND,
 	label: "Search",
 	description: "Quickly locate files, symbols, or commands.",
 	icon: Search,
