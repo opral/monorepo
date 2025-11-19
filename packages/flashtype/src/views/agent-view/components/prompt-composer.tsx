@@ -447,7 +447,7 @@ export function PromptComposer({
 					id={textAreaId}
 					data-testid="agent-composer-input"
 					placeholder={placeholder}
-					disabled={!hasKey || pending}
+					disabled={pending}
 					value={value}
 					onChange={(event) => {
 						const next = event.target.value;
