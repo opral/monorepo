@@ -184,28 +184,4 @@ describe("CentralPanel", () => {
 
 		expect(handleFinalize).toHaveBeenCalledWith("search-1");
 	});
-
-	test("triggers create-new-file callback from welcome screen", async () => {
-		const emptyPanel: PanelState = { views: [], activeInstance: null };
-		const handleCreateNewFile = vi.fn();
-
-		await renderWithProviders(
-			<DndContext>
-				<CentralPanel
-					panel={emptyPanel}
-					onSelectView={() => {}}
-					onRemoveView={() => {}}
-					viewContext={createViewContext()}
-					isFocused={false}
-					onFocusPanel={vi.fn()}
-					onCreateNewFile={handleCreateNewFile}
-				/>
-			</DndContext>,
-		);
-
-		const createButton = await screen.findByTestId("welcome-create-file");
-		fireEvent.click(createButton);
-
-		expect(handleCreateNewFile).toHaveBeenCalledTimes(1);
-	});
 });

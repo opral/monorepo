@@ -91,7 +91,7 @@ export function ChangeDecisionOverlay(props: ChangeDecisionProps) {
 						onClick={() => onReject(id)}
 						className="w-full rounded-md border border-border/60 bg-background px-3 py-2 text-left text-xs font-medium text-foreground transition hover:bg-muted/60 focus:border-foreground/40 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-foreground/30"
 					>
-						3. No
+						3. No, and explain what to do differently
 					</button>
 				</div>
 			</div>

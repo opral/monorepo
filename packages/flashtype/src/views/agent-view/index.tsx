@@ -185,6 +185,8 @@ export function AgentView({ context, instance }: AgentViewProps) {
 	}, [context]);
 	const [notice, setNotice] = useState<string | null>(null);
 	const isFirstProposalRef = useRef(true);
+	const resolvedProposalIdsRef = useRef<Set<string>>(new Set());
+	const suppressedProposalErrorRef = useRef<string | null>(null);
 	const handleAutoAcceptToggle = useCallback(
 		async (next: boolean) => {
 			await setAutoAccept(next);
@@ -257,8 +259,10 @@ export function AgentView({ context, instance }: AgentViewProps) {
 
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
+		const { proposalId } = pendingProposal;
 		try {
 			await pendingProposal.accept();
+			resolvedProposalIdsRef.current.add(proposalId);
 			clearPendingProposal();
 		} catch (error_) {
 			const message =
@@ -269,15 +273,24 @@ export function AgentView({ context, instance }: AgentViewProps) {
 
 	const rejectPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
+		const { proposalId } = pendingProposal;
+		const shouldSuppressError = pending;
+		if (shouldSuppressError) {
+			suppressedProposalErrorRef.current = proposalId;
+		}
 		try {
 			await pendingProposal.reject();
+			resolvedProposalIdsRef.current.add(proposalId);
 			clearPendingProposal();
 		} catch (error_) {
+			if (shouldSuppressError) {
+				suppressedProposalErrorRef.current = null;
+			}
 			const message =
 				error_ instanceof Error ? error_.message : String(error_ ?? "unknown");
 			setError(`Error: ${message}`);
 		}
-	}, [pendingProposal, clearPendingProposal]);
+	}, [pendingProposal, clearPendingProposal, pending]);
 
 	const clear = useCallback(async () => {
 		if (!agent) throw new Error("Agent not ready");
@@ -406,6 +419,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			if (!trimmed) return;
 			setError(null);
 			clearPendingProposal();
+			suppressedProposalErrorRef.current = null;
 			setPending(true);
 			try {
 				console.log("[agent] send", {
@@ -555,20 +569,29 @@ export function AgentView({ context, instance }: AgentViewProps) {
 					conversationId: finalMessage.conversation_id,
 				});
 				setPendingMessage(null);
-			} catch (err) {
-				setPendingMessage(null);
-				const message =
-					err instanceof Error ? err.message : String(err ?? "unknown");
-				if (err instanceof ChangeProposalRejectedError) {
-					setError(
-						"Change proposal rejected. Tell the agent what to do differently.",
-					);
-				} else {
-					setError(`Error: ${message}`);
-				}
-				throw err;
-			} finally {
-				setPending(false);
+				} catch (err) {
+					setPendingMessage(null);
+					const message =
+						err instanceof Error ? err.message : String(err ?? "unknown");
+					let shouldRethrow = true;
+					if (err instanceof ChangeProposalRejectedError) {
+						if (suppressedProposalErrorRef.current) {
+							suppressedProposalErrorRef.current = null;
+							shouldRethrow = false;
+						} else {
+							setError(
+								"Change proposal rejected. Tell the agent what to do differently.",
+							);
+						}
+					} else {
+						setError(`Error: ${message}`);
+					}
+					if (shouldRethrow) {
+						throw err;
+					}
+				} finally {
+					suppressedProposalErrorRef.current = null;
+					setPending(false);
 			}
 		},
 		[agent, conversationId, context, autoAcceptEnabled, clearPendingProposal],
@@ -583,6 +606,19 @@ export function AgentView({ context, instance }: AgentViewProps) {
 	}, [agent, hasKey, launchProps, send]);
 
 	useEffect(() => {
+		if (!openProposals) {
+			resolvedProposalIdsRef.current.clear();
+		} else {
+			const openIds = new Set(
+				openProposals.map((proposal: any) => String(proposal.id)),
+			);
+			for (const id of Array.from(resolvedProposalIdsRef.current)) {
+				if (!openIds.has(id)) {
+					resolvedProposalIdsRef.current.delete(id);
+				}
+			}
+		}
+
 		if (
 			pendingProposal ||
 			!agent ||
@@ -600,6 +636,10 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		) ?? openProposals[0]) as any;
 
 		if (!proposal) return;
+		const fallbackProposalId = String(proposal.id);
+		if (resolvedProposalIdsRef.current.has(fallbackProposalId)) {
+			return;
+		}
 
 		const details = getChangeProposalSummary(agent, proposal.id);
 		const diffInstance = details?.fileId
@@ -607,7 +647,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			: undefined;
 
 		setPendingProposal({
-			proposalId: proposal.id,
+			proposalId: fallbackProposalId,
 			summary: "Proposed changes",
 			details,
 			diffInstance,
@@ -645,7 +685,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				focus: false,
 			});
 		}
-	}, [openProposals, pendingProposal, pending, agent, lix, context]);
+	}, [openProposals, pendingProposal, pending, agent, lix, context, conversationId]);
 
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
