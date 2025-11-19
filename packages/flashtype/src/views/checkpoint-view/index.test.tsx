@@ -1,6 +1,12 @@
 import React, { Suspense } from "react";
 import { describe, expect, test, vi } from "vitest";
-import { render, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+	render,
+	fireEvent,
+	waitFor,
+	act,
+	screen,
+} from "@testing-library/react";
 import { LixProvider } from "@lix-js/react-utils";
 import { openLix, createCheckpoint } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
@@ -9,7 +15,10 @@ import { CheckpointView, view as checkpointViewDefinition } from "./index";
 import type { ViewContext, ViewInstance } from "../../app/types";
 import {
 	CHECKPOINT_VIEW_KIND,
+	DIFF_VIEW_KIND,
 	HISTORY_VIEW_KIND,
+	buildDiffViewProps,
+	diffViewInstance,
 	historyViewInstance,
 } from "../../app/view-instance-helpers";
 
@@ -148,5 +157,67 @@ describe("CheckpointView", () => {
 			instance: historyViewInstance(),
 			focus: true,
 		});
+	});
+
+	test("opens a diff as a pending preview when clicking a file row", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+		const fileId = "diff-preview-file";
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: fileId,
+				path: "/docs/diff-preview.md",
+				data: new TextEncoder().encode("# Before"),
+			})
+			.execute();
+
+		await createCheckpoint({ lix });
+
+		await lix.db
+			.updateTable("file")
+			.set({ data: new TextEncoder().encode("# After") })
+			.where("id", "=", fileId)
+			.execute();
+
+		const openView = vi.fn();
+
+		await act(async () => {
+			render(
+				<LixProvider lix={lix}>
+					<Suspense fallback={null}>
+						<CheckpointView
+							context={{
+								openView,
+								setTabBadgeCount: () => {},
+								lix,
+							}}
+						/>
+					</Suspense>
+				</LixProvider>,
+			);
+		});
+
+		const fileButton = await screen.findByRole("button", {
+			name: /diff-preview\.md/i,
+		});
+
+		fireEvent.click(fileButton);
+
+		expect(openView).toHaveBeenCalledTimes(1);
+		const [args] = openView.mock.calls[0] ?? [];
+		expect(args).toMatchObject({
+			panel: "central",
+			kind: DIFF_VIEW_KIND,
+			instance: diffViewInstance(fileId),
+			pending: true,
+			focus: true,
+		});
+		expect(args.props).toMatchObject({
+			fileId,
+			filePath: "/docs/diff-preview.md",
+			label: "diff-preview.md",
+		});
+		expect(args.props?.diff).toBeDefined();
 	});
 });

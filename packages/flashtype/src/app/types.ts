@@ -89,6 +89,7 @@ export interface ViewDefinition {
  *   kind: "file-content",
  *   instance: "file-content:file-123",
  *   props: { fileId: "file-123", filePath: "/docs/guide.md" },
+ *   pending: true,
  * });
  */
 export interface ViewContext {
@@ -98,6 +99,7 @@ export interface ViewContext {
 		readonly props?: ViewInstanceProps;
 		readonly focus?: boolean;
 		readonly instance?: string;
+		readonly pending?: boolean;
 	}) => void;
 	readonly closeView?: (args: {
 		readonly panel?: PanelSide;

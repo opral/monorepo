@@ -57,7 +57,7 @@ import {
 	type PanelLayoutSizes,
 	type FlashtypeUiState,
 } from "./ui-state";
-import { activatePanelView } from "./pending-view";
+import { activatePanelView, upsertPendingView } from "./pending-view";
 import { cloneViewInstance, reorderPanelViewsByIndex } from "./panel-utils";
 
 type LegacyViewInstance = ViewInstance & {
@@ -422,17 +422,29 @@ function LayoutShellContent() {
 			props,
 			focus = true,
 			instance,
+			pending = false,
 		}: {
 			panel: PanelSide;
 			kind: ViewKind;
 			props?: ViewInstanceProps;
 			focus?: boolean;
 			instance?: string;
+			pending?: boolean;
 		}) => {
 			ensurePanelExpanded(panel);
 			setPanelState(
 				panel,
 				(current) => {
+					if (pending) {
+						const targetInstance = instance ?? createViewInstanceId(kind);
+						const nextView: ViewInstance = {
+							instance: targetInstance,
+							kind,
+							props,
+							isPending: true,
+						};
+						return upsertPendingView(current, nextView, { activate: true });
+					}
 					if (!instance) {
 						const existing = current.views.find((entry) => entry.kind === kind);
 						if (existing) {
