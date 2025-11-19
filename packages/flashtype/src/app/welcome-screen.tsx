@@ -1,385 +1,168 @@
-import {
-	useCallback,
-	useEffect,
-	useId,
-	useMemo,
-	useRef,
-	useState,
-	type JSX,
-} from "react";
-import { Zap, ExternalLink } from "lucide-react";
-import { LixProvider, useQuery } from "@lix-js/react-utils";
-import { PromptComposer } from "@/views/agent-view/components/prompt-composer";
-import { COMMANDS } from "@/views/agent-view/commands";
-import { selectFilePaths } from "@/views/agent-view/select-file-paths";
-import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
-import { useKeyValue } from "@/hooks/key-value/use-key-value";
-import { Input } from "@/components/ui/input";
-import type { ViewContext, ViewInstanceProps } from "./types";
+import { useCallback, useMemo, type JSX } from "react";
+import { ArrowRight, Zap } from "lucide-react";
+import type { ViewContext, PanelState, PanelSide } from "./types";
 import { AGENT_VIEW_KIND } from "./view-instance-helpers";
 
-const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
-const AVAILABLE_MODELS = [
-	{ id: "anthropic/claude-4.5-sonnet", label: "Claude 4.5 Sonnet" },
-	{ id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-	{ id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-	{ id: "z-ai/glm-4.6", label: "GLM 4.6 by ZAI" },
-	{ id: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
-	{ id: "openai/gpt-5", label: "GPT-5" },
-	{ id: "openai/gpt-5-codex", label: "GPT-5 Codex" },
-] as const;
-const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";
-
 type WelcomeScreenProps = {
-	/**
-	 * View context for opening views and accessing Lix.
-	 */
-	readonly context: ViewContext;
-	/**
-	 * Optional callback to create a new file directly from the welcome screen.
-	 */
+	readonly viewContext: ViewContext;
 	readonly onCreateNewFile?: () => void | Promise<void>;
+	readonly leftPanel?: PanelState;
+	readonly rightPanel?: PanelState;
+	readonly centralPanel: PanelState;
 };
 
 /**
- * Welcome screen with a prompt composer to reduce onboarding friction.
- * Users can immediately start typing what they want to write.
+ * Minimal welcome screen that introduces Flashtype and nudges first actions.
  *
  * @example
- * return (
- *   <WelcomeScreen
- *     context={viewContext}
- *     onCreateNewFile={() => console.log("create doc")}
- *   />
- * );
+ * return <WelcomeScreen onCreateNewFile={() => console.log("create")} />;
  */
-function WelcomeScreenContent({
-	context,
+export function WelcomeScreen({
+	viewContext,
 	onCreateNewFile: _onCreateNewFile,
+	leftPanel,
+	rightPanel,
+	centralPanel,
 }: WelcomeScreenProps): JSX.Element {
-	const devApiKey =
-		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
-			? VITE_DEV_OPENROUTER_API_KEY.trim()
-			: null;
-	const usingDevApiKey = Boolean(devApiKey);
+	// Find agent view across all panels
+	const agentView = useMemo(() => {
+		const allViews = [
+			...(leftPanel?.views ?? []),
+			...(centralPanel.views ?? []),
+			...(rightPanel?.views ?? []),
+		];
+		return allViews.find((view) => view.kind === AGENT_VIEW_KIND);
+	}, [leftPanel, rightPanel, centralPanel]);
 
-	const [storedApiKey, setStoredApiKey] = useState<string | null>(devApiKey);
-	const [keyLoaded, setKeyLoaded] = useState(usingDevApiKey);
-	const [storedModel, setStoredModel] = useKeyValue("flashtype_agent_model");
-	const [autoAcceptRaw, setAutoAccept] = useKeyValue(
-		"flashtype_auto_accept_session",
-	);
-	const [_notice, setNotice] = useState<string | null>(null);
-	const [placeholderText, setPlaceholderText] = useState("");
-	const [showKeyPrompt, setShowKeyPrompt] = useState(false);
-	const [pendingMessage, setPendingMessage] = useState<string | null>(null);
-	const [apiKeyDraft, setApiKeyDraft] = useState("");
-	const keyInputId = useId();
-
-	const selectedModelId = useMemo(() => {
-		if (!storedModel) return DEFAULT_MODEL_ID;
-		const match = AVAILABLE_MODELS.find((option) => option.id === storedModel);
-		return match ? match.id : DEFAULT_MODEL_ID;
-	}, [storedModel]);
-	const autoAcceptEnabled = Boolean(autoAcceptRaw);
-	const hasKey = Boolean(storedApiKey);
-
-	const suggestions = useMemo(
-		() => [
-			"write a blog post about...",
-			"review your resume",
-			"draft an email",
-			"write a love letter",
-			"shorten your LinkedIn post",
-		],
-		[],
-	);
-	const animationRef = useRef<{
-		currentIndex: number;
-		charIndex: number;
-		isDeleting: boolean;
-	}>({
-		currentIndex: 0,
-		charIndex: 0,
-		isDeleting: false,
-	});
-	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-	useEffect(() => {
-		const type = () => {
-			const { currentIndex, charIndex, isDeleting } = animationRef.current;
-			const currentSuggestion = suggestions[currentIndex];
-			if (isDeleting) {
-				const newCharIndex = charIndex - 1;
-				animationRef.current.charIndex = newCharIndex;
-				setPlaceholderText(
-					`Ask Flashtype to ${currentSuggestion.slice(0, newCharIndex)}`,
-				);
-				if (newCharIndex === 0) {
-					animationRef.current.isDeleting = false;
-					animationRef.current.currentIndex =
-						(currentIndex + 1) % suggestions.length;
-					timeoutRef.current = setTimeout(type, 500);
-				} else {
-					timeoutRef.current = setTimeout(type, 50);
-				}
-			} else {
-				const newCharIndex = charIndex + 1;
-				animationRef.current.charIndex = newCharIndex;
-				setPlaceholderText(
-					`Ask Flashtype to ${currentSuggestion.slice(0, newCharIndex)}`,
-				);
-				if (newCharIndex === currentSuggestion.length) {
-					animationRef.current.isDeleting = true;
-					timeoutRef.current = setTimeout(type, 2000);
-				} else {
-					timeoutRef.current = setTimeout(type, 100);
-				}
-			}
-		};
-
-		timeoutRef.current = setTimeout(type, 500);
-
-		return () => {
-			// eslint-disable-next-line react-hooks/exhaustive-deps -- timeoutRef tracks the latest timeout ID
-			const timeoutId = timeoutRef.current;
-			if (timeoutId) {
-				clearTimeout(timeoutId);
-			}
-		};
-	}, [suggestions]);
-
-	useEffect(() => {
-		if (devApiKey) {
-			setStoredApiKey(devApiKey);
-			setKeyLoaded(true);
-			return;
-		}
-		if (typeof window === "undefined") {
-			setKeyLoaded(true);
-			return;
-		}
-		const existing = window.localStorage.getItem(OPENROUTER_KEY_STORAGE_KEY);
-		if (existing) {
-			setStoredApiKey(existing);
-		}
-		setKeyLoaded(true);
-	}, [devApiKey]);
-
-	const fileRows = useQuery(({ lix }) => selectFilePaths({ lix, limit: 50 }));
-	const filePaths = useMemo(
-		() => (fileRows ?? []).map((row: any) => String(row.path)),
-		[fileRows],
-	);
-
-	const handleModelChange = useCallback(
-		(next: string) => {
-			void setStoredModel(next);
-		},
-		[setStoredModel],
-	);
-
-	const handleAutoAcceptToggle = useCallback(
-		async (next: boolean) => {
-			await setAutoAccept(next);
-			setNotice(null);
-		},
-		[setAutoAccept],
-	);
-
-	const openAgentView = useCallback(
-		(props?: ViewInstanceProps) => {
-			context.openView?.({
-				panel: "central",
+	const handleOpenAgentChat = useCallback(() => {
+		if (agentView) {
+			// Agent view is already open, find which panel it's in and focus/activate it
+			const panel: PanelSide = leftPanel?.views.some(
+				(v) => v.instance === agentView.instance,
+			)
+				? "left"
+				: rightPanel?.views.some((v) => v.instance === agentView.instance)
+					? "right"
+					: "central";
+			// Use openView to focus the existing view - it will activate it if it exists
+			viewContext.openView?.({
+				panel,
 				kind: AGENT_VIEW_KIND,
-				props,
+				instance: agentView.instance,
 				focus: true,
 			});
-		},
-		[context],
-	);
-
-	const handleSlashCommand = useCallback(
-		async (_command: string) => {
-			openAgentView();
-		},
-		[openAgentView],
-	);
-
-	const handleSendMessage = useCallback(
-		async (message: string) => {
-			if (!hasKey) {
-				// Store the message and show key prompt
-				setPendingMessage(message);
-				setShowKeyPrompt(true);
-				return;
-			}
-			openAgentView({
-				source: "welcome",
-				initialMessage: message,
-				invocationId: createInvocationId(),
-			});
-		},
-		[openAgentView, hasKey],
-	);
-
-	const handleApiKeyChange = useCallback((value: string) => {
-		setApiKeyDraft(value);
-	}, []);
-
-	const handleSaveApiKey = useCallback(() => {
-		if (devApiKey) {
-			return;
-		}
-		const trimmed = apiKeyDraft.trim();
-		if (typeof window !== "undefined") {
-			if (trimmed) {
-				window.localStorage.setItem(OPENROUTER_KEY_STORAGE_KEY, trimmed);
-			} else {
-				window.localStorage.removeItem(OPENROUTER_KEY_STORAGE_KEY);
-			}
-		}
-		setStoredApiKey(trimmed || null);
-		setApiKeyDraft("");
-		setShowKeyPrompt(false);
-
-		// Send the pending message after key is saved
-		if (pendingMessage) {
-			const messageToSend = pendingMessage;
-			setPendingMessage(null);
-			openAgentView({
-				source: "welcome",
-				initialMessage: messageToSend,
-				invocationId: createInvocationId(),
+		} else {
+			// Agent view is not open, open it in the right panel and focus it
+			viewContext.openView?.({
+				panel: "right",
+				kind: AGENT_VIEW_KIND,
+				focus: true,
 			});
 		}
-	}, [apiKeyDraft, devApiKey, pendingMessage, openAgentView]);
-
-	if (!keyLoaded) {
-		return (
-			<div
-				className="flex h-full flex-col items-center justify-center px-6 text-neutral-900"
-				data-testid="welcome-screen"
-			>
-				<div className="text-neutral-600">Loading...</div>
-			</div>
-		);
-	}
+	}, [agentView, viewContext, leftPanel, rightPanel]);
 
 	return (
 		<div
-			className="relative flex h-full w-full flex-col items-center px-6 text-neutral-900"
+			className="flex h-full flex-col items-center justify-center px-6 text-neutral-900"
 			data-testid="welcome-screen"
 		>
-			{/* Logo/Brand */}
-			<div className="-translate-x-1/2 absolute left-1/2 top-6 sm:top-12 flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm [@media(max-height:640px)]:hidden">
-				<Zap className="h-3.5 w-3.5 text-brand-600" />
-				<span className="font-semibold text-neutral-900">flashtype.ai</span>
-			</div>
+			<main className="flex flex-col items-center gap-6 text-center">
+				{/* Logo/Brand */}
+				<div className="flex items-center gap-2 text-xl">
+					<Zap className="h-5 w-5 text-brand-600" />
+					<span className="font-semibold text-neutral-900">flashtype.ai</span>
+				</div>
 
-			<main className="flex h-full w-full max-w-3xl flex-col items-center justify-center gap-8 py-20 sm:py-24 text-center">
-				{/* Main prompt */}
-				<div className="flex flex-col items-center gap-2">
-					<h1 className="text-4xl font-semibold text-neutral-900">
-						What do you want to write?
-					</h1>
+				{/* Description */}
+				<div className="flex flex-col items-center gap-1">
 					<p className="text-base text-neutral-600">
-						Create markdown documents by chatting with AI.
+						A Claude Code-style markdown editor in the browser.
+					</p>
+					<p className="text-base text-neutral-600">
+						Zero install. AI-powered. Built on top of
+						<a href="https://lix.dev" target="_blank" rel="noreferrer">
+							<svg
+								width="17"
+								height="12"
+								viewBox="0 0 105 72"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+								className="inline -translate-y-1/7 ml-1.5"
+							>
+								<path
+									d="M59.8478 22.6263L68.7495 39.5774L91.2057 0.403687H105L77.6196 46.8692L92.0454 71.1121H78.314L68.7495 54.3504L59.3428 71.1121H45.4536L59.8478 46.8692L45.9587 22.6263H59.8478Z"
+									fill="#07B6D4"
+								/>
+								<path
+									d="M24.3909 71.1119V22.6262H37.8381V71.1119H24.3909Z"
+									fill="#07B6D4"
+								/>
+								<path
+									d="M13.5052 0.549194V71.6616H0.171631V0.549194H13.5052Z"
+									fill="#07B6D4"
+								/>
+								<path
+									d="M24.6166 0.549194H60.1728V11.6605H24.6166V0.549194Z"
+									fill="#07B6D4"
+								/>
+							</svg>
+						</a>
+						.
 					</p>
 				</div>
 
-				{/* Prompt Composer */}
-				<div className="flex w-full justify-center [&>div>div:last-child]:hidden">
-					<PromptComposer
-						hasKey={hasKey}
-						models={AVAILABLE_MODELS}
-						modelId={selectedModelId}
-						onModelChange={handleModelChange}
-						autoAcceptEnabled={autoAcceptEnabled}
-						onAutoAcceptToggle={handleAutoAcceptToggle}
-						commands={COMMANDS}
-						files={filePaths}
-						pending={false}
-						onNotice={setNotice}
-						onSlashCommand={handleSlashCommand}
-						onSendMessage={handleSendMessage}
-						placeholderText={placeholderText || "Ask Flashtype to..."}
-					/>
+				{/* CTAs */}
+				<div className="flex items-center gap-3">
+					<button
+						type="button"
+						onClick={handleOpenAgentChat}
+						className="cursor-pointer rounded-lg border border-neutral-200 bg-neutral-0 px-3.5 py-2 shadow-sm transition hover:border-brand-600 hover:shadow focus-visible:!bg-brand-200 focus-visible:!outline-none"
+					>
+						<div className="flex items-center gap-2">
+							<span className="text-sm font-medium leading-none text-neutral-900">
+								Open agent chat
+							</span>
+						</div>
+					</button>
+
+					<a
+						href="https://lix.dev"
+						target="_blank"
+						rel="noreferrer"
+						className="inline-flex items-center gap-1 text-sm text-neutral-500 transition hover:text-brand-600"
+					>
+						Explore{" "}
+						<svg
+							width="16"
+							height="12"
+							viewBox="0 0 105 72"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							className="inline"
+						>
+							<path
+								d="M59.8478 22.6263L68.7495 39.5774L91.2057 0.403687H105L77.6196 46.8692L92.0454 71.1121H78.314L68.7495 54.3504L59.3428 71.1121H45.4536L59.8478 46.8692L45.9587 22.6263H59.8478Z"
+								fill="currentColor"
+							/>
+							<path
+								d="M24.3909 71.1119V22.6262H37.8381V71.1119H24.3909Z"
+								fill="currentColor"
+							/>
+							<path
+								d="M13.5052 0.549194V71.6616H0.171631V0.549194H13.5052Z"
+								fill="currentColor"
+							/>
+							<path
+								d="M24.6166 0.549194H60.1728V11.6605H24.6166V0.549194Z"
+								fill="currentColor"
+							/>
+						</svg>
+						<ArrowRight className="h-3.5 w-3.5" />
+					</a>
 				</div>
 
-				{/* Key Prompt Modal */}
-				{showKeyPrompt && (
-					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-						<div className="w-full max-w-md rounded-md border border-border/80 bg-background shadow-xl">
-							<div className="flex flex-col gap-4 p-4">
-								<div className="space-y-2">
-									<h2 className="text-sm font-semibold leading-6 text-foreground">
-										Provide OpenRouter API key
-									</h2>
-									<p className="text-xs text-muted-foreground">
-										Warning: The API key is stored in the browser. Any JS code
-										running in this context can access it. Make sure to cap the
-										usage of the OpenRouter API key.
-									</p>
-									<a
-										className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 transition hover:text-neutral-900"
-										href="https://openrouter.ai/settings/keys"
-										target="_blank"
-										rel="noopener noreferrer"
-									>
-										How to get a key
-										<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-									</a>
-								</div>
-								<label htmlFor={keyInputId} className="sr-only">
-									OpenRouter API key
-								</label>
-								<Input
-									id={keyInputId}
-									value={apiKeyDraft}
-									size={0}
-									onChange={(event) => handleApiKeyChange(event.target.value)}
-									onKeyDown={(event) => {
-										if (
-											event.key === "Enter" &&
-											apiKeyDraft.trim().length > 0
-										) {
-											event.preventDefault();
-											handleSaveApiKey();
-										}
-									}}
-									placeholder="sk-or-v1-…"
-									autoComplete="off"
-									className="text-sm"
-								/>
-								<div className="flex justify-end gap-2 pt-1">
-									<button
-										type="button"
-										onClick={() => {
-											setShowKeyPrompt(false);
-											setPendingMessage(null);
-											setApiKeyDraft("");
-										}}
-										className="inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2 text-xs font-medium text-neutral-900 transition hover:border-neutral-300 hover:bg-neutral-50"
-									>
-										Cancel
-									</button>
-									<button
-										type="button"
-										onClick={handleSaveApiKey}
-										disabled={apiKeyDraft.trim().length === 0}
-										className="inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2 text-xs font-medium text-neutral-900 transition hover:border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
-									>
-										Continue
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
-
 				{/* Social Links */}
-				<div className="flex items-center gap-4 text-xs text-neutral-400">
+				<div className="mt-4 flex items-center gap-4 text-xs text-neutral-400">
 					<a
 						href="https://github.com/opral/flashtype"
 						target="_blank"
@@ -438,31 +221,4 @@ function WelcomeScreenContent({
 			</main>
 		</div>
 	);
-}
-
-/**
- * Welcome screen wrapper that provides agent state and Lix context.
- */
-export function WelcomeScreen({
-	context,
-	onCreateNewFile,
-}: WelcomeScreenProps): JSX.Element {
-	return (
-		<LixProvider lix={context.lix}>
-			<WelcomeScreenContent
-				context={context}
-				onCreateNewFile={onCreateNewFile}
-			/>
-		</LixProvider>
-	);
-}
-
-function createInvocationId(): string {
-	if (
-		typeof crypto !== "undefined" &&
-		typeof crypto.randomUUID === "function"
-	) {
-		return crypto.randomUUID();
-	}
-	return `welcome-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
