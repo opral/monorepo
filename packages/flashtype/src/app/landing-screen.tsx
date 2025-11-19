@@ -449,12 +449,7 @@ export function LandingScreen({
 	onCreateNewFile,
 }: LandingScreenProps): JSX.Element {
 	return (
-		<LixProvider lix={context.lix}>
-			<LandingScreenContent
-				context={context}
-				onCreateNewFile={onCreateNewFile}
-			/>
-		</LixProvider>
+		<LandingScreenContent context={context} onCreateNewFile={onCreateNewFile} />
 	);
 }
 
