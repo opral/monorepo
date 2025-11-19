@@ -26,6 +26,7 @@ import { rewriteEntityViewSelect } from "./entity-views/select.js";
 import { rewriteEntityViewInsert } from "./entity-views/insert.js";
 import { rewriteEntityViewUpdate } from "./entity-views/update.js";
 import { rewriteEntityViewDelete } from "./entity-views/delete.js";
+import { rewriteVtableInsertOnConflict } from "./steps/rewrite-vtable-insert-on-conflict.js";
 import { getVersionInheritanceSnapshot } from "./inheritance/version-inheritance-cache.js";
 import { rewriteStateByVersionInsert } from "./state-by-version/insert.js";
 import { rewriteStateByVersionUpdate } from "./state-by-version/update.js";
@@ -49,6 +50,7 @@ const fullPipeline: PreprocessorStep[] = [
 	rewriteStateByVersionInsert,
 	rewriteStateByVersionUpdate,
 	rewriteStateByVersionDelete,
+	rewriteVtableInsertOnConflict,
 	rewriteEntityViewSelect,
 	expandSqlViews,
 	rewriteStateByVersionSelect,
@@ -61,6 +63,7 @@ const vtableOnlyPipeline: PreprocessorStep[] = [
 	rewriteStateByVersionInsert,
 	rewriteStateByVersionUpdate,
 	rewriteStateByVersionDelete,
+	rewriteVtableInsertOnConflict,
 	rewriteStateByVersionSelect,
 	cachePopulator,
 	rewriteActiveVersionSubquery,

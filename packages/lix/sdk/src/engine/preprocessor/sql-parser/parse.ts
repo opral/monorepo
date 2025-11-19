@@ -1584,17 +1584,25 @@ function assignPositionsInInsert(
 }
 
 function assignPositionsInInsertSource(
-	source: InsertValuesNode | InsertDefaultValuesNode,
+	source:
+		| InsertValuesNode
+		| InsertDefaultValuesNode
+		| SelectStatementNode
+		| CompoundSelectNode,
 	state: ParameterTraversalState
 ): void {
 	if (source.node_kind === "insert_default_values") {
 		return;
 	}
-	for (const row of source.rows) {
-		for (const expression of row) {
-			assignPositionsInExpression(expression, state);
+	if (source.node_kind === "insert_values") {
+		for (const row of source.rows) {
+			for (const expression of row) {
+				assignPositionsInExpression(expression, state);
+			}
 		}
+		return;
 	}
+	assignPositionsInStatement(source, state);
 }
 
 function assignPositionsInUpdate(

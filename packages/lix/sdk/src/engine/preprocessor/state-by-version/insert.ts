@@ -85,10 +85,6 @@ function rewriteInsertStatement(
 		return null;
 	}
 
-	if (insert.on_conflict) {
-		return null;
-	}
-
 	if (insert.source.node_kind !== "insert_values") {
 		return null;
 	}

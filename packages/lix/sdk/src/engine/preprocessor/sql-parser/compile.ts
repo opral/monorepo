@@ -130,7 +130,7 @@ type CompileResult = {
 export function compile(
 	statements: readonly SegmentedStatementNode[]
 ): CompileResult {
-	const sql = statements.map(emitSegmentedStatement).join("\n");
+	const sql = statements.map(emitSegmentedStatement).join(";\n");
 	return {
 		sql,
 		parameters: [],
@@ -402,12 +402,19 @@ function emitInsertStatement(statement: InsertStatementNode): string {
 }
 
 function emitInsertSource(
-	source: InsertValuesNode | InsertDefaultValuesNode
+	source:
+		| InsertValuesNode
+		| InsertDefaultValuesNode
+		| SelectStatementNode
+		| CompoundSelectNode
 ): string {
 	if (source.node_kind === "insert_default_values") {
 		return "DEFAULT VALUES";
 	}
-	return emitInsertValues(source);
+	if (source.node_kind === "insert_values") {
+		return emitInsertValues(source);
+	}
+	return compileStatement(source).sql;
 }
 
 function emitInsertValues(values: InsertValuesNode): string {

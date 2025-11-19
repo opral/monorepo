@@ -478,6 +478,113 @@ simulationTest(
 );
 
 simulationTest(
+	"insert on conflict updates state and writer via lix_internal_state_vtable",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema_on_conflict",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: { value: { type: "string" } },
+		};
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+		// Seed tracked row with initial writer
+		await withWriterKey(db, "writer-1", (trx) =>
+			trx
+				.insertInto("lix_internal_state_vtable")
+				.values({
+					entity_id: "upsert-1",
+					file_id: "f-upsert",
+					schema_key: "mock_schema_on_conflict",
+					plugin_key: "test_plugin",
+					schema_version: "1.0",
+					version_id: sql`(SELECT version_id FROM active_version)`,
+					snapshot_content: JSON.stringify({ value: "initial" }),
+					untracked: 0,
+				})
+				.execute()
+		);
+
+		const changesBefore = await db
+			.selectFrom("change")
+			.where("entity_id", "=", "upsert-1")
+			.where("schema_key", "=", "mock_schema_on_conflict")
+			.where("file_id", "=", "f-upsert")
+			.selectAll()
+			.execute();
+
+		// ON CONFLICT DO UPDATE should produce a single change (the update), not an insert+update pair.
+		// Upsert with ON CONFLICT should route through vtable update path
+		await withWriterKey(db, "writer-2", (trx) =>
+			trx
+				.insertInto("lix_internal_state_vtable")
+				.values({
+					entity_id: "upsert-1",
+					file_id: "f-upsert",
+					schema_key: "mock_schema_on_conflict",
+					plugin_key: "test_plugin",
+					schema_version: "1.0",
+					version_id: sql`(SELECT version_id FROM active_version)`,
+					snapshot_content: JSON.stringify({ value: "updated" }),
+					untracked: 0,
+				})
+				.onConflict((oc) =>
+					oc
+						.columns(["entity_id", "schema_key", "file_id", "version_id"])
+						.doUpdateSet((eb) => ({
+							snapshot_content: eb.ref("excluded.snapshot_content"),
+							plugin_key: eb.ref("excluded.plugin_key"),
+							schema_version: eb.ref("excluded.schema_version"),
+							untracked: eb.ref("excluded.untracked"),
+						}))
+				)
+				.execute()
+		);
+
+		const changesAfter = await db
+			.selectFrom("change")
+			.where("entity_id", "=", "upsert-1")
+			.where("schema_key", "=", "mock_schema_on_conflict")
+			.where("file_id", "=", "f-upsert")
+			.selectAll()
+			.execute();
+
+		const row = await db
+			.selectFrom("lix_internal_state_vtable")
+			.where("entity_id", "=", "upsert-1")
+			.orderBy("entity_id")
+			.orderBy("version_id")
+			.select([
+				sql`json(snapshot_content)`.as("snapshot_content"),
+				sql`writer_key`.as("writer_key"),
+				"untracked",
+			])
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(row.snapshot_content).toEqual({ value: "updated" });
+		expectDeterministic(row.untracked).toBe(0);
+		expectDeterministic(row.writer_key).toBe("writer-2");
+		expectDeterministic(changesAfter.length).toBe(changesBefore.length + 1);
+	}
+);
+
+simulationTest(
 	"writer_key exposed on state/state_by_version/state_with_tombstones",
 	async ({ openSimulatedLix, expectDeterministic }) => {
 		const lix = await openSimulatedLix({
