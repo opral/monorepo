@@ -17,7 +17,6 @@ import {
 	CHECKPOINT_VIEW_KIND,
 	DIFF_VIEW_KIND,
 	HISTORY_VIEW_KIND,
-	buildDiffViewProps,
 	diffViewInstance,
 	historyViewInstance,
 } from "../../app/view-instance-helpers";

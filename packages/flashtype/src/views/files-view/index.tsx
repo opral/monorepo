@@ -466,12 +466,17 @@ export function FilesView({ context }: FilesViewProps) {
 				<button
 					type="button"
 					onClick={handleNewFile}
-					className="mb-1 flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1"
+					className="mb-1 flex w-full items-center justify-between gap-2 rounded border border-transparent px-2 py-1 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1"
 					aria-label="New file"
 					title="New file (⌘.)"
 				>
-					<FilePlus className="h-3.5 w-3.5 text-neutral-500" />
-					<span>New file</span>
+					<span className="flex items-center gap-2">
+						<FilePlus className="h-3.5 w-3.5 text-neutral-500" />
+						<span>New file</span>
+					</span>
+					<span className="text-[10px] font-semibold text-neutral-500">
+						⌘ ·
+					</span>
 				</button>
 			)}
 			{isDraggingOver && (
