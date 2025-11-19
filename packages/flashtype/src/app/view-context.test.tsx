@@ -70,4 +70,35 @@ describe("useViewContext", () => {
 		});
 		expect(result.current.badgeCounts.beta).toBe(5);
 	});
+
+	test("marks only the active view as active", () => {
+		const parent = createParentContext();
+		const panel: PanelState = {
+			views: [
+				{ instance: "alpha", kind: "custom" },
+				{ instance: "beta", kind: "custom" },
+			],
+			activeInstance: "alpha",
+		};
+
+		const { result, rerender } = renderHook(useViewContext, {
+			initialProps: { panel, isFocused: true, parentContext: parent },
+		});
+
+		const alphaCtx = result.current.makeContext(panel.views[0]!);
+		const betaCtx = result.current.makeContext(panel.views[1]!);
+		expect(alphaCtx.isActiveView).toBe(true);
+		expect(betaCtx.isActiveView).toBe(false);
+
+		rerender({
+			panel: { ...panel, activeInstance: "beta" },
+			isFocused: true,
+			parentContext: parent,
+		});
+
+		const alphaAfter = result.current.makeContext(panel.views[0]!);
+		const betaAfter = result.current.makeContext(panel.views[1]!);
+		expect(alphaAfter.isActiveView).toBe(false);
+		expect(betaAfter.isActiveView).toBe(true);
+	});
 });

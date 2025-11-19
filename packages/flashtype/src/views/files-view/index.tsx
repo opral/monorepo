@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Files, FileUp } from "lucide-react";
+import { Files, FileUp, FilePlus } from "lucide-react";
 import { LixProvider, useLix, useQuery } from "@lix-js/react-utils";
 import { nanoId, normalizeDirectoryPath, normalizeFilePath } from "@lix-js/sdk";
 import { selectFilesystemEntries } from "@/queries";
@@ -109,6 +109,22 @@ export function FilesView({ context }: FilesViewProps) {
 		setDraft(null);
 	}, []);
 
+	const handleNewFile = useCallback(() => {
+		const baseDirectory = resolveDraftDirectory();
+		const directoryPath =
+			baseDirectory === "/" ? "/" : normalizeDirectoryPath(baseDirectory);
+		setDraft((prev) => {
+			if (prev) return prev;
+			setSelectedPath(null);
+			setSelectedKind(null);
+			return {
+				kind: "file",
+				directoryPath,
+				value: "new-file",
+			};
+		});
+	}, [resolveDraftDirectory]);
+
 	const handleDraftCommit = useCallback(async () => {
 		if (creatingRef.current) return;
 		if (!draft) return;
@@ -140,8 +156,11 @@ export function FilesView({ context }: FilesViewProps) {
 					panel: "central",
 					kind: FILE_VIEW_KIND,
 					instance: fileViewInstance(id),
-					props: buildFileViewProps({ fileId: id, filePath: path }),
-					focus: false,
+					props: {
+						...buildFileViewProps({ fileId: id, filePath: path }),
+						focusOnLoad: true,
+					},
+					focus: true,
 				});
 			} catch (error) {
 				console.error("Failed to create file", error);
@@ -442,6 +461,24 @@ export function FilesView({ context }: FilesViewProps) {
 			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}
 		>
+			{/* New file button row - hidden when draft is active */}
+			{!draft && (
+				<button
+					type="button"
+					onClick={handleNewFile}
+					className="mb-1 flex w-full items-center justify-between gap-2 rounded border border-transparent px-2 py-1 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1"
+					aria-label="New file"
+					title="New file (⌘.)"
+				>
+					<span className="flex items-center gap-2">
+						<FilePlus className="h-3.5 w-3.5 text-neutral-500" />
+						<span>New file</span>
+					</span>
+					<span className="text-[10px] font-semibold text-neutral-500">
+						⌘ ·
+					</span>
+				</button>
+			)}
 			{isDraggingOver && (
 				<div className="absolute inset-1 z-50 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-amber-400 bg-amber-50/50 backdrop-blur-sm pointer-events-none">
 					<FileUp className="h-12 w-12 text-foreground" />

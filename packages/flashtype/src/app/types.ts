@@ -80,12 +80,16 @@ export interface ViewDefinition {
 /**
  * Context passed to views for interacting with the layout.
  *
+ * The host sets `isActiveView` when the view's tab is visible so consumers can
+ * avoid mutating shared state while hidden.
+ *
  * @example
  * context.openView?.({
  *   panel: "central",
  *   kind: "file-content",
  *   instance: "file-content:file-123",
  *   props: { fileId: "file-123", filePath: "/docs/guide.md" },
+ *   pending: true,
  * });
  */
 export interface ViewContext {
@@ -95,6 +99,7 @@ export interface ViewContext {
 		readonly props?: ViewInstanceProps;
 		readonly focus?: boolean;
 		readonly instance?: string;
+		readonly pending?: boolean;
 	}) => void;
 	readonly closeView?: (args: {
 		readonly panel?: PanelSide;
@@ -109,6 +114,7 @@ export interface ViewContext {
 	) => void;
 	readonly resizePanel?: (side: PanelSide, size: number) => void;
 	readonly focusPanel?: (side: PanelSide) => void;
+	readonly isActiveView?: boolean;
 	readonly lix: Lix;
 }
 

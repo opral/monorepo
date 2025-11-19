@@ -100,7 +100,8 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 					fileId,
 					filePath: decodedPath,
 				}),
-				focus: false,
+				pending: true,
+				focus: true,
 			});
 		},
 		[context],

@@ -13,23 +13,40 @@ import { FormattingToolbar } from "./components/formatting-toolbar";
 type MarkdownViewProps = {
 	readonly fileId?: string;
 	readonly filePath?: string;
+	readonly isActiveView?: boolean;
+	readonly focusOnLoad?: boolean;
 };
 
 /**
  * Embeds the shared TipTap editor to render Markdown documents.
  *
  * @example
- * <MarkdownView fileId="file-123" filePath="/docs/guide.md" />
+ * <MarkdownView fileId="file-123" filePath="/docs/guide.md" isActiveView />
  */
-export function MarkdownView({ fileId, filePath }: MarkdownViewProps) {
+export function MarkdownView({
+	fileId,
+	filePath,
+	isActiveView = true,
+	focusOnLoad = false,
+}: MarkdownViewProps) {
 	return (
 		<Suspense fallback={<MarkdownLoadingSpinner />}>
-			<MarkdownViewContent fileId={fileId} filePath={filePath} />
+			<MarkdownViewContent
+				fileId={fileId}
+				filePath={filePath}
+				isActiveView={isActiveView}
+				focusOnLoad={focusOnLoad}
+			/>
 		</Suspense>
 	);
 }
 
-function MarkdownViewContent({ fileId, filePath }: MarkdownViewProps) {
+function MarkdownViewContent({
+	fileId,
+	filePath,
+	isActiveView = true,
+	focusOnLoad = false,
+}: MarkdownViewProps) {
 	const [activeFileId, setActiveFileId] = useKeyValue(
 		"flashtype_active_file_id",
 	);
@@ -46,9 +63,10 @@ function MarkdownViewContent({ fileId, filePath }: MarkdownViewProps) {
 
 	useEffect(() => {
 		if (!fileRow?.id) return;
+		if (!isActiveView) return;
 		if (activeFileId === fileRow.id) return;
 		void setActiveFileId(fileRow.id);
-	}, [fileRow?.id, activeFileId, setActiveFileId]);
+	}, [fileRow?.id, activeFileId, setActiveFileId, isActiveView]);
 
 	let content: ReactNode;
 	const hasTarget = Boolean(fileId || filePath);
@@ -70,7 +88,12 @@ function MarkdownViewContent({ fileId, filePath }: MarkdownViewProps) {
 			<EditorProvider>
 				<div className="markdown-view flex h-full flex-col bg-background">
 					<FormattingToolbar className="mb-3" />
-					<TipTapEditor className="flex-1" />
+					<TipTapEditor
+						className="flex-1"
+						fileId={fileRow.id}
+						isActiveView={isActiveView}
+						focusOnLoad={focusOnLoad}
+					/>
 				</div>
 			</EditorProvider>
 		);
@@ -108,6 +131,8 @@ export const view = createReactViewDefinition({
 			<MarkdownView
 				fileId={instance.props?.fileId}
 				filePath={instance.props?.filePath}
+				isActiveView={context.isActiveView ?? false}
+				focusOnLoad={Boolean(instance.props?.focusOnLoad)}
 			/>
 		</LixProvider>
 	),
