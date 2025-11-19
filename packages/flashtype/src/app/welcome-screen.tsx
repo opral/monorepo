@@ -233,22 +233,22 @@ function WelcomeScreenContent({
 
 	return (
 		<div
-			className="flex h-full flex-col items-center justify-center px-6 text-neutral-900"
+			className="relative flex h-full w-full flex-col items-center px-6 text-neutral-900"
 			data-testid="welcome-screen"
 		>
-			<main className="flex w-full max-w-3xl flex-col items-center gap-8 mt-12 sm:mt-0 sm:-mt-32">
-				{/* Logo/Brand */}
-				<div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm mb-16">
-					<Zap className="h-3.5 w-3.5 text-brand-600" />
-					<span className="font-semibold text-neutral-900">flashtype.ai</span>
-				</div>
+			{/* Logo/Brand */}
+			<div className="-translate-x-1/2 absolute left-1/2 top-6 sm:top-12 flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm [@media(max-height:640px)]:hidden">
+				<Zap className="h-3.5 w-3.5 text-brand-600" />
+				<span className="font-semibold text-neutral-900">flashtype.ai</span>
+			</div>
 
+			<main className="flex h-full w-full max-w-3xl flex-col items-center justify-center gap-8 py-20 sm:py-24 text-center">
 				{/* Main prompt */}
 				<div className="flex flex-col items-center gap-2">
 					<h1 className="text-4xl font-semibold text-neutral-900">
 						What do you want to write?
 					</h1>
-					<p className="text-center text-base text-neutral-600">
+					<p className="text-base text-neutral-600">
 						Create markdown documents by chatting with AI
 						<br />
 						(or copy & paste existing content to get it reviewed).
@@ -256,7 +256,7 @@ function WelcomeScreenContent({
 				</div>
 
 				{/* Prompt Composer */}
-				<div className="mt-4 flex w-full justify-center [&>div>div:last-child]:hidden">
+				<div className="flex w-full justify-center [&>div>div:last-child]:hidden">
 					<PromptComposer
 						hasKey={hasKey}
 						models={AVAILABLE_MODELS}
@@ -275,7 +275,7 @@ function WelcomeScreenContent({
 				</div>
 
 				{/* Social Links */}
-				<div className="mt-4 flex items-center gap-4 text-xs text-neutral-400">
+				<div className="flex items-center gap-4 text-xs text-neutral-400">
 					<a
 						href="https://github.com/opral/flashtype"
 						target="_blank"
