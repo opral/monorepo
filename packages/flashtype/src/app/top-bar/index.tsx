@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,11 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { FlashtypeMenu } from "./flashtype-menu";
 import { VersionSwitcher } from "./version-switcher";
 
@@ -44,36 +49,64 @@ export function TopBar({
 
 	const hasFiles = (fileCount?.count ?? 0) > 0;
 
+	const isMacPlatform = useMemo(() => {
+		if (typeof navigator === "undefined") return false;
+		const platformCandidates = [
+			((navigator as any).userAgentData?.platform as string | undefined) ??
+				null,
+			navigator.platform ?? null,
+			navigator.userAgent ?? null,
+		].filter(Boolean) as string[];
+		const combined = platformCandidates.join(" ").toLowerCase();
+		return /mac|iphone|ipad|ipod/.test(combined);
+	}, []);
+
+	const modifierKey = isMacPlatform ? "⌘" : "Ctrl";
+	const leftShortcut = isMacPlatform ? `${modifierKey}1` : `${modifierKey}+1`;
+	const rightShortcut = isMacPlatform ? `${modifierKey}3` : `${modifierKey}+3`;
+
 	return (
 		<header className="flex h-10 items-center px-2 text-neutral-600">
 			<div className="flex flex-1 items-center gap-1 text-sm">
 				<FlashtypeMenu />
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
-					type="button"
-					onClick={onToggleLeftSidebar}
-					title="Toggle left sidebar"
-					aria-label="Toggle left sidebar"
-					aria-pressed={isLeftSidebarVisible}
-					data-state={isLeftSidebarVisible ? "on" : "off"}
-				>
-					<PanelToggleIcon side="left" isActive={isLeftSidebarVisible} />
-				</Button>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
-					type="button"
-					onClick={onToggleRightSidebar}
-					title="Toggle right sidebar"
-					aria-label="Toggle right sidebar"
-					aria-pressed={isRightSidebarVisible}
-					data-state={isRightSidebarVisible ? "on" : "off"}
-				>
-					<PanelToggleIcon side="right" isActive={isRightSidebarVisible} />
-				</Button>
+				<Tooltip delayDuration={500}>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+							type="button"
+							onClick={onToggleLeftSidebar}
+							aria-label="Toggle left panel"
+							aria-pressed={isLeftSidebarVisible}
+							data-state={isLeftSidebarVisible ? "on" : "off"}
+						>
+							<PanelToggleIcon side="left" isActive={isLeftSidebarVisible} />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent className="bg-neutral-900 text-neutral-0 [&_[class*='bg-secondary']]:bg-neutral-900 [&_[class*='fill-secondary']]:fill-neutral-900">
+						Toggle left panel ({leftShortcut})
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip delayDuration={500}>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-7 w-7 rounded-md hover:bg-neutral-200 hover:text-neutral-900"
+							type="button"
+							onClick={onToggleRightSidebar}
+							aria-label="Toggle right panel"
+							aria-pressed={isRightSidebarVisible}
+							data-state={isRightSidebarVisible ? "on" : "off"}
+						>
+							<PanelToggleIcon side="right" isActive={isRightSidebarVisible} />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent className="bg-neutral-900 text-neutral-0 [&_[class*='bg-secondary']]:bg-neutral-900 [&_[class*='fill-secondary']]:fill-neutral-900">
+						Toggle right panel ({rightShortcut})
+					</TooltipContent>
+				</Tooltip>
 				<VersionSwitcher />
 			</div>
 			<div className="flex flex-1 justify-center">

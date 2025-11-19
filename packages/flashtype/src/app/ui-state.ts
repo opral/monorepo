@@ -1,9 +1,5 @@
 import type { PanelSide, PanelState } from "./types";
-import {
-	AGENT_VIEW_KIND,
-	CHECKPOINT_VIEW_KIND,
-	FILES_VIEW_KIND,
-} from "./view-instance-helpers";
+import { CHECKPOINT_VIEW_KIND, FILES_VIEW_KIND } from "./view-instance-helpers";
 
 export const FLASHTYPE_UI_STATE_KEY = "flashtype_ui_state" as const;
 

@@ -216,7 +216,7 @@ export function PromptComposer({
 
 		onNotice(null);
 		pushHistory(trimmedEnd);
-		
+
 		// Reset composer before sending - if no key, parent will handle showing prompt
 		// and the message will be stored separately
 		resetComposer();
@@ -447,7 +447,7 @@ export function PromptComposer({
 					id={textAreaId}
 					data-testid="agent-composer-input"
 					placeholder={placeholder}
-					disabled={!hasKey}
+					disabled={!hasKey || pending}
 					value={value}
 					onChange={(event) => {
 						const next = event.target.value;
@@ -470,7 +470,6 @@ export function PromptComposer({
 						updateMentions(textAreaRef.current);
 					}}
 					className="h-28 w-full resize-none border-0 bg-transparent px-3 pr-14 pb-12 pt-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:text-muted-foreground"
-					disabled={pending}
 				/>
 				{menuFragment ? (
 					<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">

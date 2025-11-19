@@ -55,7 +55,7 @@ type WelcomeScreenProps = {
  */
 function WelcomeScreenContent({
 	context,
-	onCreateNewFile,
+	onCreateNewFile: _onCreateNewFile,
 }: WelcomeScreenProps): JSX.Element {
 	const devApiKey =
 		VITE_DEV_OPENROUTER_API_KEY && VITE_DEV_OPENROUTER_API_KEY.trim().length > 0
@@ -69,7 +69,7 @@ function WelcomeScreenContent({
 	const [autoAcceptRaw, setAutoAccept] = useKeyValue(
 		"flashtype_auto_accept_session",
 	);
-	const [notice, setNotice] = useState<string | null>(null);
+	const [_notice, setNotice] = useState<string | null>(null);
 	const [placeholderText, setPlaceholderText] = useState("");
 	const [showKeyPrompt, setShowKeyPrompt] = useState(false);
 	const [pendingMessage, setPendingMessage] = useState<string | null>(null);
@@ -98,13 +98,12 @@ function WelcomeScreenContent({
 		currentIndex: number;
 		charIndex: number;
 		isDeleting: boolean;
-		timeoutId: ReturnType<typeof setTimeout> | null;
 	}>({
 		currentIndex: 0,
 		charIndex: 0,
 		isDeleting: false,
-		timeoutId: null,
 	});
+	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
 		const type = () => {
@@ -120,9 +119,9 @@ function WelcomeScreenContent({
 					animationRef.current.isDeleting = false;
 					animationRef.current.currentIndex =
 						(currentIndex + 1) % suggestions.length;
-					animationRef.current.timeoutId = setTimeout(type, 500);
+					timeoutRef.current = setTimeout(type, 500);
 				} else {
-					animationRef.current.timeoutId = setTimeout(type, 50);
+					timeoutRef.current = setTimeout(type, 50);
 				}
 			} else {
 				const newCharIndex = charIndex + 1;
@@ -132,19 +131,20 @@ function WelcomeScreenContent({
 				);
 				if (newCharIndex === currentSuggestion.length) {
 					animationRef.current.isDeleting = true;
-					animationRef.current.timeoutId = setTimeout(type, 2000);
+					timeoutRef.current = setTimeout(type, 2000);
 				} else {
-					animationRef.current.timeoutId = setTimeout(type, 100);
+					timeoutRef.current = setTimeout(type, 100);
 				}
 			}
 		};
 
-		animationRef.current.timeoutId = setTimeout(type, 500);
+		timeoutRef.current = setTimeout(type, 500);
 
 		return () => {
-			if (animationRef.current.timeoutId) {
-				clearTimeout(animationRef.current.timeoutId);
-				animationRef.current.timeoutId = null;
+			// eslint-disable-next-line react-hooks/exhaustive-deps -- timeoutRef tracks the latest timeout ID
+			const timeoutId = timeoutRef.current;
+			if (timeoutId) {
+				clearTimeout(timeoutId);
 			}
 		};
 	}, [suggestions]);
@@ -284,9 +284,7 @@ function WelcomeScreenContent({
 						What do you want to write?
 					</h1>
 					<p className="text-base text-neutral-600">
-						Create markdown documents by chatting with AI
-						<br />
-						(or copy & paste existing content to get it reviewed).
+						Create markdown documents by chatting with AI.
 					</p>
 				</div>
 
@@ -353,7 +351,6 @@ function WelcomeScreenContent({
 									placeholder="sk-or-v1-…"
 									autoComplete="off"
 									className="text-sm"
-									autoFocus
 								/>
 								<div className="flex justify-end gap-2 pt-1">
 									<button

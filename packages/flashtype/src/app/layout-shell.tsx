@@ -43,17 +43,12 @@ import { createViewInstanceId, VIEW_MAP } from "./view-registry";
 import { PanelTabPreview } from "./panel-v2";
 import {
 	AGENT_VIEW_KIND,
-	buildDiffViewProps,
 	buildFileViewProps,
-	commitViewInstance,
 	createWorkingVsCheckpointDiffConfig,
 	decodeURIComponentSafe,
 	DIFF_VIEW_KIND,
 	diffLabelFromPath,
-	diffViewInstance,
-	fileLabelFromPath,
 	fileViewInstance,
-	historyViewInstance,
 	FILE_VIEW_KIND,
 } from "./view-instance-helpers";
 import {
@@ -62,7 +57,7 @@ import {
 	type PanelLayoutSizes,
 	type FlashtypeUiState,
 } from "./ui-state";
-import { activatePanelView, upsertPendingView } from "./pending-view";
+import { activatePanelView } from "./pending-view";
 import { cloneViewInstance, reorderPanelViewsByIndex } from "./panel-utils";
 
 type LegacyViewInstance = ViewInstance & {
@@ -975,6 +970,101 @@ function LayoutShellContent() {
 			panel.resize(0);
 		}
 	}, [isRightCollapsed, initialLayoutSizes.right, schedulePanelAnimation]);
+
+	const isMacPlatform = useMemo(() => {
+		if (typeof navigator === "undefined") return false;
+		const platformCandidates = [
+			((navigator as any).userAgentData?.platform as string | undefined) ??
+				null,
+			navigator.platform ?? null,
+			navigator.userAgent ?? null,
+		].filter(Boolean) as string[];
+		const combined = platformCandidates.join(" ").toLowerCase();
+		return /mac|iphone|ipad|ipod/.test(combined);
+	}, []);
+
+	const isInteractiveTarget = useCallback(
+		(target: EventTarget | null): boolean => {
+			if (!target || !(target instanceof HTMLElement)) return false;
+			const tagName = target.tagName.toLowerCase();
+			const isInput =
+				tagName === "input" ||
+				tagName === "textarea" ||
+				tagName === "select" ||
+				target.isContentEditable;
+			return isInput;
+		},
+		[],
+	);
+
+	useEffect(() => {
+		const listener = (event: KeyboardEvent) => {
+			const usesPrimaryModifier = isMacPlatform
+				? event.metaKey && !event.ctrlKey
+				: event.ctrlKey && !event.metaKey;
+			if (!usesPrimaryModifier || event.altKey || event.shiftKey) return;
+
+			// CMD+1 for left panel
+			if (event.key === "1" || event.code === "Digit1") {
+				event.preventDefault();
+				event.stopPropagation();
+				event.stopImmediatePropagation?.();
+				event.returnValue = false;
+				if (
+					event.type === "keydown" &&
+					!event.repeat &&
+					!isInteractiveTarget(event.target)
+				) {
+					toggleLeftSidebar();
+				}
+				return;
+			}
+
+			// CMD+3 for right panel
+			if (event.key === "3" || event.code === "Digit3") {
+				event.preventDefault();
+				event.stopPropagation();
+				event.stopImmediatePropagation?.();
+				event.returnValue = false;
+				if (
+					event.type === "keydown" &&
+					!event.repeat &&
+					!isInteractiveTarget(event.target)
+				) {
+					toggleRightSidebar();
+				}
+				return;
+			}
+		};
+
+		const options: AddEventListenerOptions = { capture: true, passive: false };
+		const eventTypes: Array<"keydown" | "keypress" | "keyup"> = [
+			"keydown",
+			"keypress",
+			"keyup",
+		];
+		const targets: EventTarget[] = [window, document];
+		if (document.body) {
+			targets.push(document.body);
+		}
+		for (const target of targets) {
+			for (const type of eventTypes) {
+				target.addEventListener(type, listener as EventListener, options);
+			}
+		}
+		return () => {
+			for (const target of targets) {
+				for (const type of eventTypes) {
+					target.removeEventListener(type, listener as EventListener, options);
+				}
+			}
+		};
+	}, [
+		isMacPlatform,
+		toggleLeftSidebar,
+		toggleRightSidebar,
+		isInteractiveTarget,
+	]);
 
 	const animatedPanelClass = shouldAnimatePanels
 		? "transition-[flex-basis] duration-200 ease-in-out"

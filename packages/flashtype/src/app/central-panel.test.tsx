@@ -4,7 +4,6 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { CentralPanel } from "./central-panel";
 import type { PanelState, ViewContext } from "./types";
-import type { Lix } from "@lix-js/sdk";
 import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { ViewHostRegistryProvider } from "./view-host-registry";

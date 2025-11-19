@@ -448,7 +448,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				updatePending();
 				let finalMessage: AgentConversationMessage | null = null;
 				let errorEvent: Extract<AgentEvent, { type: "error" }> | null = null;
-				let activeProposal: {
+				let _activeProposal: {
 					id: string;
 					summary?: string;
 					details?: ChangeProposalSummary | null;
@@ -488,7 +488,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 							const diffInstance = details?.fileId
 								? diffViewInstance(details.fileId)
 								: undefined;
-							activeProposal = {
+							_activeProposal = {
 								id: event.proposal.id,
 								summary: event.proposal.summary,
 								details,
@@ -546,7 +546,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 						case "proposal:closed": {
 							if (!autoAcceptEnabled) {
 								clearPendingProposal();
-								activeProposal = null;
+								_activeProposal = null;
 							}
 							break;
 						}
@@ -578,32 +578,39 @@ export function AgentView({ context, instance }: AgentViewProps) {
 					conversationId: finalMessage.conversation_id,
 				});
 				setPendingMessage(null);
-				} catch (err) {
-					setPendingMessage(null);
-					const message =
-						err instanceof Error ? err.message : String(err ?? "unknown");
-					let shouldRethrow = true;
-					if (err instanceof ChangeProposalRejectedError) {
-						if (suppressedProposalErrorRef.current) {
-							suppressedProposalErrorRef.current = null;
-							shouldRethrow = false;
-						} else {
-							setError(
-								"Change proposal rejected. Tell the agent what to do differently.",
-							);
-						}
+			} catch (err) {
+				setPendingMessage(null);
+				const message =
+					err instanceof Error ? err.message : String(err ?? "unknown");
+				let shouldRethrow = true;
+				if (err instanceof ChangeProposalRejectedError) {
+					if (suppressedProposalErrorRef.current) {
+						suppressedProposalErrorRef.current = null;
+						shouldRethrow = false;
 					} else {
-						setError(`Error: ${message}`);
+						setError(
+							"Change proposal rejected. Tell the agent what to do differently.",
+						);
 					}
-					if (shouldRethrow) {
-						throw err;
-					}
-				} finally {
-					suppressedProposalErrorRef.current = null;
-					setPending(false);
+				} else {
+					setError(`Error: ${message}`);
+				}
+				if (shouldRethrow) {
+					throw err;
+				}
+			} finally {
+				suppressedProposalErrorRef.current = null;
+				setPending(false);
 			}
 		},
-		[agent, ensureConversationId, context, autoAcceptEnabled, clearPendingProposal],
+		[
+			agent,
+			ensureConversationId,
+			context,
+			autoAcceptEnabled,
+			clearPendingProposal,
+			instance?.instance,
+		],
 	);
 
 	useEffect(() => {
@@ -694,7 +701,15 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				focus: false,
 			});
 		}
-	}, [openProposals, pendingProposal, pending, agent, lix, context, conversationId]);
+	}, [
+		openProposals,
+		pendingProposal,
+		pending,
+		agent,
+		lix,
+		context,
+		conversationId,
+	]);
 
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
