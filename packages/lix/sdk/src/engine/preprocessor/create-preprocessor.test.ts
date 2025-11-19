@@ -22,6 +22,9 @@ test("state_by_version view is rewritten", async () => {
 	expect(steps).toContain("rewrite_vtable_selects");
 	expect(steps).toContain("complete");
 
+	expect(sql.toLowerCase()).toContain("lix_internal_state_vtable");
+	expect(sql.toLowerCase()).not.toContain("state_by_version");
+
 	expect(() =>
 		lix.engine!.sqlite.exec({
 			sql,

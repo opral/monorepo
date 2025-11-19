@@ -10,6 +10,7 @@ import type { PreprocessorContext, PreprocessorTrace } from "./types.js";
 import type { LixEngine } from "../boot.js";
 import { getAllStoredSchemas } from "../../stored-schema/get-stored-schema.js";
 import type { LixSchemaDefinition } from "../../schema-definition/definition.js";
+import { normalizeIdentifierValue } from "./sql-parser/ast-helpers.js";
 import { getStateCacheTables } from "../../state/cache/schema.js";
 import { cacheTableNameToSchemaKey } from "../../state/cache/create-schema-cache-table.js";
 import { hasOpenTransaction } from "../../state/vtable/vtable.js";
@@ -48,9 +49,9 @@ const fullPipeline: PreprocessorStep[] = [
 	rewriteStateByVersionInsert,
 	rewriteStateByVersionUpdate,
 	rewriteStateByVersionDelete,
-	rewriteStateByVersionSelect,
 	rewriteEntityViewSelect,
 	expandSqlViews,
+	rewriteStateByVersionSelect,
 	cachePopulator,
 	rewriteActiveVersionSubquery,
 	rewriteVtableSelects,
@@ -249,6 +250,12 @@ function loadSqlViewMap(engine: EngineShape): Map<string, string> {
 		const name = typeof row.name === "string" ? row.name : undefined;
 		const sqlText = typeof row.sql === "string" ? row.sql : undefined;
 		if (!name || !sqlText) {
+			continue;
+		}
+		const normalized = normalizeIdentifierValue(name);
+		// Exclude the public state_by_version view from expansion; it is rewritten
+		// by the dedicated preprocessor step instead.
+		if (normalized === "state_by_version") {
 			continue;
 		}
 		const selectSql = extractSelectBody(sqlText);
