@@ -121,6 +121,7 @@ const DEFAULT_PANEL_FALLBACK_SIZES = {
 	central: 60,
 	right: 20,
 };
+const MIN_UNCOLLAPSED_RIGHT_SIZE = 35;
 const MIN_VISIBLE_PANEL_SIZE = 1;
 const PANEL_TRANSITION_STYLE: CSSProperties = {
 	transitionProperty: "flex-grow, flex-basis",
@@ -362,6 +363,58 @@ function LayoutShellContent() {
 		[setLeftPanel, setCentralPanel, setRightPanel, setFocusedPanel],
 	);
 
+	const schedulePanelAnimation = useCallback(() => {
+		setShouldAnimatePanels(true);
+		if (animationTimeoutRef.current !== null) {
+			window.clearTimeout(animationTimeoutRef.current);
+		}
+		animationTimeoutRef.current = window.setTimeout(() => {
+			setShouldAnimatePanels(false);
+			animationTimeoutRef.current = null;
+		}, 220);
+	}, []);
+
+	const ensurePanelExpanded = useCallback(
+		(side: PanelSide) => {
+			if (side === "central") return;
+			const panelRef =
+				side === "left" ? leftPanelRef.current : rightPanelRef.current;
+			const isCollapsed = side === "left" ? isLeftCollapsed : isRightCollapsed;
+			if (!panelRef || !isCollapsed) return;
+			const initialSize =
+				side === "left" ? initialLayoutSizes.left : initialLayoutSizes.right;
+			const lastSize =
+				side === "left"
+					? lastNonZeroSizesRef.current.left
+					: lastNonZeroSizesRef.current.right;
+			const fallbackSize =
+				side === "left"
+					? DEFAULT_PANEL_FALLBACK_SIZES.left
+					: DEFAULT_PANEL_FALLBACK_SIZES.right;
+			const desiredSize =
+				lastSize > MIN_VISIBLE_PANEL_SIZE ? lastSize : initialSize;
+			let targetSize =
+				desiredSize > MIN_VISIBLE_PANEL_SIZE ? desiredSize : fallbackSize;
+			if (side === "right") {
+				targetSize = Math.max(targetSize, MIN_UNCOLLAPSED_RIGHT_SIZE);
+			}
+			schedulePanelAnimation();
+			if (side === "left") {
+				setIsLeftCollapsed(false);
+			} else {
+				setIsRightCollapsed(false);
+			}
+			panelRef.resize(targetSize);
+		},
+		[
+			initialLayoutSizes.left,
+			initialLayoutSizes.right,
+			isLeftCollapsed,
+			isRightCollapsed,
+			schedulePanelAnimation,
+		],
+	);
+
 	const handleOpenView = useCallback(
 		({
 			panel,
@@ -376,6 +429,7 @@ function LayoutShellContent() {
 			focus?: boolean;
 			instance?: string;
 		}) => {
+			ensurePanelExpanded(panel);
 			setPanelState(
 				panel,
 				(current) => {
@@ -423,7 +477,7 @@ function LayoutShellContent() {
 				{ focus },
 			);
 		},
-		[setPanelState],
+		[ensurePanelExpanded, setPanelState],
 	);
 
 	const handleCloseView = useCallback(
@@ -781,17 +835,6 @@ function LayoutShellContent() {
 		[setPanelState],
 	);
 
-	const schedulePanelAnimation = useCallback(() => {
-		setShouldAnimatePanels(true);
-		if (animationTimeoutRef.current !== null) {
-			window.clearTimeout(animationTimeoutRef.current);
-		}
-		animationTimeoutRef.current = window.setTimeout(() => {
-			setShouldAnimatePanels(false);
-			animationTimeoutRef.current = null;
-		}, 220);
-	}, []);
-
 	const handleMoveViewToPanel = useCallback(
 		(targetPanel: PanelSide, instance?: string) => {
 			// Find the view in any panel
@@ -957,10 +1000,11 @@ function LayoutShellContent() {
 				lastNonZeroSizesRef.current.right > MIN_VISIBLE_PANEL_SIZE
 					? lastNonZeroSizesRef.current.right
 					: initialLayoutSizes.right;
-			const target =
+			let target =
 				desiredSize > MIN_VISIBLE_PANEL_SIZE
 					? desiredSize
 					: DEFAULT_PANEL_FALLBACK_SIZES.right;
+			target = Math.max(target, MIN_UNCOLLAPSED_RIGHT_SIZE);
 			setIsRightCollapsed(false);
 			schedulePanelAnimation();
 			panel.resize(target);
