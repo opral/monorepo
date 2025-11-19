@@ -9,6 +9,7 @@ import { assembleMdAst } from "./assemble-md-ast";
 import { astToTiptapDoc } from "@opral/markdown-wc/tiptap";
 
 type TipTapEditorProps = {
+	fileId?: string | null;
 	className?: string;
 	onReady?: (editor: Editor) => void;
 	persistDebounceMs?: number;
@@ -21,15 +22,21 @@ type TipTapEditorProps = {
  * remote changes, and persists edits via the collaborative Lix writer.
  *
  * @example
- * <TipTapEditor className="grow" onReady={(editor) => editor.commands.focus()} />
+ * <TipTapEditor
+ *   fileId="file-123"
+ *   className="grow"
+ *   onReady={(editor) => editor.commands.focus()}
+ * />
  */
 export function TipTapEditor({
+	fileId,
 	className,
 	onReady,
 	persistDebounceMs,
 }: TipTapEditorProps) {
 	const lix = useLix();
-	const [activeFileId] = useKeyValue("flashtype_active_file_id");
+	const [activeFileIdKV] = useKeyValue("flashtype_active_file_id");
+	const activeFileId = fileId ?? activeFileIdKV;
 	const initialFile = useQueryTakeFirst(
 		({ lix }) =>
 			lix.db

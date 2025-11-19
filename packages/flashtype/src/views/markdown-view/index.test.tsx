@@ -84,6 +84,71 @@ describe("MarkdownView", () => {
 		});
 	});
 
+	test("renders the requested file even if a different active file is stored", async () => {
+		const lix = await openLix({ providePlugins: [mdPlugin] });
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "file_alpha",
+				path: "/alpha.md",
+				data: new TextEncoder().encode("# Alpha"),
+			})
+			.execute();
+
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "file_beta",
+				path: "/beta.md",
+				data: new TextEncoder().encode("# Beta"),
+			})
+			.execute();
+
+		// Persist a stale active file id pointing to alpha
+		await lix.db
+			.insertInto("key_value_by_version")
+			.values({
+				key: "flashtype_active_file_id",
+				value: "file_alpha",
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			})
+			.execute();
+
+		let utils: ReturnType<typeof render> | undefined;
+		await act(async () => {
+			utils = render(
+				<LixProvider lix={lix}>
+					<KeyValueProvider defs={KEY_VALUE_DEFINITIONS}>
+						<Suspense fallback={null}>
+							<MarkdownView
+								fileId="file_beta"
+								filePath="/beta.md"
+								isActiveView
+							/>
+						</Suspense>
+					</KeyValueProvider>
+				</LixProvider>,
+			);
+		});
+
+		const editor = await screen.findByTestId("tiptap-editor");
+		expect(editor).toHaveTextContent("Beta");
+
+		await waitFor(async () => {
+			const record = await lix.db
+				.selectFrom("key_value_by_version")
+				.select(["value"])
+				.where("key", "=", "flashtype_active_file_id")
+				.executeTakeFirst();
+			expect(record?.value).toBe("file_beta");
+		});
+
+		await act(async () => {
+			utils?.unmount();
+		});
+	});
+
 	test("shows a not found message when the file is missing", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
 

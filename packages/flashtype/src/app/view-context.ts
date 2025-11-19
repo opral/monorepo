@@ -80,19 +80,26 @@ export function useViewContext({
 			const setCount = getBadgeSetter(instance.instance);
 			const cached = contextRef.current[instance.instance];
 			const focusValue = baseContext.isPanelFocused ?? isFocused;
+			const isActiveView = panel.activeInstance === instance.instance;
 			if (
 				cached &&
 				cached.setTabBadgeCount === setCount &&
-				cached.isPanelFocused === focusValue
+				cached.isPanelFocused === focusValue &&
+				cached.isActiveView === isActiveView
 			) {
 				return cached;
 			}
 
-			const next: ViewContext = { ...baseContext, setTabBadgeCount: setCount };
+			const next: ViewContext = {
+				...baseContext,
+				setTabBadgeCount: setCount,
+				isActiveView,
+				isPanelFocused: focusValue,
+			};
 			contextRef.current[instance.instance] = next;
 			return next;
 		},
-		[baseContext, getBadgeSetter, isFocused],
+		[baseContext, getBadgeSetter, isFocused, panel.activeInstance],
 	);
 
 	return { badgeCounts, makeContext };
