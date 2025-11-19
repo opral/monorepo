@@ -23,8 +23,7 @@ import {
 } from "@dnd-kit/core";
 import { useLix } from "@lix-js/react-utils";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
-import { nanoId, normalizeFilePath, selectWorkingDiff } from "@lix-js/sdk";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import { nanoId, normalizeFilePath } from "@lix-js/sdk";
 import { SidePanel } from "./side-panel";
 import { CentralPanel } from "./central-panel";
 import { TopBar } from "./top-bar";
@@ -38,12 +37,25 @@ import type {
 	PanelState,
 	ViewInstance,
 	ViewInstanceProps,
-	ViewKey,
-	DiffViewConfig,
-	RenderableDiff,
+	ViewKind,
 } from "./types";
-import { createViewInstanceKey, VIEW_MAP } from "./view-registry";
+import { createViewInstanceId, VIEW_MAP } from "./view-registry";
 import { PanelTabPreview } from "./panel-v2";
+import {
+	AGENT_VIEW_KIND,
+	buildDiffViewProps,
+	buildFileViewProps,
+	commitViewInstance,
+	createWorkingVsCheckpointDiffConfig,
+	decodeURIComponentSafe,
+	DIFF_VIEW_KIND,
+	diffLabelFromPath,
+	diffViewInstance,
+	fileLabelFromPath,
+	fileViewInstance,
+	historyViewInstance,
+	FILE_VIEW_KIND,
+} from "./view-instance-helpers";
 import {
 	FLASHTYPE_UI_STATE_KEY,
 	normalizeLayoutSizes,
@@ -51,10 +63,7 @@ import {
 	type FlashtypeUiState,
 } from "./ui-state";
 import { activatePanelView, upsertPendingView } from "./pending-view";
-import {
-	cloneViewInstanceByKey,
-	reorderPanelViewsByIndex,
-} from "./panel-utils";
+import { cloneViewInstance, reorderPanelViewsByIndex } from "./panel-utils";
 
 type LegacyViewInstance = ViewInstance & {
 	readonly metadata?: ViewInstance["props"];
@@ -73,25 +82,23 @@ const hydratePanel = (panel: PanelState): PanelState => {
 	const views = (panel.views as LegacyViewInstance[])
 		.map(adoptLegacyProps)
 		// Drop unknown view keys that might linger in persisted UI state.
-		.filter((view) => VIEW_MAP.has(view.viewKey))
+		.filter((view) => VIEW_MAP.has(view.kind))
 		.map(upgradeDiffProps);
 	if (views.length === 0) {
-		return { views, activeInstanceKey: null };
+		return { views, activeInstance: null };
 	}
-	const fallbackActive = views[0]?.instanceKey ?? null;
-	const hasDesiredActive = panel.activeInstanceKey
-		? views.some((view) => view.instanceKey === panel.activeInstanceKey)
+	const fallbackActive = views[0]?.instance ?? null;
+	const hasDesiredActive = panel.activeInstance
+		? views.some((view) => view.instance === panel.activeInstance)
 		: false;
 	return {
 		views,
-		activeInstanceKey: hasDesiredActive
-			? panel.activeInstanceKey
-			: fallbackActive,
+		activeInstance: hasDesiredActive ? panel.activeInstance : fallbackActive,
 	};
 };
 
 const upgradeDiffProps = (view: ViewInstance): ViewInstance => {
-	if (view.viewKey !== "diff") return view;
+	if (view.kind !== DIFF_VIEW_KIND) return view;
 	const fileId = view.props?.fileId;
 	if (!fileId) return view;
 	const existing = view.props?.diff;
@@ -113,58 +120,6 @@ const upgradeDiffProps = (view: ViewInstance): ViewInstance => {
 		},
 	};
 };
-
-const diffLabelFromPath = (filePath?: string): string | undefined => {
-	if (!filePath) return undefined;
-	const encodedLabel = filePath.split("/").filter(Boolean).pop();
-	return encodedLabel ? decodeURIComponentSafe(encodedLabel) : undefined;
-};
-
-const fileLabelFromPath = (
-	filePath?: string,
-	fallbackLabel?: string,
-): string => {
-	const derived = diffLabelFromPath(filePath);
-	if (derived) return derived;
-	if (filePath) return filePath;
-	return fallbackLabel ?? "Untitled";
-};
-
-const decodeURIComponentSafe = (value: string): string => {
-	try {
-		return decodeURIComponent(value);
-	} catch {
-		return value;
-	}
-};
-
-const createWorkingVsCheckpointDiffConfig = (
-	fileId: string,
-	title: string,
-): DiffViewConfig => ({
-	title,
-	query: ({ lix }) =>
-		selectWorkingDiff({ lix })
-			.where("diff.file_id", "=", fileId)
-			.orderBy("diff.entity_id")
-			.leftJoin("change as after", "after.id", "diff.after_change_id")
-			.leftJoin("change as before", "before.id", "diff.before_change_id")
-			.select((eb) => [
-				eb.ref("diff.entity_id").as("entity_id"),
-				eb.ref("diff.schema_key").as("schema_key"),
-				eb.ref("diff.status").as("status"),
-				eb.ref("before.snapshot_content").as("before_snapshot_content"),
-				eb.ref("after.snapshot_content").as("after_snapshot_content"),
-				eb.fn
-					.coalesce(
-						eb.ref("after.plugin_key"),
-						eb.ref("before.plugin_key"),
-						eb.val(mdPlugin.key),
-					)
-					.as("plugin_key"),
-			])
-			.$castTo<RenderableDiff>(),
-});
 
 const DEFAULT_PANEL_FALLBACK_SIZES = {
 	left: 20,
@@ -264,17 +219,17 @@ function LayoutShellContent() {
 	const rightPanelRef = useRef<ImperativePanelHandle | null>(null);
 	const viewHostRegistry = useViewHostRegistry();
 
-	const activeInstanceKeys = useMemo(() => {
+	const activeInstances = useMemo(() => {
 		const keys = new Set<string>();
-		for (const view of leftPanel.views) keys.add(view.instanceKey);
-		for (const view of centralPanel.views) keys.add(view.instanceKey);
-		for (const view of rightPanel.views) keys.add(view.instanceKey);
+		for (const view of leftPanel.views) keys.add(view.instance);
+		for (const view of centralPanel.views) keys.add(view.instance);
+		for (const view of rightPanel.views) keys.add(view.instance);
 		return keys;
 	}, [leftPanel.views, centralPanel.views, rightPanel.views]);
 
 	useEffect(() => {
-		viewHostRegistry.pruneHosts(activeInstanceKeys);
-	}, [viewHostRegistry, activeInstanceKeys]);
+		viewHostRegistry.pruneHosts(activeInstances);
+	}, [viewHostRegistry, activeInstances]);
 
 	const lastPersistedRef = useRef<string>(
 		JSON.stringify({
@@ -415,63 +370,59 @@ function LayoutShellContent() {
 	const handleOpenView = useCallback(
 		({
 			panel,
-			viewKey,
+			kind,
 			props,
 			focus = true,
-			instanceKey,
+			instance,
 		}: {
 			panel: PanelSide;
-			viewKey: ViewKey;
+			kind: ViewKind;
 			props?: ViewInstanceProps;
 			focus?: boolean;
-			instanceKey?: string;
+			instance?: string;
 		}) => {
 			setPanelState(
 				panel,
 				(current) => {
-					if (!instanceKey) {
-						const existing = current.views.find(
-							(entry) => entry.viewKey === viewKey,
-						);
+					if (!instance) {
+						const existing = current.views.find((entry) => entry.kind === kind);
 						if (existing) {
 							const views = props
 								? current.views.map((entry) =>
-										entry.instanceKey === existing.instanceKey
+										entry.instance === existing.instance
 											? { ...entry, props }
 											: entry,
-								  )
+									)
 								: current.views;
 							return {
 								views,
-								activeInstanceKey: existing.instanceKey,
+								activeInstance: existing.instance,
 							};
 						}
 					}
-					const targetKey = instanceKey ?? createViewInstanceKey(viewKey);
-					const existingByInstance = instanceKey
-						? current.views.find(
-							(entry) => entry.instanceKey === instanceKey,
-						)
+					const targetInstance = instance ?? createViewInstanceId(kind);
+					const existingByInstance = instance
+						? current.views.find((entry) => entry.instance === instance)
 						: null;
 					if (existingByInstance) {
 						const views = current.views.map((entry) =>
-							entry.instanceKey === targetKey
-								? { ...entry, viewKey, props }
+							entry.instance === targetInstance
+								? { ...entry, kind, props }
 								: entry,
 						);
 						return {
 							views,
-							activeInstanceKey: targetKey,
+							activeInstance: targetInstance,
 						};
 					}
 					const nextView: ViewInstance = {
-						instanceKey: targetKey,
-						viewKey,
+						instance: targetInstance,
+						kind,
 						props,
 					};
 					return {
 						views: [...current.views, nextView],
-						activeInstanceKey: nextView.instanceKey,
+						activeInstance: nextView.instance,
 					};
 				},
 				{ focus },
@@ -483,17 +434,17 @@ function LayoutShellContent() {
 	const handleCloseView = useCallback(
 		({
 			panel,
-			instanceKey,
-			viewKey,
+			instance,
+			kind,
 		}: {
 			panel?: PanelSide;
-			instanceKey?: string;
-			viewKey?: ViewKey;
+			instance?: string;
+			kind?: ViewKind;
 		}) => {
-			if (!instanceKey && !viewKey) return;
+			if (!instance && !kind) return;
 			const predicate = (entry: ViewInstance) => {
-				if (instanceKey) return entry.instanceKey === instanceKey;
-				if (viewKey) return entry.viewKey === viewKey;
+				if (instance) return entry.instance === instance;
+				if (kind) return entry.kind === kind;
 				return false;
 			};
 			const targetPanels: PanelSide[] = panel
@@ -507,11 +458,11 @@ function LayoutShellContent() {
 					removed = true;
 					const views = current.views.filter((_, idx) => idx !== index);
 					const removedView = current.views[index];
-					const activeInstanceKey =
-						current.activeInstanceKey === removedView.instanceKey
-							? views[views.length - 1]?.instanceKey ?? null
-							: current.activeInstanceKey;
-					return { views, activeInstanceKey };
+					const activeInstance =
+						current.activeInstance === removedView.instance
+							? (views[views.length - 1]?.instance ?? null)
+							: current.activeInstance;
+					return { views, activeInstance };
 				});
 				if (removed) break;
 			}
@@ -520,8 +471,8 @@ function LayoutShellContent() {
 	);
 
 	const handleAddView = useCallback(
-		(side: PanelSide, viewKey: ViewKey) => {
-			handleOpenView({ panel: side, viewKey });
+		(side: PanelSide, kind: ViewKind) => {
+			handleOpenView({ panel: side, kind });
 		},
 		[handleOpenView],
 	);
@@ -577,12 +528,12 @@ function LayoutShellContent() {
 			if (!over) return;
 
 			const dragData = active.data.current as
-				| { instanceKey: string; viewKey: ViewKey; fromPanel: PanelSide }
+				| { instance: string; kind: ViewKind; fromPanel: PanelSide }
 				| undefined;
 			const dropData = over.data.current as
 				| {
 						panel?: PanelSide;
-						instanceKey?: string;
+						instance?: string;
 						sortable?: { index: number };
 				  }
 				| undefined;
@@ -592,24 +543,24 @@ function LayoutShellContent() {
 
 			if (!dragData || !dropData) return;
 
-			const { instanceKey, viewKey: _viewKey, fromPanel } = dragData;
+			const { instance, kind: _kind, fromPanel } = dragData;
 			const toPanel = dropData.panel ?? fromPanel;
-			const targetInstanceKey = dropData.instanceKey;
+			const targetInstance = dropData.instance;
 
 			if (toPanel === fromPanel) {
 				setPanelState(
 					fromPanel,
 					(panel) => {
 						const fromIndex = panel.views.findIndex(
-							(entry) => entry.instanceKey === instanceKey,
+							(entry) => entry.instance === instance,
 						);
 						if (fromIndex === -1) return panel;
 						let toIndex: number | null = null;
 						if (overSortable?.index != null) {
 							toIndex = overSortable.index;
-						} else if (targetInstanceKey) {
+						} else if (targetInstance) {
 							toIndex = panel.views.findIndex(
-								(entry) => entry.instanceKey === targetInstanceKey,
+								(entry) => entry.instance === targetInstance,
 							);
 						} else {
 							toIndex = panel.views.length - 1;
@@ -630,19 +581,19 @@ function LayoutShellContent() {
 					: fromPanel === "central"
 						? centralPanel
 						: rightPanel;
-			const movedView = cloneViewInstanceByKey(sourcePanel, instanceKey);
+			const movedView = cloneViewInstance(sourcePanel, instance);
 
 			if (!movedView) return;
 
 			setPanelState(fromPanel, (panel) => {
 				const remaining = panel.views.filter(
-					(entry) => entry.instanceKey !== instanceKey,
+					(entry) => entry.instance !== instance,
 				);
 				const nextActive =
-					panel.activeInstanceKey === instanceKey
-						? (remaining[remaining.length - 1]?.instanceKey ?? null)
-						: panel.activeInstanceKey;
-				return { views: remaining, activeInstanceKey: nextActive };
+					panel.activeInstance === instance
+						? (remaining[remaining.length - 1]?.instance ?? null)
+						: panel.activeInstance;
+				return { views: remaining, activeInstance: nextActive };
 			});
 
 			setPanelState(
@@ -652,9 +603,9 @@ function LayoutShellContent() {
 					let insertIndex = views.length;
 					if (overSortable?.index != null) {
 						insertIndex = Math.min(overSortable.index, views.length);
-					} else if (targetInstanceKey) {
+					} else if (targetInstance) {
 						const targetIndex = views.findIndex(
-							(entry) => entry.instanceKey === targetInstanceKey,
+							(entry) => entry.instance === targetInstance,
 						);
 						if (targetIndex !== -1) {
 							insertIndex = targetIndex;
@@ -663,7 +614,7 @@ function LayoutShellContent() {
 					views.splice(insertIndex, 0, movedView);
 					return {
 						views,
-						activeInstanceKey: movedView.instanceKey,
+						activeInstance: movedView.instance,
 					};
 				},
 				{ focus: true },
@@ -677,83 +628,11 @@ function LayoutShellContent() {
 				...hydratedLeft.views,
 				...hydratedCentral.views,
 				...hydratedRight.views,
-			].find((view) => view.instanceKey === activeId)
+			].find((view) => view.instance === activeId)
 		: null;
 	const activeDragView = activeDragData
-		? VIEW_MAP.get(activeDragData.viewKey)
+		? VIEW_MAP.get(activeDragData.kind)
 		: null;
-
-	const handleOpenFile = useCallback(
-		(
-			fileId: string,
-			options?: {
-				readonly focus?: boolean;
-				readonly filePath?: string;
-			},
-		) => {
-			const shouldFocus = options?.focus ?? true;
-			const filePath = options?.filePath;
-			setPanelState(
-				"central",
-				(panel) => {
-				const existingFileView = panel.views.find(
-					(view) =>
-						view.props?.fileId === fileId ||
-						(filePath && view.props?.filePath === filePath),
-				);
-					if (existingFileView) {
-						const activated = activatePanelView(
-							panel,
-							existingFileView.instanceKey,
-						);
-					const nextViews = activated.views.map((entry) => {
-						if (entry.instanceKey !== existingFileView.instanceKey) {
-							return entry;
-						}
-						const nextProps = {
-							...entry.props,
-							fileId,
-							filePath: filePath ?? entry.props?.filePath,
-						};
-						if (!nextProps.label) {
-							nextProps.label = fileLabelFromPath(
-								nextProps.filePath,
-								fileId,
-							);
-						}
-						return {
-							...entry,
-							props: nextProps,
-						};
-					});
-						return {
-							views: nextViews,
-							activeInstanceKey: activated.activeInstanceKey,
-						};
-					}
-					const label = fileLabelFromPath(filePath, fileId);
-					const newView: ViewInstance = {
-						instanceKey: createViewInstanceKey("file-content"),
-						viewKey: "file-content" as ViewKey,
-						isPending: true,
-					props: filePath
-						? {
-									fileId,
-									filePath,
-									label,
-								}
-						: {
-							fileId,
-							label,
-						},
-					};
-					return upsertPendingView(panel, newView);
-				},
-				{ focus: shouldFocus },
-			);
-		},
-		[setPanelState],
-	);
 
 	const handleCreateNewFile = useCallback(async () => {
 		if (!lix) return;
@@ -771,194 +650,21 @@ function LayoutShellContent() {
 				data: new TextEncoder().encode(""),
 			})
 			.execute();
-		handleOpenFile(id, { focus: true, filePath: path });
-	}, [handleOpenFile, lix]);
-
-	const handleOpenCommit = useCallback(
-		(
-			checkpointId: string,
-			label: string,
-			options?: {
-				readonly focus?: boolean;
-			},
-		) => {
-			const shouldFocus = options?.focus ?? true;
-			setPanelState(
-				"central",
-				(panel) => {
-				const existingCommitView = panel.views.find(
-					(view) => view.props?.checkpointId === checkpointId,
-				);
-					if (existingCommitView) {
-						return activatePanelView(panel, existingCommitView.instanceKey);
-					}
-					const newView: ViewInstance = {
-						instanceKey: createViewInstanceKey("commit"),
-						viewKey: "commit" as ViewKey,
-						isPending: true,
-						props: {
-							checkpointId,
-							label,
-						},
-					};
-					return upsertPendingView(panel, newView);
-				},
-				{ focus: shouldFocus },
-			);
-		},
-		[setPanelState],
-	);
-
-	const handleOpenHistory = useCallback(
-		(options?: { readonly focus?: boolean; readonly side?: PanelSide }) => {
-			const side = options?.side ?? "central";
-			const shouldFocus = options?.focus ?? true;
-			setPanelState(
-				side,
-				(panel) => {
-					const existingHistoryView = panel.views.find(
-						(view) => view.viewKey === "history",
-					);
-					if (existingHistoryView) {
-						return activatePanelView(panel, existingHistoryView.instanceKey);
-					}
-					const newView: ViewInstance = {
-						instanceKey: createViewInstanceKey("history"),
-						viewKey: "history" as ViewKey,
-						isPending: true,
-					};
-					return upsertPendingView(panel, newView);
-				},
-				{ focus: shouldFocus },
-			);
-		},
-		[setPanelState],
-	);
-
-	const handleOpenDiff = useCallback(
-		(
-			fileId: string,
-			filePath: string,
-			options?: {
-				readonly focus?: boolean;
-				readonly diffConfig?: DiffViewConfig;
-			},
-		) => {
-			console.log("[layout] opening diff", { fileId, filePath, options });
-			const shouldFocus = options?.focus ?? true;
-			const diffLabel =
-				options?.diffConfig?.title ?? diffLabelFromPath(filePath) ?? filePath;
-			const diffConfig =
-				options?.diffConfig ??
-				createWorkingVsCheckpointDiffConfig(fileId, diffLabel);
-			setPanelState(
-				"central",
-				(panel) => {
-				const existingDiffView = panel.views.find(
-					(view) =>
-						view.viewKey === "diff" && view.props?.fileId === fileId,
-				);
-					if (existingDiffView) {
-					const nextViews = panel.views.map((entry) =>
-						entry.instanceKey === existingDiffView.instanceKey
-							? {
-									...entry,
-									isPending: false,
-									props: {
-										fileId,
-										filePath,
-										label: diffLabel,
-										diff: diffConfig,
-									},
-								}
-							: entry,
-					);
-						return {
-							views: nextViews,
-							activeInstanceKey: existingDiffView.instanceKey,
-						};
-					}
-					const newView: ViewInstance = {
-						instanceKey: createViewInstanceKey("diff"),
-						viewKey: "diff",
-						isPending: true,
-						props: {
-							fileId,
-							filePath,
-							label: diffLabel,
-							diff: diffConfig,
-						},
-					};
-					return upsertPendingView(panel, newView);
-				},
-				{ focus: shouldFocus },
-			);
-		},
-		[setPanelState],
-	);
-
-	const handleCloseDiff = useCallback(
-		(fileId: string) => {
-			// eslint-disable-next-line no-console
-			console.log("[layout] closing diff", fileId);
-			setPanelState(
-				"central",
-				(panel) => {
-				const targetIndex = panel.views.findIndex(
-					(view) =>
-						view.viewKey === "diff" && view.props?.fileId === fileId,
-				);
-					if (targetIndex === -1) {
-						return panel;
-					}
-					const targetView = panel.views[targetIndex];
-					const nextViews = panel.views.filter(
-						(view) =>
-							!(view.viewKey === "diff" && view.props?.fileId === fileId),
-					);
-					const filePath =
-						typeof targetView.props?.filePath === "string"
-							? targetView.props.filePath
-							: undefined;
-					if (nextViews.length === 0) {
-						const label = fileLabelFromPath(filePath, fileId);
-						const newView: ViewInstance = {
-							instanceKey: createViewInstanceKey("file-content"),
-							viewKey: "file-content",
-							isPending: true,
-							props: filePath
-								? { fileId, filePath, label }
-								: { fileId, label },
-						};
-						return {
-							views: [newView],
-							activeInstanceKey: newView.instanceKey,
-						};
-					}
-					const nextActive = nextViews.some(
-						(view) => view.instanceKey === panel.activeInstanceKey,
-					)
-						? panel.activeInstanceKey
-						: (nextViews[0]?.instanceKey ?? null);
-					return {
-						views: nextViews,
-						activeInstanceKey: nextActive,
-					};
-				},
-				{ focus: true },
-			);
-		},
-		[setPanelState],
-	);
+		handleOpenView({
+			panel: "central",
+			kind: FILE_VIEW_KIND,
+			instance: fileViewInstance(id),
+			props: buildFileViewProps({ fileId: id, filePath: path }),
+			focus: true,
+		});
+	}, [handleOpenView, lix]);
 
 	const activeCentralEntry = useMemo(() => {
-		const activeKey =
-			centralPanel.activeInstanceKey ??
-			centralPanel.views[0]?.instanceKey ??
-			null;
-		if (!activeKey) return null;
+		const activeInstance =
+			centralPanel.activeInstance ?? centralPanel.views[0]?.instance ?? null;
+		if (!activeInstance) return null;
 		return (
-			centralPanel.views.find((entry) => entry.instanceKey === activeKey) ??
+			centralPanel.views.find((entry) => entry.instance === activeInstance) ??
 			null
 		);
 	}, [centralPanel]);
@@ -976,7 +682,7 @@ function LayoutShellContent() {
 		}
 		return (
 			activeCentralEntry.props?.label ??
-			VIEW_MAP.get(activeCentralEntry.viewKey)?.label ??
+			VIEW_MAP.get(activeCentralEntry.kind)?.label ??
 			null
 		);
 	}, [activeCentralEntry]);
@@ -986,22 +692,22 @@ function LayoutShellContent() {
 	const isRightFocused = focusedPanel === "right";
 
 	const addViewOnLeft = useCallback(
-		(viewKey: ViewKey) => handleAddView("left", viewKey),
+		(type: ViewKind) => handleAddView("left", type),
 		[handleAddView],
 	);
 
 	const addViewOnRight = useCallback(
-		(viewKey: ViewKey) => handleAddView("right", viewKey),
+		(type: ViewKind) => handleAddView("right", type),
 		[handleAddView],
 	);
 
 	const handleSelectLeftView = useCallback(
-		(instanceKey: string) =>
+		(key: string) =>
 			setPanelState(
 				"left",
 				(panel) => ({
 					views: panel.views,
-					activeInstanceKey: instanceKey,
+					activeInstance: key,
 				}),
 				{ focus: true },
 			),
@@ -1009,22 +715,20 @@ function LayoutShellContent() {
 	);
 
 	const handleSelectCentralView = useCallback(
-		(instanceKey: string) =>
-			setPanelState(
-				"central",
-				(panel) => activatePanelView(panel, instanceKey),
-				{ focus: true },
-			),
+		(key: string) =>
+			setPanelState("central", (panel) => activatePanelView(panel, key), {
+				focus: true,
+			}),
 		[setPanelState],
 	);
 
 	const handleSelectRightView = useCallback(
-		(instanceKey: string) =>
+		(key: string) =>
 			setPanelState(
 				"right",
 				(panel) => ({
 					views: panel.views,
-					activeInstanceKey: instanceKey,
+					activeInstance: key,
 				}),
 				{ focus: true },
 			),
@@ -1032,18 +736,50 @@ function LayoutShellContent() {
 	);
 
 	const handleRemoveView = useCallback(
-		(side: PanelSide, instanceKey: string) =>
+		(side: PanelSide, instance: string) =>
 			setPanelState(
 				side,
 				(panel) => {
-					const views = panel.views.filter(
-						(entry) => entry.instanceKey !== instanceKey,
+					const targetView = panel.views.find(
+						(entry) => entry.instance === instance,
 					);
+					if (!targetView) {
+						return panel;
+					}
+					let views = panel.views.filter(
+						(entry) => entry.instance !== instance,
+					);
+					if (
+						side === "central" &&
+						targetView.kind === DIFF_VIEW_KIND &&
+						views.length === 0
+					) {
+						const fileId = targetView.props?.fileId
+							? String(targetView.props.fileId)
+							: null;
+						if (fileId) {
+							const filePath =
+								typeof targetView.props?.filePath === "string"
+									? targetView.props.filePath
+									: undefined;
+							const fallbackView: ViewInstance = {
+								instance: fileViewInstance(fileId),
+								kind: FILE_VIEW_KIND,
+								isPending: true,
+								props: buildFileViewProps({ fileId, filePath }),
+							};
+							views = [fallbackView];
+							return {
+								views,
+								activeInstance: fallbackView.instance,
+							};
+						}
+					}
 					const nextActive =
-						panel.activeInstanceKey === instanceKey
-							? (views[views.length - 1]?.instanceKey ?? null)
-							: panel.activeInstanceKey;
-					return { views, activeInstanceKey: nextActive };
+						panel.activeInstance === instance
+							? (views[views.length - 1]?.instance ?? null)
+							: panel.activeInstance;
+					return { views, activeInstance: nextActive };
 				},
 				{ focus: true },
 			),
@@ -1062,7 +798,7 @@ function LayoutShellContent() {
 	}, []);
 
 	const handleMoveViewToPanel = useCallback(
-		(targetPanel: PanelSide, instanceKey?: string) => {
+		(targetPanel: PanelSide, instance?: string) => {
 			// Find the view in any panel
 			const allViews = [
 				...leftPanel.views.map((v) => ({
@@ -1079,9 +815,9 @@ function LayoutShellContent() {
 				})),
 			];
 
-			const viewToMove = instanceKey
-				? allViews.find((v) => v.instanceKey === instanceKey)
-				: allViews.find((v) => v.viewKey === "agent");
+			const viewToMove = instance
+				? allViews.find((v) => v.instance === instance)
+				: allViews.find((v) => v.kind === AGENT_VIEW_KIND);
 
 			if (!viewToMove) return;
 
@@ -1091,13 +827,13 @@ function LayoutShellContent() {
 			// Remove from source panel
 			setPanelState(sourcePanel, (panel) => {
 				const views = panel.views.filter(
-					(v) => v.instanceKey !== viewToMove.instanceKey,
+					(v) => v.instance !== viewToMove.instance,
 				);
 				const nextActive =
-					panel.activeInstanceKey === viewToMove.instanceKey
-						? (views[views.length - 1]?.instanceKey ?? null)
-						: panel.activeInstanceKey;
-				return { views, activeInstanceKey: nextActive };
+					panel.activeInstance === viewToMove.instance
+						? (views[views.length - 1]?.instance ?? null)
+						: panel.activeInstance;
+				return { views, activeInstance: nextActive };
 			});
 
 			// Add to target panel
@@ -1107,12 +843,12 @@ function LayoutShellContent() {
 					views: [
 						...panel.views,
 						{
-							instanceKey: viewToMove.instanceKey,
-							viewKey: viewToMove.viewKey,
+							instance: viewToMove.instance,
+							kind: viewToMove.kind,
 							props: viewToMove.props,
 						},
 					],
-					activeInstanceKey: viewToMove.instanceKey,
+					activeInstance: viewToMove.instance,
 				}),
 				{ focus: true },
 			);
@@ -1146,10 +882,6 @@ function LayoutShellContent() {
 
 	const sharedViewContext = useMemo(
 		() => ({
-			openFileView: handleOpenFile,
-			openCommitView: handleOpenCommit,
-			openDiffView: handleOpenDiff,
-			closeDiffView: handleCloseDiff,
 			openView: handleOpenView,
 			closeView: handleCloseView,
 			setTabBadgeCount: () => {},
@@ -1159,10 +891,6 @@ function LayoutShellContent() {
 			lix,
 		}),
 		[
-			handleOpenFile,
-			handleOpenCommit,
-			handleOpenDiff,
-			handleCloseDiff,
 			handleOpenView,
 			handleCloseView,
 			handleMoveViewToPanel,
@@ -1175,31 +903,25 @@ function LayoutShellContent() {
 	const leftViewContext = useMemo(
 		() => ({
 			...sharedViewContext,
-			openHistoryView: (options?: { readonly focus?: boolean }) =>
-				handleOpenHistory({ ...options, side: "left" }),
 			isPanelFocused: isLeftFocused,
 		}),
-		[sharedViewContext, handleOpenHistory, isLeftFocused],
+		[sharedViewContext, isLeftFocused],
 	);
 
 	const centralViewContext = useMemo(
 		() => ({
 			...sharedViewContext,
-			openHistoryView: (options?: { readonly focus?: boolean }) =>
-				handleOpenHistory({ ...options, side: "central" }),
 			isPanelFocused: isCentralFocused,
 		}),
-		[sharedViewContext, handleOpenHistory, isCentralFocused],
+		[sharedViewContext, isCentralFocused],
 	);
 
 	const rightViewContext = useMemo(
 		() => ({
 			...sharedViewContext,
-			openHistoryView: (options?: { readonly focus?: boolean }) =>
-				handleOpenHistory({ ...options, side: "right" }),
 			isPanelFocused: isRightFocused,
 		}),
-		[sharedViewContext, handleOpenHistory, isRightFocused],
+		[sharedViewContext, isRightFocused],
 	);
 
 	useEffect(() => {
@@ -1300,9 +1022,7 @@ function LayoutShellContent() {
 								onFocusPanel={focusPanel}
 								onSelectView={handleSelectLeftView}
 								onAddView={addViewOnLeft}
-								onRemoveView={(instanceKey) =>
-									handleRemoveView("left", instanceKey)
-								}
+								onRemoveView={(key) => handleRemoveView("left", key)}
 								viewContext={leftViewContext}
 							/>
 						</Panel>
@@ -1320,19 +1040,17 @@ function LayoutShellContent() {
 								isFocused={focusedPanel === "central"}
 								onFocusPanel={focusPanel}
 								onSelectView={handleSelectCentralView}
-								onRemoveView={(instanceKey) =>
-									handleRemoveView("central", instanceKey)
-								}
-								onFinalizePendingView={(instanceKey) =>
+								onRemoveView={(key) => handleRemoveView("central", key)}
+								onFinalizePendingView={(key) =>
 									setPanelState(
 										"central",
-										(panel) => activatePanelView(panel, instanceKey),
+										(panel) => activatePanelView(panel, key),
 										{ focus: true },
 									)
 								}
-						viewContext={centralViewContext}
-						onCreateNewFile={handleCreateNewFile}
-					/>
+								viewContext={centralViewContext}
+								onCreateNewFile={handleCreateNewFile}
+							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
 							<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 h-full rounded-full bg-gradient-to-b from-transparent via-brand-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
@@ -1355,9 +1073,7 @@ function LayoutShellContent() {
 								onFocusPanel={focusPanel}
 								onSelectView={handleSelectRightView}
 								onAddView={addViewOnRight}
-								onRemoveView={(instanceKey) =>
-									handleRemoveView("right", instanceKey)
-								}
+								onRemoveView={(key) => handleRemoveView("right", key)}
 								viewContext={rightViewContext}
 							/>
 						</Panel>

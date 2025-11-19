@@ -6,13 +6,13 @@ import type { PanelState, ViewInstance } from "./types";
  * between panels.
  *
  * @example
- * const cloned = cloneViewInstanceByKey(panelState, "files-1");
+ * const cloned = cloneViewInstance(panelState, "files-1");
  */
-export const cloneViewInstanceByKey = (
+export const cloneViewInstance = (
 	panel: PanelState,
-	instanceKey: string,
+	instance: string,
 ): ViewInstance | null => {
-	const view = panel.views.find((entry) => entry.instanceKey === instanceKey);
+	const view = panel.views.find((entry) => entry.instance === instance);
 	if (!view) return null;
 	return {
 		...view,
@@ -40,9 +40,9 @@ export const reorderPanelViewsByIndex = (
 	views.splice(toIndex, 0, moving);
 	return {
 		views,
-		activeInstanceKey:
-			panel.activeInstanceKey === moving.instanceKey
-				? moving.instanceKey
-				: panel.activeInstanceKey,
+		activeInstance:
+			panel.activeInstance === moving.instance
+				? moving.instance
+				: panel.activeInstance,
 	};
 };

@@ -1,4 +1,9 @@
 import type { PanelSide, PanelState } from "./types";
+import {
+	AGENT_VIEW_KIND,
+	CHECKPOINT_VIEW_KIND,
+	FILES_VIEW_KIND,
+} from "./view-instance-helpers";
 
 export const FLASHTYPE_UI_STATE_KEY = "flashtype_ui_state" as const;
 
@@ -13,9 +18,9 @@ export const FLASHTYPE_UI_STATE_KEY = "flashtype_ui_state" as const;
  * const uiState: FlashtypeUiState = {
  *   focusedPanel: "left",
  *   panels: {
- *     left: { views: [...], activeInstanceKey: "files-1" },
- *     central: { views: [], activeInstanceKey: null },
- *     right: { views: [], activeInstanceKey: null },
+ *     left: { views: [...], activeInstance: "files-1" },
+ *     central: { views: [], activeInstance: null },
+ *     right: { views: [], activeInstance: null },
  *   },
  *   layout: { sizes: { left: 20, central: 60, right: 20 } },
  * };
@@ -47,15 +52,15 @@ export const DEFAULT_FLASHTYPE_UI_STATE: FlashtypeUiState = {
 	panels: {
 		left: {
 			views: [
-				{ instanceKey: "files-default", viewKey: "files" },
-				{ instanceKey: "checkpoint-default", viewKey: "checkpoint" },
+				{ instance: "files-default", kind: FILES_VIEW_KIND },
+				{ instance: "checkpoint-default", kind: CHECKPOINT_VIEW_KIND },
 			],
-			activeInstanceKey: "files-default",
+			activeInstance: "files-default",
 		},
-		central: { views: [], activeInstanceKey: null },
+		central: { views: [], activeInstance: null },
 		right: {
-			views: [{ instanceKey: "agent-default", viewKey: "agent" }],
-			activeInstanceKey: "agent-default",
+			views: [{ instance: "agent-default", kind: AGENT_VIEW_KIND }],
+			activeInstance: "agent-default",
 		},
 	},
 	layout: { sizes: { ...DEFAULT_LAYOUT_SIZES } },

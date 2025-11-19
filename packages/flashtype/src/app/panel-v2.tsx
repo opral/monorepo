@@ -27,15 +27,12 @@ import type {
 	ViewContext,
 	ViewDefinition,
 	ViewInstance,
-	ViewKey,
+	ViewKind,
 } from "./types";
 import { VIEW_MAP } from "./view-registry";
 import styles from "./panel.module.css";
 import { useViewContext } from "./view-context";
-import {
-	useViewHostRegistry,
-	type ViewHostRecord,
-} from "./view-host-registry";
+import { useViewHostRegistry, type ViewHostRecord } from "./view-host-registry";
 import { Activity } from "react";
 
 /**
@@ -74,24 +71,23 @@ export function PanelV2({
 		data: { panel: side },
 	});
 
-	const activeEntry = panel.activeInstanceKey
-		? (panel.views.find(
-				(entry) => entry.instanceKey === panel.activeInstanceKey,
-			) ?? null)
+	const activeEntry = panel.activeInstance
+		? (panel.views.find((entry) => entry.instance === panel.activeInstance) ??
+			null)
 		: (panel.views[0] ?? null);
 
 	const resolveViewDefinition = useCallback(
-		(viewKey: ViewKey): ViewDefinition | null => {
+		(kind: ViewKind): ViewDefinition | null => {
 			const override = viewOverrides?.find(
-				(candidate) => candidate.key === viewKey,
+				(candidate) => candidate.kind === kind,
 			);
-			return override ?? VIEW_MAP.get(viewKey) ?? null;
+			return override ?? VIEW_MAP.get(kind) ?? null;
 		},
 		[viewOverrides],
 	);
 
 	const hasViews = panel.views.length > 0;
-	const activeInstanceKey = activeEntry?.instanceKey ?? null;
+	const activeInstance = activeEntry?.instance ?? null;
 	const { badgeCounts, makeContext } = useViewContext({
 		panel,
 		isFocused,
@@ -101,7 +97,7 @@ export function PanelV2({
 	const viewContexts = useMemo(() => {
 		const map = new Map<string, ReturnType<typeof makeContext>>();
 		for (const entry of panel.views) {
-			map.set(entry.instanceKey, makeContext(entry));
+			map.set(entry.instance, makeContext(entry));
 		}
 		return map;
 	}, [panel.views, makeContext]);
@@ -113,26 +109,26 @@ export function PanelV2({
 	useEffect(() => {
 		const cleanupMap = activationCleanupRef.current;
 		for (const entry of panel.views) {
-			if (cleanupMap.has(entry.instanceKey)) continue;
-			const view = resolveViewDefinition(entry.viewKey);
+			if (cleanupMap.has(entry.instance)) continue;
+			const view = resolveViewDefinition(entry.kind);
 			if (!view?.activate) {
-				cleanupMap.set(entry.instanceKey, undefined);
+				cleanupMap.set(entry.instance, undefined);
 				continue;
 			}
-			const contextForView = viewContexts.get(entry.instanceKey);
+			const contextForView = viewContexts.get(entry.instance);
 			if (!contextForView) {
-				cleanupMap.set(entry.instanceKey, undefined);
+				cleanupMap.set(entry.instance, undefined);
 				continue;
 			}
 			const cleanup = view.activate({
 				context: contextForView,
 				instance: entry,
 			});
-			cleanupMap.set(entry.instanceKey, cleanup ?? undefined);
+			cleanupMap.set(entry.instance, cleanup ?? undefined);
 		}
 
 		for (const [key, cleanup] of Array.from(cleanupMap.entries())) {
-			if (!panel.views.some((entry) => entry.instanceKey === key)) {
+			if (!panel.views.some((entry) => entry.instance === key)) {
 				cleanup?.();
 				cleanupMap.delete(key);
 			}
@@ -148,8 +144,8 @@ export function PanelV2({
 	}, []);
 
 	const handleInteraction = () => {
-		if (!onActiveViewInteraction || !activeInstanceKey) return;
-		onActiveViewInteraction(activeInstanceKey);
+		if (!onActiveViewInteraction || !activeInstance) return;
+		onActiveViewInteraction(activeInstance);
 	};
 
 	const ContainerElement =
@@ -159,7 +155,7 @@ export function PanelV2({
 	const showTabBar = hasViews || Boolean(extraTabBarContent);
 
 	const contentHandlers =
-		onActiveViewInteraction && activeInstanceKey
+		onActiveViewInteraction && activeInstance
 			? {
 					onPointerDownCapture: handleInteraction,
 					onFocusCapture: handleInteraction,
@@ -182,29 +178,29 @@ export function PanelV2({
 					<TabBar extraContent={extraTabBarContent}>
 						<SortableContext
 							id={`panel-${side}`}
-							items={panel.views.map((entry) => entry.instanceKey)}
+							items={panel.views.map((entry) => entry.instance)}
 							strategy={horizontalListSortingStrategy}
 						>
 							{panel.views.map((entry) => {
-								const view = resolveViewDefinition(entry.viewKey);
+								const view = resolveViewDefinition(entry.kind);
 								if (!view) return null;
-								const isActive = activeInstanceKey === entry.instanceKey;
+								const isActive = activeInstance === entry.instance;
 								const label = resolveLabel(view, entry, tabLabel);
-								const badgeCount = badgeCounts[entry.instanceKey] ?? null;
+								const badgeCount = badgeCounts[entry.instance] ?? null;
 								return (
 									<SortableTab
-										key={entry.instanceKey}
-										instanceKey={entry.instanceKey}
+										key={entry.instance}
+										instance={entry.instance}
 										panelSide={side}
-										viewKey={entry.viewKey}
+										kind={entry.kind}
 										icon={view.icon}
 										label={label}
 										badgeCount={badgeCount}
 										isActive={isActive}
 										isFocused={isFocused && isActive}
 										isPending={entry.isPending}
-										onClick={() => onSelectView(entry.instanceKey)}
-										onClose={() => onRemoveView(entry.instanceKey)}
+										onClick={() => onSelectView(entry.instance)}
+										onClose={() => onRemoveView(entry.instance)}
 									/>
 								);
 							})}
@@ -215,14 +211,14 @@ export function PanelV2({
 				{hasViews ? (
 					<PanelContent {...contentHandlers}>
 						{panel.views.map((entry) => {
-							const view = resolveViewDefinition(entry.viewKey);
+							const view = resolveViewDefinition(entry.kind);
 							if (!view) return null;
-							const context = viewContexts.get(entry.instanceKey);
+							const context = viewContexts.get(entry.instance);
 							if (!context) return null;
-							const isActive = activeInstanceKey === entry.instanceKey;
+							const isActive = activeInstance === entry.instance;
 							return (
 								<Activity
-									key={entry.instanceKey}
+									key={entry.instance}
 									mode={isActive ? "visible" : "hidden"}
 								>
 									<ViewRenderer
@@ -247,13 +243,13 @@ export type PanelV2Props = {
 	readonly panel: PanelState;
 	readonly isFocused: boolean;
 	readonly onFocusPanel: (side: PanelSide) => void;
-	readonly onSelectView: (instanceKey: string) => void;
-	readonly onRemoveView: (instanceKey: string) => void;
+	readonly onSelectView: (instance: string) => void;
+	readonly onRemoveView: (instance: string) => void;
 	readonly viewContext: ViewContext;
 	readonly tabLabel?: (view: ViewDefinition, instance: ViewInstance) => string;
 	readonly extraTabBarContent?: ReactNode;
 	readonly emptyStatePlaceholder?: ReactNode;
-	readonly onActiveViewInteraction?: (instanceKey: string) => void;
+	readonly onActiveViewInteraction?: (instance: string) => void;
 	readonly dropId?: string;
 	readonly viewOverrides?: ViewDefinition[];
 };
@@ -389,11 +385,7 @@ function ViewRenderer({
 	return <ViewHostMount host={host} />;
 }
 
-function ViewHostMount({
-	host,
-}: {
-	host: ViewHostRecord | null;
-}) {
+function ViewHostMount({ host }: { host: ViewHostRecord | null }) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 
 	useLayoutEffect(() => {
@@ -417,18 +409,18 @@ function ViewHostMount({
 }
 
 interface SortableTabProps extends PanelTabPreviewProps {
-	readonly instanceKey: string;
+	readonly instance: string;
 	readonly panelSide: PanelSide;
-	readonly viewKey: ViewKey;
+	readonly kind: ViewKind;
 	readonly onClick?: () => void;
 	readonly onClose?: () => void;
 	readonly isPending?: boolean;
 }
 
 function SortableTab({
-	instanceKey,
+	instance,
 	panelSide,
-	viewKey,
+	kind,
 	icon,
 	label,
 	badgeCount,
@@ -446,12 +438,12 @@ function SortableTab({
 		transition,
 		isDragging,
 	} = useSortable({
-		id: instanceKey,
+		id: instance,
 		data: {
 			type: "panel-tab",
 			panel: panelSide,
-			instanceKey,
-			viewKey,
+			instance,
+			kind,
 			fromPanel: panelSide,
 		},
 	});
@@ -474,8 +466,8 @@ function SortableTab({
 			onClose={onClose}
 			isDragging={isDragging}
 			dataFocused={isFocused ? "true" : undefined}
-			dataViewInstance={instanceKey}
-			dataViewKey={viewKey}
+			dataViewInstance={instance}
+			dataViewKind={kind}
 			style={style}
 			buttonProps={{
 				...(attributes as ButtonHTMLAttributes<HTMLButtonElement>),
@@ -500,7 +492,7 @@ interface TabBaseProps extends PanelTabPreviewProps {
 	readonly isDragging?: boolean;
 	readonly dataFocused?: string;
 	readonly dataViewInstance?: string;
-	readonly dataViewKey?: string;
+	readonly dataViewKind?: string;
 	readonly buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> | null;
 	readonly style?: CSSProperties;
 }
@@ -519,7 +511,7 @@ const TabButtonBase = forwardRef<HTMLButtonElement, TabBaseProps>(
 			isDragging,
 			dataFocused,
 			dataViewInstance,
-			dataViewKey,
+			dataViewKind,
 			buttonProps = null,
 			style,
 		},
@@ -537,7 +529,7 @@ const TabButtonBase = forwardRef<HTMLButtonElement, TabBaseProps>(
 				ref={ref}
 				data-focused={dataFocused}
 				data-view-instance={dataViewInstance}
-				data-view-key={dataViewKey}
+				data-view-key={dataViewKind}
 				className={clsx(
 					tabBaseClasses,
 					tabStateClasses[state],

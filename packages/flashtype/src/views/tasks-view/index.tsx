@@ -1,5 +1,6 @@
 import { CalendarDays } from "lucide-react";
 import { createReactViewDefinition } from "../../app/react-view";
+import { TASKS_VIEW_KIND } from "../../app/view-instance-helpers";
 
 /**
  * Tasks view - Track the current sprint notes
@@ -38,7 +39,7 @@ export function TasksView() {
  * import { view as tasksView } from "@/views/tasks-view";
  */
 export const view = createReactViewDefinition({
-	key: "tasks",
+	kind: TASKS_VIEW_KIND,
 	label: "Tasks",
 	description: "Track the current sprint notes.",
 	icon: CalendarDays,

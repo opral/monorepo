@@ -7,6 +7,11 @@ import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
 import { CheckpointView, view as checkpointViewDefinition } from "./index";
 import type { ViewContext, ViewInstance } from "../../app/types";
+import {
+	CHECKPOINT_VIEW_KIND,
+	HISTORY_VIEW_KIND,
+	historyViewInstance,
+} from "../../app/view-instance-helpers";
 
 async function countCommits(lix: Awaited<ReturnType<typeof openLix>>) {
 	const rows = await lix.db.selectFrom("commit").select("id").execute();
@@ -89,8 +94,8 @@ describe("CheckpointView", () => {
 		} satisfies ViewContext;
 
 		const instance: ViewInstance = {
-			instanceKey: "checkpoint-1",
-			viewKey: "checkpoint",
+			instance: "checkpoint-1",
+			kind: CHECKPOINT_VIEW_KIND,
 		};
 
 		const { unmount } = render(
@@ -111,9 +116,9 @@ describe("CheckpointView", () => {
 		unmount();
 	});
 
-	test("invokes openHistoryView when clicking View checkpoints", async () => {
+	test("invokes openView for history when clicking View checkpoints", async () => {
 		const lix = await openLix({ providePlugins: [mdPlugin] });
-		const openHistoryView = vi.fn();
+		const openView = vi.fn();
 
 		let utils: ReturnType<typeof render>;
 		await act(async () => {
@@ -122,7 +127,7 @@ describe("CheckpointView", () => {
 					<Suspense fallback={null}>
 						<CheckpointView
 							context={{
-								openHistoryView,
+								openView,
 								setTabBadgeCount: () => {},
 								lix,
 							}}
@@ -137,6 +142,11 @@ describe("CheckpointView", () => {
 		})) as HTMLButtonElement;
 
 		fireEvent.click(button);
-		expect(openHistoryView).toHaveBeenCalledTimes(1);
+		expect(openView).toHaveBeenCalledWith({
+			panel: "central",
+			kind: HISTORY_VIEW_KIND,
+			instance: historyViewInstance(),
+			focus: true,
+		});
 	});
 });

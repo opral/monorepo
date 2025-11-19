@@ -5,6 +5,12 @@ import type { ViewContext, ViewInstance } from "../../app/types";
 import { File, GitCommitVertical } from "lucide-react";
 import { createReactViewDefinition } from "../../app/react-view";
 import { selectCheckpointFiles, type CheckpointFileChangeRow } from "./queries";
+import {
+	COMMIT_VIEW_KIND,
+	DIFF_VIEW_KIND,
+	buildDiffViewProps,
+	diffViewInstance,
+} from "../../app/view-instance-helpers";
 
 type CommitFile = {
 	id: string;
@@ -56,9 +62,18 @@ export function CommitView({ context, view }: CommitViewProps) {
 
 	const handleOpenDiff = useCallback(
 		(file: CommitFile) => {
-			if (!context?.openDiffView) return;
-			const diffOptions = context.isPanelFocused ? { focus: false } : undefined;
-			context.openDiffView(file.id, file.fullPath, diffOptions);
+			if (!context?.openView) return;
+			const focus = context.isPanelFocused ? false : undefined;
+			context.openView({
+				panel: "central",
+				kind: DIFF_VIEW_KIND,
+				instance: diffViewInstance(file.id),
+				props: buildDiffViewProps({
+					fileId: file.id,
+					filePath: file.fullPath,
+				}),
+				focus,
+			});
 		},
 		[context],
 	);
@@ -157,7 +172,7 @@ export function CommitView({ context, view }: CommitViewProps) {
  * import { view as commitView } from "@/views/commit-view";
  */
 export const view = createReactViewDefinition({
-	key: "commit",
+	kind: COMMIT_VIEW_KIND,
 	label: "Commit",
 	description: "View commit details and changes.",
 	icon: GitCommitVertical,

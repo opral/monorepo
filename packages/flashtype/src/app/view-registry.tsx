@@ -1,4 +1,4 @@
-import type { ViewDefinition, ViewKey } from "./types";
+import type { ViewDefinition, ViewKind } from "./types";
 import { view as agentViewDefinition } from "../views/agent-view";
 import { view as filesViewDefinition } from "../views/files-view";
 import { view as searchViewDefinition } from "../views/search-view";
@@ -26,13 +26,13 @@ const HIDDEN_VIEWS: ViewDefinition[] = [
 
 export const VIEW_DEFINITIONS: ViewDefinition[] = VISIBLE_VIEWS;
 
-export const VIEW_MAP = new Map<ViewKey, ViewDefinition>(
-	[...VISIBLE_VIEWS, ...HIDDEN_VIEWS].map((ext) => [ext.key, ext]),
+export const VIEW_MAP = new Map<ViewKind, ViewDefinition>(
+	[...VISIBLE_VIEWS, ...HIDDEN_VIEWS].map((ext) => [ext.kind, ext]),
 );
 
 let viewCounter = 0;
 
-export function createViewInstanceKey(viewKey: ViewKey): string {
+export function createViewInstanceId(kind: ViewKind): string {
 	viewCounter += 1;
-	return `${viewKey}-${viewCounter}`;
+	return `${kind}-${viewCounter}`;
 }

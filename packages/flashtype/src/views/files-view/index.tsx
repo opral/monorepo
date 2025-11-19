@@ -7,6 +7,12 @@ import { buildFilesystemTree } from "@/views/files-view/build-filesystem-tree";
 import type { ViewContext } from "../../app/types";
 import { FileTree } from "./file-tree";
 import { createReactViewDefinition } from "../../app/react-view";
+import {
+	FILE_VIEW_KIND,
+	FILES_VIEW_KIND,
+	buildFileViewProps,
+	fileViewInstance,
+} from "../../app/view-instance-helpers";
 
 type FilesViewProps = {
 	readonly context?: ViewContext;
@@ -25,12 +31,7 @@ type DraftState = {
  * when rendered in the UI, so callers must perform the matching decode step.
  *
  * @example
- * <FilesView
- *   context={{
- *     openFileView: (fileId, options) =>
- *       console.log(fileId, options?.filePath),
- *   }}
- * />
+ * <FilesView context={{ openView: console.log }} />
  */
 export function FilesView({ context }: FilesViewProps) {
 	const lix = useLix();
@@ -135,9 +136,13 @@ export function FilesView({ context }: FilesViewProps) {
 				setPendingPaths((prev) => [...prev, path]);
 				setSelectedPath(path);
 				setSelectedKind("file");
-				if (context?.openFileView) {
-					await context.openFileView(id, { focus: false, filePath: path });
-				}
+				context?.openView?.({
+					panel: "central",
+					kind: FILE_VIEW_KIND,
+					instance: fileViewInstance(id),
+					props: buildFileViewProps({ fileId: id, filePath: path }),
+					focus: false,
+				});
 			} catch (error) {
 				console.error("Failed to create file", error);
 			} finally {
@@ -183,12 +188,13 @@ export function FilesView({ context }: FilesViewProps) {
 		async (fileId: string, path: string) => {
 			setSelectedPath(path);
 			setSelectedKind("file");
-			if (context?.openFileView) {
-				await context.openFileView(fileId, {
-					focus: false,
-					filePath: path,
-				});
-			}
+			context?.openView?.({
+				panel: "central",
+				kind: FILE_VIEW_KIND,
+				instance: fileViewInstance(fileId),
+				props: buildFileViewProps({ fileId, filePath: path }),
+				focus: false,
+			});
 		},
 		[context],
 	);
@@ -408,7 +414,15 @@ export function FilesView({ context }: FilesViewProps) {
 							.executeTakeFirst();
 
 						if (newFile?.id) {
-							context?.openFileView?.(newFile.id as string, { filePath });
+							context?.openView?.({
+								panel: "central",
+								kind: FILE_VIEW_KIND,
+								instance: fileViewInstance(newFile.id as string),
+								props: buildFileViewProps({
+									fileId: newFile.id as string,
+									filePath,
+								}),
+							});
 						}
 					}
 				} catch (error) {
@@ -481,7 +495,7 @@ export function FilesView({ context }: FilesViewProps) {
  * import { view as filesView } from "@/views/files-view";
  */
 export const view = createReactViewDefinition({
-	key: "files",
+	kind: FILES_VIEW_KIND,
 	label: "Files",
 	description: "Browse and pin project documents.",
 	icon: Files,

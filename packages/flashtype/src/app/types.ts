@@ -6,9 +6,9 @@ import type { SelectQueryBuilder } from "@lix-js/sdk/dependency/kysely";
  * Union of registry keys for views available in the layout.
  *
  * @example
- * const activeView: ViewKey = "files";
+ * const activeView: ViewKind = "flashtype_files";
  */
-export type ViewKey = string;
+export type ViewKind = string;
 
 /**
  * Declares how a diff view should source its data.
@@ -37,7 +37,7 @@ export type DiffViewConfig = {
  * Per-panel instance props used to track which views are open.
  *
  * @example
- * const instance: ViewInstance = { instanceKey: "files-1", viewKey: "files" };
+ * const instance: ViewInstance = { instance: "files-1", kind: "flashtype_files" };
  */
 export interface ViewInstanceProps {
 	readonly filePath?: string;
@@ -49,8 +49,8 @@ export interface ViewInstanceProps {
 }
 
 export interface ViewInstance {
-	readonly instanceKey: string;
-	readonly viewKey: ViewKey;
+	readonly instance: string;
+	readonly kind: ViewKind;
 	readonly isPending?: boolean;
 	readonly props?: ViewInstanceProps;
 }
@@ -62,7 +62,7 @@ export interface ViewInstance {
  * const filesView: ViewDefinition = VIEW_DEFINITIONS[0];
  */
 export interface ViewDefinition {
-	readonly key: ViewKey;
+	readonly kind: ViewKind;
 	readonly label: string;
 	readonly description: string;
 	readonly icon: LucideIcon;
@@ -81,67 +81,32 @@ export interface ViewDefinition {
  * Context passed to views for interacting with the layout.
  *
  * @example
- * context.openFileView?.("file-123", { focus: false, filePath: "/docs/guide.md" });
- * context.openDiffView?.("file-123", "/docs/guide.md");
+ * context.openView?.({
+ *   panel: "central",
+ *   kind: "file-content",
+ *   instance: "file-content:file-123",
+ *   props: { fileId: "file-123", filePath: "/docs/guide.md" },
+ * });
  */
 export interface ViewContext {
-	readonly openFileView?: (
-		fileId: string,
-		options?: {
-			/**
-			 * Whether the central panel should receive focus when the file opens.
-			 * Defaults to `true` for backwards compatibility.
-			 */
-			readonly focus?: boolean;
-			/**
-			 * Optional absolute workspace path for the file. When provided, the
-			 * layout uses it to label the tab and avoid an extra lookup.
-			 */
-			readonly filePath?: string;
-		},
-	) => Promise<void> | void;
-	readonly openCommitView?: (
-		checkpointId: string,
-		label: string,
-		options?: {
-			/**
-			 * Whether the central panel should receive focus when the commit opens.
-			 * Defaults to `true` for backwards compatibility.
-			 */
-			readonly focus?: boolean;
-		},
-	) => void;
-	readonly openDiffView?: (
-		fileId: string,
-		filePath: string,
-		options?: {
-			/**
-			 * Whether the central panel should receive focus when the diff opens.
-			 */
-			readonly focus?: boolean;
-			/**
-			 * Optional override configuration for the diff view.
-			 */
-			readonly diffConfig?: DiffViewConfig;
-		},
-	) => void;
-	readonly openHistoryView?: (options?: { readonly focus?: boolean }) => void;
-	readonly closeDiffView?: (fileId: string) => void;
 	readonly openView?: (args: {
 		readonly panel: PanelSide;
-		readonly viewKey: ViewKey;
+		readonly kind: ViewKind;
 		readonly props?: ViewInstanceProps;
 		readonly focus?: boolean;
-		readonly instanceKey?: string;
+		readonly instance?: string;
 	}) => void;
 	readonly closeView?: (args: {
 		readonly panel?: PanelSide;
-		readonly instanceKey?: string;
-		readonly viewKey?: ViewKey;
+		readonly instance?: string;
+		readonly kind?: ViewKind;
 	}) => void;
 	readonly isPanelFocused?: boolean;
 	readonly setTabBadgeCount: (count: number | null | undefined) => void;
-	readonly moveViewToPanel?: (targetPanel: PanelSide, instanceKey?: string) => void;
+	readonly moveViewToPanel?: (
+		targetPanel: PanelSide,
+		instance?: string,
+	) => void;
 	readonly resizePanel?: (side: PanelSide, size: number) => void;
 	readonly focusPanel?: (side: PanelSide) => void;
 	readonly lix: Lix;
@@ -151,11 +116,11 @@ export interface ViewContext {
  * Lightweight state container that represents one panel island.
  *
  * @example
- * const leftPanel: PanelState = { views: [], activeInstanceKey: null };
+ * const leftPanel: PanelState = { views: [], activeInstance: null };
  */
 export interface PanelState {
 	readonly views: ViewInstance[];
-	readonly activeInstanceKey: string | null;
+	readonly activeInstance: string | null;
 }
 
 /**

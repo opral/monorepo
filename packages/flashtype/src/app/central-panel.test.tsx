@@ -8,11 +8,12 @@ import type { Lix } from "@lix-js/sdk";
 import { openLix } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { ViewHostRegistryProvider } from "./view-host-registry";
+import { SEARCH_VIEW_KIND } from "./view-instance-helpers";
 
 vi.mock("./view-registry", () => {
 	const definitions = [
 		{
-			key: "search" as const,
+			kind: "flashtype_search" as const,
 			label: "Search",
 			description: "Search view",
 			icon: () => <svg></svg>,
@@ -27,7 +28,12 @@ vi.mock("./view-registry", () => {
 				input.setAttribute("data-testid", "search-view-input");
 				input.setAttribute("placeholder", "Search project...");
 				input.addEventListener("pointerdown", () => {
-					context.openFileView?.("search", { focus: false });
+					context.openView?.({
+						panel: "central",
+						kind: "flashtype_search",
+						instance: "search-view",
+						focus: false,
+					});
 				});
 				target.replaceChildren(input);
 				return () => {
@@ -38,7 +44,7 @@ vi.mock("./view-registry", () => {
 	];
 	return {
 		VIEW_DEFINITIONS: definitions,
-		VIEW_MAP: new Map(definitions.map((def) => [def.key, def])),
+		VIEW_MAP: new Map(definitions.map((def) => [def.kind, def])),
 	};
 });
 
@@ -58,9 +64,7 @@ const renderWithProviders = async (ui: ReactNode) => {
 	await act(async () => {
 		result = render(
 			<ViewHostRegistryProvider>
-				<Suspense fallback={<div data-testid="loading-state" />}>
-					{ui}
-				</Suspense>
+				<Suspense fallback={<div data-testid="loading-state" />}>{ui}</Suspense>
 			</ViewHostRegistryProvider>,
 		);
 	});
@@ -70,9 +74,11 @@ const renderWithProviders = async (ui: ReactNode) => {
 const createViewContext = (
 	overrides: Partial<ViewContext> = {},
 ): ViewContext => ({
-	lix: lix ?? (() => {
-		throw new Error("Lix instance not initialized");
-	})(),
+	lix:
+		lix ??
+		(() => {
+			throw new Error("Lix instance not initialized");
+		})(),
 	isPanelFocused: false,
 	setTabBadgeCount: () => {},
 	...overrides,
@@ -80,7 +86,7 @@ const createViewContext = (
 
 describe("CentralPanel", () => {
 	test("shows the welcome screen when no views are open", async () => {
-		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
+		const emptyPanel: PanelState = { views: [], activeInstance: null };
 
 		await renderWithProviders(
 			<DndContext>
@@ -100,8 +106,8 @@ describe("CentralPanel", () => {
 
 	test("renders the active view and wires tab selection", async () => {
 		const panelState: PanelState = {
-			views: [{ instanceKey: "search-1", viewKey: "search" }],
-			activeInstanceKey: "search-1",
+			views: [{ instance: "search-1", kind: SEARCH_VIEW_KIND }],
+			activeInstance: "search-1",
 		};
 		const handleSelect = vi.fn();
 
@@ -129,8 +135,8 @@ describe("CentralPanel", () => {
 
 	test("active tab is not focused when panel loses focus", async () => {
 		const panelState: PanelState = {
-			views: [{ instanceKey: "search-1", viewKey: "search" }],
-			activeInstanceKey: "search-1",
+			views: [{ instance: "search-1", kind: SEARCH_VIEW_KIND }],
+			activeInstance: "search-1",
 		};
 
 		await renderWithProviders(
@@ -152,8 +158,10 @@ describe("CentralPanel", () => {
 
 	test("finalizes pending view when interacting with content", async () => {
 		const panelState: PanelState = {
-			views: [{ instanceKey: "search-1", viewKey: "search", isPending: true }],
-			activeInstanceKey: "search-1",
+			views: [
+				{ instance: "search-1", kind: SEARCH_VIEW_KIND, isPending: true },
+			],
+			activeInstance: "search-1",
 		};
 		const handleFinalize = vi.fn();
 
@@ -178,7 +186,7 @@ describe("CentralPanel", () => {
 	});
 
 	test("triggers create-new-file callback from welcome screen", async () => {
-		const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
+		const emptyPanel: PanelState = { views: [], activeInstance: null };
 		const handleCreateNewFile = vi.fn();
 
 		await renderWithProviders(

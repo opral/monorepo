@@ -14,6 +14,7 @@ import { selectFilePaths } from "@/views/agent-view/select-file-paths";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import type { ViewContext, ViewInstanceProps } from "./types";
+import { AGENT_VIEW_KIND } from "./view-instance-helpers";
 
 const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
 const AVAILABLE_MODELS = [
@@ -193,7 +194,7 @@ function WelcomeScreenContent({
 		(props?: ViewInstanceProps) => {
 			context.openView?.({
 				panel: "central",
-				viewKey: "agent",
+				kind: AGENT_VIEW_KIND,
 				props,
 				focus: true,
 			});
@@ -235,9 +236,9 @@ function WelcomeScreenContent({
 			className="flex h-full flex-col items-center justify-center px-6 text-neutral-900"
 			data-testid="welcome-screen"
 		>
-			<main className="flex w-full max-w-3xl flex-col items-center gap-8">
+			<main className="flex w-full max-w-3xl flex-col items-center gap-8 mt-12 sm:mt-0 sm:-mt-32">
 				{/* Logo/Brand */}
-				<div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm mb-16 -mt-32">
+				<div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm mb-16">
 					<Zap className="h-3.5 w-3.5 text-brand-600" />
 					<span className="font-semibold text-neutral-900">flashtype.ai</span>
 				</div>
@@ -254,10 +255,10 @@ function WelcomeScreenContent({
 					</p>
 				</div>
 
-			{/* Prompt Composer */}
-			<div className="mt-4 flex w-full justify-center [&>div>div:last-child]:hidden">
-				<PromptComposer
-					hasKey={hasKey}
+				{/* Prompt Composer */}
+				<div className="mt-4 flex w-full justify-center [&>div>div:last-child]:hidden">
+					<PromptComposer
+						hasKey={hasKey}
 						models={AVAILABLE_MODELS}
 						modelId={selectedModelId}
 						onModelChange={handleModelChange}
@@ -269,26 +270,11 @@ function WelcomeScreenContent({
 						onNotice={setNotice}
 						onSlashCommand={handleSlashCommand}
 						onSendMessage={handleSendMessage}
-					placeholderText={placeholderText || "Ask Flashtype to..."}
-				/>
-			</div>
-
-			{onCreateNewFile ? (
-				<div className="flex justify-center">
-					<button
-						type="button"
-						data-testid="welcome-create-file"
-						onClick={() => {
-							void onCreateNewFile();
-						}}
-						className="mt-4 inline-flex items-center justify-center rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
-					>
-						Create a new file
-					</button>
+						placeholderText={placeholderText || "Ask Flashtype to..."}
+					/>
 				</div>
-			) : null}
 
-			{/* Social Links */}
+				{/* Social Links */}
 				<div className="mt-4 flex items-center gap-4 text-xs text-neutral-400">
 					<a
 						href="https://github.com/opral/flashtype"
@@ -368,7 +354,10 @@ export function WelcomeScreen({
 }
 
 function createInvocationId(): string {
-	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+	if (
+		typeof crypto !== "undefined" &&
+		typeof crypto.randomUUID === "function"
+	) {
 		return crypto.randomUUID();
 	}
 	return `welcome-${Date.now()}-${Math.random().toString(16).slice(2)}`;

@@ -9,6 +9,7 @@ import { Diff } from "@/components/diff";
 import "../markdown-view/style.css";
 import type { DiffViewConfig, RenderableDiff } from "../../app/types";
 import { createReactViewDefinition } from "../../app/react-view";
+import { DIFF_VIEW_KIND } from "../../app/view-instance-helpers";
 
 interface DiffViewProps {
 	readonly config?: DiffViewConfig;
@@ -143,7 +144,7 @@ function DiffLoadingSpinner(): ReactNode {
  * import { view as diffView } from "@/views/diff-view";
  */
 export const view = createReactViewDefinition({
-	key: "diff",
+	kind: DIFF_VIEW_KIND,
 	label: "Diff",
 	description: "Inspect changes for a file.",
 	icon: DiffIcon,

@@ -45,17 +45,18 @@ import type { Lix } from "@lix-js/sdk";
 import { Flag, Search } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
+import { SEARCH_VIEW_KIND } from "./view-instance-helpers";
 
-const emptyPanel: PanelState = { views: [], activeInstanceKey: null };
+const emptyPanel: PanelState = { views: [], activeInstance: null };
 
 const singleSearchPanel: PanelState = {
-	views: [{ instanceKey: "search-1", viewKey: "search" }],
-	activeInstanceKey: "search-1",
+	views: [{ instance: "search-1", kind: SEARCH_VIEW_KIND }],
+	activeInstance: "search-1",
 };
 
 const pendingSearchPanel: PanelState = {
-	views: [{ instanceKey: "search-1", viewKey: "search", isPending: true }],
-	activeInstanceKey: "search-1",
+	views: [{ instance: "search-1", kind: SEARCH_VIEW_KIND, isPending: true }],
+	activeInstance: "search-1",
 };
 
 const mockLix = {} as Lix;
@@ -70,7 +71,7 @@ const createViewContext = (
 });
 
 const searchViewOverride: ViewDefinition = {
-	key: "search",
+	kind: SEARCH_VIEW_KIND,
 	label: "Search",
 	description: "Test search view",
 	icon: Search,
@@ -210,7 +211,7 @@ describe("PanelV2", () => {
 			expect.objectContaining({
 				id: "search-1",
 				data: expect.objectContaining({
-					instanceKey: "search-1",
+					instance: "search-1",
 					panel: "left",
 					fromPanel: "left",
 				}),
@@ -302,12 +303,12 @@ describe("PanelV2", () => {
 		let updateBadge: ((value: number | null) => void) | undefined;
 
 		const badgePanel: PanelState = {
-			views: [{ instanceKey: "badge-1", viewKey: "badge-view" }],
-			activeInstanceKey: "badge-1",
+			views: [{ instance: "badge-1", kind: "badge-view" }],
+			activeInstance: "badge-1",
 		};
 
 		const badgeView: ViewDefinition = {
-			key: "badge-view",
+			kind: "badge-view",
 			label: "Badge",
 			description: "Test badge view",
 			icon: Flag,

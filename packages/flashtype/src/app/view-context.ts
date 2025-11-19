@@ -31,7 +31,7 @@ export function useViewContext({
 			const next = { ...prev };
 			let mutated = false;
 			for (const key of Object.keys(prev)) {
-				if (!panel.views.some((view) => view.instanceKey === key)) {
+				if (!panel.views.some((view) => view.instance === key)) {
 					delete next[key];
 					mutated = true;
 				}
@@ -40,15 +40,15 @@ export function useViewContext({
 		});
 
 		for (const key of Object.keys(setterRef.current)) {
-			if (!panel.views.some((view) => view.instanceKey === key)) {
+			if (!panel.views.some((view) => view.instance === key)) {
 				delete setterRef.current[key];
 				delete contextRef.current[key];
 			}
 		}
 	}, [panel.views]);
 
-	const getBadgeSetter = useCallback((instanceKey: string) => {
-		const cached = setterRef.current[instanceKey];
+	const getBadgeSetter = useCallback((instanceId: string) => {
+		const cached = setterRef.current[instanceId];
 		if (cached) return cached;
 		const setter = (count: number | null | undefined) => {
 			setBadgeCounts((prev) => {
@@ -58,16 +58,16 @@ export function useViewContext({
 					!Number.isFinite(count) ||
 					Number(count) <= 0
 				) {
-					if (!(instanceKey in prev)) return prev;
-					const { [instanceKey]: _, ...rest } = prev;
+					if (!(instanceId in prev)) return prev;
+					const { [instanceId]: _, ...rest } = prev;
 					return rest;
 				}
 				const normalized = Number(count);
-				if (prev[instanceKey] === normalized) return prev;
-				return { ...prev, [instanceKey]: normalized };
+				if (prev[instanceId] === normalized) return prev;
+				return { ...prev, [instanceId]: normalized };
 			});
 		};
-		setterRef.current[instanceKey] = setter;
+		setterRef.current[instanceId] = setter;
 		return setter;
 	}, []);
 
@@ -77,8 +77,8 @@ export function useViewContext({
 
 	const makeContext = useCallback(
 		(instance: ViewInstance): ViewContext => {
-			const setCount = getBadgeSetter(instance.instanceKey);
-			const cached = contextRef.current[instance.instanceKey];
+			const setCount = getBadgeSetter(instance.instance);
+			const cached = contextRef.current[instance.instance];
 			const focusValue = baseContext.isPanelFocused ?? isFocused;
 			if (
 				cached &&
@@ -89,7 +89,7 @@ export function useViewContext({
 			}
 
 			const next: ViewContext = { ...baseContext, setTabBadgeCount: setCount };
-			contextRef.current[instance.instanceKey] = next;
+			contextRef.current[instance.instance] = next;
 			return next;
 		},
 		[baseContext, getBadgeSetter, isFocused],

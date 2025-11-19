@@ -8,6 +8,14 @@ import { ChangedFilesList } from "./changed-files-list";
 import { CheckpointForm } from "./checkpoint-form";
 import { LatestCheckpoint } from "./latest-checkpoint";
 import { createReactViewDefinition } from "../../app/react-view";
+import {
+	CHECKPOINT_VIEW_KIND,
+	DIFF_VIEW_KIND,
+	HISTORY_VIEW_KIND,
+	buildDiffViewProps,
+	diffViewInstance,
+	historyViewInstance,
+} from "../../app/view-instance-helpers";
 
 /**
  * Checkpoint view - Shows working changes and allows creating checkpoints
@@ -80,13 +88,31 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 		}
 	};
 
-	const handleOpenDiff = context?.openDiffView
-		? (fileId: string, filePath: string) =>
-				context.openDiffView?.(fileId, decodeURIComponent(filePath))
-		: undefined;
+	const handleOpenDiff = useCallback(
+		(fileId: string, filePath: string) => {
+			if (!context?.openView) return;
+			const decodedPath = decodeURIComponent(filePath);
+			context.openView({
+				panel: "central",
+				kind: DIFF_VIEW_KIND,
+				instance: diffViewInstance(fileId),
+				props: buildDiffViewProps({
+					fileId,
+					filePath: decodedPath,
+				}),
+				focus: false,
+			});
+		},
+		[context],
+	);
 
 	const handleViewHistory = useCallback(() => {
-		context?.openHistoryView?.();
+		context?.openView?.({
+			panel: "central",
+			kind: HISTORY_VIEW_KIND,
+			instance: historyViewInstance(),
+			focus: true,
+		});
 	}, [context]);
 
 	return (
@@ -125,7 +151,7 @@ export function CheckpointView({ context }: CheckpointViewProps) {
  * import { view as checkpointView } from "@/views/checkpoint-view";
  */
 export const view = createReactViewDefinition({
-	key: "checkpoint",
+	kind: CHECKPOINT_VIEW_KIND,
 	label: "Checkpoint",
 	description: "View working changes and create checkpoints.",
 	icon: Flag,

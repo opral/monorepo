@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, test, vi, beforeEach } from "vitest";
 import { HistoryView } from "./index";
+import {
+	COMMIT_VIEW_KIND,
+	commitViewInstance,
+} from "../../app/view-instance-helpers";
 
 const mockId = "cp-1";
 vi.mock("@lix-js/react-utils", () => ({
@@ -25,7 +29,7 @@ describe("HistoryView", () => {
 		render(
 			<HistoryView
 				context={{
-					openCommitView: handleOpenCommit,
+					openView: handleOpenCommit,
 					isPanelFocused: true,
 					setTabBadgeCount: () => {},
 					lix: {} as any,
@@ -38,7 +42,14 @@ describe("HistoryView", () => {
 		);
 		fireEvent.click(commitButton);
 
-		expect(handleOpenCommit).toHaveBeenCalledWith(mockId, expect.any(String), {
+		expect(handleOpenCommit).toHaveBeenCalledWith({
+			panel: "central",
+			kind: COMMIT_VIEW_KIND,
+			instance: commitViewInstance(mockId),
+			props: {
+				checkpointId: mockId,
+				label: expect.any(String),
+			},
 			focus: false,
 		});
 	});
@@ -49,7 +60,7 @@ describe("HistoryView", () => {
 		render(
 			<HistoryView
 				context={{
-					openCommitView: handleOpenCommit,
+					openView: handleOpenCommit,
 					isPanelFocused: false,
 					setTabBadgeCount: () => {},
 					lix: {} as any,
@@ -62,10 +73,15 @@ describe("HistoryView", () => {
 		);
 		fireEvent.click(commitButton);
 
-		expect(handleOpenCommit).toHaveBeenCalledWith(
-			mockId,
-			expect.any(String),
-			undefined,
-		);
+		expect(handleOpenCommit).toHaveBeenCalledWith({
+			panel: "central",
+			kind: COMMIT_VIEW_KIND,
+			instance: commitViewInstance(mockId),
+			props: {
+				checkpointId: mockId,
+				label: expect.any(String),
+			},
+			focus: undefined,
+		});
 	});
 });

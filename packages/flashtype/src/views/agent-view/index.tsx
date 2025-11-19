@@ -43,6 +43,15 @@ import { PromptComposer } from "./components/prompt-composer";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { WelcomeScreen } from "./components/welcome-screen";
+import {
+	AGENT_VIEW_KIND,
+	DIFF_VIEW_KIND,
+	FILE_VIEW_KIND,
+	buildDiffViewProps,
+	buildFileViewProps,
+	diffViewInstance,
+	fileViewInstance,
+} from "../../app/view-instance-helpers";
 
 type AgentViewLaunchProps = {
 	readonly initialMessage?: string;
@@ -164,7 +173,16 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		details?: ChangeProposalSummary | null;
 		accept: () => Promise<void>;
 		reject: (reason?: string) => Promise<void>;
+		diffInstance?: string;
 	} | null>(null);
+	const clearPendingProposal = useCallback(() => {
+		setPendingProposal((prev) => {
+			if (context && prev?.diffInstance) {
+				context.closeView?.({ instance: prev.diffInstance });
+			}
+			return null;
+		});
+	}, [context]);
 	const [notice, setNotice] = useState<string | null>(null);
 	const isFirstProposalRef = useRef(true);
 	const handleAutoAcceptToggle = useCallback(
@@ -177,13 +195,8 @@ export function AgentView({ context, instance }: AgentViewProps) {
 
 	useEffect(() => {
 		if (!autoAcceptEnabled) return;
-		setPendingProposal((prev) => {
-			if (prev?.details?.fileId) {
-				context?.closeDiffView?.(prev.details.fileId);
-			}
-			return null;
-		});
-	}, [autoAcceptEnabled, context]);
+		clearPendingProposal();
+	}, [autoAcceptEnabled, clearPendingProposal]);
 
 	const provider = useMemo(() => {
 		if (!storedApiKey) return null;
@@ -242,15 +255,6 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		};
 	}, [hasKey, lix, model, storedApiKey]);
 
-	const clearPendingProposal = useCallback(() => {
-		setPendingProposal((prev) => {
-			if (context && prev?.details?.fileId) {
-				context.closeDiffView?.(prev.details.fileId);
-			}
-			return null;
-		});
-	}, [context]);
-
 	const acceptPendingProposal = useCallback(async () => {
 		if (!pendingProposal) return;
 		try {
@@ -278,9 +282,9 @@ export function AgentView({ context, instance }: AgentViewProps) {
 	const clear = useCallback(async () => {
 		if (!agent) throw new Error("Agent not ready");
 		await runClearConversation({ agent, conversationId });
-		setPendingProposal(null);
+		clearPendingProposal();
 		setPendingMessage(null);
-	}, [agent, conversationId]);
+	}, [agent, clearPendingProposal, conversationId]);
 
 	const handleModelChange = useCallback(
 		(next: string) => {
@@ -354,14 +358,16 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			await acceptPendingProposal();
 
 			// After accepting, open the file in center view
-			if (
-				context &&
-				details?.fileId &&
-				details.filePath
-			) {
-				await context.openFileView?.(details.fileId, {
+			if (context && details?.fileId) {
+				context.openView?.({
+					panel: "central",
+					kind: FILE_VIEW_KIND,
+					instance: fileViewInstance(details.fileId),
+					props: buildFileViewProps({
+						fileId: details.fileId,
+						filePath: details.filePath,
+					}),
 					focus: true,
-					filePath: details.filePath,
 				});
 			}
 		},
@@ -399,7 +405,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			const trimmed = text.trim();
 			if (!trimmed) return;
 			setError(null);
-			setPendingProposal(null);
+			clearPendingProposal();
 			setPending(true);
 			try {
 				console.log("[agent] send", {
@@ -456,6 +462,9 @@ export function AgentView({ context, instance }: AgentViewProps) {
 							const details = agent
 								? getChangeProposalSummary(agent, event.proposal.id)
 								: null;
+							const diffInstance = details?.fileId
+								? diffViewInstance(details.fileId)
+								: undefined;
 							activeProposal = {
 								id: event.proposal.id,
 								summary: event.proposal.summary,
@@ -465,25 +474,31 @@ export function AgentView({ context, instance }: AgentViewProps) {
 								proposalId: event.proposal.id,
 								summary: event.proposal.summary,
 								details,
+								diffInstance,
 								accept: event.accept,
 								reject: event.reject,
 							});
 
-					// On first proposal, move agent to right panel and set it up
-					if (isFirstProposalRef.current && context) {
-						isFirstProposalRef.current = false;
+							// On first proposal, move agent to right panel and set it up
+							if (isFirstProposalRef.current && context) {
+								isFirstProposalRef.current = false;
 
-						// Move agent view to right panel
-						context.moveViewToPanel?.("right", instance?.instanceKey);
+								// Move agent view to right panel
+								context.moveViewToPanel?.("right", instance?.instance);
 
-						// Resize right panel to at least 30
-						context.resizePanel?.("right", 30);
+								// Resize right panel to at least 30
+								context.resizePanel?.("right", 30);
 
 								// Focus right panel
 								context.focusPanel?.("right");
 							}
 
-							if (context && details?.fileId && details.filePath) {
+							if (
+								context &&
+								details?.fileId &&
+								details.filePath &&
+								diffInstance
+							) {
 								console.log("Proposal event", event);
 								const diffConfig = createProposalDiffConfig({
 									fileId: details.fileId,
@@ -491,9 +506,16 @@ export function AgentView({ context, instance }: AgentViewProps) {
 									sourceVersionId: details.source_version_id,
 									targetVersionId: details.target_version_id,
 								});
-								context.openDiffView?.(details.fileId, details.filePath, {
+								context.openView?.({
+									panel: "central",
+									kind: DIFF_VIEW_KIND,
+									instance: diffInstance,
+									props: buildDiffViewProps({
+										fileId: details.fileId,
+										filePath: details.filePath,
+										diffConfig,
+									}),
 									focus: true,
-									diffConfig,
 								});
 							}
 							break;
@@ -580,11 +602,15 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		if (!proposal) return;
 
 		const details = getChangeProposalSummary(agent, proposal.id);
+		const diffInstance = details?.fileId
+			? diffViewInstance(details.fileId)
+			: undefined;
 
 		setPendingProposal({
 			proposalId: proposal.id,
 			summary: "Proposed changes",
 			details,
+			diffInstance,
 			accept: async () => {
 				await acceptChangeProposal({
 					lix,
@@ -600,26 +626,26 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		});
 
 		// Also open the diff view if not open and we have details
-		if (context && details?.fileId && details.filePath) {
+		if (context && details?.fileId && details.filePath && diffInstance) {
 			const diffConfig = createProposalDiffConfig({
 				fileId: details.fileId,
 				filePath: details.filePath,
 				sourceVersionId: details.source_version_id,
 				targetVersionId: details.target_version_id,
 			});
-			context.openDiffView?.(details.fileId, details.filePath, {
-				focus: false, // Don't steal focus from agent view
-				diffConfig,
+			context.openView?.({
+				panel: "central",
+				kind: DIFF_VIEW_KIND,
+				instance: diffInstance,
+				props: buildDiffViewProps({
+					fileId: details.fileId,
+					filePath: details.filePath,
+					diffConfig,
+				}),
+				focus: false,
 			});
 		}
-	}, [
-		openProposals,
-		pendingProposal,
-		pending,
-		agent,
-		lix,
-		context,
-	]);
+	}, [openProposals, pendingProposal, pending, agent, lix, context]);
 
 	const handleSlashCommand = useCallback(
 		async (raw: string) => {
@@ -753,7 +779,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
  * import { view as agentView } from "@/views/agent-view";
  */
 export const view = createReactViewDefinition({
-	key: "agent",
+	kind: AGENT_VIEW_KIND,
 	label: "AI Agent",
 	description: "Chat with the project assistant.",
 	icon: Bot,

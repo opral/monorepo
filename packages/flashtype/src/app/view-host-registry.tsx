@@ -9,7 +9,7 @@ import {
 import type { ViewContext, ViewDefinition, ViewInstance } from "./types";
 
 export type ViewHostRecord = {
-	readonly instanceKey: string;
+	readonly instanceId: string;
 	readonly container: HTMLDivElement;
 	view: ViewDefinition;
 	instance: ViewInstance;
@@ -25,7 +25,7 @@ type EnsureArgs = {
 
 type ViewHostRegistry = {
 	ensureHost: (args: EnsureArgs) => ViewHostRecord;
-	pruneHosts: (activeKeys: Set<string>) => void;
+	pruneHosts: (activeInstances: Set<string>) => void;
 };
 
 const ViewHostRegistryContext = createContext<ViewHostRegistry | null>(null);
@@ -37,51 +37,51 @@ export function ViewHostRegistryProvider({
 }) {
 	const hostsRef = useRef<Map<string, ViewHostRecord>>(new Map());
 
-		const ensureHost = useCallback(
-			({ instance, view, context }: EnsureArgs): ViewHostRecord => {
-				let record = hostsRef.current.get(instance.instanceKey);
-				if (!record) {
-					const container = document.createElement("div");
-					container.className =
-						"flex min-h-0 flex-1 flex-col overflow-hidden w-full h-full";
-					const maybeCleanup = view.render({
-						context,
-						instance,
-						target: container,
-					});
-					const cleanup =
-						typeof maybeCleanup === "function" ? maybeCleanup : undefined;
-					record = {
-						instanceKey: instance.instanceKey,
-						container,
-						view,
-						instance,
-						cleanup,
-						lastContext: context,
-					};
-					hostsRef.current.set(instance.instanceKey, record);
-					return record;
-				}
-
-				record.cleanup?.();
+	const ensureHost = useCallback(
+		({ instance, view, context }: EnsureArgs): ViewHostRecord => {
+			let record = hostsRef.current.get(instance.instance);
+			if (!record) {
+				const container = document.createElement("div");
+				container.className =
+					"flex min-h-0 flex-1 flex-col overflow-hidden w-full h-full";
 				const maybeCleanup = view.render({
 					context,
 					instance,
-					target: record.container,
+					target: container,
 				});
-				record.cleanup =
+				const cleanup =
 					typeof maybeCleanup === "function" ? maybeCleanup : undefined;
-				record.instance = instance;
-				record.view = view;
-				record.lastContext = context;
+				record = {
+					instanceId: instance.instance,
+					container,
+					view,
+					instance,
+					cleanup,
+					lastContext: context,
+				};
+				hostsRef.current.set(instance.instance, record);
 				return record;
-			},
-			[],
-		);
+			}
 
-	const pruneHosts = useCallback((activeKeys: Set<string>) => {
+			record.cleanup?.();
+			const maybeCleanup = view.render({
+				context,
+				instance,
+				target: record.container,
+			});
+			record.cleanup =
+				typeof maybeCleanup === "function" ? maybeCleanup : undefined;
+			record.instance = instance;
+			record.view = view;
+			record.lastContext = context;
+			return record;
+		},
+		[],
+	);
+
+	const pruneHosts = useCallback((activeInstances: Set<string>) => {
 		for (const [key, record] of hostsRef.current) {
-			if (activeKeys.has(key)) continue;
+			if (activeInstances.has(key)) continue;
 			record.cleanup?.();
 			record.container.remove();
 			hostsRef.current.delete(key);

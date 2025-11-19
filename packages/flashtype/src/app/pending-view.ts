@@ -19,8 +19,8 @@ export interface UpsertPendingViewOptions {
  *
  * @example
  * const next = upsertPendingView(panel, {
- *   instanceKey: "file-content-1",
- *   viewKey: "file-content",
+ *   instance: "flashtype_file-1",
+ *   kind: "flashtype_file",
  *   isPending: true,
  * });
  */
@@ -37,24 +37,24 @@ export function upsertPendingView(
 	const viewsWithoutPending = panel.views.filter((entry) => !entry.isPending);
 	const nextViews = [
 		...viewsWithoutPending.filter(
-			(entry) => entry.instanceKey !== pendingView.instanceKey,
+			(entry) => entry.instance !== pendingView.instance,
 		),
 		pendingView,
 	];
 
 	const desiredActiveKey = activate
-		? pendingView.instanceKey
-		: panel.activeInstanceKey;
-	const fallbackActive = nextViews[nextViews.length - 1]?.instanceKey ?? null;
-	const activeInstanceKey =
+		? pendingView.instance
+		: panel.activeInstance;
+	const fallbackActive = nextViews[nextViews.length - 1]?.instance ?? null;
+	const activeInstance =
 		desiredActiveKey &&
-		nextViews.some((entry) => entry.instanceKey === desiredActiveKey)
+		nextViews.some((entry) => entry.instance === desiredActiveKey)
 			? desiredActiveKey
 			: fallbackActive;
 
 	return {
 		views: nextViews,
-		activeInstanceKey,
+		activeInstance,
 	};
 }
 
@@ -75,18 +75,18 @@ export interface ActivatePanelViewOptions {
  * flag clears and the tab becomes permanent.
  *
  * @example
- * const next = activatePanelView(panel, "file-content-1");
+ * const next = activatePanelView(panel, "flashtype_file-1");
  */
 export function activatePanelView(
 	panel: PanelState,
-	instanceKey: string,
+	instance: string,
 	options: ActivatePanelViewOptions = {},
 ): PanelState {
 	const finalizePending = options.finalizePending ?? true;
 	let found = false;
 
 	const views = panel.views.map((view) => {
-		if (view.instanceKey !== instanceKey) return view;
+		if (view.instance !== instance) return view;
 		found = true;
 		if (!finalizePending || !view.isPending) {
 			return { ...view };
@@ -98,6 +98,6 @@ export function activatePanelView(
 
 	return {
 		views,
-		activeInstanceKey: instanceKey,
+		activeInstance: instance,
 	};
 }
