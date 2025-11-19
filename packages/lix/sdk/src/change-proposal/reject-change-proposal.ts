@@ -5,33 +5,18 @@ export async function rejectChangeProposal(args: {
 	lix: Lix;
 	proposal: Pick<LixChangeProposal, "id"> | LixChangeProposal;
 }): Promise<void> {
-	const { lix, proposal: proposalRef } = args;
-	const id = proposalRef.id as string;
-
-	await lix.db.transaction().execute(async (trx) => {
-		const proposal = await trx
-			.selectFrom("change_proposal")
-			.where("id", "=", id)
-			.select(["id", "source_version_id", "status"])
-			.executeTakeFirstOrThrow();
-
-		// Update status then remove proposal to release FK before deleting version
+	const executeInTransaction = async (trx: Lix["db"]) => {
 		await trx
-			.updateTable("change_proposal_by_version")
+			.updateTable("change_proposal")
 			.set({ status: "rejected" })
-			.where("id", "=", id)
-			.where("lixcol_version_id", "=", "global")
+			.where("id", "=", args.proposal.id)
 			.execute();
+	};
 
-		await trx
-			.deleteFrom("change_proposal_by_version")
-			.where("id", "=", id)
-			.where("lixcol_version_id", "=", "global")
-			.execute();
+	if (args.lix.db.isTransaction) {
+		await executeInTransaction(args.lix.db);
+		return;
+	}
 
-		await trx
-			.deleteFrom("version")
-			.where("id", "=", proposal.source_version_id)
-			.execute();
-	});
+	return await args.lix.db.transaction().execute(executeInTransaction);
 }
