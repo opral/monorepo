@@ -211,13 +211,14 @@ export function PromptComposer({
 			return;
 		}
 
-		if (!hasKey) {
-			onNotice("Add an OpenRouter API key to enable the AI Agent.");
-			return;
-		}
+		// Note: hasKey check is now handled by the parent component
+		// This allows users to type their prompt first, then prompt for key
 
 		onNotice(null);
 		pushHistory(trimmedEnd);
+		
+		// Reset composer before sending - if no key, parent will handle showing prompt
+		// and the message will be stored separately
 		resetComposer();
 
 		try {
@@ -244,7 +245,6 @@ export function PromptComposer({
 		filteredCommands,
 		commands,
 		onSlashCommand,
-		hasKey,
 		onNotice,
 		pushHistory,
 		onSendMessage,
@@ -433,10 +433,8 @@ export function PromptComposer({
 	const placeholder =
 		customPlaceholderText !== undefined
 			? customPlaceholderText
-			: hasKey
-				? "Ask Flashtype…"
-				: "Add an OpenRouter API key to enable the AI Agent…";
-	const sendDisabled = pending || !hasKey;
+			: "Ask Flashtype…";
+	const sendDisabled = pending;
 
 	return (
 		<div className="relative w-full max-w-2xl">
@@ -472,6 +470,7 @@ export function PromptComposer({
 						updateMentions(textAreaRef.current);
 					}}
 					className="h-28 w-full resize-none border-0 bg-transparent px-3 pr-14 pb-12 pt-3 text-sm leading-6 text-foreground outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:text-muted-foreground"
+					disabled={pending}
 				/>
 				{menuFragment ? (
 					<div className="absolute left-0 right-0 bottom-full z-[2] mb-2">

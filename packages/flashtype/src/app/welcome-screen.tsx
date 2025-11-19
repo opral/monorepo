@@ -1,18 +1,20 @@
 import {
 	useCallback,
 	useEffect,
+	useId,
 	useMemo,
 	useRef,
 	useState,
 	type JSX,
 } from "react";
-import { Zap } from "lucide-react";
+import { Zap, ExternalLink } from "lucide-react";
 import { LixProvider, useQuery } from "@lix-js/react-utils";
 import { PromptComposer } from "@/views/agent-view/components/prompt-composer";
 import { COMMANDS } from "@/views/agent-view/commands";
 import { selectFilePaths } from "@/views/agent-view/select-file-paths";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
+import { Input } from "@/components/ui/input";
 import type { ViewContext, ViewInstanceProps } from "./types";
 import { AGENT_VIEW_KIND } from "./view-instance-helpers";
 
@@ -69,6 +71,10 @@ function WelcomeScreenContent({
 	);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [placeholderText, setPlaceholderText] = useState("");
+	const [showKeyPrompt, setShowKeyPrompt] = useState(false);
+	const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+	const [apiKeyDraft, setApiKeyDraft] = useState("");
+	const keyInputId = useId();
 
 	const selectedModelId = useMemo(() => {
 		if (!storedModel) return DEFAULT_MODEL_ID;
@@ -101,15 +107,6 @@ function WelcomeScreenContent({
 	});
 
 	useEffect(() => {
-		if (!hasKey) {
-			if (animationRef.current.timeoutId) {
-				clearTimeout(animationRef.current.timeoutId);
-				animationRef.current.timeoutId = null;
-			}
-			setPlaceholderText("");
-			return;
-		}
-
 		const type = () => {
 			const { currentIndex, charIndex, isDeleting } = animationRef.current;
 			const currentSuggestion = suggestions[currentIndex];
@@ -150,7 +147,7 @@ function WelcomeScreenContent({
 				animationRef.current.timeoutId = null;
 			}
 		};
-	}, [hasKey, suggestions]);
+	}, [suggestions]);
 
 	useEffect(() => {
 		if (devApiKey) {
@@ -211,14 +208,52 @@ function WelcomeScreenContent({
 
 	const handleSendMessage = useCallback(
 		async (message: string) => {
+			if (!hasKey) {
+				// Store the message and show key prompt
+				setPendingMessage(message);
+				setShowKeyPrompt(true);
+				return;
+			}
 			openAgentView({
 				source: "welcome",
 				initialMessage: message,
 				invocationId: createInvocationId(),
 			});
 		},
-		[openAgentView],
+		[openAgentView, hasKey],
 	);
+
+	const handleApiKeyChange = useCallback((value: string) => {
+		setApiKeyDraft(value);
+	}, []);
+
+	const handleSaveApiKey = useCallback(() => {
+		if (devApiKey) {
+			return;
+		}
+		const trimmed = apiKeyDraft.trim();
+		if (typeof window !== "undefined") {
+			if (trimmed) {
+				window.localStorage.setItem(OPENROUTER_KEY_STORAGE_KEY, trimmed);
+			} else {
+				window.localStorage.removeItem(OPENROUTER_KEY_STORAGE_KEY);
+			}
+		}
+		setStoredApiKey(trimmed || null);
+		setApiKeyDraft("");
+		setShowKeyPrompt(false);
+
+		// Send the pending message after key is saved
+		if (pendingMessage) {
+			const messageToSend = pendingMessage;
+			setPendingMessage(null);
+			openAgentView({
+				source: "welcome",
+				initialMessage: messageToSend,
+				invocationId: createInvocationId(),
+			});
+		}
+	}, [apiKeyDraft, devApiKey, pendingMessage, openAgentView]);
 
 	if (!keyLoaded) {
 		return (
@@ -273,6 +308,78 @@ function WelcomeScreenContent({
 						placeholderText={placeholderText || "Ask Flashtype to..."}
 					/>
 				</div>
+
+				{/* Key Prompt Modal */}
+				{showKeyPrompt && (
+					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+						<div className="w-full max-w-md rounded-md border border-border/80 bg-background shadow-xl">
+							<div className="flex flex-col gap-4 p-4">
+								<div className="space-y-2">
+									<h2 className="text-sm font-semibold leading-6 text-foreground">
+										Provide OpenRouter API key
+									</h2>
+									<p className="text-xs text-muted-foreground">
+										Warning: The API key is stored in the browser. Any JS code
+										running in this context can access it. Make sure to cap the
+										usage of the OpenRouter API key.
+									</p>
+									<a
+										className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 transition hover:text-neutral-900"
+										href="https://openrouter.ai/settings/keys"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										How to get a key
+										<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+									</a>
+								</div>
+								<label htmlFor={keyInputId} className="sr-only">
+									OpenRouter API key
+								</label>
+								<Input
+									id={keyInputId}
+									value={apiKeyDraft}
+									size={0}
+									onChange={(event) => handleApiKeyChange(event.target.value)}
+									onKeyDown={(event) => {
+										if (
+											event.key === "Enter" &&
+											apiKeyDraft.trim().length > 0
+										) {
+											event.preventDefault();
+											handleSaveApiKey();
+										}
+									}}
+									placeholder="sk-or-v1-…"
+									autoComplete="off"
+									className="text-sm"
+									autoFocus
+								/>
+								<div className="flex justify-end gap-2 pt-1">
+									<button
+										type="button"
+										onClick={() => {
+											setShowKeyPrompt(false);
+											setPendingMessage(null);
+											setApiKeyDraft("");
+										}}
+										className="inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2 text-xs font-medium text-neutral-900 transition hover:border-neutral-300 hover:bg-neutral-50"
+									>
+										Cancel
+									</button>
+									<button
+										type="button"
+										onClick={handleSaveApiKey}
+										disabled={apiKeyDraft.trim().length === 0}
+										className="inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2 text-xs font-medium text-neutral-900 transition hover:border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+									>
+										Continue
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 
 				{/* Social Links */}
 				<div className="flex items-center gap-4 text-xs text-neutral-400">
