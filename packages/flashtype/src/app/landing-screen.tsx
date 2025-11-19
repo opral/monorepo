@@ -8,7 +8,7 @@ import {
 	type JSX,
 } from "react";
 import { Zap, ExternalLink } from "lucide-react";
-import { LixProvider, useQuery } from "@lix-js/react-utils";
+import { useQuery } from "@lix-js/react-utils";
 import { PromptComposer } from "@/views/agent-view/components/prompt-composer";
 import { COMMANDS } from "@/views/agent-view/commands";
 import { selectFilePaths } from "@/views/agent-view/select-file-paths";
