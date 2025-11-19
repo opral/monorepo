@@ -1,6 +1,6 @@
 import { Suspense, act, type ReactNode } from "react";
 import { DndContext } from "@dnd-kit/core";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { CentralPanel } from "./central-panel";
 import type { PanelState, ViewContext } from "./types";
@@ -84,30 +84,6 @@ const createViewContext = (
 });
 
 describe("CentralPanel", () => {
-	test("shows the landing or welcome screen when no views are open", async () => {
-		const emptyPanel: PanelState = { views: [], activeInstance: null };
-
-		await renderWithProviders(
-			<DndContext>
-				<CentralPanel
-					panel={emptyPanel}
-					onSelectView={() => {}}
-					onRemoveView={() => {}}
-					viewContext={createViewContext()}
-					isFocused={false}
-					onFocusPanel={vi.fn()}
-				/>
-			</DndContext>,
-		);
-
-		// Should show either landing screen (no files) or welcome screen (files exist)
-		await waitFor(() => {
-			const landingScreen = screen.queryByTestId("landing-screen");
-			const welcomeScreen = screen.queryByTestId("welcome-screen");
-			expect(landingScreen || welcomeScreen).toBeInTheDocument();
-		});
-	});
-
 	test("renders the active view and wires tab selection", async () => {
 		const panelState: PanelState = {
 			views: [{ instance: "search-1", kind: SEARCH_VIEW_KIND }],

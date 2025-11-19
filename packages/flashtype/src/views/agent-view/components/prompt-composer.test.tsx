@@ -1,3 +1,4 @@
+import React, { type ComponentProps } from "react";
 import {
 	act,
 	fireEvent,
@@ -6,16 +7,16 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
-import type { ComponentProps } from "react";
+import { ChangeDecisionOverlay } from "./change-decision";
 import { PromptComposer } from "./prompt-composer";
 import { COMMANDS } from "../commands/index";
 
 const TEST_FILES = ["docs/readme.md", "src/app.ts", "README.md"];
 
-function renderComposer(
+function createComposerProps(
 	overrides: Partial<ComponentProps<typeof PromptComposer>> = {},
-) {
-	const props: ComponentProps<typeof PromptComposer> = {
+): ComponentProps<typeof PromptComposer> {
+	return {
 		hasKey: true,
 		commands: COMMANDS,
 		files: TEST_FILES,
@@ -30,6 +31,12 @@ function renderComposer(
 		onSendMessage: vi.fn().mockResolvedValue(undefined),
 		...overrides,
 	};
+}
+
+function renderComposer(
+	overrides: Partial<ComponentProps<typeof PromptComposer>> = {},
+) {
+	const props = createComposerProps(overrides);
 	render(<PromptComposer {...props} />);
 	const textarea = screen.getByTestId(
 		"agent-composer-input",
@@ -140,6 +147,33 @@ describe("PromptComposer", () => {
 		fireEvent.click(toggleButton);
 		await waitFor(() => {
 			expect(onAutoAcceptToggle).toHaveBeenCalledWith(true);
+		});
+	});
+
+	test("focuses composer after resolving a proposal decision", async () => {
+		const props = createComposerProps();
+		function ProposalHarness() {
+			const [deciding, setDeciding] = React.useState(true);
+			if (deciding) {
+				return (
+					<ChangeDecisionOverlay
+						id="proposal-1"
+						onAccept={() => setDeciding(false)}
+						onAcceptAlways={() => setDeciding(false)}
+						onReject={() => setDeciding(false)}
+					/>
+				);
+			}
+			return <PromptComposer {...props} />;
+		}
+
+		render(<ProposalHarness />);
+
+		fireEvent.click(screen.getByText("1. Yes"));
+
+		const textarea = await screen.findByTestId("agent-composer-input");
+		await waitFor(() => {
+			expect(textarea).toHaveFocus();
 		});
 	});
 });

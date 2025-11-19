@@ -1196,8 +1196,6 @@ function LayoutShellContent() {
 								}
 								viewContext={centralViewContext}
 								onCreateNewFile={handleCreateNewFile}
-								leftPanel={leftPanel}
-								rightPanel={rightPanel}
 							/>
 						</Panel>
 						<PanelResizeHandle className="relative w-1 flex items-center justify-center group">
