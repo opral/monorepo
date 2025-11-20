@@ -95,10 +95,10 @@ describe("FilesView", () => {
 				panel: "central",
 				kind: FILE_VIEW_KIND,
 				instance: fileViewInstance(createdId),
-				props: {
+				state: {
 					fileId: createdId,
 					filePath: "/notes.md",
-					label: "notes.md",
+					flashtype: { label: "notes.md" },
 					focusOnLoad: true,
 				},
 				focus: true,

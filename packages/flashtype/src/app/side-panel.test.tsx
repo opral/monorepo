@@ -88,10 +88,10 @@ vi.mock("./view-registry", async () => {
 						panel: "central",
 						kind: "flashtype_file",
 						instance: "flashtype_file:file-writing",
-						props: {
+						state: {
 							fileId: "file-writing",
 							filePath: "/docs/guides/writing-style.md",
-							label: "writing-style.md",
+							flashtype: { label: "writing-style.md" },
 						},
 						focus: false,
 					});
@@ -197,10 +197,10 @@ describe("SidePanel", () => {
 			panel: "central",
 			kind: FILE_VIEW_KIND,
 			instance: fileViewInstance("file-writing"),
-			props: {
+			state: {
 				fileId: "file-writing",
 				filePath: "/docs/guides/writing-style.md",
-				label: "writing-style.md",
+				flashtype: { label: "writing-style.md" },
 			},
 			focus: false,
 		});

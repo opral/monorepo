@@ -156,7 +156,7 @@ export function FilesView({ context }: FilesViewProps) {
 					panel: "central",
 					kind: FILE_VIEW_KIND,
 					instance: fileViewInstance(id),
-					props: {
+					state: {
 						...buildFileViewProps({ fileId: id, filePath: path }),
 						focusOnLoad: true,
 					},
@@ -211,7 +211,7 @@ export function FilesView({ context }: FilesViewProps) {
 				panel: "central",
 				kind: FILE_VIEW_KIND,
 				instance: fileViewInstance(fileId),
-				props: buildFileViewProps({ fileId, filePath: path }),
+				state: buildFileViewProps({ fileId, filePath: path }),
 				focus: false,
 			});
 		},
@@ -437,7 +437,7 @@ export function FilesView({ context }: FilesViewProps) {
 								panel: "central",
 								kind: FILE_VIEW_KIND,
 								instance: fileViewInstance(newFile.id as string),
-								props: buildFileViewProps({
+								state: buildFileViewProps({
 									fileId: newFile.id as string,
 									filePath,
 								}),

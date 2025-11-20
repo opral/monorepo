@@ -11,6 +11,30 @@ import type { SelectQueryBuilder } from "@lix-js/sdk/dependency/kysely";
 export type ViewKind = string;
 
 /**
+ * Persisted view state. Only include values that should survive reloads.
+ *
+ * @example
+ * const state: ViewState = { fileId: "file-123", filePath: "/docs/guide.md" };
+ */
+export type ViewState = {
+	/**
+	 * Flashtype-managed metadata (reserved namespace).
+	 */
+	readonly flashtype?: {
+		readonly label?: string;
+	};
+	readonly [key: string]: unknown;
+};
+
+/**
+ * One-shot launch-time arguments that must not be persisted.
+ *
+ * @example
+ * const launchArgs: ViewLaunchArgs = { initialMessage: "Summarize changes" };
+ */
+export type ViewLaunchArgs = Record<string, unknown>;
+
+/**
  * Declares how a diff view should source its data.
  *
  * @example
@@ -34,25 +58,23 @@ export type DiffViewConfig = {
 };
 
 /**
- * Per-panel instance props used to track which views are open.
+ * Per-panel instance payload used to track which views are open.
  *
  * @example
  * const instance: ViewInstance = { instance: "files-1", kind: "flashtype_files" };
  */
-export interface ViewInstanceProps {
-	readonly filePath?: string;
-	readonly label?: string;
-	readonly checkpointId?: string;
-	readonly fileId?: string;
-	readonly diff?: DiffViewConfig;
-	readonly [key: string]: unknown;
-}
-
 export interface ViewInstance {
 	readonly instance: string;
 	readonly kind: ViewKind;
 	readonly isPending?: boolean;
-	readonly props?: ViewInstanceProps;
+	/**
+	 * Persisted view state (serializable).
+	 */
+	readonly state?: ViewState;
+	/**
+	 * Transient launch args (never persisted).
+	 */
+	readonly launchArgs?: ViewLaunchArgs;
 }
 
 /**
@@ -88,7 +110,7 @@ export interface ViewDefinition {
  *   panel: "central",
  *   kind: "file-content",
  *   instance: "file-content:file-123",
- *   props: { fileId: "file-123", filePath: "/docs/guide.md" },
+ *   state: { fileId: "file-123", filePath: "/docs/guide.md" },
  *   pending: true,
  * });
  */
@@ -96,7 +118,8 @@ export interface ViewContext {
 	readonly openView?: (args: {
 		readonly panel: PanelSide;
 		readonly kind: ViewKind;
-		readonly props?: ViewInstanceProps;
+		readonly state?: ViewState;
+		readonly launchArgs?: ViewLaunchArgs;
 		readonly focus?: boolean;
 		readonly instance?: string;
 		readonly pending?: boolean;

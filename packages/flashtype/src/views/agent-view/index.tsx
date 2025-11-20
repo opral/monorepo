@@ -220,7 +220,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		[provider, selectedModelId],
 	);
 	const hasKey = Boolean(storedApiKey);
-	const launchProps = instance?.props as AgentViewLaunchProps | undefined;
+	const launchProps = instance?.launchArgs as AgentViewLaunchProps | undefined;
 
 	const messages = useQuery(({ lix }) =>
 		lix.db
@@ -384,7 +384,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 					panel: "central",
 					kind: FILE_VIEW_KIND,
 					instance: fileViewInstance(details.fileId),
-					props: buildFileViewProps({
+					state: buildFileViewProps({
 						fileId: details.fileId,
 						filePath: details.filePath,
 					}),
@@ -533,7 +533,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 									panel: "central",
 									kind: DIFF_VIEW_KIND,
 									instance: diffInstance,
-									props: buildDiffViewProps({
+									state: buildDiffViewProps({
 										fileId: details.fileId,
 										filePath: details.filePath,
 										diffConfig,
@@ -693,7 +693,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				panel: "central",
 				kind: DIFF_VIEW_KIND,
 				instance: diffInstance,
-				props: buildDiffViewProps({
+				state: buildDiffViewProps({
 					fileId: details.fileId,
 					filePath: details.filePath,
 					diffConfig,

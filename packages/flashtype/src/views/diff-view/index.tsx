@@ -150,7 +150,7 @@ export const view = createReactViewDefinition({
 	icon: DiffIcon,
 	component: ({ context, instance }) => (
 		<LixProvider lix={context.lix}>
-			<DiffView config={instance.props?.diff} />
+			<DiffView config={instance.state?.diff as DiffViewConfig | undefined} />
 		</LixProvider>
 	),
 });

@@ -2,8 +2,8 @@ import type { PanelState, ViewInstance } from "./types";
 
 /**
  * Returns a shallow clone of a view instance stored in a panel, including a
- * copied props object to keep state transitions immutable when moving tabs
- * between panels.
+ * copied state object to keep transitions immutable when moving tabs between
+ * panels.
  *
  * @example
  * const cloned = cloneViewInstance(panelState, "files-1");
@@ -16,7 +16,8 @@ export const cloneViewInstance = (
 	if (!view) return null;
 	return {
 		...view,
-		props: view.props ? { ...view.props } : undefined,
+		state: view.state ? { ...view.state } : undefined,
+		launchArgs: view.launchArgs ? { ...view.launchArgs } : undefined,
 	};
 };
 

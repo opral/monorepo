@@ -46,9 +46,9 @@ describe("HistoryView", () => {
 			panel: "central",
 			kind: COMMIT_VIEW_KIND,
 			instance: commitViewInstance(mockId),
-			props: {
+			state: {
 				checkpointId: mockId,
-				label: expect.any(String),
+				flashtype: { label: expect.any(String) },
 			},
 			focus: false,
 		});
@@ -77,9 +77,9 @@ describe("HistoryView", () => {
 			panel: "central",
 			kind: COMMIT_VIEW_KIND,
 			instance: commitViewInstance(mockId),
-			props: {
+			state: {
 				checkpointId: mockId,
-				label: expect.any(String),
+				flashtype: { label: expect.any(String) },
 			},
 			focus: undefined,
 		});

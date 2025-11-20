@@ -8,15 +8,15 @@ import {
 } from "./view-instance-helpers";
 
 describe("cloneViewInstanceByKey", () => {
-	test("clones the matched view and its props", () => {
-		const originalProps = { label: "Files", filePath: "/docs/readme.md" };
+	test("clones the matched view and its state", () => {
+		const originalState = { label: "Files", filePath: "/docs/readme.md" };
 		const panelState: PanelState = {
 			views: [
 				{
 					instance: "files-1",
 					kind: FILES_VIEW_KIND,
 					isPending: true,
-					props: originalProps,
+					state: originalState,
 				} satisfies ViewInstance,
 			],
 			activeInstance: "files-1",
@@ -27,7 +27,7 @@ describe("cloneViewInstanceByKey", () => {
 		expect(cloned).not.toBeNull();
 		expect(cloned).toEqual(panelState.views[0]);
 		expect(cloned).not.toBe(panelState.views[0]);
-		expect(cloned?.props).not.toBe(originalProps);
+		expect(cloned?.state).not.toBe(originalState);
 	});
 
 	test("returns null when no matching view is found", () => {

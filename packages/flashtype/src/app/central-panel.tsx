@@ -64,7 +64,7 @@ export function CentralPanel({
 
 	const labelResolver = useCallback(
 		(view: ViewDefinition, entry: (typeof panel.views)[number]) =>
-			entry.props?.label ?? view.label,
+			(entry.state?.flashtype?.label as string | undefined) ?? view.label,
 		[],
 	);
 

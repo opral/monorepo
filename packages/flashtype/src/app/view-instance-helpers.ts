@@ -55,8 +55,12 @@ export function buildFileViewProps(args: {
 }) {
 	const label = args.label ?? fileLabelFromPath(args.filePath, args.fileId);
 	return args.filePath
-		? { fileId: args.fileId, filePath: args.filePath, label }
-		: { fileId: args.fileId, label };
+		? {
+				fileId: args.fileId,
+				filePath: args.filePath,
+				flashtype: { label },
+			}
+		: { fileId: args.fileId, flashtype: { label } };
 }
 
 export function createWorkingVsCheckpointDiffConfig(
@@ -101,7 +105,7 @@ export function buildDiffViewProps(args: {
 	return {
 		fileId: args.fileId,
 		filePath: args.filePath,
-		label,
+		flashtype: { label },
 		diff,
 	};
 }
