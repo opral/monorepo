@@ -4,7 +4,7 @@
 
 Your app's existing CSS continues to work exactly as before.
 
-When you render a diff using Lix HTML Diff, it only adds `data-diff-status` attributes to highlight changes. It does not modify your existing HTML structure or styling. The exception is when you opt in to specific behaviors using [data-diff-mode](/guide/attributes.html#data-diff-mode) attributes, which allows for more control over how diffs are displayed.
+When you render a diff using HTML Diff, it only adds `data-diff-status` attributes to highlight changes. It does not modify your existing HTML structure or styling. The exception is when you opt in to specific behaviors using [data-diff-mode](/guide/attributes.html#data-diff-mode) attributes, which allows for more control over how diffs are displayed.
 
 Each changed element receives one of these attributes:
 

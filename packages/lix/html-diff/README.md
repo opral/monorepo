@@ -1,6 +1,6 @@
-# Lix HTML Diff
+# HTML Diff
 
-Lix HTML Diff is a simple way to generate and display diffs for any app UI.
+HTML Diff is a simple way to generate and display diffs for any app UI.
 
 - 🌐 **Universal**: Works for any app that renders to HTML (which is most apps!)
 - ⚡ **Simple**: No need for renderer-specific diff logic.
