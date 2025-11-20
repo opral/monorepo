@@ -95,9 +95,9 @@ export function HistoryView({ context }: HistoryViewProps) {
 											panel: "central",
 											kind: COMMIT_VIEW_KIND,
 											instance: commitViewInstance(item.id),
-											props: {
+											state: {
 												checkpointId: item.id,
-												label: item.label,
+												flashtype: { label: item.label },
 											},
 											focus,
 										});

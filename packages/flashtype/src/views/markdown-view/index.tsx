@@ -129,10 +129,10 @@ export const view = createReactViewDefinition({
 	component: ({ context, instance }) => (
 		<LixProvider lix={context.lix}>
 			<MarkdownView
-				fileId={instance.props?.fileId}
-				filePath={instance.props?.filePath}
+				fileId={instance.state?.fileId as string | undefined}
+				filePath={instance.state?.filePath as string | undefined}
 				isActiveView={context.isActiveView ?? false}
-				focusOnLoad={Boolean(instance.props?.focusOnLoad)}
+				focusOnLoad={Boolean(instance.state?.focusOnLoad)}
 			/>
 		</LixProvider>
 	),

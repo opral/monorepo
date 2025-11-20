@@ -96,7 +96,7 @@ export function CheckpointView({ context }: CheckpointViewProps) {
 				panel: "central",
 				kind: DIFF_VIEW_KIND,
 				instance: diffViewInstance(fileId),
-				props: buildDiffViewProps({
+				state: buildDiffViewProps({
 					fileId,
 					filePath: decodedPath,
 				}),

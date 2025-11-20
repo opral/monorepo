@@ -35,9 +35,11 @@ import {
 import type {
 	PanelSide,
 	PanelState,
+	DiffViewConfig,
 	ViewInstance,
-	ViewInstanceProps,
 	ViewKind,
+	ViewLaunchArgs,
+	ViewState,
 } from "./types";
 import { createViewInstanceId, VIEW_MAP } from "./view-registry";
 import { PanelTabPreview } from "./panel-v2";
@@ -60,22 +62,30 @@ import {
 import { activatePanelView, upsertPendingView } from "./pending-view";
 import { cloneViewInstance, reorderPanelViewsByIndex } from "./panel-utils";
 
-type LegacyViewInstance = ViewInstance & {
-	readonly metadata?: ViewInstance["props"];
+const stripLaunchArgs = (view: ViewInstance): ViewInstance => {
+	const { launchArgs: _omitLaunch, ...rest } = view as any;
+	return rest;
 };
 
-const adoptLegacyProps = (view: LegacyViewInstance): ViewInstance => {
-	if (view.props || !view.metadata) return view;
-	const { metadata, ...rest } = view;
-	return {
-		...rest,
-		props: metadata,
-	};
-};
+const sanitizePanels = (
+	panels: Record<PanelSide, PanelState>,
+): Record<PanelSide, PanelState> => ({
+	left: {
+		views: panels.left.views.map(stripLaunchArgs),
+		activeInstance: panels.left.activeInstance,
+	},
+	central: {
+		views: panels.central.views.map(stripLaunchArgs),
+		activeInstance: panels.central.activeInstance,
+	},
+	right: {
+		views: panels.right.views.map(stripLaunchArgs),
+		activeInstance: panels.right.activeInstance,
+	},
+});
 
 const hydratePanel = (panel: PanelState): PanelState => {
-	const views = (panel.views as LegacyViewInstance[])
-		.map(adoptLegacyProps)
+	const views = panel.views
 		// Drop unknown view keys that might linger in persisted UI state.
 		.filter((view) => VIEW_MAP.has(view.kind))
 		.map(upgradeDiffProps);
@@ -94,21 +104,22 @@ const hydratePanel = (panel: PanelState): PanelState => {
 
 const upgradeDiffProps = (view: ViewInstance): ViewInstance => {
 	if (view.kind !== DIFF_VIEW_KIND) return view;
-	const fileId = view.props?.fileId;
+	const state = view.state ?? {};
+	const fileId = state.fileId as string | undefined;
 	if (!fileId) return view;
-	const existing = view.props?.diff;
+	const existing = state.diff as DiffViewConfig | undefined;
 	const nextLabel =
-		view.props?.label ??
-		diffLabelFromPath(view.props?.filePath) ??
+		(state.flashtype?.label as string | undefined) ??
+		diffLabelFromPath(state.filePath as string | undefined) ??
 		"Unnamed diff";
-	if (existing?.query && view.props?.label === nextLabel) {
+	if (existing?.query && state.flashtype?.label === nextLabel) {
 		return view;
 	}
 	return {
 		...view,
-		props: {
-			...view.props,
-			label: nextLabel,
+		state: {
+			...state,
+			flashtype: { ...(state.flashtype ?? {}), label: nextLabel },
 			diff: existing?.query
 				? existing
 				: createWorkingVsCheckpointDiffConfig(fileId, nextLabel),
@@ -177,15 +188,19 @@ function LayoutShellContent() {
 	}
 
 	const initialLayoutSizes = normalizeLayoutSizes(uiStateKV.layout?.sizes);
+	const sanitizedPersistedPanels = useMemo(
+		() => sanitizePanels(uiStateKV.panels),
+		[uiStateKV],
+	);
 
 	const [leftPanel, setLeftPanel] = useState<PanelState>(() =>
-		hydratePanel(uiStateKV.panels.left),
+		hydratePanel(sanitizedPersistedPanels.left),
 	);
 	const [centralPanel, setCentralPanel] = useState<PanelState>(() =>
-		hydratePanel(uiStateKV.panels.central),
+		hydratePanel(sanitizedPersistedPanels.central),
 	);
 	const [rightPanel, setRightPanel] = useState<PanelState>(() =>
-		hydratePanel(uiStateKV.panels.right),
+		hydratePanel(sanitizedPersistedPanels.right),
 	);
 	const [focusedPanel, setFocusedPanel] = useState<PanelSide>(
 		() => uiStateKV.focusedPanel,
@@ -230,7 +245,7 @@ function LayoutShellContent() {
 	const lastPersistedRef = useRef<string>(
 		JSON.stringify({
 			focusedPanel: uiStateKV.focusedPanel,
-			panels: uiStateKV.panels,
+			panels: sanitizedPersistedPanels,
 			layout: { sizes: initialLayoutSizes },
 		} satisfies FlashtypeUiState),
 	);
@@ -267,19 +282,19 @@ function LayoutShellContent() {
 		hydratingRef.current = true;
 		lastPersistedRef.current = serialized;
 		setLeftPanel((prev) =>
-			prev === uiStateKV.panels.left
+			prev === sanitizedPersistedPanels.left
 				? prev
-				: hydratePanel(uiStateKV.panels.left),
+				: hydratePanel(sanitizedPersistedPanels.left),
 		);
 		setCentralPanel((prev) =>
-			prev === uiStateKV.panels.central
+			prev === sanitizedPersistedPanels.central
 				? prev
-				: hydratePanel(uiStateKV.panels.central),
+				: hydratePanel(sanitizedPersistedPanels.central),
 		);
 		setRightPanel((prev) =>
-			prev === uiStateKV.panels.right
+			prev === sanitizedPersistedPanels.right
 				? prev
-				: hydratePanel(uiStateKV.panels.right),
+				: hydratePanel(sanitizedPersistedPanels.right),
 		);
 		setFocusedPanel((prev) =>
 			prev === uiStateKV.focusedPanel ? prev : uiStateKV.focusedPanel,
@@ -302,17 +317,17 @@ function LayoutShellContent() {
 				pendingPersistRef.current = null;
 			}
 		});
-	}, [uiStateKV, updateDerivedPanelState]);
+	}, [uiStateKV, sanitizedPersistedPanels, updateDerivedPanelState]);
 
 	useEffect(() => {
 		if (hydratingRef.current) return;
 		const nextState: FlashtypeUiState = {
 			focusedPanel,
-			panels: {
+			panels: sanitizePanels({
 				left: leftPanel,
 				central: centralPanel,
 				right: rightPanel,
-			},
+			}),
 			layout: { sizes: panelSizes },
 		};
 		const serialized = JSON.stringify(nextState);
@@ -419,14 +434,16 @@ function LayoutShellContent() {
 		({
 			panel,
 			kind,
-			props,
+			state,
+			launchArgs,
 			focus = true,
 			instance,
 			pending = false,
 		}: {
 			panel: PanelSide;
 			kind: ViewKind;
-			props?: ViewInstanceProps;
+			state?: ViewState;
+			launchArgs?: ViewLaunchArgs;
 			focus?: boolean;
 			instance?: string;
 			pending?: boolean;
@@ -440,7 +457,8 @@ function LayoutShellContent() {
 						const nextView: ViewInstance = {
 							instance: targetInstance,
 							kind,
-							props,
+							state,
+							launchArgs,
 							isPending: true,
 						};
 						return upsertPendingView(current, nextView, { activate: true });
@@ -448,10 +466,14 @@ function LayoutShellContent() {
 					if (!instance) {
 						const existing = current.views.find((entry) => entry.kind === kind);
 						if (existing) {
-							const views = props
+							const views = state || launchArgs
 								? current.views.map((entry) =>
 										entry.instance === existing.instance
-											? { ...entry, props }
+											? {
+													...entry,
+													state: state ?? entry.state,
+													launchArgs: launchArgs ?? entry.launchArgs,
+												}
 											: entry,
 									)
 								: current.views;
@@ -468,7 +490,12 @@ function LayoutShellContent() {
 					if (existingByInstance) {
 						const views = current.views.map((entry) =>
 							entry.instance === targetInstance
-								? { ...entry, kind, props }
+								? {
+										...entry,
+										kind,
+										state: state ?? entry.state,
+										launchArgs: launchArgs ?? entry.launchArgs,
+									}
 								: entry,
 						);
 						return {
@@ -479,7 +506,8 @@ function LayoutShellContent() {
 					const nextView: ViewInstance = {
 						instance: targetInstance,
 						kind,
-						props,
+						state,
+						launchArgs,
 					};
 					return {
 						views: [...current.views, nextView],
@@ -715,7 +743,7 @@ function LayoutShellContent() {
 			panel: "central",
 			kind: FILE_VIEW_KIND,
 			instance: fileViewInstance(id),
-			props: buildFileViewProps({ fileId: id, filePath: path }),
+			state: buildFileViewProps({ fileId: id, filePath: path }),
 			focus: true,
 		});
 	}, [handleOpenView, lix]);
@@ -732,7 +760,7 @@ function LayoutShellContent() {
 
 	const activeStatusLabel = useMemo(() => {
 		if (!activeCentralEntry) return null;
-		const rawPath = activeCentralEntry.props?.filePath;
+		const rawPath = activeCentralEntry.state?.filePath as string | undefined;
 		if (rawPath) {
 			const parts = rawPath.split("/").map((segment, index) => {
 				if (index === 0 && segment === "") return "";
@@ -742,7 +770,7 @@ function LayoutShellContent() {
 			return decoded.length > 0 ? decoded : rawPath;
 		}
 		return (
-			activeCentralEntry.props?.label ??
+			(activeCentralEntry.state?.flashtype?.label as string | undefined) ??
 			VIEW_MAP.get(activeCentralEntry.kind)?.label ??
 			null
 		);
@@ -815,19 +843,19 @@ function LayoutShellContent() {
 						targetView.kind === DIFF_VIEW_KIND &&
 						views.length === 0
 					) {
-						const fileId = targetView.props?.fileId
-							? String(targetView.props.fileId)
+						const fileId = targetView.state?.fileId
+							? String(targetView.state.fileId)
 							: null;
 						if (fileId) {
 							const filePath =
-								typeof targetView.props?.filePath === "string"
-									? targetView.props.filePath
+								typeof targetView.state?.filePath === "string"
+									? (targetView.state.filePath as string)
 									: undefined;
 							const fallbackView: ViewInstance = {
 								instance: fileViewInstance(fileId),
 								kind: FILE_VIEW_KIND,
 								isPending: true,
-								props: buildFileViewProps({ fileId, filePath }),
+								state: buildFileViewProps({ fileId, filePath }),
 							};
 							views = [fallbackView];
 							return {
@@ -895,7 +923,8 @@ function LayoutShellContent() {
 						{
 							instance: viewToMove.instance,
 							kind: viewToMove.kind,
-							props: viewToMove.props,
+							state: viewToMove.state,
+							launchArgs: viewToMove.launchArgs,
 						},
 					],
 					activeInstance: viewToMove.instance,

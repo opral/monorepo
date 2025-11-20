@@ -8,15 +8,15 @@ import {
 } from "./view-instance-helpers";
 
 describe("cloneViewInstanceByKey", () => {
-	test("clones the matched view and its props", () => {
-		const originalProps = { label: "Files", filePath: "/docs/readme.md" };
+	test("clones the matched view and its state", () => {
+		const originalState = { label: "Files", filePath: "/docs/readme.md" };
 		const panelState: PanelState = {
 			views: [
 				{
 					instance: "files-1",
 					kind: FILES_VIEW_KIND,
 					isPending: true,
-					props: originalProps,
+					state: originalState,
 				} satisfies ViewInstance,
 			],
 			activeInstance: "files-1",
@@ -27,7 +27,36 @@ describe("cloneViewInstanceByKey", () => {
 		expect(cloned).not.toBeNull();
 		expect(cloned).toEqual(panelState.views[0]);
 		expect(cloned).not.toBe(panelState.views[0]);
-		expect(cloned?.props).not.toBe(originalProps);
+		expect(cloned?.state).not.toBe(originalState);
+	});
+
+	test("deep clones nested state and launch args", () => {
+		const query = () => null;
+		const panelState: PanelState = {
+			views: [
+				{
+					instance: "files-1",
+					kind: FILES_VIEW_KIND,
+					state: { diff: { query, metadata: { nested: true } } },
+					launchArgs: { initial: { path: "/docs" } },
+				} satisfies ViewInstance,
+			],
+			activeInstance: "files-1",
+		};
+
+		const cloned = cloneViewInstance(panelState, "files-1");
+
+		expect(cloned).not.toBeNull();
+		const clonedState = (cloned as ViewInstance).state as any;
+		const originalState = panelState.views[0].state as any;
+		expect(clonedState).not.toBe(originalState);
+		expect(clonedState.diff).not.toBe(originalState.diff);
+		expect(clonedState.diff.query).toBe(query);
+		expect(clonedState.diff.metadata).not.toBe(originalState.diff.metadata);
+		const clonedLaunchArgs = (cloned as ViewInstance).launchArgs as any;
+		const originalLaunchArgs = panelState.views[0].launchArgs as any;
+		expect(clonedLaunchArgs).not.toBe(originalLaunchArgs);
+		expect(clonedLaunchArgs.initial).not.toBe(originalLaunchArgs.initial);
 	});
 
 	test("returns null when no matching view is found", () => {

@@ -15,7 +15,7 @@ import { selectFilePaths } from "@/views/agent-view/select-file-paths";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { Input } from "@/components/ui/input";
-import type { ViewContext, ViewInstanceProps } from "./types";
+import type { ViewContext, ViewLaunchArgs } from "./types";
 import { AGENT_VIEW_KIND } from "./view-instance-helpers";
 
 const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
@@ -216,11 +216,11 @@ function LandingScreenContent({
 	);
 
 	const openAgentView = useCallback(
-		(props?: ViewInstanceProps) => {
+		(launchArgs?: ViewLaunchArgs) => {
 			context.openView?.({
 				panel: "central",
 				kind: AGENT_VIEW_KIND,
-				props,
+				launchArgs,
 				focus: true,
 			});
 		},

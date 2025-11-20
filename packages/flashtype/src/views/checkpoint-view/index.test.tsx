@@ -212,11 +212,11 @@ describe("CheckpointView", () => {
 			pending: true,
 			focus: true,
 		});
-		expect(args.props).toMatchObject({
+		expect(args.state).toMatchObject({
 			fileId,
 			filePath: "/docs/diff-preview.md",
-			label: "diff-preview.md",
+			flashtype: { label: "diff-preview.md" },
 		});
-		expect(args.props?.diff).toBeDefined();
+		expect(args.state?.diff).toBeDefined();
 	});
 });

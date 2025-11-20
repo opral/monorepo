@@ -44,7 +44,7 @@ function formatTimestamp(value: string | null | undefined): string {
 }
 
 export function CommitView({ context, view }: CommitViewProps) {
-	const checkpointId = view?.props?.checkpointId;
+	const checkpointId = view?.state?.checkpointId as string | undefined;
 	const checkpoints = useQuery(({ lix }) => selectCheckpoints({ lix })) ?? [];
 
 	const checkpoint = checkpoints.find((cp) => cp.id === checkpointId);
@@ -68,7 +68,7 @@ export function CommitView({ context, view }: CommitViewProps) {
 				panel: "central",
 				kind: DIFF_VIEW_KIND,
 				instance: diffViewInstance(file.id),
-				props: buildDiffViewProps({
+				state: buildDiffViewProps({
 					fileId: file.id,
 					filePath: file.fullPath,
 				}),
