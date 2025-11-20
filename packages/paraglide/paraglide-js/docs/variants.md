@@ -6,7 +6,7 @@ imports:
 
 # Variants
 
-Variants enable pluralization, gendering, A/B testing, and more. They are a powerful feature of inlang that allows you to create different versions of a message based on conditions. 
+Variants enable pluralization, gendering, A/B testing, and more. They are a powerful feature of inlang that allows you to create different versions of a message based on conditions.
 
 ## Matching
 
@@ -59,3 +59,29 @@ You can define a variable in your message and then use it in the selector. Parag
   }]
 }
 ```
+
+### Ordinal pluralization (1st, 2nd, 3rd…)
+
+`plural` forwards its options to `Intl.PluralRules`, so you can request ordinal categories by passing `type=ordinal`.
+
+```json
+{
+  "finished_readout": [{
+    "declarations": [
+      "input placeNumber",
+      "local ordinalCategory = placeNumber: plural type=ordinal"
+    ],
+    "selectors": ["ordinalCategory"],
+    "match": {
+      "ordinalCategory=one": "You finished in {placeNumber}st place",
+      "ordinalCategory=two": "You finished in {placeNumber}nd place",
+      "ordinalCategory=few": "You finished in {placeNumber}rd place",
+      "ordinalCategory=*": "You finished in {placeNumber}th place"
+    }
+  }]
+}
+```
+
+<doc-callout type="tip">
+  Ordinal category names (`one`, `two`, `few`, `other`, etc.) follow <code>Intl.PluralRules</code> for the active locale.
+</doc-callout>
