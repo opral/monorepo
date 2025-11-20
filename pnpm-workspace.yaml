@@ -1,6 +1,11 @@
 packages:
   - inlang/packages/**/*
   - lix/packages/**/*
+  - '!inlang/packages/parrot-figma'
+  - '!inlang/packages/fink'
+  - '!packages/csv-app'
+  - '!packages/lix/file-manager'
+  - '!packages/lix/host'
   - '!**/*/dist'
   - packages/**/*
   - packages/*/example
