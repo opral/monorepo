@@ -8,6 +8,8 @@ imports:
 The Inlang Message Format is a simple storage plugin for the Inlang ecosystem. It allows you to store simple
 messages in a JSON file per language.
 
+The syntax is inspired by the upcoming [MessageFormat 2.0](https://messageformat.unicode.org/) draft to keep migration friction low as the standard matures.
+
 The message files contain key-value pairs of the message ID and the translation. You can add variables in your message by using curly braces.
 
 ```json
@@ -183,6 +185,34 @@ The message below will match the following conditions:
 	]
 }
 ```
+
+#### Ordinal pluralization (1st, 2nd, 3rd…)
+
+`plural` forwards its options to `Intl.PluralRules`, so you can request ordinal categories by passing `type=ordinal` in your declaration.
+
+```json
+{
+  "finished_readout": [
+    {
+      "declarations": [
+        "input placeNumber",
+        "local ordinalCategory = placeNumber: plural type=ordinal"
+      ],
+      "selectors": ["ordinalCategory"],
+      "match": {
+        "ordinalCategory=one": "You finished in {placeNumber}st place",
+        "ordinalCategory=two": "You finished in {placeNumber}nd place",
+        "ordinalCategory=few": "You finished in {placeNumber}rd place",
+        "ordinalCategory=*": "You finished in {placeNumber}th place"
+      }
+    }
+  ]
+}
+```
+
+<doc-callout type="tip">
+  Ordinal category names (`one`, `two`, `few`, `other`, etc.) follow <code>Intl.PluralRules</code> for the active locale.
+</doc-callout>
 
 Pluralization is also supported. You can define a variable in your message and then use it in the selector.
 
