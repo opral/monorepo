@@ -148,6 +148,7 @@ function rewriteInsertStatement(
 		...insert,
 		target: buildObjectName(INTERNAL_STATE_VTABLE),
 		columns: finalColumns,
+		on_conflict: insert.on_conflict,
 		source: {
 			node_kind: "insert_values",
 			rows: rewrittenRows,

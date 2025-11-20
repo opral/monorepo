@@ -231,6 +231,9 @@ function buildEntityViewInsert(
 ): StatementSegmentNode | null {
 	const isDefaultInsert =
 		args.insert.source.node_kind === "insert_default_values";
+	if (!isDefaultInsert && args.insert.source.node_kind !== "insert_values") {
+		return null;
+	}
 	const columns = args.insert.columns;
 	if (columns.length === 0 && !isDefaultInsert) {
 		return null;

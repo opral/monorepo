@@ -1049,6 +1049,12 @@ function rewriteWithClauseNode(
 		const nextVersionIds = metadata?.versionIds ?? pushdownVersionIds;
 		const nextSnapshotFilters =
 			metadata?.snapshotFilters ?? pushdownSnapshotFilters;
+		if (
+			cte.statement.node_kind !== "compound_select" &&
+			cte.statement.node_kind !== "select_statement"
+		) {
+			return cte;
+		}
 		const statement =
 			cte.statement.node_kind === "compound_select"
 				? rewriteCompoundSelect(

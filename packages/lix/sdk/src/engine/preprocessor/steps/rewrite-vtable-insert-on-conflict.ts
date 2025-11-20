@@ -61,7 +61,7 @@ function rewriteSegmentedStatement(
 	if (statement.segments.length !== 1) {
 		return [statement];
 	}
-	const [segment] = statement.segments;
+	const segment = statement.segments[0]!;
 	if (segment.node_kind !== "insert_statement") {
 		return [statement];
 	}
@@ -110,7 +110,7 @@ function rewriteInsert(
 	const keyColumns = extractConflictColumns(conflictTarget);
 	if (!keyColumns) return null;
 
-	const row = insert.source.rows[0];
+	const row = insert.source.rows[0]!;
 	const columnMap = buildColumnValueMap(insert.columns, row);
 	if (!columnMap) return null;
 
@@ -142,21 +142,10 @@ function rewriteInsert(
 		where_clause: updateWhere,
 	};
 
-	const insertSelectWhere = binaryExpression(
-		groupedExpression(
-			binaryExpression(functionCall(identifier("changes"), []), "=", literal(0))
-		),
-		"and",
-		groupedExpression(
-			unaryExpression(
-				"not",
-				{
-					node_kind: "exists_expression",
-					statement: buildExistsSubquery(conflictPredicate),
-				}
-			)
-		)
-	);
+	const insertSelectWhere = unaryExpression("not", {
+		node_kind: "exists_expression",
+		statement: buildExistsSubquery(conflictPredicate),
+	});
 
 	const insertSelect: StatementSegmentNode = {
 		node_kind: "insert_statement",
@@ -166,7 +155,21 @@ function rewriteInsert(
 		source: buildInsertSelectSource(insert.columns, columnMap, insertSelectWhere),
 	};
 
-	return { insertSegment: updateStatement, updateSegment: insertSelect };
+	const inlinedAssignments = inlineParametersInAssignments(
+		assignments,
+		context.parameters ?? []
+	);
+	const inlinedWhere = inlineParameters(updateWhere, context.parameters ?? []);
+	if (!inlinedAssignments || inlinedWhere === undefined) return null;
+
+	return {
+		insertSegment: insertSelect,
+		updateSegment: {
+			...updateStatement,
+			assignments: inlinedAssignments,
+			where_clause: inlinedWhere,
+		},
+	};
 }
 
 function tableReference(name: InsertStatementNode["target"]): TableReferenceNode {
@@ -200,9 +203,82 @@ function ensureRequiredAssignments(
 			column: columnReference([column]),
 			value,
 		});
+		existing.add(column);
+	}
+
+	for (const [column, value] of columnMap.entries()) {
+		if (existing.has(column)) continue;
+		augmented.push({
+			node_kind: "set_clause",
+			column: columnReference([column]),
+			value,
+		});
 	}
 
 	return augmented;
+}
+
+function inlineParameters(
+	expression: ExpressionNode | null,
+	parameters: ReadonlyArray<unknown>
+): ExpressionNode | null {
+	if (!expression) return null;
+	switch (expression.node_kind) {
+		case "parameter": {
+			const value = parameters[expression.position];
+			return value === undefined ? expression : literal(value as any);
+		}
+		case "grouped_expression": {
+			const expr = inlineParameters(expression.expression, parameters);
+			return expr ? groupedExpression(expr) : null;
+		}
+		case "unary_expression": {
+			const operand = inlineParameters(expression.operand, parameters);
+			return operand ? { ...expression, operand } : null;
+		}
+		case "binary_expression": {
+			const left = inlineParameters(expression.left, parameters);
+			const right = inlineParameters(expression.right, parameters);
+			return left && right
+				? ({ ...expression, left, right } satisfies BinaryExpressionNode)
+				: null;
+		}
+		case "function_call": {
+			const args: Array<FunctionCallExpressionNode["arguments"][number]> = [];
+			for (const arg of expression.arguments) {
+				if (arg.node_kind === "all_columns") {
+					args.push(arg);
+					continue;
+				}
+				const transformed = inlineParameters(arg, parameters);
+				if (transformed) {
+					args.push(transformed);
+				}
+			}
+			return { ...expression, arguments: args };
+		}
+		case "column_reference":
+		case "literal":
+		case "raw_fragment":
+			return expression;
+		default:
+			return expression;
+	}
+}
+
+function inlineParametersInAssignments(
+	assignments: readonly SetClauseNode[],
+	parameters: ReadonlyArray<unknown>
+): readonly SetClauseNode[] | null {
+	const result: SetClauseNode[] = [];
+	for (const assignment of assignments) {
+		const value = inlineParameters(assignment.value, parameters);
+		result.push({
+			...assignment,
+			value: value ?? assignment.value,
+		});
+	}
+	return result;
 }
 
 function extractConflictColumns(
@@ -302,7 +378,7 @@ function transformExpression(
 				: null;
 		}
 		case "function_call": {
-			const args: FunctionCallExpressionNode["arguments"] = [];
+			const args: Array<FunctionCallExpressionNode["arguments"][number]> = [];
 			for (const arg of expression.arguments) {
 				if (arg.node_kind === "all_columns") {
 					args.push(arg);
@@ -351,33 +427,6 @@ function normalizeExpressionParameters(expression: ExpressionNode): ExpressionNo
 						: normalizeExpressionParameters(arg)
 				),
 			};
-		case "case_expression":
-			return {
-				...expression,
-				when_clauses: expression.when_clauses.map((clause) => ({
-					...clause,
-					when: normalizeExpressionParameters(clause.when),
-					then: normalizeExpressionParameters(clause.then),
-				})),
-				else: expression.else
-					? normalizeExpressionParameters(expression.else)
-					: null,
-			};
-		case "subquery_expression":
-		case "exists_expression":
-		case "cast_expression":
-		case "collate_expression":
-		case "window_function_call":
-		case "between_expression":
-		case "in_expression":
-		case "null_comparison_expression":
-		case "variant_expression":
-		case "members_expression":
-		case "case_insensitive_like_expression":
-		case "concatenation_expression":
-		case "json_access_expression":
-			// These nodes are not currently emitted from rewrite code paths.
-			return expression;
 		default:
 			return expression;
 	}
