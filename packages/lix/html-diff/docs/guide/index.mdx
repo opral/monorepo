@@ -114,6 +114,32 @@ npm install @lix-js/html-diff
 
 ## Usage
 
+### Quickstart
+
+```ts
+import { renderHtmlDiff } from "@lix-js/html-diff";
+import "@lix-js/html-diff/default.css";
+
+const beforeHtml = `<p data-diff-key="x9n4" class="my-text">The quick brown fox</p>`;
+const afterHtml = `<p data-diff-key="x9n4" class="my-text">The fast red fox</p>`;
+
+const diff = renderHtmlDiff({ beforeHtml, afterHtml });
+
+// Vanilla
+document.getElementById("diff-container")!.innerHTML = diff;
+
+// React
+function Diff({ html }: { html: string }) {
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+}
+```
+
+Include the default styling if you want ready-made highlights:
+
+```ts
+import "@lix-js/html-diff/default.css";
+```
+
 ### Step 1: Add `data-diff-key` attributes
 
 Add unique [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes to elements you want to track for changes. Use random, short identifiers (not semantic names):
