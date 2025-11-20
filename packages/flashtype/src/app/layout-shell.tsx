@@ -466,17 +466,18 @@ function LayoutShellContent() {
 					if (!instance) {
 						const existing = current.views.find((entry) => entry.kind === kind);
 						if (existing) {
-							const views = state || launchArgs
-								? current.views.map((entry) =>
-										entry.instance === existing.instance
-											? {
-													...entry,
-													state: state ?? entry.state,
-													launchArgs: launchArgs ?? entry.launchArgs,
-												}
-											: entry,
-									)
-								: current.views;
+							const views =
+								state || launchArgs
+									? current.views.map((entry) =>
+											entry.instance === existing.instance
+												? {
+														...entry,
+														state: state ?? entry.state,
+														launchArgs: launchArgs ?? entry.launchArgs,
+													}
+												: entry,
+										)
+									: current.views;
 							return {
 								views,
 								activeInstance: existing.instance,

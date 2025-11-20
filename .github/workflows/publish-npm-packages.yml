@@ -16,7 +16,8 @@ on:
 
 jobs: 
   publish:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Allow manual runs, otherwise require CI success on main
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: production
     steps:
@@ -30,6 +31,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 22
+          registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
 
         # Conditional steps based on the check
@@ -49,7 +51,6 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Publish packages
-        run: pnpm publish -r --no-git-checks
+        run: pnpm exec changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
-

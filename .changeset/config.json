@@ -4,6 +4,7 @@
   "commit": false,
   "access": "restricted",
   "baseBranch": "main",
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
   "ignore": [
     "@inlang/cli-example",
     "@inlang/fink",
@@ -22,6 +23,12 @@
     "@inlang/template-plugin",
     "@inlang/website",
     "@lix-js/sdk-example-server-protocol-handler-hono",
-    "@lix-js/plugin-prosemirror-example"
+    "@lix-js/plugin-prosemirror-example",
+    "@lix-js/host",
+    "lix-file-manager",
+    "csv-app",
+    "@inlang/*",
+    "vs-code-extension",
+    "sherlock-editor-app"
   ]
 }
