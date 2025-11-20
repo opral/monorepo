@@ -30,6 +30,36 @@ describe("cloneViewInstanceByKey", () => {
 		expect(cloned?.state).not.toBe(originalState);
 	});
 
+	test("deep clones nested state and launch args", () => {
+		const query = () => null;
+		const panelState: PanelState = {
+			views: [
+				{
+					instance: "files-1",
+					kind: FILES_VIEW_KIND,
+					state: { diff: { query, metadata: { nested: true } } },
+					launchArgs: { initial: { path: "/docs" } },
+				} satisfies ViewInstance,
+			],
+			activeInstance: "files-1",
+		};
+
+		const cloned = cloneViewInstance(panelState, "files-1");
+
+		expect(cloned?.state).not.toBe(panelState.views[0].state);
+		expect((cloned?.state as any).diff).not.toBe(
+			(panelState.views[0].state as any).diff,
+		);
+		expect((cloned?.state as any).diff.query).toBe(query);
+		expect((cloned?.state as any).diff.metadata).not.toBe(
+			(panelState.views[0].state as any).diff.metadata,
+		);
+		expect(cloned?.launchArgs).not.toBe(panelState.views[0].launchArgs);
+		expect((cloned?.launchArgs as any).initial).not.toBe(
+			(panelState.views[0].launchArgs as any).initial,
+		);
+	});
+
 	test("returns null when no matching view is found", () => {
 		const panelState: PanelState = { views: [], activeInstance: null };
 

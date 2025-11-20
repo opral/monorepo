@@ -1,9 +1,42 @@
 import type { PanelState, ViewInstance } from "./types";
 
+const deepCloneValue = <T>(input: T): T => {
+	if (Array.isArray(input)) {
+		return input.map((item) => deepCloneValue(item)) as unknown as T;
+	}
+
+	if (input instanceof Date) {
+		return new Date(input.getTime()) as unknown as T;
+	}
+
+	if (input instanceof Map) {
+		return new Map(
+			Array.from(input.entries(), ([key, value]) => [
+				deepCloneValue(key),
+				deepCloneValue(value),
+			]),
+		) as unknown as T;
+	}
+
+	if (input instanceof Set) {
+		return new Set(Array.from(input.values(), (value) => deepCloneValue(value))) as unknown as T;
+	}
+
+	if (input && typeof input === "object") {
+		return Object.fromEntries(
+			Object.entries(input as Record<string, unknown>).map(([key, value]) => [
+				key,
+				deepCloneValue(value),
+			]),
+		) as T;
+	}
+
+	return input;
+};
+
 /**
- * Returns a shallow clone of a view instance stored in a panel, including a
- * copied state object to keep transitions immutable when moving tabs between
- * panels.
+ * Returns a view instance clone with deep-cloned state and launch args to keep
+ * transitions immutable when moving tabs between panels.
  *
  * @example
  * const cloned = cloneViewInstance(panelState, "files-1");
@@ -16,8 +49,8 @@ export const cloneViewInstance = (
 	if (!view) return null;
 	return {
 		...view,
-		state: view.state ? { ...view.state } : undefined,
-		launchArgs: view.launchArgs ? { ...view.launchArgs } : undefined,
+		state: view.state ? deepCloneValue(view.state) : undefined,
+		launchArgs: view.launchArgs ? deepCloneValue(view.launchArgs) : undefined,
 	};
 };
 
