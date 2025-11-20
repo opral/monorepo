@@ -46,18 +46,17 @@ describe("cloneViewInstanceByKey", () => {
 
 		const cloned = cloneViewInstance(panelState, "files-1");
 
-		expect(cloned?.state).not.toBe(panelState.views[0].state);
-		expect((cloned?.state as any).diff).not.toBe(
-			(panelState.views[0].state as any).diff,
-		);
-		expect((cloned?.state as any).diff.query).toBe(query);
-		expect((cloned?.state as any).diff.metadata).not.toBe(
-			(panelState.views[0].state as any).diff.metadata,
-		);
-		expect(cloned?.launchArgs).not.toBe(panelState.views[0].launchArgs);
-		expect((cloned?.launchArgs as any).initial).not.toBe(
-			(panelState.views[0].launchArgs as any).initial,
-		);
+		expect(cloned).not.toBeNull();
+		const clonedState = (cloned as ViewInstance).state as any;
+		const originalState = panelState.views[0].state as any;
+		expect(clonedState).not.toBe(originalState);
+		expect(clonedState.diff).not.toBe(originalState.diff);
+		expect(clonedState.diff.query).toBe(query);
+		expect(clonedState.diff.metadata).not.toBe(originalState.diff.metadata);
+		const clonedLaunchArgs = (cloned as ViewInstance).launchArgs as any;
+		const originalLaunchArgs = panelState.views[0].launchArgs as any;
+		expect(clonedLaunchArgs).not.toBe(originalLaunchArgs);
+		expect(clonedLaunchArgs.initial).not.toBe(originalLaunchArgs.initial);
 	});
 
 	test("returns null when no matching view is found", () => {
