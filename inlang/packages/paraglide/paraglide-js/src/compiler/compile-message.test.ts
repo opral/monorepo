@@ -237,6 +237,87 @@ test("compiles messages that use plural()", async () => {
 	expect(plural_test({ count: undefined })).toBe("There are many cats.");
 });
 
+test("compiles messages that use plural() with ordinal type", async () => {
+	const declarations: Declaration[] = [
+		{ type: "input-variable", name: "count" },
+		{
+			type: "local-variable",
+			name: "countOrdinal",
+			value: {
+				arg: { type: "variable-reference", name: "count" },
+				annotation: {
+					type: "function-reference",
+					name: "plural",
+					options: [
+						{ name: "type", value: { type: "literal", value: "ordinal" } },
+					],
+				},
+				type: "expression",
+			},
+		},
+	];
+	const message: Message = {
+		locale: "en",
+		bundleId: "ordinal_test",
+		id: "message_id",
+		selectors: [{ type: "variable-reference", name: "countOrdinal" }],
+	};
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "message_id",
+			matches: [{ type: "literal-match", value: "one", key: "countOrdinal" }],
+			pattern: [
+				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{ type: "text", value: "st place" },
+			],
+		},
+		{
+			id: "2",
+			messageId: "message_id",
+			matches: [{ type: "literal-match", value: "two", key: "countOrdinal" }],
+			pattern: [
+				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{ type: "text", value: "nd place" },
+			],
+		},
+		{
+			id: "3",
+			messageId: "message_id",
+			matches: [{ type: "literal-match", value: "few", key: "countOrdinal" }],
+			pattern: [
+				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{ type: "text", value: "rd place" },
+			],
+		},
+		{
+			id: "4",
+			messageId: "message_id",
+			matches: [{ type: "literal-match", value: "other", key: "countOrdinal" }],
+			pattern: [
+				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{ type: "text", value: "th place" },
+			],
+		},
+	];
+
+	const compiled = compileMessage(declarations, message, variants);
+
+	const { ordinal_test } = await import(
+		"data:text/javascript;base64," +
+			btoa(createRegistry()) +
+			btoa(
+				"export const ordinal_test = " +
+					compiled.code.replace("registry.", "")
+			)
+	);
+
+	expect(ordinal_test({ count: 1 })).toBe("1st place");
+	expect(ordinal_test({ count: 2 })).toBe("2nd place");
+	expect(ordinal_test({ count: 3 })).toBe("3rd place");
+	expect(ordinal_test({ count: 4 })).toBe("4th place");
+});
+
 test("compiles messages that use datetime()", async () => {
 	const createMessage = async (locale: string) => {
 		const declarations: Declaration[] = [

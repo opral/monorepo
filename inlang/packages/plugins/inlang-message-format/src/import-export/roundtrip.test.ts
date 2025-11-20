@@ -265,6 +265,83 @@ test("variants with a plural function are parsed correctly", async () => {
 	);
 });
 
+test("ordinal plural options survive import/export", async () => {
+	const imported = await runImportFiles({
+		finished_readout: [
+			{
+				declarations: [
+					"input placeNumber",
+					"local ordinalCategory = placeNumber: plural type=ordinal",
+				],
+				selectors: ["ordinalCategory"],
+				match: {
+					"ordinalCategory=one": "You finished in {placeNumber}st place",
+					"ordinalCategory=two": "You finished in {placeNumber}nd place",
+					"ordinalCategory=few": "You finished in {placeNumber}rd place",
+					"ordinalCategory=*": "You finished in {placeNumber}th place",
+				},
+			},
+		],
+	});
+
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		finished_readout: [
+			{
+				declarations: [
+					"input placeNumber",
+					"local ordinalCategory = placeNumber: plural type=ordinal",
+				],
+				selectors: ["ordinalCategory"],
+				match: {
+					"ordinalCategory=one": "You finished in {placeNumber}st place",
+					"ordinalCategory=two": "You finished in {placeNumber}nd place",
+					"ordinalCategory=few": "You finished in {placeNumber}rd place",
+					"ordinalCategory=*": "You finished in {placeNumber}th place",
+				},
+			},
+		],
+	});
+
+	expect(imported.bundles[0]?.declarations).toContainEqual({
+		type: "local-variable",
+		name: "ordinalCategory",
+		value: {
+			type: "expression",
+			arg: { type: "variable-reference", name: "placeNumber" },
+			annotation: {
+				type: "function-reference",
+				name: "plural",
+				options: [
+					{ name: "type", value: { type: "literal", value: "ordinal" } },
+				],
+			},
+		},
+	});
+
+	expect(imported.messages[0]?.selectors).toContainEqual({
+		type: "variable-reference",
+		name: "ordinalCategory",
+	});
+
+	const catchallVariant = imported.variants.find((variant) =>
+		variant.matches?.some(
+			(match) =>
+				match.type === "catchall-match" && match.key === "ordinalCategory"
+		)
+	);
+
+	expect(catchallVariant).toMatchObject({
+		pattern: [
+			{ type: "text", value: "You finished in " },
+			{
+				type: "expression",
+				arg: { type: "variable-reference", name: "placeNumber" },
+			},
+			{ type: "text", value: "th place" },
+		],
+	});
+});
+
 test("doesn't use string as value if declarations, selectors, or multiple matches exist ", async () => {
 	const imported = await runImportFiles({
 		some_happy_cat: "Today is {date}.",
