@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { ChatMessage as Msg } from "./chat-types";
 import { ToolRunList } from "./tool-run-list";
+import { MessageBody } from "./markdown/message-body";
 
 /**
  * Chat message component with clean typography and spacing.
@@ -75,66 +76,9 @@ export function ChatMessage({
 							: "text-foreground",
 					].join(" ")}
 				>
-					<MessageBody content={message.content} isUser={isUser} />
+					<MessageBody content={message.content} />
 				</div>
 			)}
 		</div>
 	);
-}
-
-/**
- * Renders message content with lightweight code block styling.
- * Plain text uses sans-serif, code blocks use monospace.
- */
-function MessageBody({
-	content,
-	isUser: _isUser,
-}: {
-	content: string;
-	isUser: boolean;
-}) {
-	const parts = React.useMemo(() => splitFences(content), [content]);
-	return (
-		<div className="space-y-3">
-			{parts.map((p, i) =>
-				p.type === "fence" ? (
-					<div
-						key={i}
-						className="rounded-md border border-border/50 bg-muted/30 overflow-hidden"
-					>
-						<div className="border-b border-border/40 bg-muted/50 px-3 py-1.5">
-							<span className="text-xs font-mono font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-								{p.lang || "code"}
-							</span>
-						</div>
-						<pre className="px-3 py-2.5 text-sm font-mono leading-relaxed text-foreground overflow-x-auto">
-							{p.body}
-						</pre>
-					</div>
-				) : (
-					<div key={i} className="text-sm leading-relaxed whitespace-pre-wrap">
-						{p.body}
-					</div>
-				),
-			)}
-		</div>
-	);
-}
-
-type Part = { type: "text" | "fence"; body: string; lang?: string };
-
-function splitFences(input: string): Part[] {
-	const out: Part[] = [];
-	const fence = /```(\w+)?\n([\s\S]*?)\n```/g;
-	let last = 0;
-	let m: RegExpExecArray | null;
-	while ((m = fence.exec(input))) {
-		const [full, lang, body] = m;
-		if (m.index > last)
-			out.push({ type: "text", body: input.slice(last, m.index) });
-		out.push({ type: "fence", lang, body });
-		last = m.index + full.length;
-	}
-	if (last < input.length) out.push({ type: "text", body: input.slice(last) });
-	return out;
 }

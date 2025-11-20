@@ -9,6 +9,7 @@ import type {
 import { toPlainText } from "@lix-js/sdk/dependency/zettel-ast";
 import type { ZettelDoc } from "@lix-js/sdk/dependency/zettel-ast";
 import { ChevronRight } from "lucide-react";
+import { MessageBody } from "./markdown/message-body";
 
 type ConversationMessageProps = {
 	message: AgentConversationMessage;
@@ -89,35 +90,6 @@ function UserMessage({ content }: UserMessageProps) {
 			<div className="max-w-full break-words rounded-lg border border-border/60 bg-secondary/40 px-2 py-1.5 leading-relaxed">
 				<MessageBody content={content} />
 			</div>
-		</div>
-	);
-}
-
-function MessageBody({ content }: { content: string }) {
-	const parts = React.useMemo(() => splitFences(content), [content]);
-	return (
-		<div className="space-y-2">
-			{parts.map((part, index) =>
-				part.type === "fence" ? (
-					<div
-						key={index}
-						className="overflow-hidden rounded-md border border-border/50 bg-muted/30"
-					>
-						<div className="border-b border-border/40 bg-muted/50 px-3 py-1.5">
-							<span className="text-xs font-mono font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-								{part.lang || "code"}
-							</span>
-						</div>
-						<pre className="overflow-x-auto px-3 py-2.5 text-sm font-mono leading-relaxed text-foreground">
-							{part.body}
-						</pre>
-					</div>
-				) : (
-					<div key={index} className="text-sm leading-relaxed">
-						{part.body}
-					</div>
-				),
-			)}
 		</div>
 	);
 }
@@ -362,28 +334,6 @@ function formatToolError(value: unknown): string | undefined {
 	} catch {
 		return String(value);
 	}
-}
-
-type Part = { type: "text" | "fence"; body: string; lang?: string };
-
-// Lightweight fence parser so we can render ``` blocks with structured styling.
-function splitFences(input: string): Part[] {
-	const out: Part[] = [];
-	const fence = /```(\w+)?\n([\s\S]*?)\n```/g;
-	let last = 0;
-	let match: RegExpExecArray | null;
-	while ((match = fence.exec(input))) {
-		const [full, lang, body] = match;
-		if (match.index > last) {
-			out.push({ type: "text", body: input.slice(last, match.index) });
-		}
-		out.push({ type: "fence", lang, body });
-		last = match.index + full.length;
-	}
-	if (last < input.length) {
-		out.push({ type: "text", body: input.slice(last) });
-	}
-	return out;
 }
 
 /**
