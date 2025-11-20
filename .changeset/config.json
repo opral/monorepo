@@ -6,6 +6,8 @@
   "baseBranch": "main",
   "bumpVersionsWithWorkspaceProtocolOnly": true,
   "ignore": [
+    "@opral/flashtype",
+    "@lix-js/agent-sdk",
     "@inlang/cli-example",
     "@inlang/paraglide-js-benchmark",
     "@inlang/paraglide-js-example-cli",
