@@ -133,7 +133,7 @@ export default defineConfig({
         icon: "github",
         mode: "link",
         content:
-          "https://github.com/opral/monorepo/tree/main/packages/lix/lix-html-diff",
+          "https://github.com/opral/monorepo/tree/main/packages/lix/html-diff",
       },
     ],
   },
