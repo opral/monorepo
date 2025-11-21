@@ -1,6 +1,29 @@
+import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "./code-block";
+
+function MarkdownImage({ src, alt }: { src?: string; alt?: string }) {
+	const [error, setError] = React.useState(false);
+
+	if (error) {
+		return (
+			<div className="max-w-full rounded-md border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+				Failed to load image: {alt || src}
+			</div>
+		);
+	}
+
+	return (
+		<img
+			src={src}
+			alt={alt || "Image"}
+			className="max-w-full h-auto rounded-md border border-border"
+			loading="lazy"
+			onError={() => setError(true)}
+		/>
+	);
+}
 
 export function MessageBody({ content }: { content: string }) {
 	return (
@@ -142,14 +165,7 @@ export function MessageBody({ content }: { content: string }) {
 						return <hr className="border-t border-border my-4" />;
 					},
 					img({ src, alt }) {
-						return (
-							<img
-								src={src}
-								alt={alt}
-								className="max-w-full h-auto rounded-md border border-border"
-								loading="lazy"
-							/>
-						);
+						return <MarkdownImage src={src} alt={alt} />;
 					},
 					del({ children }) {
 						return <del className="line-through text-muted-foreground">{children}</del>;
