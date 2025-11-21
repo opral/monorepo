@@ -268,7 +268,10 @@ test("compiles messages that use plural() with ordinal type", async () => {
 			messageId: "message_id",
 			matches: [{ type: "literal-match", value: "one", key: "countOrdinal" }],
 			pattern: [
-				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "count" },
+				},
 				{ type: "text", value: "st place" },
 			],
 		},
@@ -277,7 +280,10 @@ test("compiles messages that use plural() with ordinal type", async () => {
 			messageId: "message_id",
 			matches: [{ type: "literal-match", value: "two", key: "countOrdinal" }],
 			pattern: [
-				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "count" },
+				},
 				{ type: "text", value: "nd place" },
 			],
 		},
@@ -286,7 +292,10 @@ test("compiles messages that use plural() with ordinal type", async () => {
 			messageId: "message_id",
 			matches: [{ type: "literal-match", value: "few", key: "countOrdinal" }],
 			pattern: [
-				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "count" },
+				},
 				{ type: "text", value: "rd place" },
 			],
 		},
@@ -295,7 +304,10 @@ test("compiles messages that use plural() with ordinal type", async () => {
 			messageId: "message_id",
 			matches: [{ type: "literal-match", value: "other", key: "countOrdinal" }],
 			pattern: [
-				{ type: "expression", arg: { type: "variable-reference", name: "count" } },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "count" },
+				},
 				{ type: "text", value: "th place" },
 			],
 		},
@@ -307,8 +319,7 @@ test("compiles messages that use plural() with ordinal type", async () => {
 		"data:text/javascript;base64," +
 			btoa(createRegistry()) +
 			btoa(
-				"export const ordinal_test = " +
-					compiled.code.replace("registry.", "")
+				"export const ordinal_test = " + compiled.code.replace("registry.", "")
 			)
 	);
 
