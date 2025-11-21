@@ -11,7 +11,7 @@
     "----- CI ---- used to test the codebase on every commit": "",
     "ci": "pnpm lint && pnpm test && pnpm build"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.23.0",
   "engines": {
     "node": ">=22",
     "pnpm": ">=10 <11"

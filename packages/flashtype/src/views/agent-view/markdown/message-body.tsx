@@ -43,7 +43,7 @@ export function MessageBody({ content }: { content: string }) {
 
 						return (
 							<code
-								className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-foreground"
+								className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-foreground break-all"
 								{...props}
 							>
 								{children}
