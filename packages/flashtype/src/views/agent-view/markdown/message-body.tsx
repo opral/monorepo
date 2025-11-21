@@ -86,14 +86,14 @@ export function MessageBody({ content }: { content: string }) {
 					},
 					ul({ children }) {
 						return (
-							<ul className="list-disc list-inside space-y-1 text-sm">
+							<ul className="list-disc space-y-1 text-sm pl-6 [&_ul]:list-[circle] [&_ul_ul]:list-[square]">
 								{children}
 							</ul>
 						);
 					},
 					ol({ children }) {
 						return (
-							<ol className="list-decimal list-inside space-y-1 text-sm">
+							<ol className="list-decimal space-y-1 text-sm pl-6">
 								{children}
 							</ol>
 						);
