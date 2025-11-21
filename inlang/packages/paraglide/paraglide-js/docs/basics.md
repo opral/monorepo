@@ -21,7 +21,7 @@ To add a new locale, add it to the `locales` array in `<project0name>.inlang/set
 ## Adding and editing messages
 
 <doc-callout type="info">
-  This section assumes you use the inlang message format plugin that is setup by default in Paraglide JS. 
+  These examples use the inlang message format plugin that ships by default, but Paraglide works with any format plugin that produces the expected message files. Swap the plugin in `project.inlang/settings.json` if you prefer a different storage format—see the <a href="https://inlang.com/c/plugins">plugin directory</a>.
 </doc-callout>
 
 Messages are stored in `messages/{locale}.json` as key-value pairs. You can add parameters with curly braces.

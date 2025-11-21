@@ -30,16 +30,17 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.12",
     "@ai-sdk/provider": "^2.0.0",
-    "@lix-js/sdk": "workspace:*",
     "dedent": "^1.7.0",
     "zod": "^4.0.0"
   },
   "peerDependencies": {
-    "ai": "^5"
+    "ai": "^5",
+    "@lix-js/sdk": "workspace:*"
   },
   "devDependencies": {
     "@lix-js/plugin-md": "workspace:*",
     "@opral/tsconfig": "workspace:*",
+    "@lix-js/sdk": "workspace:*",
     "ai": "^5.0.34",
     "oxlint": "^1.14.0",
     "prettier": "^3.4.1",

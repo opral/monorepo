@@ -1,7 +1,10 @@
 {
 	"name": "@lix-js/sdk",
 	"type": "module",
-	"version": "0.5.0-preview.1",
+	"publishConfig": {
+		"access": "public"
+	},
+	"version": "0.5.0",
 	"description": "SDK for change control. Enable Git-like capabilities like versioning, history, and blame in apps and AI agents.",
 	"keywords": [
 		"change control",

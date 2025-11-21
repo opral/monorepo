@@ -1,7 +1,12 @@
 # Playground
 
 Try the HTML diff tool in real-time! Paste your "before" and "after" HTML to see how the diff would look.
-Make sure to include [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes for elements.
+Make sure to include [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes for elements you want to track changes for.
+
+You can also use these optional attributes to control diffing behavior:
+- [`data-diff-mode="words"`](/guide/attributes.html#words) - Enable word-level diffing within elements
+- [`data-diff-mode="element"`](/guide/attributes.html#element) - Use atomic element-level diffing
+- [`data-diff-show-when-removed`](/guide/attributes.html#data-diff-show-when-removed) - Show removed elements with strikethrough styling
 
 import DiffPlayground from "./components/diff-playground";
 

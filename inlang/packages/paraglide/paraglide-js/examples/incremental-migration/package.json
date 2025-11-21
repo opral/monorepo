@@ -10,6 +10,7 @@
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/plugin-i18next": "workspace:*",
 		"typescript": "^5.7.2",
 		"vite": "^6.0.7"
 	},
