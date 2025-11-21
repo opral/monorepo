@@ -2,10 +2,6 @@ import * as React from "react";
 import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
-import {
-	Collapsible,
-	CollapsibleContent,
-} from "@/components/ui/collapsible";
 
 export function CodeBlock({
 	code,
