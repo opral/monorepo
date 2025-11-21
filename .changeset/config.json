@@ -4,9 +4,11 @@
   "commit": false,
   "access": "restricted",
   "baseBranch": "main",
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
   "ignore": [
+    "@opral/flashtype",
+    "@lix-js/agent-sdk",
     "@inlang/cli-example",
-    "@inlang/fink",
     "@inlang/paraglide-js-benchmark",
     "@inlang/paraglide-js-example-cli",
     "@inlang/paraglide-js-example-vite",
@@ -22,6 +24,12 @@
     "@inlang/template-plugin",
     "@inlang/website",
     "@lix-js/sdk-example-server-protocol-handler-hono",
-    "@lix-js/plugin-prosemirror-example"
+    "@lix-js/plugin-prosemirror-example",
+    "@lix-js/host",
+    "lix-file-manager",
+    "csv-app",
+    "@inlang/*",
+    "vs-code-extension",
+    "sherlock-editor-app"
   ]
 }

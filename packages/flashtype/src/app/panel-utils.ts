@@ -19,7 +19,9 @@ const deepCloneValue = <T>(input: T): T => {
 	}
 
 	if (input instanceof Set) {
-		return new Set(Array.from(input.values(), (value) => deepCloneValue(value))) as unknown as T;
+		return new Set(
+			Array.from(input.values(), (value) => deepCloneValue(value)),
+		) as unknown as T;
 	}
 
 	if (input && typeof input === "object") {

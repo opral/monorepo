@@ -262,9 +262,7 @@ const resolveLabel = (
 	if (tabLabel) {
 		return tabLabel(view, instance);
 	}
-	return (
-		(instance.state?.flashtype?.label as string | undefined) ?? view.label
-	);
+	return (instance.state?.flashtype?.label as string | undefined) ?? view.label;
 };
 
 interface TabBarProps {
