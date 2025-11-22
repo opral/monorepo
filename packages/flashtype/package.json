@@ -46,7 +46,10 @@
 		"lucide-react": "^0.542.0",
 		"react": "^19.2.0",
 		"react-dom": "^19.2.0",
+		"react-markdown": "^9.0.1",
 		"react-resizable-panels": "^2.1.9",
+		"react-syntax-highlighter": "^15.6.1",
+		"remark-gfm": "^4.0.0",
 		"tailwind-merge": "^3.3.1"
 	},
 	"devDependencies": {
@@ -56,6 +59,7 @@
 		"@testing-library/react": "^16.0.0",
 		"@types/react": "^19.2.2",
 		"@types/react-dom": "^19.2.2",
+		"@types/react-syntax-highlighter": "^15.5.13",
 		"@vitejs/plugin-react": "^5.0.2",
 		"babel-plugin-react-compiler": "^1.0.0",
 		"happy-dom": "^18.0.1",
