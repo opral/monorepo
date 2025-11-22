@@ -1,11 +1,14 @@
 {
 	"name": "@lix-js/plugin-md",
 	"type": "module",
-	"private": true,
 	"version": "0.1.3",
 	"license": "Apache-2.0",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"
+	},
+	"publishConfig": {
+		"access": "public"
 	},
 	"scripts": {
 		"build": "rolldown -c",
