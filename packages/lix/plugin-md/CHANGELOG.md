@@ -1,5 +1,11 @@
 # @lix-js/plugin-md
 
+## 0.2.0
+
+### Minor Changes
+
+- ffec3ca: Prepare the Markdown plugin for its first public publish on npm.
+
 ## 0.1.3
 
 ### Patch Changes
