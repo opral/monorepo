@@ -7,6 +7,10 @@
 	"exports": {
 		".": "./dist/index.js"
 	},
+	"files": [
+		"dist",
+		"src"
+	],
 	"publishConfig": {
 		"access": "public"
 	},

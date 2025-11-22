@@ -7,6 +7,7 @@ packages:
   - '!packages/lix/file-manager'
   - '!packages/lix/host'
   - '!**/*/dist'
+  - '!inlang/packages/website/dist/**'
   - packages/**/*
   - packages/*/example
   - packages/*/examples/*
