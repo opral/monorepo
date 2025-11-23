@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+  "name": "lix-html-diff",
+  "compatibility_date": "2025-11-23",
+  "assets": {
+    "directory": "./docs_build"
+  },
+  "build": {
+    "command": "pnpm --filter @lix-js/html-diff... build"
+  }
+}
