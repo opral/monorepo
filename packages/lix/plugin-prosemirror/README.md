@@ -59,7 +59,7 @@ const view = new EditorView(document.querySelector("#editor"), { state });
 
 ## How it works
 
-- Node-per-entity: each node with an `attrs.id` (or legacy `_id`) becomes a stored entity. The document entity keeps the ordered list of child IDs.
+- Node-per-entity: each node with an `attrs.id` becomes a stored entity. The document entity keeps the ordered list of child IDs.
 - Content vs. structure: leaf nodes track text/marks; container nodes track attributes and the order of their children. New child nodes are captured inside their parent snapshot the first time they appear.
 - Apply: `applyChanges` rebuilds the ProseMirror JSON by merging stored node snapshots and the document’s `children_order`.
 
