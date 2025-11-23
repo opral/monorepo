@@ -195,6 +195,16 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			const filters = extractLiteralFilters(recompiled);
 			const watchedVersions = new Set(filters.versionIds);
 			const watchedEntityIds = new Set(filters.entityIds);
+			const watchedFileIds = new Set(filters.fileIds);
+			const targetsFileTable = schemaKeys.includes("lix_file_descriptor");
+			const previousFileIds =
+				targetsFileTable && previousResult
+					? new Set(
+							(previousResult as any[])
+								.map((row) => (row as any)?.file_id ?? (row as any)?.id)
+								.filter((id): id is string => typeof id === "string")
+						)
+					: new Set<string>();
 			const targetsActiveVersion =
 				watchedVersions.size === 0 &&
 				(schemaKeys.includes("state") ||
@@ -234,6 +244,21 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 				const changeVid =
 					(change.lixcol_version_id as string | undefined) ||
 					(change.version_id as string | undefined);
+				const changeFileId = change.file_id as string | undefined;
+
+				// File reads depend on all schema keys touching the same file id.
+				if (targetsFileTable && changeFileId) {
+					if (watchedFileIds.size > 0 && watchedFileIds.has(changeFileId)) {
+						return true;
+					}
+					if (
+						watchedFileIds.size === 0 &&
+						previousFileIds.size > 0 &&
+						previousFileIds.has(changeFileId)
+					) {
+						return true;
+					}
+				}
 
 				// Special case: queries with 'change' schema should always re-execute
 				if (schemaKeys.includes("change")) {

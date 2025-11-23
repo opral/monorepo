@@ -7,7 +7,8 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	changes,
 }) => {
 	// Parse the current document
-	const currentDocument: ProsemirrorNode = file.data
+	const hasExistingData = file.data && file.data.length > 0;
+	const currentDocument: ProsemirrorNode = hasExistingData
 		? JSON.parse(new TextDecoder().decode(file.data))
 		: { type: "doc", content: [] };
 
@@ -259,7 +260,7 @@ function applyDocumentOrder(
 	for (const nodeId of childrenOrder) {
 		// First check if the node exists in the current document content
 		const existingNode = document.content.find(
-			(node) => (node.attrs?.id || node._id) === nodeId,
+			(node) => node.attrs?.id === nodeId,
 		);
 
 		if (existingNode) {
@@ -278,7 +279,7 @@ function applyDocumentOrder(
 
 	// Add any remaining nodes that weren't in the children_order but exist in current content
 	for (const node of document.content) {
-		const nodeId = node.attrs?.id || node._id;
+		const nodeId = node.attrs?.id;
 		if (nodeId && !processedIds.has(nodeId)) {
 			newContent.push(node);
 			processedIds.add(nodeId);

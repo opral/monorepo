@@ -49,6 +49,37 @@ test("should extract schema keys from key_value queries", async () => {
 	await lix.close();
 });
 
+test("extractLiteralFilters captures file_id", async () => {
+	const lix = await openLix({});
+
+	const compiled = lix.db
+		.selectFrom("file")
+		.where("id", "=", "file-123")
+		.select(["id", "path"])
+		.compile();
+
+	const filters = extractLiteralFilters(compiled);
+	expect(filters.fileIds).toEqual(["file-123"]);
+
+	await lix.close();
+});
+
+test("extractLiteralFilters does not misclassify joined id columns as file_id", async () => {
+	const lix = await openLix({});
+
+	const compiled = lix.db
+		.selectFrom("change")
+		.innerJoin("file", "file.id", "change.file_id")
+		.where("change.id", "=", "change-123")
+		.select(["change.id", "change.file_id"])
+		.compile();
+
+	const filters = extractLiteralFilters(compiled);
+	expect(filters.fileIds).toEqual([]);
+
+	await lix.close();
+});
+
 test("should extract schema keys from state table queries", async () => {
 	const lix = await openLix({});
 

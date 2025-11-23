@@ -34,7 +34,6 @@ export interface ProsemirrorNodeMark {
  */
 export interface ProsemirrorNode {
 	type: string;
-	_id?: string;
 	content?: ProsemirrorNode[];
 	text?: string;
 	attrs?: ProsemirrorNodeAttributes;
@@ -55,11 +54,6 @@ export const ProsemirrorNodeSchema: LixSchemaDefinition = {
 			type: "string",
 			description:
 				"ProseMirror node type identifier (e.g. paragraph, heading).",
-		},
-		_id: {
-			type: "string",
-			description:
-				"Legacy field for node identifiers. Prefer using attrs.id when possible.",
 		},
 		text: {
 			type: "string",

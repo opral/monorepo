@@ -978,6 +978,95 @@ test("multiple observers with different entities should not interfere", async ()
 	await lix.close();
 });
 
+test("observing a file via nested select re-emits when a state commit touches that file", async () => {
+	const lix = await openLix({});
+	const encoder = new TextEncoder();
+	const decoder = new TextDecoder();
+
+	// Seed a file to mirror the ProseMirror example setup.
+	await lix.db
+		.insertInto("file")
+		.values({
+			path: "/prosemirror.json",
+			data: encoder.encode(JSON.stringify({ content: "old" })),
+		})
+		.execute();
+
+	const { id: fileId } = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/prosemirror.json")
+		.select("id")
+		.executeTakeFirstOrThrow();
+
+	// Mirror the example query: file row selected via nested selectFrom.
+	const fileQuery = lix.db
+		.selectFrom("file")
+		.where(
+			"id",
+			"=",
+			lix.db
+				.selectFrom("file")
+				.where("path", "=", "/prosemirror.json")
+				.select("id")
+		)
+		.select(["id", "data"]);
+
+	const emissions: Array<Array<{ id: string; data: Uint8Array }>> = [];
+	const sub = lix
+		.observe(fileQuery)
+		.subscribe({ next: (rows) => emissions.push(rows) });
+
+	await new Promise((r) => setTimeout(r, 10));
+	expect(emissions).toHaveLength(1);
+	expect(emissions[0]).toHaveLength(1);
+	const initialRow = emissions[0]?.[0];
+	expect(initialRow).toBeDefined();
+	expect(decoder.decode(initialRow!.data)).toContain("old");
+
+	// Update the file payload so the observable should emit a new value when invalidated.
+	await lix.db
+		.updateTable("file")
+		.set({ data: encoder.encode(JSON.stringify({ content: "fresh" })) })
+		.where("id", "=", fileId)
+		.execute();
+
+	const { version_id: versionId } = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Emit a state_commit for the same file with a schema key that does NOT match the file table.
+	lix.hooks._emit("state_commit", {
+		changes: [
+			{
+				id: "prosemirror-change",
+				entity_id: "document-root",
+				schema_key: "prosemirror_document",
+				schema_version: "1.0",
+				file_id: fileId,
+				plugin_key: "plugin_prosemirror",
+				created_at: new Date().toISOString(),
+				snapshot_content: { info: "updated via plugin" },
+				version_id: versionId,
+				commit_id: "commit-prosemirror",
+				writer_key: null,
+			},
+		],
+	});
+
+	await new Promise((r) => setTimeout(r, 30));
+
+	// The observer should re-execute because the state change targets the same file.
+	expect(emissions).toHaveLength(2);
+	expect(emissions[1]).toHaveLength(1);
+	const updatedRow = emissions[1]?.[0];
+	expect(updatedRow).toBeDefined();
+	expect(decoder.decode(updatedRow!.data)).toContain("fresh");
+
+	sub.unsubscribe();
+	await lix.close();
+});
+
 test("subquery should re-execute when parent or child entities change", async () => {
 	const lix = await openLix({});
 	const subqueryEmissions: any[] = [];

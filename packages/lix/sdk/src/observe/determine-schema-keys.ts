@@ -140,15 +140,37 @@ export function extractLiteralFilters(compiledQuery: any): {
 	schemaKeys: string[];
 	versionIds: string[];
 	entityIds: string[];
+	fileIds: string[];
 } {
 	const schemaKeys = new Set<string>();
 	const versionIds = new Set<string>();
 	const entityIds = new Set<string>();
+	const fileIds = new Set<string>();
+	const tableNames = new Set<string>();
+	const tableAliases = new Map<string, string>();
 
 	const root = compiledQuery?.query ?? compiledQuery;
 	if (!root) {
-		return { schemaKeys: [], versionIds: [], entityIds: [] };
+		return { schemaKeys: [], versionIds: [], entityIds: [], fileIds: [] };
 	}
+
+	const rootQuery = root?.query ?? root;
+	if (rootQuery?.from)
+		extractTableNamesFromQueryNode(rootQuery.from, tableNames, tableAliases);
+	if (rootQuery?.joins) {
+		for (const join of rootQuery.joins) {
+			extractTableNamesFromQueryNode(join, tableNames, tableAliases);
+		}
+	}
+	if (rootQuery?.where)
+		extractTableNamesFromQueryNode(rootQuery.where, tableNames, tableAliases);
+
+	const fileTablesPresent =
+		tableNames.has("file") || tableNames.has("file_by_version");
+	const onlyFileTablesPresent =
+		fileTablesPresent &&
+		tableNames.size > 0 &&
+		Array.from(tableNames).every(isFileTableName);
 
 	const record = (column: string | undefined, values: string[] | undefined) => {
 		if (!column || !values || values.length === 0) return;
@@ -159,7 +181,9 @@ export function extractLiteralFilters(compiledQuery: any): {
 					? versionIds
 					: column === "entity_id"
 						? entityIds
-						: undefined;
+						: column === "file_id"
+							? fileIds
+							: undefined;
 		if (!target) return;
 		for (const value of values) {
 			if (typeof value === "string") {
@@ -193,24 +217,34 @@ export function extractLiteralFilters(compiledQuery: any): {
 				return;
 			case "BinaryOperationNode": {
 				const operator = node.operator?.operator ?? node.operator;
-				const leftColumn = extractColumnName(node.leftOperand);
-				const rightColumn = extractColumnName(node.rightOperand);
+				const leftColumn = extractColumnReference(node.leftOperand);
+				const rightColumn = extractColumnReference(node.rightOperand);
 				const leftValues = extractLiteralValues(node.leftOperand);
 				const rightValues = extractLiteralValues(node.rightOperand);
 
 				if (
-					leftColumn === "schema_key" ||
-					leftColumn === "version_id" ||
-					leftColumn === "entity_id"
+					leftColumn?.column === "schema_key" ||
+					leftColumn?.column === "version_id" ||
+					leftColumn?.column === "entity_id" ||
+					leftColumn?.column === "file_id"
 				) {
-					record(leftColumn, rightValues);
+					record(leftColumn.column, rightValues);
 				}
 				if (
-					rightColumn === "schema_key" ||
-					rightColumn === "version_id" ||
-					rightColumn === "entity_id"
+					rightColumn?.column === "schema_key" ||
+					rightColumn?.column === "version_id" ||
+					rightColumn?.column === "entity_id" ||
+					rightColumn?.column === "file_id"
 				) {
-					record(rightColumn, leftValues);
+					record(rightColumn.column, leftValues);
+				}
+
+				// Heuristic: file queries filter on 'id' column; capture as file_id when file table is present.
+				if (fileTablesPresent) {
+					if (isFileIdColumn(leftColumn, onlyFileTablesPresent, tableAliases))
+						record("file_id", rightValues);
+					if (isFileIdColumn(rightColumn, onlyFileTablesPresent, tableAliases))
+						record("file_id", leftValues);
 				}
 
 				// For IN/NOT IN operators, both sides can carry literals. Already handled above.
@@ -288,24 +322,6 @@ export function extractLiteralFilters(compiledQuery: any): {
 		return undefined;
 	};
 
-	const extractColumnName = (node: any): string | undefined => {
-		if (!node) return undefined;
-		switch (node.kind) {
-			case "ReferenceNode":
-				return extractColumnName(node.column);
-			case "ColumnNode":
-				return extractColumnName(node.column);
-			case "IdentifierNode":
-				return typeof node.name === "string" ? node.name : undefined;
-			case "AliasNode":
-				return extractColumnName(node.node);
-			case "ParensNode":
-				return extractColumnName(node.node);
-			default:
-				return undefined;
-		}
-	};
-
 	const queryNode = root?.query ?? root;
 	if (queryNode?.where) visitFilterNode(queryNode.where);
 	if (queryNode?.having) visitFilterNode(queryNode.having);
@@ -319,6 +335,7 @@ export function extractLiteralFilters(compiledQuery: any): {
 		schemaKeys: Array.from(schemaKeys),
 		versionIds: Array.from(versionIds),
 		entityIds: Array.from(entityIds),
+		fileIds: Array.from(fileIds),
 	};
 }
 
@@ -327,7 +344,8 @@ export function extractLiteralFilters(compiledQuery: any): {
  */
 function extractTableNamesFromQueryNode(
 	node: any,
-	tableNames: Set<string>
+	tableNames: Set<string>,
+	tableAliases?: Map<string, string>
 ): void {
 	if (!node) return;
 
@@ -335,8 +353,9 @@ function extractTableNamesFromQueryNode(
 	switch (node.kind) {
 		case "TableNode": {
 			// Extract table name from TableNode
-			if (node.table && node.table.identifier && node.table.identifier.name) {
-				tableNames.add(node.table.identifier.name);
+			const tableName = extractTableIdentifier(node.table);
+			if (tableName) {
+				tableNames.add(tableName);
 			}
 			break;
 		}
@@ -388,14 +407,25 @@ function extractTableNamesFromQueryNode(
 		case "AliasNode": {
 			// Look inside the aliased node
 			if (node.node) {
-				extractTableNamesFromQueryNode(node.node, tableNames);
+				const aliasedTableName =
+					node.node.kind === "TableNode"
+						? extractTableIdentifier(node.node.table)
+						: extractTableIdentifier(node.node);
+				if (aliasedTableName && node.alias?.name) {
+					tableAliases?.set(node.alias.name, aliasedTableName);
+				}
+				extractTableNamesFromQueryNode(node.node, tableNames, tableAliases);
 			}
 			break;
 		}
 
 		case "SetOperationNode": {
 			if (node.expression) {
-				extractTableNamesFromQueryNode(node.expression, tableNames);
+				extractTableNamesFromQueryNode(
+					node.expression,
+					tableNames,
+					tableAliases
+				);
 			}
 			break;
 		}
@@ -409,11 +439,15 @@ function extractTableNamesFromQueryNode(
 						if (Array.isArray(value)) {
 							for (const item of value) {
 								if (item && typeof item === "object" && item.kind) {
-									extractTableNamesFromQueryNode(item, tableNames);
+									extractTableNamesFromQueryNode(
+										item,
+										tableNames,
+										tableAliases
+									);
 								}
 							}
 						} else if (value.kind) {
-							extractTableNamesFromQueryNode(value, tableNames);
+							extractTableNamesFromQueryNode(value, tableNames, tableAliases);
 						}
 					}
 				}
@@ -421,4 +455,69 @@ function extractTableNamesFromQueryNode(
 			break;
 		}
 	}
+}
+
+function isFileTableName(tableName: string): boolean {
+	return tableName === "file" || tableName === "file_by_version";
+}
+
+type ColumnReference = {
+	column?: string;
+	table?: string;
+};
+
+function extractColumnReference(node: any): ColumnReference | undefined {
+	if (!node) return undefined;
+	switch (node.kind) {
+		case "ReferenceNode": {
+			const table = extractTableIdentifier(node.table);
+			const nested = extractColumnReference(node.column);
+			return {
+				table: table ?? nested?.table,
+				column: nested?.column,
+			};
+		}
+		case "ColumnNode": {
+			const table = extractTableIdentifier(node.table);
+			const nested = extractColumnReference(node.column);
+			return {
+				table: table ?? nested?.table,
+				column: nested?.column,
+			};
+		}
+		case "IdentifierNode":
+			return { column: typeof node.name === "string" ? node.name : undefined };
+		case "AliasNode":
+		case "ParensNode":
+			return extractColumnReference(node.node);
+		default:
+			return undefined;
+	}
+}
+
+function extractTableIdentifier(node: any): string | undefined {
+	if (!node) return undefined;
+	switch (node.kind) {
+		case "TableNode":
+			return extractTableIdentifier(node.table);
+		case "SchemableIdentifierNode":
+			return extractTableIdentifier(node.identifier);
+		case "IdentifierNode":
+			return typeof node.name === "string" ? node.name : undefined;
+		default:
+			return undefined;
+	}
+}
+
+function isFileIdColumn(
+	columnRef: ColumnReference | undefined,
+	onlyFileTablesPresent: boolean,
+	tableAliases: Map<string, string>
+): boolean {
+	if (!columnRef || columnRef.column !== "id") return false;
+	if (columnRef.table) {
+		const resolvedTable = tableAliases.get(columnRef.table) ?? columnRef.table;
+		return isFileTableName(resolvedTable);
+	}
+	return onlyFileTablesPresent;
 }

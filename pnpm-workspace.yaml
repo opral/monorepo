@@ -6,6 +6,8 @@ packages:
   - '!packages/csv-app'
   - '!packages/lix/file-manager'
   - '!packages/lix/host'
+  - '!inlang/packages/paraglide/paraglide-js/examples/next-js-ssg'
+  - '!inlang/packages/paraglide/paraglide-js/examples/next-js-ssr'
   - '!**/*/dist'
   - '!inlang/packages/website/dist/**'
   - packages/**/*

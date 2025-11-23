@@ -47,7 +47,7 @@ function MainVersionSidebar() {
 				>
 					Checkpoints
 				</a>
-				<a
+				{/* <a
 					className={clsx(
 						"tab tab-bordered",
 						activeTab === "proposals" && "tab-active",
@@ -55,7 +55,7 @@ function MainVersionSidebar() {
 					onClick={() => setActiveTab("proposals")}
 				>
 					Proposals
-				</a>
+				</a> */}
 			</div>
 
 			<div className="flex-1 overflow-auto">
