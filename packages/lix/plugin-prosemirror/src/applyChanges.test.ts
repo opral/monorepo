@@ -5,6 +5,25 @@ import type { LixPlugin } from "@lix-js/sdk";
 
 type ApplyChangesArgs = Parameters<NonNullable<LixPlugin["applyChanges"]>>[0];
 
+test("handles empty initial file data by starting with an empty document", () => {
+	const result = applyChanges({
+		file: {
+			id: "doc",
+			path: "/prosemirror.json",
+			directory_id: null,
+			name: "prosemirror",
+			extension: "json",
+			data: new Uint8Array(),
+		},
+		changes: [],
+	});
+
+	expect(JSON.parse(new TextDecoder().decode(result.fileData))).toEqual({
+		type: "doc",
+		content: [],
+	});
+});
+
 // Test that detectChanges and applyChanges are in sync using mockChanges function
 test("it detects and applies changes to a Prosemirror document", async () => {
 	// Document without any paragraphs

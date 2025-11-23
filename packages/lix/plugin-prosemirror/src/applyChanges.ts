@@ -7,7 +7,8 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	changes,
 }) => {
 	// Parse the current document
-	const currentDocument: ProsemirrorNode = file.data
+	const hasExistingData = file.data && file.data.length > 0;
+	const currentDocument: ProsemirrorNode = hasExistingData
 		? JSON.parse(new TextDecoder().decode(file.data))
 		: { type: "doc", content: [] };
 
