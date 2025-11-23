@@ -1,138 +1,140 @@
-import {
-	openLix,
-	createChangeProposal,
-	acceptChangeProposal,
-	rejectChangeProposal,
-} from "@lix-js/sdk";
-
 export default async function runExample(console: any) {
-	const lix = await openLix({});
+  const {
+    openLix,
+    createVersion,
+    switchVersion,
+    createChangeProposal,
+    acceptChangeProposal,
+    rejectChangeProposal,
+  } = await import("@lix-js/sdk");
 
-	console.log("SECTION START 'create-proposal'");
+  // Optional: load JSON plugin so you can make structured edits before proposing
+  const { plugin: jsonPlugin } = await import("@lix-js/plugin-json");
 
-	// Get the main version
-	const mainVersion = await lix.db
-		.selectFrom("version")
-		.where("name", "=", "main")
-		.select("id")
-		.executeTakeFirstOrThrow();
+  const lix = await openLix({
+    providePlugins: [jsonPlugin],
+  });
 
-	// Create a feature version for proposed changes
-	await lix.db
-		.insertInto("version")
-		.values({
-			name: "feature-typo-fixes",
-			parent_version_id: mainVersion.id,
-		})
-		.execute();
+  console.log("SECTION START 'create-proposal'");
 
-	const featureVersion = await lix.db
-		.selectFrom("version")
-		.where("name", "=", "feature-typo-fixes")
-		.select("id")
-		.executeTakeFirstOrThrow();
+  // Get the main version
+  const mainVersion = await lix.db
+    .selectFrom("version")
+    .where("name", "=", "main")
+    .select(["id"])
+    .executeTakeFirstOrThrow();
 
-	// Make some changes in the feature version...
-	// (switch to feature version, modify files, etc.)
+  // Create a feature version for proposed changes (inherits from main)
+  const featureVersion = await createVersion({
+    lix,
+    name: "feature-typo-fixes",
+    inheritsFrom: mainVersion,
+  });
 
-	// Create a change proposal
-	const proposal = await createChangeProposal({
-		lix,
-		source: { id: featureVersion.id },
-		target: { id: mainVersion.id },
-	});
+  // Switch to the feature version and make edits before proposing
+  await switchVersion({ lix, to: featureVersion });
+  // ...perform edits here (e.g., update files/entities)...
 
-	console.log("Change proposal created:", proposal.id);
-	console.log("Status:", proposal.status); // "open"
+  // Create a change proposal
+  const proposal = await createChangeProposal({
+    lix,
+    source: { id: featureVersion.id },
+    target: { id: mainVersion.id },
+  });
 
-	console.log("SECTION END 'create-proposal'");
+  console.log("Change proposal created:", proposal.id);
+  console.log("Status:", proposal.status); // "open"
 
-	console.log("SECTION START 'query-proposals'");
+  console.log("SECTION END 'create-proposal'");
 
-	// Query all open proposals
-	const openProposals = await lix.db
-		.selectFrom("change_proposal")
-		.where("status", "=", "open")
-		.selectAll()
-		.execute();
+  console.log("SECTION START 'query-proposals'");
 
-	console.log("Open proposals:", openProposals.length);
+  // Query all open proposals
+  const openProposals = await lix.db
+    .selectFrom("change_proposal")
+    .where("status", "=", "open")
+    .selectAll()
+    .execute();
 
-	// Query proposals for a specific target version
-	const mainProposals = await lix.db
-		.selectFrom("change_proposal")
-		.where("target_version_id", "=", mainVersion.id)
-		.selectAll()
-		.execute();
+  console.log("Open proposals:", openProposals.length);
 
-	console.log("Proposals targeting main:", mainProposals.length);
+  // Query proposals for a specific target version
+  const mainProposals = await lix.db
+    .selectFrom("change_proposal")
+    .where("target_version_id", "=", mainVersion.id)
+    .selectAll()
+    .execute();
 
-	console.log("SECTION END 'query-proposals'");
+  console.log("Proposals targeting main:", mainProposals.length);
 
-	console.log("SECTION START 'accept-proposal'");
+  console.log("SECTION END 'query-proposals'");
 
-	// Accept the proposal - this merges changes and deletes the source version
-	await acceptChangeProposal({
-		lix,
-		proposal: { id: proposal.id },
-	});
+  console.log("SECTION START 'accept-proposal'");
 
-	console.log("Proposal accepted and merged");
-	console.log("Source version deleted");
+  // Switch back to main before accepting (so deleting the source version is safe)
+  await switchVersion({ lix, to: mainVersion });
 
-	// Verify the proposal status
-	const acceptedProposal = await lix.db
-		.selectFrom("change_proposal")
-		.where("id", "=", proposal.id)
-		.selectFirst();
+  // Accept the proposal - this merges changes and deletes the source version
+  await acceptChangeProposal({
+    lix,
+    proposal: { id: proposal.id },
+  });
 
-	console.log("Proposal status:", acceptedProposal?.status); // "accepted"
+  console.log("Proposal accepted and merged");
 
-	console.log("SECTION END 'accept-proposal'");
+  // Verify the source version was deleted after acceptance
+  const acceptedSource = await lix.db
+    .selectFrom("version")
+    .where("id", "=", featureVersion.id)
+    .selectAll()
+    .executeTakeFirst();
 
-	console.log("SECTION START 'reject-proposal'");
+  console.log("Source version deleted:", !acceptedSource);
 
-	// Create another proposal to demonstrate rejection
-	const featureVersion2 = await lix.db
-		.insertInto("version")
-		.values({
-			name: "feature-experimental",
-			parent_version_id: mainVersion.id,
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
+  console.log("SECTION END 'accept-proposal'");
 
-	const proposal2 = await createChangeProposal({
-		lix,
-		source: { id: featureVersion2.id },
-		target: { id: mainVersion.id },
-	});
+  console.log("SECTION START 'reject-proposal'");
 
-	// Reject the proposal - marks as rejected, keeps source version
-	await rejectChangeProposal({
-		lix,
-		proposal: { id: proposal2.id },
-	});
+  // Create another proposal to demonstrate rejection
+  const featureVersion2 = await createVersion({
+    lix,
+    name: "feature-experimental",
+    inheritsFrom: mainVersion,
+  });
 
-	console.log("Proposal rejected");
+  const proposal2 = await createChangeProposal({
+    lix,
+    source: { id: featureVersion2.id },
+    target: { id: mainVersion.id },
+  });
 
-	// Verify the rejection
-	const rejectedProposal = await lix.db
-		.selectFrom("change_proposal")
-		.where("id", "=", proposal2.id)
-		.selectFirst();
+  // Reject the proposal - marks as rejected, keeps source version
+  await rejectChangeProposal({
+    lix,
+    proposal: { id: proposal2.id },
+  });
 
-	console.log("Proposal status:", rejectedProposal?.status); // "rejected"
+  console.log("Proposal rejected");
 
-	// Source version still exists after rejection
-	const sourceExists = await lix.db
-		.selectFrom("version")
-		.where("id", "=", featureVersion2.id)
-		.selectFirst();
+  // Verify the rejection
+  const rejectedProposal = await lix.db
+    .selectFrom("change_proposal")
+    .where("id", "=", proposal2.id)
+    .selectAll()
+    .executeTakeFirst();
 
-	console.log("Source version still exists:", !!sourceExists);
+  console.log("Proposal status:", rejectedProposal?.status); // "rejected"
 
-	console.log("SECTION END 'reject-proposal'");
+  // Source version still exists after rejection
+  const sourceExists = await lix.db
+    .selectFrom("version")
+    .where("id", "=", featureVersion2.id)
+    .selectAll()
+    .executeTakeFirst();
+
+  console.log("Source version still exists:", !!sourceExists);
+
+  console.log("SECTION END 'reject-proposal'");
 }
 
 // Uncomment for running in node
