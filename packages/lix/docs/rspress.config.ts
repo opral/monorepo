@@ -117,36 +117,6 @@ export default defineConfig({
         },
       ],
       "/docs/api/": generateApiSidebar(path.join(__dirname, "src/docs")),
-      "/docs/plugins/": [
-        {
-          text: "Plugins",
-          items: [
-            { text: "Overview", link: "/docs/plugins/" },
-            {
-              text: "Creating Plugins",
-              link: "/docs/plugins/creating-plugins",
-            },
-            { text: "JSON Plugin", link: "/docs/plugins/json" },
-            { text: "CSV Plugin", link: "/docs/plugins/csv" },
-            { text: "Markdown Plugin", link: "/docs/plugins/markdown" },
-          ],
-        },
-      ],
-      "/docs/examples/": [
-        {
-          text: "Examples",
-          items: [
-            { text: "Overview", link: "/docs/examples/" },
-            { text: "Basic Usage", link: "/docs/examples/basic-usage" },
-            {
-              text: "Version Management",
-              link: "/docs/examples/version-management",
-            },
-            { text: "Collaboration", link: "/docs/examples/collaboration" },
-            { text: "Building an App", link: "/docs/examples/building-an-app" },
-          ],
-        },
-      ],
     },
     socialLinks: [
       {
