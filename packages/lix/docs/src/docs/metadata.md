@@ -96,4 +96,4 @@ Follow these guidelines for effective metadata usage:
 
 - **Don't use metadata for data you own:** If you control the schema of an entity, add the property directly to the schema instead of using metadata. Metadata is for _additional_ context, not core data.
 - **Don't duplicate `snapshot_content`:** Avoid storing data in metadata that is already present in the entity's `snapshot_content`.
-- **Don't store large objects:** Avoid storing large arrays, long strings, or binary data in metadata, as this can impact performance and repository size.
+- **Don't store large objects:** Avoid storing large arrays, long strings, or binary data in metadata, as this can impact performance and the size of a lix.

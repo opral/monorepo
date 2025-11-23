@@ -1,6 +1,7 @@
-# Key-Value
+# Key-Value Store
 
-A simple key-value store built into Lix with change control. Store any JSON value - from feature flags to UI preferences - and access it across your application.
+Lix has a built-in [entity](/docs/data-model) for key values. Store any JSON value - from feature flags to UI preferences - and access it across your application.
+
 
 ## Common Use Cases
 
@@ -8,68 +9,75 @@ A simple key-value store built into Lix with change control. Store any JSON valu
 - **App configuration** - Feature flags, environment settings, runtime toggles
 - **Lix configuration** - Lix itself stores key values like `lix_id`, `lix_name`, or `lix_deterministic_mode`
 
-## Quick Start
-
-Always namespace your keys to avoid collisions:
+## Basic Usage
 
 ```ts
-// ✅ DO: Use namespaced keys
+// Insert
 await lix.db
   .insertInto("key_value")
-  .values({ key: "myapp_sidebar_collapsed", value: true })
+  .values({ key: "myapp_theme", value: "dark" })
   .execute();
 
-// Read it back
-const sidebar = await lix.db
+// Read
+const config = await lix.db
   .selectFrom("key_value")
-  .where("key", "=", "myapp_sidebar_collapsed")
+  .where("key", "=", "myapp_theme")
   .executeTakeFirst();
-```
 
-## Do's and Don'ts
-
-### ✅ DO
-
-- **Always use namespaces**: `myapp_feature`, `ui_sidebar`, `config_theme`
-- **Store UI state as untracked**: Use `lixcol_untracked: 1` for ephemeral data
-
-### ❌ DON'T
-
-- **Never use bare keys**: Avoid `"theme"`, use `"myapp_theme"` instead
-
-## Real-World Examples
-
-### UI State Pattern
-
-```ts
-// Store dismissed prompts per file (from md-app)
-const key = `flashtype_prompt_dismissed_${activeFileId}`;
+// Update
 await lix.db
-  .insertInto("key_value")
-  .values({ key, value: true, lixcol_untracked: 1 })
+  .updateTable("key_value")
+  .where("key", "=", "myapp_theme")
+  .set({ value: "light" })
   .execute();
 ```
 
-### Untracked Preferences
+## Tracked vs Untracked
+
+**Tracked (default)** creates commits and appears in history:
 
 ```ts
-// UI preferences that don't create commits
+// Feature flag that should be versioned
 await lix.db
-  .insertInto("key_value_all")
+  .insertInto("key_value")
+  .values({ key: "myapp_beta_enabled", value: true })
+  .execute();
+```
+
+Use for: Feature flags, app configuration, version-specific settings
+
+**Untracked** values don't create commits:
+
+```ts
+// UI preference that shouldn't create commits
+await lix.db
+  .insertInto("key_value")
   .values({
-    key: "ui_sidebar_width",
+    key: "myapp_sidebar_width",
     value: 240,
-    lixcol_untracked: 1,
-    lixcol_version_id: "global",
+    lixcol_untracked: 1
   })
   .execute();
 ```
 
-## Views
+Use for: UI preferences, dismissed prompts, window positions, editor state
 
-- **`key_value`** - Active version only. Your default choice.
-- **`key_value_all`** - All versions. Use for untracked values or cross-version operations.
-- **`key_value_history`** - Read-only audit trail.
+## Namespacing
+
+Always prefix keys with your app name to avoid collisions:
+
+```ts
+// Good
+"myapp_theme"
+"myapp_sidebar_collapsed"
+"myapp_feature_enabled"
+
+// Bad - can conflict with other apps or Lix internals
+"theme"
+"enabled"
+```
+
+Lix uses the `lix_*` prefix internally (`lix_id`, `lix_name`, `lix_deterministic_mode`). Avoid this prefix.
 
 ## Important: Booleans
 

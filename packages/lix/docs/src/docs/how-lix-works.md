@@ -1,172 +1,198 @@
 # How Lix Works
 
-Lix is a change control system that runs in your application—in the browser, Node.js, or anywhere JavaScript runs. Think of it as "Git inside your app," but designed for structured data instead of text files.
+Lix is an embeddable change control system built on SQLite that tracks entity-level changes through a commit graph.
 
-## The Big Picture
+## Storage Layer
 
-At its core, Lix tracks changes to **entities** (meaningful units of data) within files. Instead of treating files as opaque blobs or tracking line-by-line diffs like Git, Lix understands the _structure_ of your data.
+Lix uses **SQLite** as its storage layer. The Lix engine manages the database and exposes high-level views for working with files, entities, and history:
+
+- `file` - Query current file states
+- `state` - Query current entity states
+- `change` - Access individual entity changes
+- `commit` - Access commit records
+- `version` - Work with branches
+- `file_history` - Query historical file states
+- `state_history` - Query historical entity states
+
+These views abstract the underlying database schema, providing a clean SQL interface for change control.
+
+## The Commit Graph
+
+Commits form a directed acyclic graph (DAG) where each commit references its parent commit(s):
 
 ```
-Your File (JSON, CSV, Excel, etc.)
-    ↓
-Plugin parses it into entities
-    ↓
-Lix tracks changes to each entity
-    ↓
-Query history, create branches, propose changes
+C4 ← C3 ← C2 ← C1
+      ↖
+       C5 ← C6
 ```
 
-This entity-level understanding enables:
-- **Fine-grained diffs** - "The `age` property changed from 30 to 31" instead of "line 5 changed"
-- **Smart merging** - Changes to different entities can merge automatically
-- **Granular history** - Query the history of a specific property or field
-- **Change proposals** - Review and approve changes before applying them
+**Key concept:** Each commit contains a change set (group of entity changes) and references parent commits. This creates a graph of history that enables:
 
-## How It Works
+- **History** - Walk backwards from any commit to see past states
+- **Versions** - Point to different commits to create parallel timelines
+- **Time travel** - Query state at any commit in the graph
 
-### 1. Files and Plugins
+The commit graph is global and shared across all versions.
 
-When you insert a file into Lix, you specify which **plugin** should handle it. Plugins understand file formats:
+> See [Architecture](/docs/architecture) for details on state materialisation, change set mechanics, and the formal data model.
 
+## Write File Flow
+
+Writing a file invokes a plugin to detect and record changes:
+
+### 1. File Update
 ```ts
 await lix.db
-  .insertInto("file")
-  .values({
-    path: "/data.json",
-    data: fileContent,
-    plugin_key: "plugin_json",  // JSON plugin handles this file
-  })
+  .updateTable("file")
+  .where("path", "=", "/example.json")
+  .set({ data: newFileContent })
   .execute();
 ```
 
-The plugin is responsible for:
-- **Parsing** the file into entities
-- **Detecting** what changed when the file is updated
-- **Serializing** entities back into the original format
+### 2. Plugin Detects Changes
 
-### 2. Entities and State
-
-An **entity** is a meaningful, addressable unit of data. What counts as an entity depends on the file type:
-
-| File Type | Example Entities |
-|-----------|------------------|
-| JSON | A property path like `user.name` or `settings.theme` |
-| Spreadsheet | A row, or a specific cell |
-| Document | A paragraph, heading, or code block |
-
-When a plugin detects a change, it records the entity's new state in Lix's database. Each state record captures:
-- **What** changed (entity ID)
-- **When** it changed (timestamp)
-- **The new value** (snapshot content)
-- **Which version** it belongs to (version ID)
-
-### 3. Versions (Branches)
-
-Like Git branches, Lix supports multiple parallel **versions** of your data. You can:
-
-- Create experimental versions without affecting the main data
-- Work on multiple features simultaneously
-- Compare differences between versions
-- Merge changes from one version to another
+The plugin's `detectChanges` method compares before/after states:
 
 ```ts
-// Create a new version (branch)
-await lix.db
-  .insertInto("version")
-  .values({
-    name: "feature-experiment",
-    parent_version_id: currentVersionId,
-  })
-  .execute();
-
-// Switch the active version
-await lix.db
-  .updateTable("active_version")
-  .set({ version_id: newVersionId })
-  .execute();
+detectChanges({ before, after, querySync }) => DetectedChange[]
 ```
 
-### 4. Change Control Features
+Returns an array of detected changes:
+```ts
+[
+  {
+    schema: JSONPointerValueSchema,
+    entity_id: "/user/age",
+    snapshot_content: { path: "/user/age", value: 31 }
+  }
+]
+```
 
-With files, entities, and versions in place, Lix provides Git-like capabilities:
+### 3. Engine Creates Records
 
-- **[History](/docs/history)** - View past states of any entity
-- **[Diffs](/docs/diffs)** - Compare entity states across versions or time
-- **[Attribution](/docs/attribution)** - See who changed what and when (blame)
-- **[Change Proposals](/docs/change-proposals)** - Review and approve changes before merging
-- **[Validation Rules](/docs/validation-rules)** - Enforce data quality constraints
-- **[Undo/Redo](/docs/undo-redo)** - Step through change history
-- **[Restore](/docs/restore)** - Time travel to previous states
+For each detected change, the engine:
 
-### 5. Queries, Not Commands
+1. Creates a `change` record with the new entity snapshot
+2. Updates the `state` view to reflect the current entity state
+3. Groups changes into a commit (change set)
+4. Updates the commit graph with the new commit
 
-Unlike Git's command-line interface (`git log`, `git diff`, `git blame`), Lix exposes its data through **SQL queries**. This makes change control queryable and programmable:
+### 4. History Preserved
+
+Old entity states remain queryable through `state_history`. Nothing is ever deleted - new records are added while old ones are preserved.
+
+## State Inheritance
+
+Versions inherit state from their commit ancestors using a copy-on-write model:
+
+```
+Main version at C3:
+- entity A (changed in C1)
+- entity B (changed in C2)
+- entity C (changed in C3)
+
+Feature version at C5 (parent: C3):
+- Inherits: entity A, entity B
+- Changed: entity C (modified in C5)
+- New: entity D (added in C5)
+```
+
+**How it works:**
+
+- Versions point to commits in the commit graph
+- When you query a version, the engine walks back through parent commits
+- Entities are inherited from ancestors until a change is found
+- Changes in a version only affect that version's state
+
+**Benefits:**
+
+- Efficient storage - unchanged entities aren't duplicated
+- Fast branching - no need to copy all data
+- Cheap merging - compare entities across branches
+
+## History Queries
+
+The `file_history` and `state_history` views use two special columns:
+
+**`lixcol_root_commit_id`**
+- The commit you're querying history from
+- Walk the commit graph backwards from this point
+- Filter by this to scope history to a specific timeline
+
+**`lixcol_depth`**
+- Distance from the root commit
+- `0` = current state at root commit
+- `1` = one commit back
+- `2+` = further back in history
+
+### Example Query
 
 ```ts
-// Find all changes to a specific entity in the last 24 hours
-const recentChanges = await lix.db
-  .selectFrom("change")
-  .where("entity_id", "=", "user.email")
-  .where("created_at", ">", Date.now() - 86400000)
+// Get file history from the active version's commit
+const history = await lix.db
+  .selectFrom("file_history")
+  .where("path", "=", "/example.json")
+  .where(
+    "lixcol_root_commit_id",
+    "=",
+    lix.db
+      .selectFrom("active_version")
+      .innerJoin("version", "active_version.version_id", "version.id")
+      .select("version.commit_id")
+  )
+  .orderBy("lixcol_depth", "asc")
   .selectAll()
   .execute();
 ```
 
-This query-first approach means you can:
-- Build custom UIs that show exactly the data you need
-- Create automation that reacts to specific changes
-- Integrate change control deeply into your application's logic
+This returns all historical states of the file, ordered from current (depth 0) to oldest.
 
-## Data Flow Example
+## The Engine
 
-Here's what happens when you update a file:
+The Lix engine runs anywhere JavaScript runs:
+
+**Browser**
+- Runs fully client-side
+- Data persists locally
+- Enables offline-first applications
+
+**Node.js**
+- Runs on servers or CLI tools
+- File-based persistence
+
+**Workers**
+- Runs in Web Workers or Worker Threads
+- Keeps heavy processing off the main thread
+
+**Why SQLite?**
+- **Embeddable** - No separate server process
+- **Cross-platform** - Works everywhere JS runs
+- **Transactional** - ACID guarantees for change control
+- **Queryable** - Full SQL for flexible queries
+- **Compact** - Efficient binary storage format
+
+## Data Flow Summary
 
 ```
-1. Plugin detects changes
+1. File updated
    ↓
-2. Creates change records for modified entities
+2. Plugin.detectChanges() compares before/after
    ↓
-3. Inserts new state records with updated values
+3. Returns DetectedChange[]
    ↓
-4. Preserves old state records for history
+4. Engine creates change records
    ↓
-5. Your app queries current or historical state
+5. Engine updates state views
+   ↓
+6. Engine creates commit in commit graph
+   ↓
+7. History preserved, state queryable
 ```
 
-The key insight: **Nothing is ever deleted**. Every change creates new records while preserving the old ones. This is how Lix provides complete history, undo/redo, and time travel.
-
-## Core Mental Model
-
-Think of Lix as three layers:
-
-1. **Storage layer** - SQLite database with all state and change records
-2. **Plugin layer** - File format handlers that parse/serialize entities
-3. **Query layer** - SQL API to access current state, history, diffs, etc.
-
-You interact primarily with the query layer, using standard SQL to:
-- Read current data
-- Query history
-- Compare versions
-- Track changes
-
-## What Makes Lix Different
-
-**vs Git:**
-- Lix works with any file format (not just text)
-- Entity-level tracking (not line-based)
-- Embedded in your app (not a separate tool)
-- SQL queries (not CLI commands)
-
-**vs Traditional databases:**
-- Full change history (not just current state)
-- Branching/versioning (like Git)
-- Change proposals and approval workflows
-- Works offline in the browser
+**Key insight:** The engine manages all complexity. You interact through simple SQL queries against views (`file`, `state`, `file_history`, etc.), while the engine handles commit graph traversal, state inheritance, and change detection.
 
 ## Next Steps
 
-Now that you understand how Lix works, you can:
-
-- Learn about the [Data Model](/docs/data-model) (entities, schemas, and how they relate)
-- Explore [Architecture](/docs/architecture) for implementation details
-- Try the [Change Control](/docs/versions) features to see what you can build
+- **[Architecture](/docs/architecture)** - Deep dive into state materialisation, change sets, and design rationale
+- **[Plugins](/docs/plugins)** - Learn how plugins detect entity changes
+- **[Querying Changes](/docs/querying-changes)** - Master the SQL API for working with changes and history

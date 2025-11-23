@@ -1,168 +1,162 @@
 # Data Model
 
-Lix's data model is built on two core concepts: **entities** and **schemas**. Understanding these concepts is essential to working with Lix effectively.
+Lix tracks changes at the **entity level** using **schemas** to define entity structure. This works for any file type - text or binary.
 
 ## Entities: Meaningful Units of Data
 
-An **entity** is a meaningful, addressable unit of data within a file. Instead of treating files as single blobs or tracking line-by-line changes, Lix uses plugins to identify and track individual entities.
+An **entity** is a meaningful, addressable unit of data within a file. Plugins define what counts as an entity based on the file type.
 
-### What Counts as an Entity?
-
-The definition depends on the file type and the plugin that handles it:
+### Examples of entities
 
 | File Type                          | Example Entities                                                        |
 | :--------------------------------- | :---------------------------------------------------------------------- |
-| **JSON**                           | A specific key-value pair, an item in an array, or a nested object     |
-| **Spreadsheets (Excel, CSV)**      | A complete row, or an individual cell at a specific coordinate          |
-| **Documents (docx, md)**           | A paragraph, a heading, a list item, or a code block                    |
-| **Design Files (Figma, Sketch)**   | A component, a frame, a layer, a text node, or a vector shape           |
-| **3D Models (glTF, FBX)**          | A mesh, a material, a bone in a skeleton, or a node in the scene graph  |
-| **Image Files (PSD, Krita)**       | A layer, a labeled object or region, or a path                          |
+| **JSON**                           | `/user/name`, `/theme`, `/items/0` (JSON Pointer paths)                |
+| **Markdown**                       | A paragraph, heading, list, or code block                               |
+| **Spreadsheets (Excel, CSV)**      | A row, or an individual cell                                            |
+| **Design Files (Figma, Sketch)**   | A component, frame, layer, text node, or vector shape                   |
+| **3D Models (glTF, FBX)**          | A mesh, material, bone in a skeleton, or node in the scene graph        |
+| **Image Files (PSD, Krita)**       | A layer, labeled object or region, or path                              |
 
-### Why Entity-Level Tracking Matters
+The key insight: Lix works with **any file format** - text or binary. Plugins teach Lix how to understand the structure, enabling entity-level tracking regardless of the underlying format.
 
-Traditional version control systems like Git track files line-by-line. This works for code but fails for complex formats. Consider this JSON change:
+### Why Entity-Level Tracking?
 
-```diff
-- {"name":"John","age":30,"city":"New York"}
-+ {"name":"John","age":31,"city":"New York"}
-```
-
-Git sees "line 1 changed," but the **meaning** of the change is lost. Applications can't programmatically answer:
-- "What did the `age` property change from and to?"
-- "Show me the history of all changes to `age`"
-- "Who changed the age and when?"
-
-Lix's entity-based model solves this by enabling:
+Entity-level tracking enables:
 
 **Fine-Grained Diffs**
-- Instead of "line 5 changed," you get "the `age` property changed from 30 to 31"
-- See [Diffs](/docs/diffs) for details
+- See exactly what changed: "the `/user/age` property changed from 30 to 31"
+- Not just "line 5 changed"
 
-**Precise Commenting**
-- Attach discussions to a specific paragraph, cell, or function
-- Not just to the file as a whole
+**Semantic Queries**
+- "Show me the history of `/user/age`"
+- "Who changed this specific paragraph?"
+- "What cells in this spreadsheet were modified?"
 
 **Smart Merging**
 - Changes to different entities merge automatically
-- Even if they're on the same line in the text file
+- Even if they're on the same line in the source file
 
-**Granular Access Control**
-- Grant permissions per entity
-- Users can edit specific fields but not others
+**Precise Comments**
+- Attach discussions to a specific paragraph, cell, or component
+- Not just to the file as a whole
 
 ### Example: JSON Entities
 
-The Lix JSON plugin treats each property path as a unique entity:
+The JSON plugin uses JSON Pointer (RFC 6901) to identify entities:
 
 ```json
 {
   "user": {
-    "name": "John Doe"
+    "name": "John Doe",
+    "age": 30
   },
   "theme": "dark"
 }
 ```
 
-This creates two entities:
-1. `user.name` with value `"John Doe"`
-2. `theme` with value `"dark"`
+This creates entities with these IDs:
+- `/user/name` with value `"John Doe"`
+- `/user/age` with value `30`
+- `/theme` with value `"dark"`
 
-If someone changes `theme` to `"light"`, the plugin detects this as a change to the `theme` entity. This change is queryable, mergeable, and trackable at a granular level.
+If someone changes `theme` to `"light"`, the plugin detects this as a change to the `/theme` entity. This change is queryable, mergeable, and trackable at a granular level.
 
 ## Schemas: Defining Entity Structure
 
-A **Lix Schema** formally defines the structure of data for a type of entity. Think of it as a contract that ensures data consistency across the system.
+A **schema** defines the structure and constraints of an entity type. Schemas use [JSON Schema](https://json-schema.org/) with Lix-specific extensions prefixed with `x-lix-`.
 
-### The Role of Schemas
+### Schema Example
 
-Schemas are fundamental to how Lix works:
-
-**Data Contract**
-- Defines exactly what data a plugin will provide
-- Example: The JSON plugin's schema guarantees every change includes a `property` (the path) and a `value`
-
-**Validation**
-- Lix validates changes against schemas
-- Prevents corrupt or malformed data
-
-**Interoperability**
-- Schemas make entity data understandable across the system
-- UIs, diffing tools, and other plugins can work with any entity type
-
-### Schema Structure
-
-Lix schemas extend [JSON Schema](https://json-schema.org/) with Lix-specific properties prefixed with `x-lix-`.
-
-Here's a simple example from the JSON plugin:
+Here's the actual schema from the JSON plugin:
 
 ```ts
 import type { LixSchemaDefinition } from "@lix-js/sdk";
 
-export const JSONPropertySchema: LixSchemaDefinition = {
-  "x-lix-key": "plugin_json_property",      // Unique identifier
-  "x-lix-version": "1.0",                    // Schema version
+export const JSONPointerValueSchema: LixSchemaDefinition = {
+  "x-lix-key": "plugin_json_pointer_value",   // Unique identifier
+  "x-lix-version": "1.0",                      // Schema version
+  "x-lix-primary-key": ["/path"],              // Primary key
   type: "object",
   properties: {
-    property: { type: "string" },            // The JSON path
-    value: { /* accepts any JSON value */ }, // The property value
+    path: {
+      type: "string",
+      description: "RFC 6901 JSON Pointer (e.g., '/user/name')",
+    },
+    value: {
+      // Accepts any JSON value
+      description: "JSON value at the pointer path",
+    },
   },
-  required: ["property", "value"],
+  required: ["path", "value"],
   additionalProperties: false,
 };
 ```
 
 **Lix-Specific Fields:**
-- `x-lix-key`: Globally unique identifier (snake_case)
+- `x-lix-key`: Globally unique schema identifier (snake_case)
 - `x-lix-version`: Version number for schema evolution
+- `x-lix-primary-key`: JSON Pointer(s) to properties that uniquely identify an entity
 
 **Standard JSON Schema Fields:**
-- `type`, `properties`, `required`, etc.
+- `type`, `properties`, `required`, `additionalProperties`, etc.
 
-### Advanced Schema Features
+### Schema Features
 
-Schemas can define relational constraints for structured data:
+Schemas can include additional constraints and features:
 
 ```ts
-const AccountSchema: LixSchemaDefinition = {
-  "x-lix-key": "example_account",
+const MySchema: LixSchemaDefinition = {
+  "x-lix-key": "my_entity",
   "x-lix-version": "1.0",
-  "x-lix-primary-key": ["/id"],              // Unique identifier
-  "x-lix-unique": [["/email"]],              // Email must be unique
-  "x-lix-foreign-keys": [                    // Reference other entities
+  "x-lix-primary-key": ["/id"],
+  "x-lix-unique": [["/email"]],              // Unique constraints
+  "x-lix-foreign-keys": [                    // Relationships
     {
-      properties: ["/owner_id"],
+      properties: ["/user_id"],
       references: {
-        schemaKey: "user",                   // References 'user' schema
+        schemaKey: "user",
         properties: ["/id"],
       },
     },
   ],
   type: "object",
   properties: {
-    id: { type: "string", "x-lix-default": "lix_uuid_v7()" },
-    name: { type: "string" },
+    id: {
+      type: "string",
+      "x-lix-default": "lix_uuid_v7()",      // Auto-generated ID
+    },
     email: { type: "string" },
-    owner_id: { type: "string" },
+    user_id: { type: "string" },
     created_at: {
       type: "string",
       format: "date-time",
       "x-lix-default": "lix_now()",          // Auto-generated timestamp
     },
   },
-  required: ["id", "name", "email", "owner_id", "created_at"],
+  required: ["id", "email"],
 };
 ```
 
-**Additional Lix Fields:**
-- `x-lix-primary-key`: Properties that uniquely identify an entity
-- `x-lix-unique`: Properties that must be unique across all entities
-- `x-lix-foreign-keys`: Relationships to other entity types
-- `x-lix-default`: Auto-generated values (IDs, timestamps)
+**Additional Fields:**
+- `x-lix-unique`: Properties that must be unique across entities
+- `x-lix-foreign-keys`: Define relationships between entity types
+- `x-lix-default`: Auto-generated values (UUIDs, timestamps, etc.)
+
+### Why Schemas Matter
+
+**Validation**
+- Lix validates all changes against schemas
+- Prevents corrupt or malformed data from entering the database
+
+**Interoperability**
+- Schemas make entity data understandable across the system
+- UIs, diffing tools, and queries can work with any entity type
+
+**Evolution**
+- Schema versioning (`x-lix-version`) enables safe data model changes
+- Migrate entities from old schemas to new ones
 
 ## How Entities, Schemas, and Plugins Work Together
-
-These three concepts form a cohesive system:
 
 ```
 Plugin              Schema              Entity
@@ -173,25 +167,26 @@ file format    of entity data       being tracked
 
 **Example Flow:**
 
-1. **Plugin** parses a JSON file and detects a change to `theme`
-2. **Schema** defines that a JSON property change must have a `property` and `value`
-3. **Entity** `theme` is updated with the new value `"light"`
-4. Lix stores this change, validated against the schema
+1. User updates `theme` from `"dark"` to `"light"` in a JSON file
+2. **Plugin** parses the file and detects the change at `/theme`
+3. **Schema** validates the change has required `path` and `value` fields
+4. **Entity** `/theme` is updated in the database with the new value
+5. Change is now queryable, mergeable, and part of the file's history
 
-This separation makes Lix extensible - you can add support for any file format by:
+This separation makes Lix extensible - add support for any file format (text or binary) by:
 1. Creating a plugin that understands the format
-2. Defining a schema for the entity structure
-3. Having the plugin report changes according to that schema
+2. Defining schemas for the entity types
+3. Having the plugin detect and report changes according to those schemas
 
 ## Key Takeaways
 
-- **Entities** are meaningful units of data within files (properties, cells, paragraphs)
-- **Schemas** define the structure and constraints of entity data
-- **Plugins** connect file formats to the Lix data model
-- Together, they enable queryable, mergeable, fine-grained change tracking
+- **Entities** are meaningful units of data within files - properties, paragraphs, layers, meshes, etc.
+- **Schemas** define structure and constraints using JSON Schema with Lix extensions
+- **Plugins** connect file formats (text or binary) to the entity model
+- Together, they enable queryable, mergeable, fine-grained change tracking for any data type
 
 ## Next Steps
 
-- Learn about [Architecture](/docs/architecture) to see how the system fits together
-- Explore [Change Control features](/docs/versions) to see what you can build
-- Read the [Metadata guide](/docs/metadata) for adding custom data to entities
+- See [Plugins](/docs/plugins) to learn how plugins detect entities
+- Explore [Querying Changes](/docs/querying-changes) to work with entity data
+- Read [Architecture](/docs/architecture) to understand how the system fits together

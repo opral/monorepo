@@ -18,7 +18,7 @@ Agents can draft changes, but humans stay in the loop with lightweight review to
 - Start review conversations with stakeholders or other agents using comments and mentions from [conversations](./conversations).
 - Merge once the proposal is ready, or request another revision—the entire workflow maps to familiar pull-request style collaboration.
 
-## Safe sandboxes for agents
+## Sandboxed state for AI agents
 
 [Versions](./versions.mdx) let you spin up isolated environments so agents can explore ideas without touching production data.
 

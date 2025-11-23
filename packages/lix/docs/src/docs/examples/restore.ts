@@ -28,7 +28,7 @@ export default async function runExample(console: any) {
     .select(["id", "lixcol_metadata"])
     .executeTakeFirstOrThrow();
 
-  // Restore the repository to that change set
+  // Restore the lix to that change set
   await restore({ lix, to: lastChangeSet.id });
 
   console.log("Restored to most recent change set:", lastChangeSet.id);

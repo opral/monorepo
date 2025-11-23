@@ -66,7 +66,7 @@ export default defineConfig({
   themeConfig: {
     darkMode: false,
     nav: [
-      { text: "Docs", link: "/docs/quick-start" },
+      { text: "Docs", link: "/docs/what-is-lix" },
       { text: "API Reference", link: "/docs/api/" },
     ],
     sidebar: {
@@ -74,11 +74,20 @@ export default defineConfig({
         {
           text: "Introduction",
           items: [
-            { text: "Quick Start", link: "/docs/quick-start" },
+            { text: "What is Lix?", link: "/docs/what-is-lix" },
+            { text: "Getting Started", link: "/docs/getting-started" },
+            { text: "Comparison to Git", link: "/docs/comparison-to-git" },
             { text: "Lix for AI Agents", link: "/docs/lix-for-ai-agents" },
+          ],
+        },
+        {
+          text: "Essentials",
+          items: [
             { text: "How Lix Works", link: "/docs/how-lix-works" },
+            { text: "Querying Changes", link: "/docs/querying-changes" },
             { text: "Data Model", link: "/docs/data-model" },
-            { text: "Architecture", link: "/docs/architecture" },
+            { text: "Plugins", link: "/docs/plugins" },
+            { text: "Persistence", link: "/docs/persistence" },
           ],
         },
         {
@@ -95,7 +104,6 @@ export default defineConfig({
             { text: "Conversations", link: "/docs/conversations" },
             { text: "Labels", link: "/docs/labels" },
             { text: "Key-Value Store", link: "/docs/key-value" },
-            { text: "Persistence", link: "/docs/persistence" },
             { text: "Environment API", link: "/docs/environment-api" },
             { text: "Testing", link: "/docs/testing" },
             { text: "React Integration", link: "/docs/react-integration" },
@@ -103,6 +111,7 @@ export default defineConfig({
             { text: "Deterministic Mode", link: "/docs/deterministic-mode" },
             { text: "Metadata", link: "/docs/metadata" },
             { text: "Writer Key", link: "/docs/writer-key" },
+            { text: "Architecture", link: "/docs/architecture" },
           ],
         },
       ],

@@ -4,20 +4,27 @@ import exampleSrcCode from "./examples/history.ts?raw";
 
 # History
 
-Lix provides history APIs built on automatically captured changes in state. This enables the creation of powerful features like [audit trails](./attribution), [version](./versions) history, or [restore](./restore) functionality.
+Query complete change history for files and entities using SQL.
 
 ![History](/history.svg)
 
-## Examples
+## How History Works
+
+History walks the commit graph backwards from a starting point:
+
+```mermaid
+graph RL
+    C3[Checkpoint 3<br/>setting: C] --> C2[Checkpoint 2<br/>setting: B] --> C1[Checkpoint 1<br/>setting: A]
+```
+
+Querying from Checkpoint 3 traverses backwards, showing states at C3, C2, and C1. The `lixcol_depth` field indicates distance from the starting point (0 = starting point, 1 = one step back, etc.).
 
 > [!NOTE]
-> The change set graph in Lix is global and shared across all versions. This means you don't need to provide a version ID when querying history—you simply query at a specific change set. All versions share the same understanding of history because they all reference the same [global change set graph](../architecture.md#core-data-model).
+> The commit graph is global and shared across all versions. You query at a specific commit, not a version. All versions reference the same unified graph structure.
 
-### Get history for a specific file
+## File History
 
-To query the history of a file, you need to specify which commit you want to view the history from. The `lixcol_root_commit_id` field is used to filter the results to a specific point in the commit graph.
-
-> Tip: Always filter by `lixcol_root_commit_id` (and usually `lixcol_depth = 0` for the head) to avoid mixing multiple timelines in a single query result.
+Query file state at specific checkpoints to see how it changed over time:
 
 <CodeSnippet
   module={example}
@@ -25,9 +32,11 @@ To query the history of a file, you need to specify which commit you want to vie
   sections={["file-history"]}
 />
 
-### Get history for a specific entity
+Query `file_history` with `lixcol_root_commit_id = checkpoint.id` and `lixcol_depth = 0` to get the file state at that specific checkpoint.
 
-You can also query the history of a single entity, like a paragraph in a Markdown file or a row in a CSV. This is useful for building features like comment threads or fine-grained audit trails.
+## Entity History
+
+Query history for specific entities like key-value pairs, custom data types, or plugin-defined entities:
 
 <CodeSnippet
   module={example}
@@ -35,38 +44,19 @@ You can also query the history of a single entity, like a paragraph in a Markdow
   sections={["entity-history"]}
 />
 
-### Get history for a file within a specific version
+Entity-level history enables fine-grained audit trails and tracking for individual data points beyond files.
 
-To get the history of a file for a specific version, you simply query using that version's change set ID as the root. The history view will automatically traverse the change set graph to show all historical states.
+## Query History at Checkpoints
 
-<CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
-  sections={["version-specific-history"]}
-/>
-
-## Data Model
-
-History is simply querying state at a specific change set. Because the change set graph is global, no version needs to be specified when querying history. Every change set is part of the same unified structure, allowing you to traverse the history without worrying about which version you are in.
-
-### Example
-
-Imagine a file, `config.json`, changes over time. Each change creates a new change set that points to its predecessor:
-
-- **CS1:** `config.json` is created with `{ "setting": "A" }`.
-- **CS2:** `config.json` is updated to `{ "setting": "B" }`.
-- **CS3:** `config.json` is updated to `{ "setting": "C" }`.
-- **CS4:** `config.json` is updated to `{ "setting": "D" }`.
-
-```mermaid
-graph RL
-    CS4 --> CS3 --> CS2 --> CS1
-```
-
-Querying the history at change set CS3 entails traversing the graph backward from that point:
+Query file state at any specific checkpoint:
 
 <CodeSnippet
   module={example}
   srcCode={exampleSrcCode}
-  sections={["history-data-model"]}
+  sections={["checkpoint-history"]}
 />
+
+Use `lixcol_depth = 0` to get the state at that exact checkpoint.
+
+> [!TIP]
+> Lix automatically commits every change. Checkpoints are optional labels for important moments. Always filter by `lixcol_root_commit_id` to scope history to a specific point and avoid mixing timelines.

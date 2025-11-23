@@ -25,7 +25,7 @@ await lix.db
 
 ## When to Use Lix Logging
 
-Use Lix for logs that are part of your application's state. Because logs are stored and versioned in the repository, they are queryable, shareable, and available long after the original process has exited.
+Use Lix for logs that are part of your application's state. Because logs are stored and versioned in the lix, they are queryable, shareable, and available long after the original process has exited.
 
 | Use Lix Logging For...                      | Use `console.log` For...                    |
 | ------------------------------------------- | ------------------------------------------- |

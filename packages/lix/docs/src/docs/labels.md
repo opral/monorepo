@@ -1,23 +1,24 @@
 # Labels
 
-Labels in Lix are flexible tags you can attach to any entity — change sets, files, versions, paragraphs, JSON properties, and more. This universal “attach to any entity” model is a core super power of Lix.
+Labels are flexible tags you can attach to any entity (change sets, files, versions, paragraphs, JSON properties, and more). Each label has an `id` and a `name` (e.g. `important`, `urgent`, `checkpoint`).
 
-## What are Labels?
+## Common Use Cases
 
-Labels are named tags you can attach to any entity in Lix. Each label has:
+**Categorization:**
+- Tag files by importance: `important`, `draft`, `reviewed`
+- Tag changes by type: `type:feature`, `type:bugfix`, `type:refactor`
 
-- an `id` (stable identifier)
-- a `name` (human-readable tag, e.g. `important`, `urgent`, `checkpoint`)
+**Workflows:**
+- Track status: `status:review`, `status:approved`, `status:rejected`
+- Priority management: `priority:high`, `priority:low`
+- Release milestones: `release:v1.2.0`, `release:v2.0.0`
 
-You create labels once (by name), then attach/detach them to entities as needed.
+**Filtering:**
+- Query all files labeled `important`
+- Find all change sets with `status:review`
+- Filter entities by multiple labels
 
-## Why use labels?
-
-- Categorize entities (e.g. `type:feature`, `priority:high`)
-- Build workflows (`status:review`, `status:approved`)
-- Filter queries and views by label
-
-## Attach and detach labels on any entity
+## Basic Usage
 
 Prefer the high-level SDK helpers when working with labels. They work uniformly across all entity types.
 

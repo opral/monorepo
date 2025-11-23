@@ -1,0 +1,69 @@
+import CodeSnippet from "./components/code-snippet";
+import * as example from "./examples/getting-started.ts";
+import exampleSrcCode from "./examples/getting-started.ts?raw";
+import { PackageManagerTabs } from "@theme";
+
+# Getting Started
+
+Build a simple app that tracks JSON file changes with Lix.
+
+## Install
+
+<PackageManagerTabs command="install @lix-js/sdk @lix-js/plugin-json" />
+
+## Initialize Lix
+
+Initialize Lix with plugins for the file types you'll track. Plugins teach Lix what constitutes a meaningful change (e.g., a JSON property, CSV row, or Markdown paragraph).
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["opening-lix"]}
+/>
+
+Without plugins, Lix treats files as binary blobs. The `jsonPlugin` enables entity-level tracking—detecting that `/user/age` changed from 50 to 51, not just that line 3 changed.
+
+## Insert and Update Files
+
+Files are stored as `Uint8Array` (binary), making Lix format-agnostic. Once inserted, every change is tracked automatically—no manual commits.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["inserting-file"]}
+/>
+
+Update files like regular database operations:
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["updating-file"]}
+/>
+
+The JSON plugin detects exactly what changed (`age` property), preserving previous states while updating the current state.
+
+## Query History
+
+Query file state at any checkpoint using SQL:
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["querying-file-history"]}
+/>
+
+The `file_history` view walks backwards from `lixcol_root_commit_id` (the checkpoint), reconstructing file state at each point in history. Use `lixcol_depth = 0` to get the state at that exact checkpoint.
+
+> [!TIP]
+> Lix automatically commits every change. Checkpoints are not required but provide a convenient way to label important moments like before/after a migration.
+
+## Next Steps
+
+**Track changes in your app:**
+- [Versions](/docs/versions) - Create isolated versions (branching) for parallel work
+- [Change Proposals](/docs/change-proposals) - Review and approve changes before merging
+- [Querying Changes](/docs/querying-changes) - Advanced SQL queries for diffs and attribution
+
+**Add more file types:**
+- [Plugins](/docs/plugins) - CSV, Markdown, or create custom plugins

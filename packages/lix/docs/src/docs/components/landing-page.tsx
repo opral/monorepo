@@ -402,7 +402,7 @@ function LandingPage() {
     },
     {
       id: "async-workflows",
-      title: "Safe sandboxes for agents",
+      title: "Sandboxed state for AI agents",
       description:
         "Versions let AI agents experiment without affecting user data.",
       Illustration: AsyncWorkflowIllustration,
