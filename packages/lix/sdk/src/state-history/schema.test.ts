@@ -883,7 +883,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 	const history = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "test-entity")
-		// .where("root_change_set_id", "=", changeSet3.change_set_id)
+		// .where("root_commit_id", "=", changeSet3.commit_id)
 		.orderBy("depth", "asc")
 		.selectAll()
 		.execute();

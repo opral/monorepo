@@ -1,0 +1,74 @@
+import CodeSnippet from "./components/code-snippet";
+import * as example from "./examples/getting-started.ts";
+import exampleSrcCode from "./examples/getting-started.ts?raw";
+import { PackageManagerTabs } from "@theme";
+
+# Getting Started
+
+Build a simple app that tracks JSON file changes with Lix.
+
+## Install
+
+<PackageManagerTabs command="install @lix-js/sdk @lix-js/plugin-json" />
+
+## Step 1: Open a Lix with Plugins
+
+Open a Lix with plugins for the file formats you want to track. Plugins teach Lix what constitutes a meaningful change in each format.
+
+> [!NOTE]
+> In this example, we're using the default in-memory mode. For persistence to disk, cloud storage, or browser storage, see [Persistence](/docs/persistence).
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["opening-lix"]}
+/>
+
+Without plugins, Lix treats files as binary blobs. The `jsonPlugin` enables entity-level tracking by detecting that the `age` property changed from `50` to `51`, rather than just "line 3 changed."
+
+## Step 2: Insert and Update Files
+
+Files are stored as `Uint8Array` (binary data), making Lix format-agnostic. Once inserted, every change is automatically tracked.
+
+**Insert a file:**
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["inserting-file"]}
+/>
+
+**Update the file:**
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["updating-file"]}
+/>
+
+The JSON plugin detects precisely what changed (in this case, the `age` property from `50` to `51`) while preserving all previous states.
+
+## Step 3: Query History
+
+Query file state at any point in time using SQL and checkpoints:
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["querying-file-history"]}
+/>
+
+The `file_history` view reconstructs file state by walking backwards from a commit (`lixcol_root_commit_id`). Use `lixcol_depth = 0` to get the exact state at that checkpoint.
+
+> [!TIP]
+> Lix automatically commits every change. Checkpoints are optionally [labelled commits](/docs/labels) for important moments like before/after a migration or deployment.
+
+## Next Steps
+
+**Track changes in your app:**
+- [Versions](/docs/versions) - Create isolated versions (branching) for parallel work
+- [Change Proposals](/docs/change-proposals) - Review and approve changes before merging
+- [Querying Changes](/docs/querying-changes) - Advanced SQL queries for diffs and attribution
+
+**Add more file types:**
+- [Plugins](/docs/plugins) - CSV, Markdown, or create custom plugins

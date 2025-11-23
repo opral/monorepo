@@ -16,20 +16,20 @@ console.log("Generating API Reference documentation...");
 await generateApiDocs({
   entryPoints: [path.join(__dirname, "../sdk/src/index.ts")],
   tsconfig: path.join(__dirname, "../sdk/tsconfig.json"),
-  docRoot: path.join(__dirname, "docs"),
+  docRoot: path.join(__dirname, "src/docs"),
   title: "Lix",
 });
 console.log("✅ API Reference documentation generated successfully.");
 
 export default defineConfig({
-  root: path.join(__dirname, "docs"),
+  root: path.join(__dirname, "src"),
   outDir: "docs_build",
   title: "Lix",
   logo: "/logo.svg",
   description:
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
   icon: "/logo.svg",
-  globalStyles: path.join(__dirname, "docs/styles/index.css"),
+  globalStyles: path.join(__dirname, "src/styles/index.css"),
   route: {
     cleanUrls: true,
     exclude: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
@@ -38,7 +38,7 @@ export default defineConfig({
     // Disable Rust MDX compiler to support global components
     mdxRs: false,
     globalComponents: [
-      path.join(__dirname, "docs/components/InteractiveExampleCard.tsx"),
+      path.join(__dirname, "src/docs/components/InteractiveExampleCard.tsx"),
     ],
   },
   builderConfig: {
@@ -66,104 +66,57 @@ export default defineConfig({
   themeConfig: {
     darkMode: false,
     nav: [
-      { text: "Docs", link: "/guide/getting-started" },
-      { text: "API Reference", link: "/api/" },
+      { text: "Docs", link: "/docs/what-is-lix" },
+      { text: "API Reference", link: "/docs/api/" },
     ],
     sidebar: {
-      "/guide/": [
+      "/docs/": [
         {
           text: "Introduction",
           items: [
-            { text: "Getting Started", link: "/guide/getting-started" },
-            {
-              text: "Lix for AI Agents",
-              link: "/guide/ai-agent-collaboration",
-            },
-            { text: "Architecture", link: "/guide/architecture" },
+            { text: "What is Lix?", link: "/docs/what-is-lix" },
+            { text: "Getting Started", link: "/docs/getting-started" },
+            { text: "Comparison to Git", link: "/docs/comparison-to-git" },
+            { text: "Lix for AI Agents", link: "/docs/lix-for-ai-agents" },
           ],
         },
         {
-          text: "Most Used Features",
-          collapsed: false,
+          text: "Essentials",
           items: [
-            {
-              text: "Change Proposals",
-              link: "/guide/change-proposals",
-            },
-            { text: "Entity-level diffs", link: "/guide/diffs" },
-            { text: "History", link: "/guide/history" },
-            {
-              text: "Validation Rules",
-              link: "/guide/validation-rules",
-            },
-            { text: "Versions (Branching)", link: "/guide/versions" },
+            { text: "How Lix Works", link: "/docs/how-lix-works" },
+            { text: "Querying Changes", link: "/docs/querying-changes" },
+            { text: "Data Model", link: "/docs/data-model" },
+            { text: "Plugins", link: "/docs/plugins" },
+            { text: "Persistence", link: "/docs/persistence" },
           ],
         },
         {
-          text: "More Features",
-          collapsed: true,
+          text: "Guides",
           items: [
-            {
-              text: "Attribution (Blame)",
-              link: "/guide/attribution",
-            },
-            { text: "Restore", link: "/guide/restore" },
-            { text: "Undo/Redo", link: "/guide/undo-redo" },
-            { text: "Conversations", link: "/guide/conversations" },
-            { text: "Labels", link: "/guide/concepts/labels" },
-            { text: "Key Value Store", link: "/guide/concepts/key-value" },
-          ],
-        },
-        {
-          text: "Concepts",
-          collapsed: true,
-          items: [
-            { text: "What is an Entity?", link: "/guide/entity" },
-            { text: "Lix Schema", link: "/guide/schema" },
-            { text: "Metadata", link: "/guide/metadata" },
-            { text: "Writer Key", link: "/guide/writer-key" },
-            { text: "Environment API", link: "/guide/environment-api" },
-          ],
-        },
-        {
-          text: "Development & Debugging",
-          collapsed: true,
-          items: [
-            { text: "Testing", link: "/guide/testing" },
-            { text: "Logging", link: "/guide/logging" },
-            { text: "Deterministic Mode", link: "/guide/deterministic-mode" },
-            { text: "React Utils", link: "/guide/react-utils" },
+            { text: "Versions (Branching)", link: "/docs/versions" },
+            { text: "History", link: "/docs/history" },
+            { text: "Diffs", link: "/docs/diffs" },
+            { text: "Attribution (Blame)", link: "/docs/attribution" },
+            { text: "Change Proposals", link: "/docs/change-proposals" },
+            { text: "Validation Rules", link: "/docs/validation-rules" },
+            { text: "Undo/Redo", link: "/docs/undo-redo" },
+            { text: "Restore", link: "/docs/restore" },
+            { text: "Conversations", link: "/docs/conversations" },
+            { text: "Labels", link: "/docs/labels" },
+            { text: "Key-Value Store", link: "/docs/key-value" },
+            { text: "Environment API", link: "/docs/environment-api" },
+            { text: "Testing", link: "/docs/testing" },
+            { text: "React Integration", link: "/docs/react-integration" },
+            { text: "Logging & Debugging", link: "/docs/logging" },
+            { text: "Deterministic Mode", link: "/docs/deterministic-mode" },
+            { text: "Metadata", link: "/docs/metadata" },
+            { text: "Writer Key", link: "/docs/writer-key" },
+            { text: "Architecture", link: "/docs/architecture" },
+            { text: "Lix as File Format", link: "/docs/lix-as-file-format" },
           ],
         },
       ],
-      "/api/": generateApiSidebar(path.join(__dirname, "docs")),
-      "/plugins/": [
-        {
-          text: "Plugins",
-          items: [
-            { text: "Overview", link: "/plugins/" },
-            { text: "Creating Plugins", link: "/plugins/creating-plugins" },
-            { text: "JSON Plugin", link: "/plugins/json" },
-            { text: "CSV Plugin", link: "/plugins/csv" },
-            { text: "Markdown Plugin", link: "/plugins/markdown" },
-          ],
-        },
-      ],
-      "/examples/": [
-        {
-          text: "Examples",
-          items: [
-            { text: "Overview", link: "/examples/" },
-            { text: "Basic Usage", link: "/examples/basic-usage" },
-            {
-              text: "Version Management",
-              link: "/examples/version-management",
-            },
-            { text: "Collaboration", link: "/examples/collaboration" },
-            { text: "Building an App", link: "/examples/building-an-app" },
-          ],
-        },
-      ],
+      "/docs/api/": generateApiSidebar(path.join(__dirname, "src/docs")),
     },
     socialLinks: [
       {
