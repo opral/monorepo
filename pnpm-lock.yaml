@@ -1685,6 +1685,9 @@ importers:
       '@rspress/core':
         specifier: 2.0.0-rc.1
         version: 2.0.0-rc.1(@types/react@19.1.12)
+      '@rspress/plugin-llms':
+        specifier: 2.0.0-rc.1
+        version: 2.0.0-rc.1(@rspress/core@2.0.0-rc.1(@types/react@19.1.12))
       '@tailwindcss/postcss':
         specifier: ^4.1.10
         version: 4.1.10
@@ -7652,6 +7655,12 @@ packages:
   '@rspress/plugin-last-updated@1.44.0':
     resolution: {integrity: sha512-/OSVzNHNLgBKuHaUvtwiAA10kLeiywzIV6nrFb9MVoZicJedxtwaL6DRgjyG/QQbfTUGle7u1G7RjbumVmfjMw==}
     engines: {node: '>=14.17.6'}
+
+  '@rspress/plugin-llms@2.0.0-rc.1':
+    resolution: {integrity: sha512-ha8IeADXwuFyW+KYO8dCuU5tl1DjH1r+3iuJx/CWRccCMqXb+YFmbS3QZ3mhJPj8iAFlXryCp+iZS3ujoagUyg==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@rspress/core': ^2.0.0-rc.1
 
   '@rspress/plugin-medium-zoom@1.44.0':
     resolution: {integrity: sha512-IFUviQ5hhc/1XNcVb7pX5gJ30X9+ZIasDUS+BM7Mh9Z0mvl6roCWbqLD5PIaLnOIyhJv44X2zxKUKj15DKx2Fw==}
@@ -21966,12 +21975,6 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nrwl/devkit@18.3.5(nx@18.3.5)':
-    dependencies:
-      '@nx/devkit': 18.3.5(nx@18.3.5)
-    transitivePeerDependencies:
-      - nx
-
   '@nrwl/devkit@18.3.5(nx@21.4.1)':
     dependencies:
       '@nx/devkit': 18.3.5(nx@21.4.1)
@@ -21981,6 +21984,21 @@ snapshots:
   '@nrwl/js@18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.4.5)':
     dependencies:
       '@nx/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.4.5)
+    transitivePeerDependencies:
+      - '@babel/traverse'
+      - '@swc-node/register'
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
+      - debug
+      - nx
+      - supports-color
+      - typescript
+      - verdaccio
+
+  '@nrwl/js@18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.8.3)':
+    dependencies:
+      '@nx/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.8.3)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -22098,7 +22116,7 @@ snapshots:
 
   '@nx/devkit@18.3.5(nx@18.3.5)':
     dependencies:
-      '@nrwl/devkit': 18.3.5(nx@18.3.5)
+      '@nrwl/devkit': 18.3.5(nx@21.4.1)
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.2
@@ -22193,7 +22211,7 @@ snapshots:
       '@babel/preset-env': 7.26.0(@babel/core@7.28.3)
       '@babel/preset-typescript': 7.26.0(@babel/core@7.28.3)
       '@babel/runtime': 7.28.3
-      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.4.5)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.8.3)
       '@nx/devkit': 18.3.5(nx@21.4.1)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.8.3)
@@ -24297,6 +24315,17 @@ snapshots:
   '@rspress/plugin-last-updated@1.44.0':
     dependencies:
       '@rspress/shared': 1.44.0
+
+  '@rspress/plugin-llms@2.0.0-rc.1(@rspress/core@2.0.0-rc.1(@types/react@19.1.12))':
+    dependencies:
+      '@rspress/core': 2.0.0-rc.1(@types/react@19.1.12)
+      remark-mdx: 3.1.1
+      remark-parse: 11.0.0
+      remark-stringify: 11.0.0
+      unified: 11.0.5
+      unist-util-visit: 5.0.0
+    transitivePeerDependencies:
+      - supports-color
 
   '@rspress/plugin-medium-zoom@1.44.0(@rspress/runtime@1.44.0)':
     dependencies:

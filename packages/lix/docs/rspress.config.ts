@@ -1,5 +1,6 @@
 import * as path from "node:path";
 import { defineConfig } from "@rspress/core";
+import { pluginLlms } from "@rspress/plugin-llms";
 import { syncReactUtilsReadmePlugin } from "./rspress-plugins/sync-react-utils-readme";
 import {
   generateApiDocs,
@@ -33,6 +34,8 @@ export default defineConfig({
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
   icon: "/logo.svg",
   globalStyles: path.join(__dirname, "src/styles/index.css"),
+  // Use the shared theme directory (not inside src) so custom MDX components load, including the LLM copy button.
+  themeDir: path.join(__dirname, "theme"),
   route: {
     cleanUrls: true,
     exclude: [
@@ -78,7 +81,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [syncReactUtilsReadmePlugin()],
+  plugins: [pluginLlms(), syncReactUtilsReadmePlugin()],
   themeConfig: {
     darkMode: false,
     nav: [
