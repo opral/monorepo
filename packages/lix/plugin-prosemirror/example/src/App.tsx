@@ -58,6 +58,35 @@ function App() {
 	return (
 		<LixProvider lix={lix}>
 			<div className="flex flex-col mx-5 bg-base-100 text-base-content">
+				<a
+					href="https://www.npmjs.com/package/@lix-js/plugin-prosemirror"
+					target="_blank"
+					rel="noreferrer"
+					className="mt-4 flex items-center justify-between rounded border border-base-300 bg-base-100 px-4 py-3 shadow-sm transition hover:shadow-md"
+				>
+					<div className="flex items-center gap-3">
+						<div className="flex h-10 items-center justify-center rounded-md border border-base-300 bg-white px-3">
+							<img
+								src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/1080px-Npm-logo.svg.png"
+								alt="npm logo"
+								className="h-6 w-auto"
+								loading="lazy"
+							/>
+						</div>
+						<div className="flex flex-col gap-1">
+							<span className="text-sm text-neutral-600">
+								For more information visit the npm package.
+							</span>
+							<span className="text-lg font-semibold text-base-content">
+								@lix-js/plugin-prosemirror
+							</span>
+						</div>
+					</div>
+					<span className="inline-flex items-center justify-center rounded-md border border-base-300 bg-base-100 px-3 py-2 text-sm font-medium text-base-content hover:bg-base-200">
+						View package &rarr;
+					</span>
+				</a>
+
 				{/* main ui */}
 				<div className="flex flex-col border border-base-300 rounded my-5">
 					<div className="flex justify-between items-center mt-5 mb-5 mx-5">
