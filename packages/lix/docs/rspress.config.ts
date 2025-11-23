@@ -122,6 +122,7 @@ export default defineConfig({
             { text: "Lix Schema", link: "/guide/schema" },
             { text: "Metadata", link: "/guide/metadata" },
             { text: "Writer Key", link: "/guide/writer-key" },
+            { text: "Persistence", link: "/guide/persistence" },
             { text: "Environment API", link: "/guide/environment-api" },
           ],
         },
