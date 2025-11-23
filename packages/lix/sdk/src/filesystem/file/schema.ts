@@ -10,6 +10,13 @@ import {
 } from "./descriptor-utils.js";
 import { type LixFileDescriptor } from "./schema-definition.js";
 
+/**
+ * Applies file-related database schema, including the file_history view.
+ *
+ * Consumers of file_history should always scope queries with
+ * lixcol_root_commit_id (and typically lixcol_depth = 0) to avoid mixing
+ * multiple timelines in one result set.
+ */
 export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
 	const engine = args.engine;
 	// applied in databse itself before state because commit
@@ -448,7 +455,10 @@ export function applyFileDatabaseSchema(args: { engine: LixEngine }): void {
         AND version_id = OLD.lixcol_version_id;
   END;
 
-	  CREATE VIEW IF NOT EXISTS file_history AS
+  -- file_history exposes file snapshots per commit. When querying, always filter by
+  -- lixcol_root_commit_id (and usually lixcol_depth = 0) to scope results to a single
+  -- checkpoint/root commit and avoid mixing multiple timelines in one result set.
+  CREATE VIEW IF NOT EXISTS file_history AS
 	  WITH
 	  -- Inline entity views to avoid preprocessor dependencies
 	  _commit_by_version AS (

@@ -82,6 +82,8 @@ With files under change control, you can query their complete history using stan
 Key points:
 
 - `file_history` provides access to all previous states of a file
+- Filter by `lixcol_root_commit_id` (and typically `lixcol_depth = 0`) to scope history
+  to a single checkpoint and avoid mixing multiple timelines
 - Changes are ordered by depth: 0 is the current state, higher numbers are older
 - Each row contains the complete file content at that point in time
 - Standard SQL queries work - filter, join, and analyze history however you need

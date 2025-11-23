@@ -85,19 +85,19 @@ export default async function runExample(console: any) {
     {
       data: { setting: "C" },
       lixcol_change_set_id: "CS3",
-      lixcol_root_change_set_id: "CS3",
+      lixcol_root_commit_id: "CS3",
       lixcol_depth: 0,
     },
     {
       data: { setting: "B" },
       lixcol_change_set_id: "CS2",
-      lixcol_root_change_set_id: "CS3",
+      lixcol_root_commit_id: "CS3",
       lixcol_depth: 1,
     },
     {
       data: { setting: "A" },
       lixcol_change_set_id: "CS1",
-      lixcol_root_change_set_id: "CS3",
+      lixcol_root_commit_id: "CS3",
       lixcol_depth: 2,
     },
   ];

@@ -15,7 +15,9 @@ Lix provides history APIs built on automatically captured changes in state. This
 
 ### Get history for a specific file
 
-To query the history of a file, you need to specify which change set you want to view the history from. The `lixcol_root_change_set_id` field is used to filter the results to a specific point in the change set graph.
+To query the history of a file, you need to specify which commit you want to view the history from. The `lixcol_root_commit_id` field is used to filter the results to a specific point in the commit graph.
+
+> Tip: Always filter by `lixcol_root_commit_id` (and usually `lixcol_depth = 0` for the head) to avoid mixing multiple timelines in a single query result.
 
 <CodeSnippet
   module={example}
