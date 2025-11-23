@@ -72,84 +72,37 @@ export default defineConfig({
     sidebar: {
       "/docs/": [
         {
-          text: "Getting Started",
+          text: "Introduction",
           items: [
             { text: "Quick Start", link: "/docs/quick-start" },
-            {
-              text: "Lix for AI Agents",
-              link: "/docs/lix-for-ai-agents",
-            },
-          ],
-        },
-        {
-          text: "Concepts",
-          collapsed: true,
-          items: [
+            { text: "Lix for AI Agents", link: "/docs/lix-for-ai-agents" },
+            { text: "How Lix Works", link: "/docs/how-lix-works" },
+            { text: "Data Model", link: "/docs/data-model" },
             { text: "Architecture", link: "/docs/architecture" },
-            { text: "What is an Entity?", link: "/docs/entity" },
-            { text: "Lix Schema", link: "/docs/schema" },
-            { text: "Metadata", link: "/docs/metadata" },
-            { text: "Writer Key", link: "/docs/writer-key" },
-          ],
-        },
-        {
-          text: "Change Control",
-          collapsed: false,
-          items: [
-            { text: "Versions (Branching)", link: "/docs/versions" },
-            { text: "History", link: "/docs/history" },
-            { text: "Diffs", link: "/docs/diffs" },
-            {
-              text: "Attribution (Blame)",
-              link: "/docs/attribution",
-            },
-            {
-              text: "Change Proposals",
-              link: "/docs/change-proposals",
-            },
-            {
-              text: "Validation Rules",
-              link: "/docs/validation-rules",
-            },
-            { text: "Undo/Redo", link: "/docs/undo-redo" },
-            { text: "Restore", link: "/docs/restore" },
-          ],
-        },
-        {
-          text: "Additional Features",
-          collapsed: true,
-          items: [
-            {
-              text: "Conversations",
-              link: "/docs/conversations",
-            },
-            { text: "Labels", link: "/docs/labels" },
-            {
-              text: "Key-Value Store",
-              link: "/docs/key-value",
-            },
           ],
         },
         {
           text: "Guides",
-          collapsed: true,
           items: [
+            { text: "Versions (Branching)", link: "/docs/versions" },
+            { text: "History", link: "/docs/history" },
+            { text: "Diffs", link: "/docs/diffs" },
+            { text: "Attribution (Blame)", link: "/docs/attribution" },
+            { text: "Change Proposals", link: "/docs/change-proposals" },
+            { text: "Validation Rules", link: "/docs/validation-rules" },
+            { text: "Undo/Redo", link: "/docs/undo-redo" },
+            { text: "Restore", link: "/docs/restore" },
+            { text: "Conversations", link: "/docs/conversations" },
+            { text: "Labels", link: "/docs/labels" },
+            { text: "Key-Value Store", link: "/docs/key-value" },
             { text: "Persistence", link: "/docs/persistence" },
             { text: "Environment API", link: "/docs/environment-api" },
             { text: "Testing", link: "/docs/testing" },
             { text: "React Integration", link: "/docs/react-integration" },
             { text: "Logging & Debugging", link: "/docs/logging" },
-            {
-              text: "Deterministic Mode",
-              link: "/docs/deterministic-mode",
-            },
-          ],
-        },
-        {
-          text: "Advanced",
-          collapsed: true,
-          items: [
-            // Add advanced topics as needed
+            { text: "Deterministic Mode", link: "/docs/deterministic-mode" },
+            { text: "Metadata", link: "/docs/metadata" },
+            { text: "Writer Key", link: "/docs/writer-key" },
           ],
         },
       ],
