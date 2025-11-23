@@ -5,7 +5,9 @@ description: Make Lix run anywhere with a clean runtime + persistence boundary.
 
 # Environment API
 
-The Environment API is Lix's abstraction layer that lets you run the same code everywhere — from browser tabs to Node.js servers to test suites. Each Environment is a container where the Lix Engine runs alongside SQLite, handling both where your data lives and how your code executes, so you don't have to worry about platform differences.
+The Environment API lets you use Lix across different platforms: browser tabs, Node.js servers, or test suites.
+
+Environments define where the Lix engine executes and how data is stored. You can run Lix in-memory for testing, use OPFS for browser persistence, or build custom integrations for your own backend.
 
 ## Why Environments Matter
 
@@ -66,7 +68,7 @@ The simplest environment that runs everything in memory on the current thread.
 
 ### OpfsSahEnvironment
 
-A production-ready browser environment using Web Workers and [OPFS SAH (Origin Private File System with Synchronous Access Handles)](https://sqlite.org/wasm/doc/tip/persistence.md#vfs-opfs-sahpool).
+A production-ready browser environment using Web Workers and [OPFS SAH](https://sqlite.org/wasm/doc/tip/persistence.md#vfs-opfs-sahpool) (Origin Private File System with Synchronous Access Handles). SAH provides the fastest SQLite performance in browsers by allowing synchronous file operations in a worker.
 
 **When to use:**
 
@@ -88,11 +90,16 @@ Each environment is a runtime container that hosts the Lix Engine and manages tw
 
 ### 1. Storage Management
 
-Environments decide where and how your SQLite database lives — whether that's in memory, in browser storage, or on disk. They handle creating, loading, and persisting your data.
+Environments decide where and how your SQLite database lives: in memory, in browser storage, or on disk. They handle creating, loading, and persisting your data.
 
 ### 2. Engine Isolation
 
-Environments determine where the Lix Engine executes. The InMemoryEnvironment runs the engine on your main thread (simple but can block UI), while OpfsSahEnvironment runs the engine in a Web Worker (non-blocking but requires message passing). The engine always runs inside the environment, never separately.
+Environments determine where the Lix engine executes:
+
+- **InMemoryEnvironment**: Runs on your main thread. Simple, but can block the UI during heavy operations.
+- **OpfsSahEnvironment**: Runs in a Web Worker. Non-blocking, but communication happens through message passing between threads.
+
+The engine always runs inside the environment, never separately.
 
 ## Practical Examples
 
@@ -128,7 +135,7 @@ const lix = await openLix({
 
 ## Writing a Custom Environment
 
-If you need to run Lix somewhere else—another storage backend, a specialized worker, a native shell—you can implement your own environment by satisfying the `LixEnvironment` interface.
+If you need to run Lix somewhere else (another storage backend, a specialized worker, a native shell), you can implement your own environment by satisfying the `LixEnvironment` interface.
 
 At minimum you must provide persistence primitives (`create`, `exists`, `exec`, `export`, `close`) and implement `open()` so the SDK can boot the engine next to your database. The `call()` method must forward engine RPCs across your boundary (e.g. to a worker thread or other process).
 
