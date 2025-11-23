@@ -6,7 +6,7 @@ AI agents generate a tremendous volume of changes. These changes need to be revi
 
 ## Every change is reviewable
 
-- Use [attribution](./attribution.md) to see exactly which agent (or human) changed a field, paragraph, or table cell.
+- Use [attribution](./attribution) to see exactly which agent (or human) changed a field, paragraph, or table cell.
 - Compare versions with entity-aware [diffs](./diffs.mdx) so reviewers understand the intent of a change instead of guessing from raw text.
 - Keep a durable audit trail; you can query history for “Which agent touched this configuration last?” at any time.
 
@@ -14,8 +14,8 @@ AI agents generate a tremendous volume of changes. These changes need to be revi
 
 Agents can draft changes, but humans stay in the loop with lightweight review tools.
 
-- [Change proposals](./change-proposals.md) bundle the diff, discussion, and approval state. Accept the good ideas, reject the hallucinations.
-- Start review conversations with stakeholders or other agents using comments and mentions from [conversations](./conversations.md).
+- [Change proposals](./change-proposals) bundle the diff, discussion, and approval state. Accept the good ideas, reject the hallucinations.
+- Start review conversations with stakeholders or other agents using comments and mentions from [conversations](./conversations).
 - Merge once the proposal is ready, or request another revision—the entire workflow maps to familiar pull-request style collaboration.
 
 ## Safe sandboxes for agents
@@ -37,7 +37,7 @@ Agents can draft changes, but humans stay in the loop with lightweight review to
 ## Coming soon: automated guardrails
 
 > [!NOTE]
-> [Validation rules](./validation-rules.md) are an upcoming feature. They will let you define automated checks that agents can use to self-correct before a human ever sees the proposal. Follow the issue for progress and demos.
+> [Validation rules](./validation-rules) are an upcoming feature. They will let you define automated checks that agents can use to self-correct before a human ever sees the proposal. Follow the issue for progress and demos.
 
 ![Validation rules for AI agents](/validation-rules-agent.svg)
 

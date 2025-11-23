@@ -1,6 +1,6 @@
 # What is a Lix Schema?
 
-A **Lix Schema** is a formal definition that describes the structure of data for a type of [entity](./entity.md). It acts as a contract that ensures data is consistent and understandable throughout the Lix ecosystem.
+A **Lix Schema** is a formal definition that describes the structure of data for a type of [entity](./entity). It acts as a contract that ensures data is consistent and understandable throughout the Lix ecosystem.
 
 Lix schemas are based on the widely-used [JSON Schema](https://json-schema.org/) standard, with a few Lix-specific extensions.
 

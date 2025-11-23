@@ -115,7 +115,7 @@ For persistent, non-blocking storage in the browser, run Lix in the
 `OpfsSahEnvironment`. This environment **automatically persists** every change to the browser's
 private file system (Origin Private File System).
 
-See the [Environment API](/guide/environment-api) for how environments control
+See the [Environment API](/docs/environment-api) for how environments control
 where your Lix runs and persists.
 
 ### Resume a session

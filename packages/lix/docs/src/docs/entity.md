@@ -1,6 +1,6 @@
 # What is an Entity?
 
-In Lix, an **entity** is a meaningful, addressable unit of data within a file. Instead of treating a file as a single blob of text, Lix uses plugins to identify changes to these entities. The structure of each entity's data is described by a **[Lix Schema](./schema.md)**.
+In Lix, an **entity** is a meaningful, addressable unit of data within a file. Instead of treating a file as a single blob of text, Lix uses plugins to identify changes to these entities. The structure of each entity's data is described by a **[Lix Schema](./schema)**.
 
 ## Examples of Entities
 
@@ -37,7 +37,7 @@ Lix's entity-based model solves this by unlocking several powerful capabilities:
 
 The concepts of Entities, Schemas, and Plugins work together:
 
-- A **[Lix Schema](./schema.md)** defines the _structure_ of an entity's data.
+- A **[Lix Schema](./schema)** defines the _structure_ of an entity's data.
 - A **Lix Plugin** understands a file format (like JSON) and is responsible for detecting changes to entities within that file.
 - When a plugin detects a change, it reports it to Lix using the structure defined by the corresponding schema.
 
@@ -63,7 +63,7 @@ It "flattens" the object, treating each property path as a unique entity. For th
 1.  An entity with the ID `user.name`.
 2.  An entity with the ID `theme`.
 
-If a user changed the theme to "light", the plugin would detect this and report a change to the `theme` entity. The data for that change would conform to the plugin's `JSONPropertySchema`. You can read more about the anatomy of this schema in the **[Lix Schema](./schema.md)** documentation.
+If a user changed the theme to "light", the plugin would detect this and report a change to the `theme` entity. The data for that change would conform to the plugin's `JSONPropertySchema`. You can read more about the anatomy of this schema in the **[Lix Schema](./schema)** documentation.
 
 ### Limitations
 

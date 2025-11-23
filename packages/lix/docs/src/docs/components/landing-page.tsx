@@ -447,7 +447,7 @@ function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16  mt-8">
               <a
-                href="/guide/getting-started.html"
+                href="/docs/quick-start"
                 className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{ backgroundColor: "#0692B6", color: "#ffffff" }}
                 onMouseEnter={(event) => {
@@ -800,7 +800,7 @@ function LandingPage() {
         <section className="py-14 px-6 sm:px-12 md:px-16 bg-white">
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-6">
             <a
-              href="https://lix.dev/guide/index.html"
+              href="/docs/quick-start"
               className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>📘</span>

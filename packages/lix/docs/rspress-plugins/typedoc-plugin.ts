@@ -130,7 +130,7 @@ Welcome to the comprehensive Lix SDK API documentation. This reference provides 
 
 ## Need Help?
 
-If you're new to Lix, consider starting with our [Getting Started Guide](/guide/getting-started) before diving into the API reference.
+If you're new to Lix, consider starting with our [Getting Started Guide](/docs/quick-start) before diving into the API reference.
 
 Browse the API documentation using the sidebar to find the specific functionality you need.`,
     );
@@ -147,7 +147,12 @@ export function generateApiSidebar(docsRoot: string) {
     throw new Error(`API directory not found: ${apiDir}`);
   }
 
-  const sidebar: any[] = [];
+  const sidebar: any[] = [
+    {
+      text: "Overview",
+      link: "/docs/api/",
+    },
+  ];
 
   // Define the categories we want to show
   const categories = [
@@ -169,7 +174,7 @@ export function generateApiSidebar(docsRoot: string) {
           const name = file.replace(".md", "");
           return {
             text: name,
-            link: `/api/${category.dir}/${name}`,
+            link: `/docs/api/${category.dir}/${name}`,
           };
         })
         .sort((a, b) => a.text.localeCompare(b.text));
