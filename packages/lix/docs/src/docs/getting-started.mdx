@@ -11,9 +11,12 @@ Build a simple app that tracks JSON file changes with Lix.
 
 <PackageManagerTabs command="install @lix-js/sdk @lix-js/plugin-json" />
 
-## Initialize Lix
+## Step 1: Open a Lix with Plugins
 
-Initialize Lix with plugins for the file types you'll track. Plugins teach Lix what constitutes a meaningful change (e.g., a JSON property, CSV row, or Markdown paragraph).
+Open a Lix with plugins for the file formats you want to track. Plugins teach Lix what constitutes a meaningful change in each format.
+
+> [!NOTE]
+> In this example, we're using the default in-memory mode. For persistence to disk, cloud storage, or browser storage, see [Persistence](/docs/persistence).
 
 <CodeSnippet
   module={example}
@@ -21,11 +24,13 @@ Initialize Lix with plugins for the file types you'll track. Plugins teach Lix w
   sections={["opening-lix"]}
 />
 
-Without plugins, Lix treats files as binary blobs. The `jsonPlugin` enables entity-level tracking—detecting that `/user/age` changed from 50 to 51, not just that line 3 changed.
+Without plugins, Lix treats files as binary blobs. The `jsonPlugin` enables entity-level tracking by detecting that the `age` property changed from `50` to `51`, rather than just "line 3 changed."
 
-## Insert and Update Files
+## Step 2: Insert and Update Files
 
-Files are stored as `Uint8Array` (binary), making Lix format-agnostic. Once inserted, every change is tracked automatically—no manual commits.
+Files are stored as `Uint8Array` (binary data), making Lix format-agnostic. Once inserted, every change is automatically tracked.
+
+**Insert a file:**
 
 <CodeSnippet
   module={example}
@@ -33,7 +38,7 @@ Files are stored as `Uint8Array` (binary), making Lix format-agnostic. Once inse
   sections={["inserting-file"]}
 />
 
-Update files like regular database operations:
+**Update the file:**
 
 <CodeSnippet
   module={example}
@@ -41,11 +46,11 @@ Update files like regular database operations:
   sections={["updating-file"]}
 />
 
-The JSON plugin detects exactly what changed (`age` property), preserving previous states while updating the current state.
+The JSON plugin detects precisely what changed (in this case, the `age` property from `50` to `51`) while preserving all previous states.
 
-## Query History
+## Step 3: Query History
 
-Query file state at any checkpoint using SQL:
+Query file state at any point in time using SQL and checkpoints:
 
 <CodeSnippet
   module={example}
@@ -53,10 +58,10 @@ Query file state at any checkpoint using SQL:
   sections={["querying-file-history"]}
 />
 
-The `file_history` view walks backwards from `lixcol_root_commit_id` (the checkpoint), reconstructing file state at each point in history. Use `lixcol_depth = 0` to get the state at that exact checkpoint.
+The `file_history` view reconstructs file state by walking backwards from a commit (`lixcol_root_commit_id`). Use `lixcol_depth = 0` to get the exact state at that checkpoint.
 
 > [!TIP]
-> Lix automatically commits every change. Checkpoints are not required but provide a convenient way to label important moments like before/after a migration.
+> Lix automatically commits every change. Checkpoints are optionally [labelled commits](/docs/labels) for important moments like before/after a migration or deployment.
 
 ## Next Steps
 

@@ -5,12 +5,9 @@ description: Save and reload Lix projects as .lix files across Node and browsers
 
 # Persistence
 
-Lix is persisted as a single blob you can drop wherever you already store data: disk, OPFS, object storage, or a
-database column. 
+By default, `openLix()` runs in-memory. For production use, Lix is persisted as a single blob you can drop wherever you already store data: disk, OPFS, object storage, or a database column.
 
-Export with `lix.toBlob()` and reopen with `openLix({ blob })`
-on Node, in the browser, or in workers—no storage migration or custom backend
-needed.
+Why this matters: you adopt Lix without redesigning storage. Keep Postgres, filesystem, browser storage, or object store as-is—persist the blob there and reopen the identical project anywhere the SDK runs.
 
 **Patterns at a glance**
 
@@ -21,10 +18,6 @@ needed.
 | Database column (Postgres)| Store in `bytea`; reopen with `new Blob([bytes])` | Fits existing doc storage patterns         |
 | Browser (OPFS)            | `new OpfsSahEnvironment({ key })`                 | Persisted, non-blocking in the browser     |
 | In-memory (tests, demos)  | Default in-memory instance                        | Great for unit tests and ephemeral sessions |
-
-Why this matters: you adopt Lix without redesigning storage. Keep Postgres,
-filesystem, browser storage, or object store as-is—persist the blob there and
-reopen the identical project anywhere the SDK runs.
 
 ## Save a Lix to disk (Node)
 
@@ -113,7 +106,7 @@ get the full Lix state back without changing your storage model.
 
 For persistent, non-blocking storage in the browser, run Lix in the
 `OpfsSahEnvironment`. This environment **automatically persists** every change to the browser's
-private file system (Origin Private File System).
+private file system ([Origin Private File System](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system)).
 
 See the [Environment API](/docs/environment-api) for how environments control
 where your Lix runs and persists.
