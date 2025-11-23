@@ -1,12 +1,10 @@
-# Lix Plugin Prosemirror
+# Lix Plugin ProseMirror
 
-This package enables change control for [ProseMirror](https://prosemirror.net/) documents using the Lix SDK.
+Lix plugin that tracks changes in [ProseMirror](https://prosemirror.net/) documents.
 
 [![Screenshot of the ProseMirror example app](./assets/prosemirror.png)](https://prosemirror-example.onrender.com/)
 
-[Try out the example app →](https://prosemirror-example.onrender.com/)
-
-An example can be found in the [example](./example) directory.
+[Try out the example app →](https://prosemirror-example.onrender.com/) • See the [example](./example) directory for a local setup.
 
 ## Installation
 
@@ -14,73 +12,67 @@ An example can be found in the [example](./example) directory.
 npm install @lix-js/sdk @lix-js/plugin-prosemirror
 ```
 
-## Getting Started
+## Quick start
 
-### Initialize Lix with the Prosemirror Plugin
+1) Open Lix with the ProseMirror plugin:
 
 ```ts
 import { openLix } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
 
-export const lix = await openLix({
-	providePlugins: [prosemirrorPlugin],
-});
+export const lix = await openLix({ providePlugins: [prosemirrorPlugin] });
 ```
 
-### Create and Insert a Prosemirror Document
+2) Create a ProseMirror doc in Lix:
 
 ```ts
-export const prosemirrorFile = await lix.db
+const file = await lix.db
 	.insertInto("file")
 	.values({
-		path: "/prosemirror.json",
+		path: "/doc.json",
 		data: new TextEncoder().encode(
-			JSON.stringify({
-				type: "doc",
-				content: [],
-			}),
+			JSON.stringify({ type: "doc", content: [] }),
 		),
 	})
-	.execute();
+	.returningAll()
+	.executeTakeFirstOrThrow();
 ```
 
-### Add the `lixProsemirror` Plugin to Your Editor State
-
-When configuring your ProseMirror editor, add the `lixProsemirror` plugin to your editor state's plugins array:
+3) Wire the editor:
 
 ```ts
-import { lixProsemirror, idPlugin } from "@lix-js/plugin-prosemirror";
 import { EditorState } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+import { lixProsemirror, idPlugin } from "@lix-js/plugin-prosemirror";
 
 const state = EditorState.create({
-	doc: schema.nodeFromJSON(/* ... */),
 	schema,
+	doc: schema.nodeFromJSON({ type: "doc", content: [] }),
 	plugins: [
-		// ...other plugins...
-		idPlugin(),
-		lixProsemirror({
-			lix, // your lix instance
-			fileId: prosemirrorFile.id, // the file id of your Prosemirror document
-		}),
+		idPlugin(), // add stable ids if your schema doesn't provide them
+		lixProsemirror({ lix, fileId: file.id }),
 	],
 });
-```
 
-### (Optional) Add the `idPlugin` if Your Nodes Lack Unique IDs
-
-If your ProseMirror document nodes do not have unique IDs, you should also add the `idPlugin`:
-
-```ts
-import { idPlugin } from "@lix-js/plugin-prosemirror";
-// ...other plugins...
-idPlugin(),
+const view = new EditorView(document.querySelector("#editor"), { state });
 ```
 
 ## How it works
 
-The lix prosemirror plugin tracks changes in the Prosemirror document with unique IDs.
+- Node-per-entity: each node with an `attrs.id` (or legacy `_id`) becomes a stored entity. The document entity keeps the ordered list of child IDs.
+- Content vs. structure: leaf nodes track text/marks; container nodes track attributes and the order of their children. New child nodes are captured inside their parent snapshot the first time they appear.
+- Apply: `applyChanges` rebuilds the ProseMirror JSON by merging stored node snapshots and the document’s `children_order`.
 
-If you don't have a id for your nodes yet, use the `idPlugin()` to add them:
+## Requirements and tips
+
+- Every node you want tracked must have a stable, unique ID in `attrs.id`. Use `idPlugin()` if your schema does not supply IDs.
+- Make sure your schema allows an `id` attribute on the node types you want to track.
+- Reordering children is captured via the document’s `children_order`. Inserting in the middle or reparenting nodes will appear as moves plus any node-level edits.
+- Text nodes themselves do not need IDs; their parent leaf node carries the content diff.
+
+### Adding IDs automatically
+
+If your nodes don’t already have IDs, add the bundled `idPlugin()` so the ProseMirror plugin can track them:
 
 ```diff
 {
@@ -100,4 +92,34 @@ If you don't have a id for your nodes yet, use the `idPlugin()` to add them:
     }
   ]
 }
+```
+
+## Rendering diffs
+
+You can render review-friendly diffs with [HTML Diff](https://html-diff.lix.dev/). Serialize the before/after ProseMirror JSON to HTML using your schema, then feed the two HTML strings to HTML Diff:
+
+```ts
+import { renderHtmlDiff } from "@lix-js/html-diff";
+import { DOMSerializer, Schema } from "prosemirror-model";
+
+// Convert ProseMirror JSON to HTML
+const toHtml = (schema: Schema, json: any) => {
+	const doc = schema.nodeFromJSON(json);
+	const div = document.createElement("div");
+	const fragment = DOMSerializer.fromSchema(schema).serializeFragment(doc.content);
+	div.appendChild(fragment);
+	return div.innerHTML;
+};
+
+const beforeHtml = toHtml(schema, beforeJson);
+const afterHtml = toHtml(schema, afterJson);
+
+const diffHtml = await renderHtmlDiff({
+	beforeHtml,
+	afterHtml,
+	diffAttribute: "data-diff-key",
+});
+
+// Render it wherever you show reviews
+document.querySelector("#diff")!.innerHTML = diffHtml;
 ```

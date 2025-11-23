@@ -49,6 +49,21 @@ test("should extract schema keys from key_value queries", async () => {
 	await lix.close();
 });
 
+test("extractLiteralFilters captures file_id", async () => {
+	const lix = await openLix({});
+
+	const compiled = lix.db
+		.selectFrom("file")
+		.where("id", "=", "file-123")
+		.select(["id", "path"])
+		.compile();
+
+	const filters = extractLiteralFilters(compiled);
+	expect(filters.fileIds).toEqual(["file-123"]);
+
+	await lix.close();
+});
+
 test("should extract schema keys from state table queries", async () => {
 	const lix = await openLix({});
 

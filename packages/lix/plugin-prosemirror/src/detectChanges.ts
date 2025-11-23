@@ -106,7 +106,7 @@ function shouldIncludeNewNode(
 	// Check if the parent node is also new in this diff.
 	// If so, skip adding the child separately, as it's part of the parent's snapshot.
 	const parentNode = findParentNode(documentAfter, nodeId);
-	const parentId = parentNode?.attrs?.id || parentNode?._id;
+	const parentId = parentNode?.attrs?.id;
 	return !(parentId && !beforeNodeMap.has(parentId));
 }
 
@@ -135,19 +135,13 @@ function hasNodeChanged(
 
 /**
  * Recursively collects all nodes with IDs into a map
- * IDs can be either in node.attrs.id (preferred) or node._id (legacy)
  */
 function collectNodesWithId(
 	node: ProsemirrorNode,
 	nodeMap: Map<string, ProsemirrorNode>,
 ) {
-	// Check for ID in node.attrs.id (preferred location)
 	if (node.attrs && node.attrs.id) {
 		nodeMap.set(node.attrs.id, node);
-	}
-	// Also check for legacy _id directly on the node
-	else if (node._id) {
-		nodeMap.set(node._id, node);
 	}
 
 	if (node.content && Array.isArray(node.content)) {
@@ -303,11 +297,6 @@ function areContentArraysEqual(
 			return false;
 		}
 
-		// For nodes with IDs, if IDs don't match, they're different
-		if (node1._id && node2._id && node1._id !== node2._id) {
-			return false;
-		}
-
 		// Compare attributes
 		if (!areAttributesEqual(node1.attrs, node2.attrs)) {
 			return false;
@@ -331,7 +320,7 @@ function hasChildrenWithIds(node: ProsemirrorNode): boolean {
 	}
 
 	for (const child of node.content) {
-		if ((child.attrs && child.attrs.id) || child._id) {
+		if (child.attrs && child.attrs.id) {
 			return true;
 		}
 
@@ -352,7 +341,7 @@ function findParentNode(
 	targetId: string,
 	parent: ProsemirrorNode | null = null,
 ): ProsemirrorNode | null {
-	const currentId = currentNode.attrs?.id || currentNode._id;
+	const currentId = currentNode.attrs?.id;
 	if (currentId === targetId) {
 		return parent;
 	}
@@ -379,7 +368,7 @@ function extractChildrenOrder(document: ProsemirrorNode): string[] {
 
 	const childrenOrder: string[] = [];
 	for (const child of document.content) {
-		const childId = child.attrs?.id || child._id;
+		const childId = child.attrs?.id;
 		if (childId) {
 			childrenOrder.push(childId);
 		}

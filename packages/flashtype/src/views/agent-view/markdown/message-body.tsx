@@ -168,7 +168,11 @@ export function MessageBody({ content }: { content: string }) {
 						return <MarkdownImage src={src} alt={alt} />;
 					},
 					del({ children }) {
-						return <del className="line-through text-muted-foreground">{children}</del>;
+						return (
+							<del className="line-through text-muted-foreground">
+								{children}
+							</del>
+						);
 					},
 					input({ checked, ...props }) {
 						return (

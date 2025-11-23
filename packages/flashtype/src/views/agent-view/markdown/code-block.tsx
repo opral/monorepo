@@ -108,7 +108,11 @@ export function CodeBlock({
 					<button
 						onClick={() => setIsExpanded(!isExpanded)}
 						className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-						aria-label={isExpanded ? "Collapse code block" : `Expand code block (${lineCount} lines)`}
+						aria-label={
+							isExpanded
+								? "Collapse code block"
+								: `Expand code block (${lineCount} lines)`
+						}
 					>
 						{isExpanded ? (
 							<>
@@ -116,7 +120,8 @@ export function CodeBlock({
 							</>
 						) : (
 							<>
-								Show More ({lineCount} lines) <ChevronDown className="h-3 w-3" />
+								Show More ({lineCount} lines){" "}
+								<ChevronDown className="h-3 w-3" />
 							</>
 						)}
 					</button>

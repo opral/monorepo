@@ -259,7 +259,7 @@ function applyDocumentOrder(
 	for (const nodeId of childrenOrder) {
 		// First check if the node exists in the current document content
 		const existingNode = document.content.find(
-			(node) => (node.attrs?.id || node._id) === nodeId,
+			(node) => node.attrs?.id === nodeId,
 		);
 
 		if (existingNode) {
@@ -278,7 +278,7 @@ function applyDocumentOrder(
 
 	// Add any remaining nodes that weren't in the children_order but exist in current content
 	for (const node of document.content) {
-		const nodeId = node.attrs?.id || node._id;
+		const nodeId = node.attrs?.id;
 		if (nodeId && !processedIds.has(nodeId)) {
 			newContent.push(node);
 			processedIds.add(nodeId);

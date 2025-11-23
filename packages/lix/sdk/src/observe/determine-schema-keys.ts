@@ -140,15 +140,32 @@ export function extractLiteralFilters(compiledQuery: any): {
 	schemaKeys: string[];
 	versionIds: string[];
 	entityIds: string[];
+	fileIds: string[];
 } {
 	const schemaKeys = new Set<string>();
 	const versionIds = new Set<string>();
 	const entityIds = new Set<string>();
+	const fileIds = new Set<string>();
+	const tableNames = new Set<string>();
 
 	const root = compiledQuery?.query ?? compiledQuery;
 	if (!root) {
-		return { schemaKeys: [], versionIds: [], entityIds: [] };
+		return { schemaKeys: [], versionIds: [], entityIds: [], fileIds: [] };
 	}
+
+	const rootQuery = root?.query ?? root;
+	if (rootQuery?.from)
+		extractTableNamesFromQueryNode(rootQuery.from, tableNames);
+	if (rootQuery?.joins) {
+		for (const join of rootQuery.joins) {
+			extractTableNamesFromQueryNode(join, tableNames);
+		}
+	}
+	if (rootQuery?.where)
+		extractTableNamesFromQueryNode(rootQuery.where, tableNames);
+
+	const fileTablesPresent =
+		tableNames.has("file") || tableNames.has("file_by_version");
 
 	const record = (column: string | undefined, values: string[] | undefined) => {
 		if (!column || !values || values.length === 0) return;
@@ -159,7 +176,9 @@ export function extractLiteralFilters(compiledQuery: any): {
 					? versionIds
 					: column === "entity_id"
 						? entityIds
-						: undefined;
+						: column === "file_id"
+							? fileIds
+							: undefined;
 		if (!target) return;
 		for (const value of values) {
 			if (typeof value === "string") {
@@ -201,16 +220,24 @@ export function extractLiteralFilters(compiledQuery: any): {
 				if (
 					leftColumn === "schema_key" ||
 					leftColumn === "version_id" ||
-					leftColumn === "entity_id"
+					leftColumn === "entity_id" ||
+					leftColumn === "file_id"
 				) {
 					record(leftColumn, rightValues);
 				}
 				if (
 					rightColumn === "schema_key" ||
 					rightColumn === "version_id" ||
-					rightColumn === "entity_id"
+					rightColumn === "entity_id" ||
+					rightColumn === "file_id"
 				) {
 					record(rightColumn, leftValues);
+				}
+
+				// Heuristic: file queries filter on 'id' column; capture as file_id when file table is present.
+				if (fileTablesPresent) {
+					if (leftColumn === "id") record("file_id", rightValues);
+					if (rightColumn === "id") record("file_id", leftValues);
 				}
 
 				// For IN/NOT IN operators, both sides can carry literals. Already handled above.
@@ -319,6 +346,7 @@ export function extractLiteralFilters(compiledQuery: any): {
 		schemaKeys: Array.from(schemaKeys),
 		versionIds: Array.from(versionIds),
 		entityIds: Array.from(entityIds),
+		fileIds: Array.from(fileIds),
 	};
 }
 

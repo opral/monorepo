@@ -1,10 +1,16 @@
-import { Change } from "@lix-js/sdk";
+import { Change, OpfsSahEnvironment } from "@lix-js/sdk";
 import { toUserTime } from "../utilities/timeUtils";
 import { selectChanges, selectProsemirrorDoc } from "../queries";
 import { schema } from "../prosemirror/schema";
 import { useState, useRef } from "react";
 import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
+/**
+ * Developer utilities for inspecting and resetting the ProseMirror demo data.
+ *
+ * @example
+ * <LixDebugPanel />
+ */
 const LixDebugPanel = () => {
 	const lix = useLix();
 	const changes = useQuery(({ lix }) => selectChanges(lix));
@@ -56,9 +62,8 @@ const LixDebugPanel = () => {
 			// Close the Lix instance first
 			await lix.close();
 
-			// Delete the OPFS file
-			const opfsRoot = await navigator.storage.getDirectory();
-			await opfsRoot.removeEntry("example.lix");
+			// Clear OPFS so the next load starts from a clean database
+			await OpfsSahEnvironment.clear();
 
 			// Reload the window
 			window.location.reload();
