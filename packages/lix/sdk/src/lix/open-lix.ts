@@ -44,13 +44,26 @@ export type Lix = {
 	 * Serialises the Lix into a {@link Blob}.
 	 *
 	 * Use this helper to persist the current state to disk or send it to a
-	 * server. The blob contains the raw SQLite file representing the Lix
-	 * project.
+	 * server. By convention, persisted Lix files use the `.lix` extension.
 	 *
-	 * @example
+	 * @example Persist to disk in Node
+	 *
 	 * ```ts
-	 * const blob = await lix.toBlob()
-	 * download(blob)
+	 * import { writeFile } from "node:fs/promises";
+	 * const blob = await lix.toBlob();
+	 * await writeFile("repo.lix", Buffer.from(await blob.arrayBuffer()));
+	 * ```
+	 *
+	 * @example Trigger a browser download
+	 *
+	 * ```ts
+	 * const blob = await lix.toBlob();
+	 * const url = URL.createObjectURL(blob);
+	 * const a = document.createElement("a");
+	 * a.href = url;
+	 * a.download = "repo.lix";
+	 * a.click();
+	 * URL.revokeObjectURL(url);
 	 * ```
 	 */
 	toBlob: () => Promise<Blob>;
