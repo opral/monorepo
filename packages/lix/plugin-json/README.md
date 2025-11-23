@@ -1,6 +1,6 @@
 # Lix Plugin `.json`
 
-This plugin adds support for `.json` files in Lix.
+Plugin for [Lix](https://lix.dev) that adds support for `.json` files.
 
 ## Installation
 

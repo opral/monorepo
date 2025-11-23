@@ -1,6 +1,6 @@
 # Lix Plugin `.md`
 
-Lix plugin that tracks changes in Markdown files.
+Plugin for [Lix](https://lix.dev) that tracks changes in Markdown files.
 
 It parses Markdown into the [`@opral/markdown-wc`](https://www.npmjs.com/package/@opral/markdown-wc) AST, tracks top-level blocks as entities, and renders rich diffs via [HTML Diff](https://html-diff.lix.dev/). The plugin follows the [markdown-wc spec](https://markdown-wc.opral.com/), giving Lix a stable Markdown shape to detect, apply, and render changes against.
 

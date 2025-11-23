@@ -1,6 +1,6 @@
 # Lix Plugin ProseMirror
 
-Lix plugin that tracks changes in [ProseMirror](https://prosemirror.net/) documents.
+Plugin for [Lix](https://lix.dev) that tracks changes in [ProseMirror](https://prosemirror.net/) documents.
 
 [![Screenshot of the ProseMirror example app](./assets/prosemirror.png)](https://prosemirror-example.onrender.com/)
 
