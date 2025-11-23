@@ -15,9 +15,7 @@ export function syncReactUtilsReadmePlugin(): RspressPlugin {
         "> [!NOTE]\n> This page is mirrored from [packages/lix/react-utils](https://github.com/opral/monorepo/tree/main/packages/lix/react-utils).\n\n";
       await fs.mkdir(path.dirname(dest), { recursive: true });
       await fs.writeFile(dest, banner + readme, "utf8");
-      console.log(
-        "✅ copied react utils README.md to docs/react-integration.mdx",
-      );
+      console.log(`✅ copied react utils README.md to ${dest}`);
 
       return config;
     },
