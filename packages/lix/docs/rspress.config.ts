@@ -112,6 +112,7 @@ export default defineConfig({
             { text: "Metadata", link: "/docs/metadata" },
             { text: "Writer Key", link: "/docs/writer-key" },
             { text: "Architecture", link: "/docs/architecture" },
+            { text: "Lix as File Format", link: "/docs/lix-as-file-format" },
           ],
         },
       ],
