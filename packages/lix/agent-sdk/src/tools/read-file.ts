@@ -94,7 +94,10 @@ export async function readFile(
 				.select(["id", "path", "data"])
 				.executeTakeFirst();
 
-	if (!row) throw new Error("read_file: file not found");
+	if (!row) {
+		const identifier = path ? `"${path}"` : `fileId "${fileId}"`;
+		throw new Error(`File not found: ${identifier}. Try using the list_files tool to see available files.`);
+	}
 
 	const bytes = row.data as unknown as Uint8Array;
 	const size = bytes?.byteLength ?? 0;
