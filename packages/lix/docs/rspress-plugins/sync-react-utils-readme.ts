@@ -8,7 +8,7 @@ export function syncReactUtilsReadmePlugin(): RspressPlugin {
     async config(config) {
       const docsRoot = config.root!;
       const src = path.join(__dirname, "..", "..", "react-utils", "README.md");
-      const dest = path.join(docsRoot, "guide", "react-utils.mdx");
+      const dest = path.join(docsRoot, "docs", "react-integration.mdx");
 
       const readme = await fs.readFile(src, "utf8");
       const banner =
@@ -16,7 +16,7 @@ export function syncReactUtilsReadmePlugin(): RspressPlugin {
       await fs.mkdir(path.dirname(dest), { recursive: true });
       await fs.writeFile(dest, banner + readme, "utf8");
       console.log(
-        "✅ copied react utils README.md to docs/guide/react-utils.mdx",
+        "✅ copied react utils README.md to docs/react-integration.mdx",
       );
 
       return config;

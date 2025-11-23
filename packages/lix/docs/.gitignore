@@ -7,5 +7,5 @@ docs_build
 src/docs/api/*
 
 # generated from @lix-js/react-utils/README.md
-docs/guide/react-utils.mdx
-src/docs/guide/react-utils.mdx
+docs/react-integration.mdx
+src/docs/react-integration.mdx
