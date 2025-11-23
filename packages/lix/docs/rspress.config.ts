@@ -1,11 +1,14 @@
 import * as path from "node:path";
-import { defineConfig } from "rspress/config";
-import mermaid from "rspress-plugin-mermaid";
+import { defineConfig } from "@rspress/core";
 import { syncReactUtilsReadmePlugin } from "./rspress-plugins/sync-react-utils-readme";
 import {
   generateApiDocs,
   generateApiSidebar,
 } from "./rspress-plugins/typedoc-plugin";
+import {
+  mermaidComponentPath,
+  remarkMermaid,
+} from "./rspress-plugins/remark-mermaid";
 
 // Generate API docs before creating the config
 // We need to generate the API docs at the top level (before defineConfig) because
@@ -32,16 +35,29 @@ export default defineConfig({
   globalStyles: path.join(__dirname, "src/styles/index.css"),
   route: {
     cleanUrls: true,
-    exclude: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+    exclude: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "**/examples/**/*.ts",
+      "**/components/**/*.{ts,tsx}",
+    ],
   },
   markdown: {
     // Disable Rust MDX compiler to support global components
     mdxRs: false,
     globalComponents: [
       path.join(__dirname, "src/docs/components/InteractiveExampleCard.tsx"),
+      mermaidComponentPath,
     ],
+    remarkPlugins: [remarkMermaid],
   },
   builderConfig: {
+    dev: {
+      // Disable lazy compilation to avoid giant dev proxy requests from Shiki/highlighter
+      lazyCompilation: false,
+    },
     tools: {
       rspack: {
         module: {
@@ -62,7 +78,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mermaid(), syncReactUtilsReadmePlugin()],
+  plugins: [syncReactUtilsReadmePlugin()],
   themeConfig: {
     darkMode: false,
     nav: [
