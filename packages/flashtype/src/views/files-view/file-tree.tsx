@@ -160,29 +160,29 @@ function FileTreeNode({
 }) {
 	if (node.type === "file") {
 		const isSelected = selectedPath === node.path;
-		const buttonClass = clsx(
-			"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-sm transition-colors",
-			!isSelected && "hover:bg-neutral-100",
-			isSelected ? selectedClasses : "text-neutral-700",
-		);
+                const buttonClass = clsx(
+                        "flex w-full min-w-0 items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-sm transition-colors",
+                        !isSelected && "hover:bg-neutral-100",
+                        isSelected ? selectedClasses : "text-neutral-700",
+                );
 		const itemTestId = `file-tree-item-${sanitizeForTestId(node.path)}`;
-		return (
-			<li>
-				<button
-					type="button"
-					data-selected={isSelected ? "true" : undefined}
-					data-testid={itemTestId}
-					className={buttonClass}
-					onClick={() => {
-						onSelectItem?.(node.path, "file");
-						void openFileView?.(node.id, node.path);
-					}}
-				>
-					<FileText className="h-3.5 w-3.5 text-neutral-500" />
-					<span>{formatDisplayName(node.name)}</span>
-				</button>
-			</li>
-		);
+                return (
+                        <li>
+                                <button
+                                        type="button"
+                                        data-selected={isSelected ? "true" : undefined}
+                                        data-testid={itemTestId}
+                                        className={buttonClass}
+                                        onClick={() => {
+                                                onSelectItem?.(node.path, "file");
+                                                void openFileView?.(node.id, node.path);
+                                        }}
+                                >
+                                        <FileText className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+                                        <span className="truncate">{formatDisplayName(node.name)}</span>
+                                </button>
+                        </li>
+                );
 	}
 
 	const containsDraft = draft?.directoryPath === node.path;
@@ -190,33 +190,33 @@ function FileTreeNode({
 	const Icon = isOpen ? FolderOpen : Folder;
 	const suppressSelection = Boolean(draft && draft.directoryPath === node.path);
 	const isSelected = !suppressSelection && selectedPath === node.path;
-	const buttonClass = clsx(
-		"flex items-center gap-1 rounded border border-transparent px-2 py-1 text-left text-sm font-medium transition-colors",
-		!isSelected && "hover:bg-neutral-100",
-		isSelected ? selectedClasses : "text-neutral-700",
-	);
+        const buttonClass = clsx(
+                "flex w-full min-w-0 items-center gap-1 rounded border border-transparent px-2 py-1 text-left text-sm font-medium transition-colors",
+                !isSelected && "hover:bg-neutral-100",
+                isSelected ? selectedClasses : "text-neutral-700",
+        );
 
 	return (
-		<li>
-			<div className="flex items-center">
-				<button
-					type="button"
-					aria-expanded={isOpen}
-					data-selected={isSelected ? "true" : undefined}
+                <li>
+                        <div className="flex items-center">
+                                <button
+                                        type="button"
+                                        aria-expanded={isOpen}
+                                        data-selected={isSelected ? "true" : undefined}
 					data-testid={`file-tree-directory-${sanitizeForTestId(node.path)}`}
 					className={buttonClass}
 					onClick={() => {
 						onSelectItem?.(node.path, "directory");
 						onToggleDirectory(node.path);
 					}}
-				>
-					<ChevronRight
-						className={`h-3 w-3 transition-transform ${isOpen ? "rotate-90" : ""}`}
-					/>
-					<Icon className="h-3.5 w-3.5 text-neutral-500" />
-					<span>{formatDisplayName(node.name)}</span>
-				</button>
-			</div>
+                                >
+                                        <ChevronRight
+                                                className={`h-3 w-3 shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`}
+                                        />
+                                        <Icon className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+                                        <span className="truncate">{formatDisplayName(node.name)}</span>
+                                </button>
+                        </div>
 			{isOpen ? (
 				<ul className="ml-4 space-y-1 border-l border-neutral-200 pl-2">
 					{containsDraft ? (
