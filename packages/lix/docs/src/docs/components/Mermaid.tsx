@@ -6,6 +6,8 @@ interface MermaidProps {
   config?: MermaidConfig;
 }
 
+let mermaidInitialized = false;
+
 /**
  * Renders a Mermaid diagram from fenced code blocks.
  *
@@ -16,6 +18,13 @@ export default function Mermaid({ code, config }: MermaidProps) {
   const [svg, setSvg] = useState("");
   const [hasError, setHasError] = useState(false);
   const id = useId().replace(/:/g, "");
+
+  useEffect(() => {
+    if (mermaidInitialized) return;
+
+    mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
+    mermaidInitialized = true;
+  }, []);
 
   useEffect(() => {
     const theme = document.documentElement.classList.contains("dark")
@@ -29,10 +38,11 @@ export default function Mermaid({ code, config }: MermaidProps) {
       ...config,
     };
 
+    const definition = `%%{init: ${JSON.stringify(mergedConfig)}}%%\n${code}`;
+
     Promise.resolve()
       .then(() => {
-        mermaid.initialize(mergedConfig);
-        return mermaid.render(id, code);
+        return mermaid.render(id, definition);
       })
       .then(({ svg }) => {
         setSvg(svg);
