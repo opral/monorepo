@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import mermaid, { type MermaidConfig } from "mermaid";
 
 interface MermaidProps {
@@ -7,6 +7,18 @@ interface MermaidProps {
 }
 
 let mermaidInitialized = false;
+let mermaidInitPromise: Promise<void> | null = null;
+
+const ensureMermaidInitialized = () => {
+  if (mermaidInitialized) return mermaidInitPromise as Promise<void>;
+
+  mermaidInitialized = true;
+  mermaidInitPromise = Promise.resolve().then(() =>
+    mermaid.initialize({ startOnLoad: false, securityLevel: "loose" })
+  );
+
+  return mermaidInitPromise;
+};
 
 /**
  * Renders a Mermaid diagram from fenced code blocks.
@@ -18,12 +30,10 @@ export default function Mermaid({ code, config }: MermaidProps) {
   const [svg, setSvg] = useState("");
   const [hasError, setHasError] = useState(false);
   const id = useId().replace(/:/g, "");
+  const renderRequestRef = useRef(0);
 
   useEffect(() => {
-    if (mermaidInitialized) return;
-
-    mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
-    mermaidInitialized = true;
+    ensureMermaidInitialized();
   }, []);
 
   useEffect(() => {
@@ -39,16 +49,27 @@ export default function Mermaid({ code, config }: MermaidProps) {
     };
 
     const definition = `%%{init: ${JSON.stringify(mergedConfig)}}%%\n${code}`;
+    let isCancelled = false;
+    const renderId = renderRequestRef.current + 1;
+    renderRequestRef.current = renderId;
 
-    Promise.resolve()
-      .then(() => {
-        return mermaid.render(id, definition);
-      })
+    ensureMermaidInitialized()
+      ?.then(() => mermaid.render(id, definition))
       .then(({ svg }) => {
+        if (isCancelled || renderId !== renderRequestRef.current) return;
+
         setSvg(svg);
         setHasError(false);
       })
-      .catch(() => setHasError(true));
+      .catch(() => {
+        if (isCancelled || renderId !== renderRequestRef.current) return;
+
+        setHasError(true);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [code, config, id]);
 
   if (hasError) {
