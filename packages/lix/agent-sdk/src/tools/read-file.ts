@@ -3,38 +3,41 @@ import { tool } from "ai";
 import dedent from "dedent";
 import { z } from "zod";
 
-export const ReadFileInputSchema = z
-	.object({
-		version_id: z.string().min(1),
-		path: z.string().min(1).optional(),
-		fileId: z.string().min(1).optional(),
-		byteOffset: z.number().int().min(0).default(0).optional(),
-		byteLength: z.number().int().min(1).optional(),
-		lineOffset: z.number().int().min(0).optional(),
-		lineLimit: z.number().int().min(0).optional(),
-		maxBytes: z
-			.number()
-			.int()
-			.min(1)
-			.max(5_000_000)
-			.default(200_000)
-			.optional(),
-		maxChars: z
-			.number()
-			.int()
-			.min(100)
-			.max(1_000_000)
-			.default(15_000)
-			.optional(),
-	})
-	.refine((v) => v.path || v.fileId, {
-		message: "Provide either 'path' or 'fileId'",
-	})
-	.refine((v) => !(v.path && v.fileId), {
-		message: "Provide only one of 'path' or 'fileId'",
-	});
+const BaseReadFileInputSchema = z.object({
+	version_id: z.string().min(1),
+	byteOffset: z.number().int().min(0).default(0).optional(),
+	byteLength: z.number().int().min(1).optional(),
+	lineOffset: z.number().int().min(0).optional(),
+	lineLimit: z.number().int().min(0).optional(),
+	maxBytes: z
+		.number()
+		.int()
+		.min(1)
+		.max(5_000_000)
+		.default(200_000)
+		.optional(),
+	maxChars: z
+		.number()
+		.int()
+		.min(100)
+		.max(1_000_000)
+		.default(15_000)
+		.optional(),
+});
 
-export type ReadFileInput = z.infer<typeof ReadFileInputSchema>;
+export const ReadFileByPathInputSchema = BaseReadFileInputSchema.extend({
+	path: z.string().min(1),
+});
+
+export const ReadFileByIdInputSchema = BaseReadFileInputSchema.extend({
+	fileId: z.string().min(1),
+});
+
+export type ReadFileByPathInput = z.infer<typeof ReadFileByPathInputSchema>;
+export type ReadFileByIdInput = z.infer<typeof ReadFileByIdInputSchema>;
+
+// Legacy union type for internal use
+export type ReadFileInput = ReadFileByPathInput | ReadFileByIdInput;
 
 export const ReadFileOutputSchema = z.object({
 	text: z.string(),
@@ -56,13 +59,11 @@ export type ReadFileOutput = z.infer<typeof ReadFileOutputSchema>;
  * - Returns a flat result (no nested meta), always including the resolved file path.
  */
 export async function readFile(
-	args: ReadFileInput & { lix: Lix }
+	args: (ReadFileInput & { lix: Lix }) | (ReadFileByPathInput & { lix: Lix }) | (ReadFileByIdInput & { lix: Lix })
 ): Promise<ReadFileOutput> {
 	const {
 		lix,
 		version_id,
-		path,
-		fileId,
 		byteOffset = 0,
 		byteLength,
 		lineOffset,
@@ -70,6 +71,9 @@ export async function readFile(
 		maxBytes = 200_000,
 		maxChars = 15_000,
 	} = args;
+
+	const path = "path" in args ? args.path : undefined;
+	const fileId = "fileId" in args ? args.fileId : undefined;
 
 	if (!path && !fileId)
 		throw new Error("read_file: provide 'path' or 'fileId'.");
@@ -90,7 +94,10 @@ export async function readFile(
 				.select(["id", "path", "data"])
 				.executeTakeFirst();
 
-	if (!row) throw new Error("read_file: file not found");
+	if (!row) {
+		const identifier = path ? `"${path}"` : `fileId "${fileId}"`;
+		throw new Error(`File not found: ${identifier}. Try using the list_files tool to see available files.`);
+	}
 
 	const bytes = row.data as unknown as Uint8Array;
 	const size = bytes?.byteLength ?? 0;
@@ -142,20 +149,17 @@ function clamp(n: number, min: number, max: number): number {
 	return Math.max(min, Math.min(max, n));
 }
 
-export function createReadFileTool(args: { lix: Lix }) {
+export function createReadFileByPathTool(args: { lix: Lix }) {
 	const description = dedent`
-	    Read a file from the lix (UTF-8) for a specific version.
+	    Read a file from the lix (UTF-8) for a specific version using its path.
 
     Paths
     - Paths are absolute and must start with '/'.
       Good: "/z.md" • Bad: "z.md"
-    - Alternatively, you can provide fileId instead of path.
 
     Verification
     - If in doubt whether a file exists or the exact path is correct, first
       list files and confirm the absolute path (e.g., via the list_files tool).
-      Alternatively, if you know the file id, read by fileId to avoid path
-      ambiguity.
 
     Windowing
     - Use byteOffset/byteLength for byte windows, or lineOffset/lineLimit after decode.
@@ -168,12 +172,42 @@ export function createReadFileTool(args: { lix: Lix }) {
 
 	return tool({
 		description,
-		inputSchema: ReadFileInputSchema,
+		inputSchema: ReadFileByPathInputSchema,
 		outputSchema: z.string(),
 		execute: async (input) => {
 			const result = await readFile({
 				lix: args.lix,
-				...(input as ReadFileInput),
+				...(input as ReadFileByPathInput),
+			});
+			return result.text;
+		},
+	});
+}
+
+export function createReadFileByIdTool(args: { lix: Lix }) {
+	const description = dedent`
+	    Read a file from the lix (UTF-8) for a specific version using its file ID.
+
+    File ID
+    - Use this when you have the file ID to avoid path ambiguity.
+
+    Windowing
+    - Use byteOffset/byteLength for byte windows, or lineOffset/lineLimit after decode.
+    - Prefer small windows for previews; the tool clamps very large outputs.
+
+    Output
+    - Returns the selected UTF-8 text window directly (string only).
+    - Always pass the version_id field to read from the intended lix version.
+  `;
+
+	return tool({
+		description,
+		inputSchema: ReadFileByIdInputSchema,
+		outputSchema: z.string(),
+		execute: async (input) => {
+			const result = await readFile({
+				lix: args.lix,
+				...(input as ReadFileByIdInput),
 			});
 			return result.text;
 		},
