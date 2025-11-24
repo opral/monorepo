@@ -3,6 +3,10 @@ import { defineConfig } from "@rspress/core";
 import { pluginLlms } from "@rspress/plugin-llms";
 import { syncReactUtilsReadmePlugin } from "./rspress-plugins/sync-react-utils-readme";
 import {
+  syncPluginReadmesPlugin,
+  generatePluginsSidebar,
+} from "./rspress-plugins/sync-plugin-readmes";
+import {
   generateApiDocs,
   generateApiSidebar,
 } from "./rspress-plugins/typedoc-plugin";
@@ -53,6 +57,7 @@ export default defineConfig({
     mdxRs: false,
     globalComponents: [
       path.join(__dirname, "src/docs/components/InteractiveExampleCard.tsx"),
+      path.join(__dirname, "src/docs/components/PluginMetadataCard.tsx"),
       mermaidComponentPath,
     ],
     remarkPlugins: [remarkMermaid],
@@ -88,11 +93,13 @@ export default defineConfig({
       siteUrl: "https://lix.dev",
     }),
     syncReactUtilsReadmePlugin(),
+    syncPluginReadmesPlugin(),
   ],
   themeConfig: {
     darkMode: false,
     nav: [
       { text: "Docs", link: "/docs/what-is-lix" },
+      { text: "Plugins", link: "/plugins/" },
       { text: "API Reference", link: "/docs/api/" },
     ],
     sidebar: {
@@ -142,6 +149,7 @@ export default defineConfig({
           ],
         },
       ],
+      "/plugins/": generatePluginsSidebar(path.join(__dirname, "src")),
       "/docs/api/": generateApiSidebar(path.join(__dirname, "src/docs")),
     },
     socialLinks: [

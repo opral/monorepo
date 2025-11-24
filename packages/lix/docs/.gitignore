@@ -9,3 +9,9 @@ src/docs/api/*
 # generated from @lix-js/react-utils/README.md
 docs/react-integration.mdx
 src/docs/react-integration.mdx
+
+# generated from plugin registry/READMEs
+src/plugins/_meta.json
+src/plugins/*.mdx
+!src/plugins/index.mdx
+!src/plugins/plugin.registry.json
