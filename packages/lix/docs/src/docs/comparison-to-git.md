@@ -52,28 +52,35 @@ Lix runs *inside* your application—in browsers, Node.js, or Web Workers. The p
 Query changes programmatically instead of parsing CLI output:
 
 ```typescript
-// Time-travel: query file state history
+// Time-travel: query file history from a specific commit
 const history = await lix.db
-  .selectFrom("file_state_history")
-  .where("file_id", "=", "catalog.json")
+  .selectFrom("file_history")
+  .where("path", "=", "/catalog.json")
+  .where(
+    "lixcol_root_commit_id",
+    "=",
+    lix.db
+      .selectFrom("active_version")
+      .innerJoin("version", "active_version.version_id", "version.id")
+      .select("version.commit_id")
+  )
   .orderBy("lixcol_depth", "asc")
-  .execute();
-
-// Attribution: who changed what in a file
-const changes = await lix.db
-  .selectFrom("change")
-  .innerJoin("account", "change.author_id", "account.id")
-  .where("change.file_id", "=", "catalog.json")
-  .where("change.entity_id", "=", "/sku_124/price")
   .execute();
 
 // Cross-version file comparison
 const diff = await lix.db
-  .selectFrom("file_state as v1")
-  .innerJoin("file_state as v2", "v1.file_id", "v2.file_id")
-  .where("v1.lixcol_version_id", "=", versionA)
-  .where("v2.lixcol_version_id", "=", versionB)
-  .where("v1.file_id", "=", "catalog.json")
+  .selectFrom("file_history as v1")
+  .innerJoin("file_history as v2", "v1.id", "v2.id")
+  .where("v1.lixcol_root_commit_id", "=", versionACommit)
+  .where("v1.lixcol_depth", "=", 0)
+  .where("v2.lixcol_root_commit_id", "=", versionBCommit)
+  .where("v2.lixcol_depth", "=", 0)
+  .where("v1.path", "=", "/catalog.json")
+  .select([
+    "v1.path",
+    "v1.data as versionAData",
+    "v2.data as versionBData"
+  ])
   .execute();
 ```
 
@@ -96,45 +103,42 @@ Lix enables safe, auditable AI workflows:
 - **Full audit trails**: Every change is attributed to a specific agent or human with timestamps
 - **Parallel testing**: Run competing agents in separate versions, compare results, promote the winner
 
-**6. On-Demand State Materialization**
+**6. SQL-Native Change Queries**
 
-Unlike Git's full snapshots, Lix stores only raw changes and materializes state on-demand:
-1. Collect reachable change sets from target commit
-2. Take union of all underlying changes
-3. Select latest change per entity
+Lix keeps every change addressable through SQL, so you can:
+- Query per-entity history (`state_history`) and per-file history (`file_history`) with depth-scoped filters
+- Join changes with authors, labels, or conversations to build custom review/blame UIs
+- Materialize just the entities you need instead of reconstructing whole files
 
-This reduces storage footprint while maintaining fast query performance through internal caching.
+The engine still stores raw changes and materializes state on demand, but the real benefit is the fine-grained querying surface that makes change data first-class.
 
-## Git vs Lix (real diff output)
+## Git vs Lix (querying changes directly)
 
-Git shows line replacements, which is noisy for structured data:
+Instead of line churn, Lix lets you query exactly who changed what at the entity level:
 
-```diff
-{
-  "sku_123": { "price": 100, "name": "Red Chair" },
--  "sku_124": { "price": 200, "name": "Blue Sofa" }
-+  "sku_124": { "price": 250, "name": "Blue Sofa" }
-}
+```ts
+// Blame-style history for one JSON property
+const priceHistory = await lix.db
+  .selectFrom("state_history")
+  .innerJoin("change_author", "change_author.change_id", "state_history.change_id")
+  .innerJoin("account", "account.id", "change_author.account_id")
+  .where("entity_id", "=", "/sku_124/price")
+  .where("schema_key", "=", "plugin_json_pointer_value")
+  .where("lixcol_root_commit_id", "=", versionCommit)
+  .orderBy("lixcol_depth", "asc") // depth 0 = current
+  .select([
+    "state_history.change_id",
+    "state_history.snapshot_content",
+    "state_history.lixcol_depth",
+    "account.display_name"
+  ])
+  .execute();
+
+// Shape you render (no line diff needed)
+// [
+//   { change_id: "chg_price_200", snapshot_content: { value: 200 }, lixcol_depth: 2, display_name: "Ari" },
+//   { change_id: "chg_price_250", snapshot_content: { value: 250 }, lixcol_depth: 0, display_name: "Bea" }
+// ]
 ```
 
-Why this hurts:
-- Hard to query: you can't easily answer "who changed `price` on `sku_124`?"—it's just line churn.
-- Merge pain: splitting JSON across lines creates frequent conflicts when multiple editors touch nearby fields.
-- No semantics: Git cannot tell if the line move is a rename, a deletion, or just reformatting.
-
-Lix diff rows are structured (real shape from `selectVersionDiff` / `selectWorkingDiff` with snapshots joined from the `change` table). The built-in JSON plugin emits one entity per JSON Pointer, so a price change is reported like this:
-
-```json
-{
-  "entity_id": "/sku_124/price",
-  "schema_key": "plugin_json_pointer_value",
-  "file_id": "catalog.json",
-  "status": "modified",
-  "before_change_id": "chg_price_200",
-  "after_change_id": "chg_price_250",
-  "before_snapshot": { "path": "/sku_124/price", "value": 200 },
-  "after_snapshot": { "path": "/sku_124/price", "value": 250 }
-}
-```
-
-Because Lix diffs carry entity IDs, schema keys, and before/after snapshots, review UIs can highlight just the changed field and keep JSON valid, instead of showing raw line noise.
+You get depth-scoped history, per-entity granularity, and authors in one query—something line-based diffs can't provide.

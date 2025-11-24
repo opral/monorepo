@@ -133,13 +133,7 @@ Each file is automatically processed by the plugin whose `detectChangesGlob` pat
 
 ## Finding Plugins
 
-Official plugins:
-- [@lix-js/plugin-json](https://www.npmjs.com/package/@lix-js/plugin-json)
-- [@lix-js/plugin-csv](https://www.npmjs.com/package/@lix-js/plugin-csv)
-- [@lix-js/plugin-md](https://www.npmjs.com/package/@lix-js/plugin-md)
-- [@lix-js/plugin-prosemirror](https://www.npmjs.com/package/@lix-js/plugin-prosemirror)
-
-Community plugins: Check the [Lix GitHub organization](https://github.com/opral/lix-sdk)
+Browse the [plugins directory](/plugins) for official and community plugins, installation instructions, and file type coverage.
 
 ## Next Steps
 
