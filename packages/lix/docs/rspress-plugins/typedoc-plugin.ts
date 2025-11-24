@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 import * as fsSync from "node:fs";
-import type { RspressPlugin } from "@rspress/shared";
+import type { RspressPlugin } from "@rspress/core";
 import { Application, TypeDocOptions } from "typedoc";
 
 export interface CustomTypeDocOptions {
@@ -25,7 +25,7 @@ async function patchLinks(outputDir: string) {
       (_match, p1, p2) => {
         if (
           // 2. [foo](./bar) -> [foo](./bar) no change
-          ["/", "."].includes(p2[0]) ||
+          ["/", ".", "#"].includes(p2[0]) ||
           // 3. [foo](http(s)://...) -> [foo](http(s)://...) no change
           p2.startsWith("http://") ||
           p2.startsWith("https://")
@@ -130,7 +130,7 @@ Welcome to the comprehensive Lix SDK API documentation. This reference provides 
 
 ## Need Help?
 
-If you're new to Lix, consider starting with our [Getting Started Guide](/docs/quick-start) before diving into the API reference.
+If you're new to Lix, consider starting with our [Getting Started Guide](/docs/getting-started) before diving into the API reference.
 
 Browse the API documentation using the sidebar to find the specific functionality you need.`,
     );

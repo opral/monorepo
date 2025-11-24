@@ -4,7 +4,7 @@ In Lix, **metadata** refers to arbitrary, structured data that you can attach to
 
 ## When to Use Metadata
 
-The answer is simple: Use metadata when an [entity](./entity) is not owned by your application, but for interoperability reasons, you need to use that entity or its schema. In such cases, you can attach metadata to add your application's specific information without altering the original entity's schema.
+The answer is simple: Use metadata when an [entity](/docs/data-model#entities-meaningful-units-of-data) is not owned by your application, but for interoperability reasons, you need to use that entity or its schema. In such cases, you can attach metadata to add your application's specific information without altering the original entity's schema.
 
 Here are some examples:
 

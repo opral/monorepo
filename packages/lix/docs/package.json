@@ -17,22 +17,23 @@
     "@lix-js/plugin-json": "workspace:*",
     "@lix-js/sdk": "workspace:*",
     "@monaco-editor/react": "^4.7.0",
-    "@rspress/shared": "^1.44.0",
+    "@rspress/core": "2.0.0-rc.1",
+    "@rspress/plugin-llms": "2.0.0-rc.1",
+    "@rspress/plugin-sitemap": "2.0.0-rc.1",
     "@tailwindcss/postcss": "^4.1.10",
+    "@types/mdast": "^4.0.4",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "dayjs": "^1.11.11",
     "debug": "^4.3.4",
-    "mermaid": "^11.7.0",
+    "prettier": "^3.6.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "rspress": "^1.40.2",
-    "rspress-plugin-mermaid": "^0.3.0",
-    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "typedoc": "0.28.12",
     "typedoc-plugin-markdown": "4.7.0",
     "typescript": "5.8.3",
+    "unist-util-visit": "^5.0.0",
     "vitest": "^3.2.4"
   },
   "keywords": [
@@ -46,6 +47,7 @@
   "author": "Opral, Inc.",
   "license": "MIT",
   "dependencies": {
+    "mermaid": "^11.7.0",
     "shiki": "^3.7.0"
   }
 }

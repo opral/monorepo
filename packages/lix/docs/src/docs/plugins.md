@@ -145,4 +145,4 @@ Community plugins: Check the [Lix GitHub organization](https://github.com/opral/
 
 - Learn about [Data Model](/docs/data-model) to understand entities and schemas
 - See [Querying Changes](/docs/querying-changes) to work with plugin-detected changes
-- Explore the [API Reference](/api/) for detailed plugin interfaces
+- Explore the [API Reference](/docs/api/) for detailed plugin interfaces

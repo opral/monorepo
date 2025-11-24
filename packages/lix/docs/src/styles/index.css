@@ -1,1 +1,58 @@
 @import "tailwindcss";
+
+.llms-heading-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.llms-heading-row h1 {
+  margin: 0;
+}
+
+.llms-heading-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+}
+
+.llms-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  background: #fff;
+  color: #1f2328;
+  font-size: 1rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.llms-copy-btn:hover {
+  border-color: #b3b3b3;
+  box-shadow: 0 8px 16px rgba(17, 24, 39, 0.06);
+}
+
+.llms-copy-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.llms-copy-btn.is-finished {
+  border-color: #49cd37;
+}
+
+.llms-copy-btn__icon {
+  display: inline-flex;
+}

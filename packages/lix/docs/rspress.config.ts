@@ -1,11 +1,16 @@
 import * as path from "node:path";
-import { defineConfig } from "rspress/config";
-import mermaid from "rspress-plugin-mermaid";
+import { defineConfig } from "@rspress/core";
+import { pluginLlms } from "@rspress/plugin-llms";
 import { syncReactUtilsReadmePlugin } from "./rspress-plugins/sync-react-utils-readme";
 import {
   generateApiDocs,
   generateApiSidebar,
 } from "./rspress-plugins/typedoc-plugin";
+import {
+  mermaidComponentPath,
+  remarkMermaid,
+} from "./rspress-plugins/remark-mermaid";
+import { pluginSitemap } from "@rspress/plugin-sitemap";
 
 // Generate API docs before creating the config
 // We need to generate the API docs at the top level (before defineConfig) because
@@ -30,18 +35,33 @@ export default defineConfig({
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
   icon: "/logo.svg",
   globalStyles: path.join(__dirname, "src/styles/index.css"),
+  // Use the shared theme directory (not inside src) so custom MDX components load, including the LLM copy button.
+  themeDir: path.join(__dirname, "theme"),
   route: {
     cleanUrls: true,
-    exclude: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+    exclude: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "**/examples/**/*.ts",
+      "**/components/**/*.{ts,tsx}",
+    ],
   },
   markdown: {
     // Disable Rust MDX compiler to support global components
     mdxRs: false,
     globalComponents: [
       path.join(__dirname, "src/docs/components/InteractiveExampleCard.tsx"),
+      mermaidComponentPath,
     ],
+    remarkPlugins: [remarkMermaid],
   },
   builderConfig: {
+    dev: {
+      // Disable lazy compilation to avoid giant dev proxy requests from Shiki/highlighter
+      lazyCompilation: false,
+    },
     tools: {
       rspack: {
         module: {
@@ -62,7 +82,13 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mermaid(), syncReactUtilsReadmePlugin()],
+  plugins: [
+    pluginLlms(),
+    pluginSitemap({
+      siteUrl: "https://lix.dev",
+    }),
+    syncReactUtilsReadmePlugin(),
+  ],
   themeConfig: {
     darkMode: false,
     nav: [

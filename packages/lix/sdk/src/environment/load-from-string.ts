@@ -6,6 +6,11 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
  * Uses a Blob URL + dynamic import. Requires a browser/worker environment
  * with Blob and URL.createObjectURL support. In Node, falls back to data: URL
  * with base64 encoding via global Buffer.
+ *
+ * @example
+ * const pluginCode = "export const plugin = { id: 'demo', name: 'Demo' };";
+ * const plugin = await loadPluginFromString(pluginCode);
+ * console.log(plugin.id); // "demo"
  */
 let __lixInlinePluginCounter = 0;
 
@@ -22,7 +27,9 @@ export async function loadPluginFromString(code: string): Promise<LixPlugin> {
 			const base64 = BufferAny.from(code, "utf-8").toString("base64");
 			const dataUrl = `data:text/javascript;base64,${base64}`;
 			try {
-				const mod: any = await import(/* @vite-ignore */ dataUrl);
+				const mod: any = await import(
+					/* @vite-ignore */ /* webpackIgnore: true */ dataUrl
+				);
 				return (mod.plugin ?? mod.default ?? mod) as LixPlugin;
 			} catch (e: any) {
 				const preview = code.slice(0, 200);
@@ -52,7 +59,9 @@ export async function loadPluginFromString(code: string): Promise<LixPlugin> {
 		const blob = new Blob([withSourceURL], { type: "application/javascript" });
 		const url = URL.createObjectURL(blob);
 		try {
-			const mod: any = await import(/* @vite-ignore */ url);
+			const mod: any = await import(
+				/* @vite-ignore */ /* webpackIgnore: true */ url
+			);
 			return (mod.plugin ?? mod.default ?? mod) as LixPlugin;
 		} catch (e: any) {
 			const preview = cleaned.slice(0, 400);

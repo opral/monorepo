@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-import type { RspressPlugin } from "@rspress/shared";
+import type { RspressPlugin } from "@rspress/core";
 
 export function syncReactUtilsReadmePlugin(): RspressPlugin {
   return {

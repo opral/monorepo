@@ -187,8 +187,8 @@ The following functions provide deterministic behavior when `lix_deterministic_m
 
 | Function                      | Purpose                          | Docs                                                       |
 | ----------------------------- | -------------------------------- | ---------------------------------------------------------- |
-| `getTimestamp({ lix })`       | Logical clock timestamps         | [API docs](/api/functions/timestamp)                       |
-| `random({ lix })`             | Reproducible random numbers      | [API docs](/api/functions/random)                          |
-| `uuidV7({ lix })`             | Deterministic UUID v7 generation | [API docs](/api/functions/uuidV7)                          |
-| `nanoId({ lix })`             | Deterministic nano ID generation | [API docs](/api/functions/nanoId)                          |
-| `nextSequenceNumber({ lix })` | Monotonic counter (advanced)     | [API docs](/api/functions/nextDeterministicSequenceNumber) |
+| `getTimestamp({ lix })`       | Logical clock timestamps         | [API docs](/docs/api/functions/getTimestamp)                    |
+| `random({ lix })`             | Reproducible random numbers      | [API docs](/docs/api/functions/random)                          |
+| `uuidV7({ lix })`             | Deterministic UUID v7 generation | [API docs](/docs/api/functions/uuidV7)                          |
+| `nanoId({ lix })`             | Deterministic nano ID generation | [API docs](/docs/api/functions/nanoId)                          |
+| `nextSequenceNumber({ lix })` | Monotonic counter (advanced)     | [API docs](/docs/api/functions/nextSequenceNumber)             |

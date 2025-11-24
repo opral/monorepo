@@ -439,10 +439,9 @@ function LandingPage() {
             </h1>
 
             <p className="text-gray-600 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed mt-12">
-              Lix is a JavaScript SDK that enables Git-like capabilities for
-              apps and agents:
-              <br />
-              Change proposals, versions (branches), history, blame, etc.
+              Lix is a change control system that enables Git-like features for
+              applications and AI agents such as change proposals, versions
+              (branching), history, and blame.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16  mt-8">
