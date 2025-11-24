@@ -159,9 +159,10 @@ function FileTreeNode({
 	readonly isPanelFocused: boolean;
 }) {
 	if (node.type === "file") {
+		const displayName = formatDisplayName(node.name);
 		const isSelected = selectedPath === node.path;
 		const buttonClass = clsx(
-			"flex w-full items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-sm transition-colors",
+			"flex w-full min-w-0 items-center gap-2 rounded border border-transparent px-2 py-1 text-left text-sm transition-colors",
 			!isSelected && "hover:bg-neutral-100",
 			isSelected ? selectedClasses : "text-neutral-700",
 		);
@@ -178,20 +179,23 @@ function FileTreeNode({
 						void openFileView?.(node.id, node.path);
 					}}
 				>
-					<FileText className="h-3.5 w-3.5 text-neutral-500" />
-					<span>{formatDisplayName(node.name)}</span>
+					<FileText className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+					<span className="min-w-0 flex-1 truncate" title={displayName}>
+						{displayName}
+					</span>
 				</button>
 			</li>
 		);
 	}
 
+	const displayName = formatDisplayName(node.name);
 	const containsDraft = draft?.directoryPath === node.path;
 	const isOpen = containsDraft || openDirectories.has(node.path);
 	const Icon = isOpen ? FolderOpen : Folder;
 	const suppressSelection = Boolean(draft && draft.directoryPath === node.path);
 	const isSelected = !suppressSelection && selectedPath === node.path;
 	const buttonClass = clsx(
-		"flex items-center gap-1 rounded border border-transparent px-2 py-1 text-left text-sm font-medium transition-colors",
+		"flex w-full min-w-0 items-center gap-1 rounded border border-transparent px-2 py-1 text-left text-sm font-medium transition-colors",
 		!isSelected && "hover:bg-neutral-100",
 		isSelected ? selectedClasses : "text-neutral-700",
 	);
@@ -211,10 +215,12 @@ function FileTreeNode({
 					}}
 				>
 					<ChevronRight
-						className={`h-3 w-3 transition-transform ${isOpen ? "rotate-90" : ""}`}
+						className={`h-3 w-3 shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`}
 					/>
-					<Icon className="h-3.5 w-3.5 text-neutral-500" />
-					<span>{formatDisplayName(node.name)}</span>
+					<Icon className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+					<span className="min-w-0 flex-1 truncate" title={displayName}>
+						{displayName}
+					</span>
 				</button>
 			</div>
 			{isOpen ? (
