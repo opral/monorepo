@@ -351,10 +351,10 @@ function LandingScreenContent({
 				{/* Main prompt */}
 				<div className="flex flex-col items-center gap-2">
 					<h1 className="text-4xl font-semibold text-neutral-900">
-						What do you want to write?
+						What do you want to draft?
 					</h1>
 					<p className="text-base text-neutral-600">
-						Create markdown documents by chatting with AI.
+						Draft and edit documents by chatting with AI.
 					</p>
 				</div>
 
