@@ -10,6 +10,7 @@ import {
   mermaidComponentPath,
   remarkMermaid,
 } from "./rspress-plugins/remark-mermaid";
+import { pluginSitemap } from "@rspress/plugin-sitemap";
 
 // Generate API docs before creating the config
 // We need to generate the API docs at the top level (before defineConfig) because
@@ -81,7 +82,13 @@ export default defineConfig({
       },
     },
   },
-  plugins: [pluginLlms(), syncReactUtilsReadmePlugin()],
+  plugins: [
+    pluginLlms(),
+    pluginSitemap({
+      siteUrl: "https://lix.dev",
+    }),
+    syncReactUtilsReadmePlugin(),
+  ],
   themeConfig: {
     darkMode: false,
     nav: [

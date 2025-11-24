@@ -1,11 +1,19 @@
 import React from "react";
-import {
-  getCustomMDXComponent as baseGetCustomMDXComponent,
-  type RspressMDXComponents,
-} from "@rspress/core/theme";
+import { getCustomMDXComponent as baseGetCustomMDXComponent } from "@rspress/core/theme";
 import { LlmsContainer, LlmsCopyButton } from "@rspress/plugin-llms/runtime";
 
-export function getCustomMDXComponent(): RspressMDXComponents {
+/**
+ * Light-mode-only placeholder to remove the default theme switcher.
+ *
+ * @example
+ * // Render nothing in the nav bar
+ * <SwitchAppearance />
+ */
+export const SwitchAppearance = () => null;
+
+export function getCustomMDXComponent(): ReturnType<
+  typeof baseGetCustomMDXComponent
+> {
   const components = baseGetCustomMDXComponent();
 
   return {

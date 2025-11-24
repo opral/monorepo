@@ -19,6 +19,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@rspress/core": "2.0.0-rc.1",
     "@rspress/plugin-llms": "2.0.0-rc.1",
+    "@rspress/plugin-sitemap": "2.0.0-rc.1",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.0.12",
