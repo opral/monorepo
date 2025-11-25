@@ -15,7 +15,7 @@ import { selectFilePaths } from "@/views/agent-view/select-file-paths";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/ui/action-button";
 import type { ViewContext, ViewLaunchArgs } from "./types";
 import { AGENT_VIEW_KIND } from "./view-instance-helpers";
 import { importFromClipboard, importFromComputer } from "./import-file";
@@ -85,7 +85,6 @@ function LandingScreenContent({
 	const [showKeyPrompt, setShowKeyPrompt] = useState(false);
 	const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 	const [apiKeyDraft, setApiKeyDraft] = useState("");
-	const [hasClipboard, setHasClipboard] = useState(false);
 	const keyInputId = useId();
 
 	const selectedModelId = useMemo(() => {
@@ -203,44 +202,6 @@ function LandingScreenContent({
 		() => (fileRows ?? []).map((row: any) => String(row.path)),
 		[fileRows],
 	);
-
-	// Check clipboard for paste button
-	useEffect(() => {
-		let mounted = true;
-
-		const checkClipboard = async () => {
-			if (typeof navigator === "undefined" || !navigator.clipboard?.readText) {
-				return;
-			}
-
-			try {
-				const text = await navigator.clipboard.readText();
-				if (mounted) {
-					setHasClipboard(text.trim().length > 0);
-				}
-			} catch {
-				// Permission denied or not supported
-				if (mounted) {
-					setHasClipboard(false);
-				}
-			}
-		};
-
-		// Check on mount
-		checkClipboard();
-
-		// Check when window gains focus
-		window.addEventListener("focus", checkClipboard);
-
-		// Poll every 2 seconds
-		const interval = setInterval(checkClipboard, 2000);
-
-		return () => {
-			mounted = false;
-			window.removeEventListener("focus", checkClipboard);
-			clearInterval(interval);
-		};
-	}, []);
 
 	const handleModelChange = useCallback(
 		(next: string) => {
@@ -436,26 +397,18 @@ function LandingScreenContent({
 
 				{/* Action Buttons */}
 				<div className="flex flex-wrap items-center justify-center gap-4">
-					{hasClipboard && (
-						<Button
-							variant="outline"
-							onClick={handlePasteFromClipboard}
-							className="flex h-auto flex-col items-center justify-center gap-3 rounded-xl px-8 py-6"
-							aria-label="Paste markdown from clipboard"
-						>
-							<ClipboardPaste className="size-6" />
-							<span>Paste from clipboard</span>
-						</Button>
-					)}
-					<Button
-						variant="outline"
+					<ActionButton
+						icon={<ClipboardPaste className="size-6" />}
+						label="Paste from clipboard"
+						onClick={handlePasteFromClipboard}
+						ariaLabel="Paste markdown from clipboard"
+					/>
+					<ActionButton
+						icon={<FolderOpen className="size-6" />}
+						label="Open file from computer"
 						onClick={handleOpenFileFromComputer}
-						className="flex h-auto flex-col items-center justify-center gap-3 rounded-xl px-8 py-6"
-						aria-label="Open file from computer"
-					>
-						<FolderOpen className="size-6" />
-						<span>Open file from computer</span>
-					</Button>
+						ariaLabel="Open file from computer"
+					/>
 				</div>
 
 				{/* Key Prompt Modal */}

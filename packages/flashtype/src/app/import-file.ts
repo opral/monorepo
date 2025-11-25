@@ -41,7 +41,7 @@ async function generateUniqueFilePath(
 /**
  * Sanitizes a string to create a valid filename.
  */
-function sanitizeFilename(input: string): string {
+export function sanitizeFilename(input: string): string {
 	const sanitized = input
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, "-")
@@ -109,14 +109,17 @@ export async function importFile({
 		focus: true,
 	});
 
-	// Open agent in right panel
+	// Open agent in right panel with a fresh conversation
+	const invocationId = createInvocationId();
 	context.openView?.({
 		panel: "right",
 		kind: AGENT_VIEW_KIND,
-		instance: `${AGENT_VIEW_KIND}:${source}-${Date.now()}`,
+		instance: `${AGENT_VIEW_KIND}:${invocationId}`,
 		launchArgs: {
 			source,
-			invocationId: createInvocationId(),
+			invocationId,
+			fileId,
+			filePath,
 		},
 		focus: false,
 	});
