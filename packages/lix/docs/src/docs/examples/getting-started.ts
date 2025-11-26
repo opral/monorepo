@@ -1,10 +1,13 @@
 export default async function runExample(console: any) {
   console.log("SECTION START 'opening-lix'");
 
-  const { openLix, createCheckpoint } = await import("@lix-js/sdk");
+  const { InMemoryEnvironment, openLix, createCheckpoint } = await import(
+    "@lix-js/sdk"
+  );
   const { plugin: jsonPlugin } = await import("@lix-js/plugin-json");
 
   const lix = await openLix({
+    environment: new InMemoryEnvironment(),
     providePlugins: [jsonPlugin],
   });
 
