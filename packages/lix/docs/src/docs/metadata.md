@@ -1,24 +1,21 @@
-# What is Metadata?
+# Metadata
 
-In Lix, **metadata** refers to arbitrary, structured data that you can attach to entities or changes. It provides a flexible way to add context, annotations, flags, or any application-specific information to your Lix state, especially for data records whose primary schema you do not control.
+Metadata allows you to attach additional data to entities without modifying their [schema](/docs/schemas).
 
 ## When to Use Metadata
 
-The answer is simple: Use metadata when an [entity](/docs/data-model#entities-meaningful-units-of-data) is not owned by your application, but for interoperability reasons, you need to use that entity or its schema. In such cases, you can attach metadata to add your application's specific information without altering the original entity's schema.
+Use metadata when you need to add data to entities whose schema you don't control.
 
-Here are some examples:
+Examples:
 
-- **Lix Conversation API:** Lix provides a schema for conversation messages (`lix_conversation_message`). Your application might want to store additional context for these messages, such as the `LLM_role` (e.g., "user", "assistant") or the `LLM_model` used to generate a response. Since you don't own the `lix_conversation_message` schema, you use metadata to attach this information.
-- **Third-Party Plugin Data:** If you're using a plugin that processes a specific file format (e.g., a Markdown plugin), you might want to add your own application-specific flags or annotations to the entities (e.g., a `review_status` on a Markdown heading) without modifying the plugin's schema.
-- **Standard Lix Entities:** For core Lix entities like `file` or `commit`, you can attach metadata to store application-specific details (e.g., `imported_from_source` for a file, or `jira_ticket_id` for a commit).
+- **Lix schemas:** Add `LLM_role` to [conversations](/docs/conversations), `jira_ticket_id` to commits, or `imported_from` to [files](/docs/filesystem)
+- **Plugin schemas:** Add `last_verified` timestamp to a JSON property from the [JSON plugin](/plugins/plugin_json)
 
-## How to Use Metadata
+## Using Metadata
 
-Metadata is stored as a JSON object. You can attach it when creating or updating entities.
+Metadata is a JSON object attached to entities.
 
-### Attaching Metadata
-
-When inserting or updating records in Lix, you can include a `metadata` property, which should be a JSON object.
+### Attach Metadata
 
 ```typescript
 // Attaching metadata when inserting a new state record
@@ -42,9 +39,9 @@ await lix.db
   .execute();
 ```
 
-### Updating Metadata
+### Update Metadata
 
-To update specific properties within an existing metadata object, use SQL JSON functions like `json_set`. This allows you to modify metadata without overwriting the entire object.
+Use SQL JSON functions to update specific properties without overwriting the entire object:
 
 ```typescript
 // Update a specific metadata property for an entity
@@ -58,9 +55,9 @@ await lix.db
 // This preserves other metadata properties like 'assigned_to'
 ```
 
-## Querying Metadata
+### Query Metadata
 
-You can query entities based on their metadata using SQL JSON functions like `json_extract`.
+Use SQL JSON functions to filter by metadata:
 
 ```typescript
 // Find entities with high priority
@@ -78,22 +75,14 @@ const gpt4Messages = await lix.db
   .execute();
 ```
 
-**Important Note on Columns:**
-When querying raw state tables (e.g., `state`), metadata is available in the `metadata` column. However, when querying entity views (e.g., `conversation_message`), metadata is surfaced through the operational column `lixcol_metadata`. Always use the correct column name for the view you are querying.
+**Note:** Metadata is in the `metadata` column for state tables, and `lixcol_metadata` for entity views.
 
 ## Best Practices
 
-Follow these guidelines for effective metadata usage:
+**Use metadata for schemas you don't own.** If you control the schema, add properties directly to it instead.
 
-### Do's
+**Namespace your keys.** Prefix keys with your app name (e.g., `myapp_role`) to avoid collisions.
 
-- **Namespace your keys:** Prefix your metadata keys with your application's name or a unique identifier (e.g., `myapp_role`, `inlang_priority`) to prevent collisions with other plugins or Lix's internal metadata.
-- **Add context to external schemas:** Use metadata to enrich entities whose primary schema you don't control (e.g., adding `myapp_priority: "high"` to a `lix_conversation_message`).
-- **Handle missing metadata with defaults:** Always assume metadata properties might be missing and provide fallbacks (e.g., `const role = state.metadata?.myapp_role ?? "user";`).
-- **Keep metadata small and focused:** Metadata is best for small, structured data. Avoid storing large objects or binary data.
+**Handle missing values.** Always provide defaults: `const role = state.metadata?.myapp_role ?? "user"`
 
-### Don'ts
-
-- **Don't use metadata for data you own:** If you control the schema of an entity, add the property directly to the schema instead of using metadata. Metadata is for _additional_ context, not core data.
-- **Don't duplicate `snapshot_content`:** Avoid storing data in metadata that is already present in the entity's `snapshot_content`.
-- **Don't store large objects:** Avoid storing large arrays, long strings, or binary data in metadata, as this can impact performance and the size of a lix.
+**Keep it small.** Avoid large objects or binary data.

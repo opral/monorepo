@@ -1,6 +1,6 @@
 # How Lix Works
 
-Lix is an embeddable change control system built on SQLite that tracks entity-level changes through a commit graph.
+Lix tracks changes at the entity level using SQLite and a commit graph. [Plugins](/docs/plugins) define what constitutes an entity for each file format.
 
 ## Storage Layer
 
@@ -195,4 +195,4 @@ The Lix engine runs anywhere JavaScript runs:
 
 - **[Architecture](/docs/architecture)** - Deep dive into state materialisation, change sets, and design rationale
 - **[Plugins](/docs/plugins)** - Learn how plugins detect entity changes
-- **[Querying Changes](/docs/querying-changes)** - Master the SQL API for working with changes and history
+- **[SQL Interface](/docs/sql-interface)** - Master the SQL API for working with data and history

@@ -1,5 +1,8 @@
 import type { Lix } from "@lix-js/sdk";
-import { createReadFileByPathTool, createReadFileByIdTool } from "./read-file.js";
+import {
+	createReadFileByPathTool,
+	createReadFileByIdTool,
+} from "./read-file.js";
 import { createListFilesTool } from "./list-files.js";
 import { createSqlSelectTool } from "./sql-select.js";
 import { createSqlIntrospectSchemaTool } from "./sql-introspect-schema.js";

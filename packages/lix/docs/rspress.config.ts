@@ -69,6 +69,10 @@ export default defineConfig({
     },
     tools: {
       rspack: {
+        optimization: {
+          // Avoid scope-hoisting collisions between the TypeBox Promise helper and the global Promise.
+          concatenateModules: false,
+        },
         module: {
           rules: [
             {
@@ -117,8 +121,9 @@ export default defineConfig({
           text: "Essentials",
           items: [
             { text: "How Lix Works", link: "/docs/how-lix-works" },
-            { text: "Querying Changes", link: "/docs/querying-changes" },
-            { text: "Data Model", link: "/docs/data-model" },
+            { text: "SQL Interface", link: "/docs/sql-interface" },
+            { text: "Filesystem", link: "/docs/filesystem" },
+            { text: "Schemas", link: "/docs/schemas" },
             { text: "Plugins", link: "/docs/plugins" },
             { text: "Persistence", link: "/docs/persistence" },
           ],

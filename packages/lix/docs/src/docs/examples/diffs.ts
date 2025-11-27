@@ -1,99 +1,132 @@
-import { openLix } from "@lix-js/sdk";
-
-// Helper function to match entities
-function entityIs(entity: any) {
-  return (eb: any) =>
-    eb.and([
-      eb("entity_id", "=", entity.entity_id),
-      eb("schema_key", "=", entity.schema_key),
-      eb("file_id", "=", entity.file_id),
-    ]);
-}
+import { openLix, createVersion, selectVersionDiff } from "@lix-js/sdk";
 
 export default async function runExample(console: any) {
-  const lix = await openLix({});
+	const lix = await openLix({});
 
-  console.log("SECTION START 'plugin-diffs'");
-  const plugin = (await lix.plugin.getAll()).find(
-    (p: any) => p.key === "lix_plugin_csv",
-  );
+	// Store a test schema for our examples
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "product",
+				"x-lix-version": "1.0",
+				type: "object",
+				additionalProperties: false,
+				properties: {
+					id: { type: "string" },
+					name: { type: "string" },
+					price: { type: "number" },
+				},
+			},
+		})
+		.execute();
 
-  if (plugin?.renderDiff) {
-    console.log("Plugin renderDiff available:", true);
-  } else {
-    console.log("No renderDiff function found for CSV plugin");
-  }
+	// Get active version to branch from
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
 
-  console.log("SECTION END 'plugin-diffs'");
+	// Add initial product data
+	await lix.db
+		.insertInto("state_by_version")
+		.values({
+			entity_id: "product-1",
+			schema_key: "product",
+			file_id: "products.json",
+			version_id: activeVersion.id,
+			plugin_key: "lix_plugin_json",
+			snapshot_content: { id: "product-1", name: "Widget", price: 10 },
+			schema_version: "1.0",
+		})
+		.execute();
 
-  console.log("SECTION START 'json-file-diff'");
-  // 1. Get the current state of a JSON file from the getting-started example
-  const currentFile = await lix.db
-    .selectFrom("file")
-    .where("path", "=", "/example.json")
-    .selectAll()
-    .executeTakeFirst();
+	console.log("SECTION START 'version-diff'");
 
-  if (currentFile) {
-    const currentData = JSON.parse(new TextDecoder().decode(currentFile.data));
-    console.log("Current file data:", currentData);
+	// Create two versions from the same base
+	const versionA = await createVersion({
+		lix,
+		name: "version-a",
+		from: activeVersion,
+	});
+	const versionB = await createVersion({
+		lix,
+		name: "version-b",
+		from: activeVersion,
+	});
 
-    // For demo purposes, create a mock previous version
-    const previousData = { name: "Peter", age: 50 };
+	// Modify the product in version A (change price)
+	await lix.db
+		.updateTable("state_by_version")
+		.set({ snapshot_content: { id: "product-1", name: "Widget", price: 12 } })
+		.where("version_id", "=", versionA.id)
+		.where("entity_id", "=", "product-1")
+		.execute();
 
-    const afterState = currentData;
-    const beforeState = previousData;
+	// Compare versions: what changed from B to A?
+	const diff = await selectVersionDiff({
+		lix,
+		source: versionA,
+		target: versionB,
+	})
+		.where("status", "!=", "unchanged")
+		.execute();
 
-    // 2. Compare the two states to generate a diff.
-    //
-    // This is a simplified example. In a real app,
-    // you would likely use a diffing library.
-    const diffOutput: string[] = [];
-    if (beforeState.name !== afterState.name) {
-      diffOutput.push(`- name: ${beforeState.name}`);
-      diffOutput.push(`+ name: ${afterState.name}`);
-    }
-    if (beforeState.age !== afterState.age) {
-      diffOutput.push(`- age: ${beforeState.age}`);
-      diffOutput.push(`+ age: ${afterState.age}`);
-    }
+	console.log("Changes between versions:");
+	for (const row of diff) {
+		console.log(`  ${row.entity_id}: ${row.status}`);
+	}
 
-    // 3. The diff can then be displayed in your application.
-    console.log("Diff output:");
-    console.log(diffOutput.join("\n"));
-  } else {
-    console.log(
-      "File /example.json not found - run getting-started example first",
-    );
-  }
+	console.log("SECTION END 'version-diff'");
 
-  console.log("SECTION END 'json-file-diff'");
+	console.log("SECTION START 'custom-diff'");
 
-  console.log("SECTION START 'entity-diff'");
-  // Get current entities from the state table to demonstrate entity diffing
-  const currentEntities = await lix.db
-    .selectFrom("state")
-    .selectAll()
-    .limit(2)
-    .execute();
+	// The power of SQL: compose custom diff queries with filters and joins
+	const productDiffs = await selectVersionDiff({
+		lix,
+		source: versionA,
+		target: versionB,
+	})
+		// Filter to specific schema
+		.where("diff.schema_key", "=", "product")
+		// Only show actual changes
+		.where("diff.status", "!=", "unchanged")
+		// Join to get before/after snapshot content
+		.leftJoin("change as before", "before.id", "diff.before_change_id")
+		.leftJoin("change as after", "after.id", "diff.after_change_id")
+		.select([
+			"diff.entity_id",
+			"diff.status",
+			"before.snapshot_content as before_content",
+			"after.snapshot_content as after_content",
+		])
+		.execute();
 
-  if (currentEntities.length >= 2) {
-    console.log("Comparing two entities from the current state:");
-    console.log(
-      `Entity 1: ${currentEntities[0].entity_id} (${currentEntities[0].schema_key})`,
-    );
-    console.log(
-      `Entity 2: ${currentEntities[1].entity_id} (${currentEntities[1].schema_key})`,
-    );
+	console.log("Product changes with content:");
+	for (const row of productDiffs) {
+		const before = row.before_content as any;
+		const after = row.after_content as any;
 
-    // Show their content differences
-    console.log("Entity 1 content:", currentEntities[0].snapshot_content);
-    console.log("Entity 2 content:", currentEntities[1].snapshot_content);
-  } else {
-    console.log("Not enough entities to compare - need at least 2 entities");
-  }
+		if (before?.price !== after?.price) {
+			console.log(`  ${row.entity_id}: price ${before?.price} → ${after?.price}`);
+		}
+	}
 
-  console.log("SECTION END 'entity-diff'");
+	console.log("SECTION END 'custom-diff'");
+
+	console.log("SECTION START 'plugin-diffs'");
+	const plugin = (await lix.plugin.getAll()).find(
+		(p: any) => p.key === "lix_plugin_csv",
+	);
+
+	if (plugin?.renderDiff) {
+		console.log("Plugin renderDiff available:", true);
+	} else {
+		console.log("No renderDiff function found for CSV plugin");
+	}
+
+	console.log("SECTION END 'plugin-diffs'");
 }
 
 // Uncomment for running in node

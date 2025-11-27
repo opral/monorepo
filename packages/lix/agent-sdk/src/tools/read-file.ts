@@ -9,20 +9,8 @@ const BaseReadFileInputSchema = z.object({
 	byteLength: z.number().int().min(1).optional(),
 	lineOffset: z.number().int().min(0).optional(),
 	lineLimit: z.number().int().min(0).optional(),
-	maxBytes: z
-		.number()
-		.int()
-		.min(1)
-		.max(5_000_000)
-		.default(200_000)
-		.optional(),
-	maxChars: z
-		.number()
-		.int()
-		.min(100)
-		.max(1_000_000)
-		.default(15_000)
-		.optional(),
+	maxBytes: z.number().int().min(1).max(5_000_000).default(200_000).optional(),
+	maxChars: z.number().int().min(100).max(1_000_000).default(15_000).optional(),
 });
 
 export const ReadFileByPathInputSchema = BaseReadFileInputSchema.extend({
@@ -59,7 +47,10 @@ export type ReadFileOutput = z.infer<typeof ReadFileOutputSchema>;
  * - Returns a flat result (no nested meta), always including the resolved file path.
  */
 export async function readFile(
-	args: (ReadFileInput & { lix: Lix }) | (ReadFileByPathInput & { lix: Lix }) | (ReadFileByIdInput & { lix: Lix })
+	args:
+		| (ReadFileInput & { lix: Lix })
+		| (ReadFileByPathInput & { lix: Lix })
+		| (ReadFileByIdInput & { lix: Lix })
 ): Promise<ReadFileOutput> {
 	const {
 		lix,
@@ -96,7 +87,9 @@ export async function readFile(
 
 	if (!row) {
 		const identifier = path ? `"${path}"` : `fileId "${fileId}"`;
-		throw new Error(`File not found: ${identifier}. Try using the list_files tool to see available files.`);
+		throw new Error(
+			`File not found: ${identifier}. Try using the list_files tool to see available files.`
+		);
 	}
 
 	const bytes = row.data as unknown as Uint8Array;
