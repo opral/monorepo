@@ -4,34 +4,47 @@ import exampleSrcCode from "./examples/diffs.ts?raw";
 
 # Diffs
 
-Lix provides before/after states at the file or [entity](/docs/schemas) level. You can diff entire files or individual entities (JSON properties, CSV rows, Markdown paragraphs, etc.).
+Unlike traditional version control that treats files as opaque blobs of text, Lix understands the structure of your data. Diffs are computed at the [entity](/docs/schemas) level, where an "entity" is a semantic unit defined by a [plugin](/docs/plugins). For example:
 
-[Schema-aware](/docs/schemas) diffs mean changes are semantic: "price changed from $10 to $12" instead of "line 5 changed."
+- **JSON**: A property, array, or nested path.
+- **Tables/CSV**: A row or an individual cell.
+- **Prose/Markdown**: A paragraph, heading, or list item.
+
+[Schema-aware](/docs/schemas) state enables semantic diffs: "price changed from $10 to $12" instead of "line 5 changed."
 
 ![Diff](/diff.svg)
 
-## Getting Diff Data
+## The SQL API
 
-Query data at two different [versions](/docs/versions) to get before/after states.
+Lix's main value is providing **queryable, diffable state** via SQL. You can query entity state at different [versions](/docs/versions) to build diffs.
 
-### File Level Diff
+The SDK exposes pre-built queries:
 
-Get the complete state of a file at two [versions](/docs/versions):
+| Query | Description |
+| :-- | :-- |
+| `selectVersionDiff` | Compare two versions (e.g., branch A vs branch B) |
+| `selectWorkingDiff` | Compare working state against the last checkpoint |
+
+Both return rows with `status` ('added', 'modified', 'removed', 'unchanged'), `before_change_id`, and `after_change_id` that you can join to get snapshot content.
+
+### Using selectVersionDiff
+
+Compare entities between two versions:
 
 <CodeSnippet
   module={example}
   srcCode={exampleSrcCode}
-  sections={["json-file-diff"]}
+  sections={["version-diff"]}
 />
 
-### Entity Level Diff
+### Custom Diff Queries
 
-For better performance, query a single [entity](/docs/schemas) at two [versions](/docs/versions) instead of loading the entire file:
+The real power is composing any diff query you need. Both `selectVersionDiff` and `selectWorkingDiff` return Kysely query builders, so you can filter, join, and transform results:
 
 <CodeSnippet
   module={example}
   srcCode={exampleSrcCode}
-  sections={["entity-diff"]}
+  sections={["custom-diff"]}
 />
 
 ## Rendering Diffs
