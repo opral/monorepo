@@ -1,0 +1,3 @@
+- positioning for apps & ai agents are just use cases, data science is another, etc. etc. 
+- "entity level diffs" is unconcrete. "schema-aware diffs" could be better. 
+- "semantic understanding" is unconcrete. " schema-aware" seems better

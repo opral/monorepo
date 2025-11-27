@@ -1,6 +1,6 @@
 # Key-Value Store
 
-Lix has a built-in [entity](/docs/data-model) for key values. Store any JSON value - from feature flags to UI preferences - and access it across your application.
+Lix has a built-in [entity](/docs/schemas) for key values. Store any JSON value - from feature flags to UI preferences - and access it across your application.
 
 
 ## Common Use Cases

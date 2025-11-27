@@ -2,32 +2,21 @@ import CodeSnippet from "./components/code-snippet";
 import * as example from "./examples/diffs.ts";
 import exampleSrcCode from "./examples/diffs.ts?raw";
 
-# Entity-Level Diffs
+# Diffs
 
-Unlike traditional version control that treats files as opaque blobs of text, Lix understands the _structure_ of your data. Diffs are computed at the entity level, where an "entity" is a semantic unit defined by a plugin. For example:
+Lix provides before/after states at the file or [entity](/docs/schemas) level. You can diff entire files or individual entities (JSON properties, CSV rows, Markdown paragraphs, etc.).
 
-- **JSON:** A property, array, or nested path.
-- **Tables/CSV:** A row or an individual cell.
-- **Prose/Markdown:** A paragraph, heading, or list item.
-
-This fine-grained, semantic approach makes changes easier to review, merge, and build powerful user experiences around.
+[Schema-aware](/docs/schemas) diffs mean changes are semantic: "price changed from $10 to $12" instead of "line 5 changed."
 
 ![Diff](/diff.svg)
 
-## Why Entity-Level Diffs?
+## Getting Diff Data
 
-By operating on entities instead of raw text lines, Lix provides several key advantages over traditional diffing methods.
+Query data at two different [versions](/docs/versions) to get before/after states.
 
-| Benefit                   | Description                                                                                                                     |
-| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| **Semantic Meaning**      | Diffs represent meaningful changes ("price changed from $10 to $12") not just arbitrary line edits.                             |
-| **Precise Attribution**   | Pinpoint exactly who changed what and when, down to a single cell or property, avoiding whole-file noise.                       |
-| **Fewer Conflicts**       | Merging changes to different entities (e.g., two different JSON properties) is trivial, even if they are on the same text line. |
-| **Pluggable Granularity** | Your domain model drives the diff. Plugins can define what constitutes a "change," tailoring diffs to your specific needs.      |
+### File Level Diff
 
-## Quick Start: Diffing a JSON File
-
-The most straightforward way to see a diff is to query two versions of a file and compare them. The following example gets the current version and the previous version of a JSON file to generate a simple textual diff.
+Get the complete state of a file at two [versions](/docs/versions):
 
 <CodeSnippet
   module={example}
@@ -35,19 +24,9 @@ The most straightforward way to see a diff is to query two versions of a file an
   sections={["json-file-diff"]}
 />
 
-## How to Get Diff Data
+### Entity Level Diff
 
-Lix's primary role is to provide you with the "before" and "after" states of your data. Your application can then use this data to calculate and render a diff.
-
-### Diffing an Entire File
-
-As shown in the Quick Start, you can query a file at two different versions to get its complete state at both points in time. This is useful for showing a full before-and-after view of a resource.
-
-### Diffing a Single Entity
-
-For better performance and more granular control, you can query a single entity at two different versions. This is highly efficient as it avoids loading the entire file when you only care about a specific part of the data.
-
-The same principle applies to any entity defined by a Lix plugin, such as a paragraph in a Markdown document or a cell in a CSV file.
+For better performance, query a single [entity](/docs/schemas) at two [versions](/docs/versions) instead of loading the entire file:
 
 <CodeSnippet
   module={example}
@@ -55,9 +34,9 @@ The same principle applies to any entity defined by a Lix plugin, such as a para
   sections={["entity-diff"]}
 />
 
-## How to Render Diffs
+## Rendering Diffs
 
-Once you have the "before" and "after" data, you have complete control over how the changes are visualized. There are three common approaches.
+Lix provides before/after data. You choose how to visualize it:
 
 | Approach               | Best For                                                   | Control Level |
 | :--------------------- | :--------------------------------------------------------- | :------------ |
@@ -67,7 +46,7 @@ Once you have the "before" and "after" data, you have complete control over how 
 
 ### Use a Plugin's UI
 
-Lix plugins can provide ready-to-use diff components that can be rendered directly in your application. This is the fastest way to display changes, but it limits you to the UI and rendering logic provided by the plugin.
+[Plugins](/docs/plugins) can provide ready-to-use diff components. Fastest way to display changes:
 
 <CodeSnippet
   module={example}
@@ -77,12 +56,10 @@ Lix plugins can provide ready-to-use diff components that can be rendered direct
 
 ### Use a Diff Library
 
-You can use a dedicated library to visualize the changes in your data. Popular options include general-purpose libraries like [diff](https://www.npmjs.com/package/diff) for text, or specialized solutions like the [@lix-js/html-diff](https://github.com/opral/monorepo/tree/main/packages/lix/html-diff) package.
-
-The HTML diff is particularly powerful because it can compare the rendered HTML output of your components, making it a universal tool for visualizing UI changes in any web app.
+Use a library to visualize changes. Options include [diff](https://www.npmjs.com/package/diff) for text or [@lix-js/html-diff](https://github.com/opral/monorepo/tree/main/packages/lix/html-diff) for comparing rendered HTML output.
 
 ### Build Your Own UI
 
-For complete control, you can always implement your own diff rendering logic. Because Lix provides structured "before" and "after" states, you can build any kind of diff UI you can imagine—from text-based diffs to visual comparisons of images, designs, or even 3D models.
+Build custom diff rendering with complete control. Lix provides structured before/after states for any visualization you need.
 
 ![Diffs come in many different types](/diffs-many-types.svg)
