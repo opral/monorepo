@@ -1,6 +1,6 @@
 # What is Lix?
 
-Lix is an embeddable change control system that enables Git-like features such as [history](/docs/history), [versions](/docs/versions) (branches), [diffs](/docs/), or [blame](/docs/attribution) for any file format.
+Lix is an embeddable change control system that enables Git-like features such as [history](/docs/history), [versions](/docs/versions) (branches), [diffs](/docs/diffs), or [blame](/docs/attribution) for any file format.
 
 What makes lix unique:
 
