@@ -67,13 +67,13 @@ type AgentViewProps = {
 export const CONVERSATION_KEY = "flashtype_agent_conversation_id";
 const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
 const AVAILABLE_MODELS = [
-        { id: "anthropic/claude-4.5-sonnet", label: "Claude 4.5 Sonnet" },
-        { id: "google/gemini-3-pro-preview", label: "Gemini 3 Pro Preview" },
-        { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-        { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-        { id: "z-ai/glm-4.6", label: "GLM 4.6 by ZAI" },
-        { id: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
-        { id: "openai/gpt-5", label: "GPT-5" },
+	{ id: "anthropic/claude-4.5-sonnet", label: "Claude 4.5 Sonnet" },
+	{ id: "google/gemini-3-pro-preview", label: "Gemini 3 Pro Preview" },
+	{ id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+	{ id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+	{ id: "z-ai/glm-4.6", label: "GLM 4.6 by ZAI" },
+	{ id: "x-ai/grok-code-fast-1", label: "Grok Code Fast 1" },
+	{ id: "openai/gpt-5", label: "GPT-5" },
 	{ id: "openai/gpt-5-codex", label: "GPT-5 Codex" },
 ] as const;
 const OPENROUTER_KEY_STORAGE_KEY = "flashtype_agent_openrouter_api_key";

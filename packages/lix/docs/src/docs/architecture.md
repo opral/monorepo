@@ -221,4 +221,4 @@ Applications query these views without needing to understand state materialisati
 
 - **[How Lix Works](/docs/how-lix-works)** - Practical guide to using Lix and understanding operational mechanics
 - **[Plugins](/docs/plugins)** - Learn how to build plugins that integrate with this architecture
-- **[Data Model](/docs/data-model)** - Understand entities, schemas, and how they relate to this architecture
+- **[Schemas](/docs/schemas)** - Understand entities, schemas, and how they relate to this architecture

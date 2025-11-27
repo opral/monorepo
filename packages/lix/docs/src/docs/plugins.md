@@ -137,6 +137,6 @@ Browse the [plugins directory](/plugins) for official and community plugins, ins
 
 ## Next Steps
 
-- Learn about [Data Model](/docs/data-model) to understand entities and schemas
-- See [Querying Changes](/docs/querying-changes) to work with plugin-detected changes
+- Learn about [Schemas](/docs/schemas) to understand entities and schemas
+- See [SQL Interface](/docs/sql-interface) to work with plugin-detected changes
 - Explore the [API Reference](/docs/api/) for detailed plugin interfaces
