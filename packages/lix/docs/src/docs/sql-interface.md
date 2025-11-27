@@ -6,13 +6,73 @@ Lix exposes all data through SQL. You can query current state, by version, or fu
 
 Lix provides six tables organized by scope and granularity:
 
-| | **File Level** | **Entity Level** |
-|---|---|---|
-| **Current State** | `file` | `state` |
-| **By Version** | `file_by_version` | `state_by_version` |
-| **History** | `file_history` | `state_history` |
+|                   | **File Level**    | **Entity Level**   |
+| ----------------- | ----------------- | ------------------ |
+| **Current State** | `file`            | `state`            |
+| **By Version**    | `file_by_version` | `state_by_version` |
+| **History**       | `file_history`    | `state_history`    |
 
 See [History](/docs/history) for details on querying historical data and using `*_by_version` and `*_history` tables.
+
+## Table Schemas
+
+Use these schema references when building queries. Nullable columns are marked as such; timestamps are ISO strings stored as TEXT in SQLite.
+
+### `state` (active version)
+
+| Column                      | Type            | Notes                                         |
+| --------------------------- | --------------- | --------------------------------------------- |
+| `entity_id`                 | TEXT            | Entity identifier unique within a file/schema |
+| `schema_key`                | TEXT            | Schema key (matches your `x-lix-key`)         |
+| `file_id`                   | TEXT            | Owning file ID                                |
+| `plugin_key`                | TEXT            | Plugin that owns the entity type              |
+| `snapshot_content`          | JSON            | Current JSON payload                          |
+| `schema_version`            | TEXT            | Schema version string (e.g., `1.0`)           |
+| `created_at`                | TEXT            | When this version-local state was created     |
+| `updated_at`                | TEXT            | Last update time within the active version    |
+| `inherited_from_version_id` | TEXT, nullable  | Source version when inherited                 |
+| `change_id`                 | TEXT            | Change that produced the state                |
+| `untracked`                 | INTEGER/BOOLEAN | `1` for untracked UI/ephemeral state          |
+| `commit_id`                 | TEXT            | Commit that contains the change               |
+| `writer_key`                | TEXT, nullable  | Writer attribution for echo suppression       |
+| `metadata`                  | JSON, nullable  | Metadata attached to the originating change   |
+
+### `state_by_version` (all versions)
+
+| Column                      | Type            | Notes                                         |
+| --------------------------- | --------------- | --------------------------------------------- |
+| `entity_id`                 | TEXT            | Entity identifier unique within a file/schema |
+| `schema_key`                | TEXT            | Schema key (matches your `x-lix-key`)         |
+| `file_id`                   | TEXT            | Owning file ID                                |
+| `version_id`                | TEXT            | Version that owns this row                    |
+| `plugin_key`                | TEXT            | Plugin that owns the entity type              |
+| `snapshot_content`          | JSON            | JSON payload for this version                 |
+| `schema_version`            | TEXT            | Schema version string (e.g., `1.0`)           |
+| `created_at`                | TEXT            | When this version-local state was created     |
+| `updated_at`                | TEXT            | Last update time within this version          |
+| `inherited_from_version_id` | TEXT, nullable  | Source version when inherited                 |
+| `change_id`                 | TEXT            | Change that produced the state                |
+| `untracked`                 | INTEGER/BOOLEAN | `1` for untracked UI/ephemeral state          |
+| `commit_id`                 | TEXT            | Commit that contains the change               |
+| `writer_key`                | TEXT, nullable  | Writer attribution for echo suppression       |
+| `metadata`                  | JSON, nullable  | Metadata attached to the originating change   |
+
+### `state_history` (read-only history)
+
+| Column             | Type           | Notes                                               |
+| ------------------ | -------------- | --------------------------------------------------- |
+| `entity_id`        | TEXT           | Entity identifier unique within a file/schema       |
+| `schema_key`       | TEXT           | Schema key (matches your `x-lix-key`)               |
+| `file_id`          | TEXT           | Owning file ID                                      |
+| `plugin_key`       | TEXT           | Plugin that owns the entity type                    |
+| `snapshot_content` | JSON           | Historical JSON payload at this point               |
+| `metadata`         | JSON, nullable | Metadata from the change that produced the state    |
+| `schema_version`   | TEXT           | Schema version string (e.g., `1.0`)                 |
+| `change_id`        | TEXT           | Change that produced the historical state           |
+| `commit_id`        | TEXT           | Commit where this state was created                 |
+| `root_commit_id`   | TEXT           | Commit you are traversing history from              |
+| `depth`            | INTEGER        | Distance from `root_commit_id` (`0` = root)         |
+| `version_id`       | TEXT           | Always `global` (history is global across versions) |
 
 ## Current State
 
@@ -22,10 +82,7 @@ Query the current (latest) state of your data.
 
 ```ts
 // Get all files in the current version
-const files = await lix.db
-  .selectFrom("file")
-  .selectAll()
-  .execute();
+const files = await lix.db.selectFrom("file").selectAll().execute();
 
 // Get a specific file
 const file = await lix.db
@@ -61,7 +118,7 @@ const file = await lix.db
     lix.db
       .selectFrom("version")
       .where("name", "=", "feature-branch")
-      .select("commit_id")
+      .select("commit_id"),
   )
   .selectFirst();
 ```
@@ -79,7 +136,7 @@ const entity = await lix.db
     lix.db
       .selectFrom("version")
       .where("name", "=", "feature-branch")
-      .select("commit_id")
+      .select("commit_id"),
   )
   .selectFirst();
 ```
@@ -105,7 +162,7 @@ const fileHistory = await lix.db
   .selectFrom("file_history")
   .where("path", "=", "/example.json")
   .where("lixcol_root_commit_id", "=", currentCommit)
-  .orderBy("lixcol_depth", "asc")  // 0 = current, 1 = one back, etc.
+  .orderBy("lixcol_depth", "asc") // 0 = current, 1 = one back, etc.
   .select(["path", "data", "lixcol_depth"])
   .execute();
 ```
