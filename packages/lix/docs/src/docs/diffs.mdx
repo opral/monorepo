@@ -69,11 +69,13 @@ Once you have the "before" and "after" data, you have complete control over how 
 
 Lix plugins can provide ready-to-use diff components that can be rendered directly in your application. This is the fastest way to display changes, but it limits you to the UI and rendering logic provided by the plugin.
 
-<CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
-  sections={["plugin-diffs"]}
-/>
+```ts
+const plugin = await lix.plugin.get({ key: "lix_plugin_csv" });
+
+if (plugin?.renderDiff) {
+  const diffComponent = plugin.renderDiff({ before, after });
+}
+```
 
 ### Use a Diff Library
 
