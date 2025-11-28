@@ -37,7 +37,7 @@
          │                                                       │
          ├───────────────────────────────────────────────────────┤
          │                                                       │
-         │ if untracked=1                  if untracked=0        │ materialized from
+         │ if untracked=1                  if untracked=0        │ cached from
          ▼                                                       ▼
 ┌─────────────────┐                           ┌──────────────────────────────┐
 │ lix_internal_   │                           │      lix_internal_change     │
@@ -56,8 +56,8 @@
 
 ### Changes
 
-- rename "cached state" to "materialized state" for better clarity
-- materialized state is authoritive for constraints
+- cache tables store the derived state (changes are the source of truth)
+- cache state is authoritative for constraints
   - untracked state does NOT participate in constraints
 - drop transaction table - rely on SQLite transactions for isolation
 
@@ -85,17 +85,18 @@
                   │ priority 1                          │ priority 2
                   ▼                                     ▼
     ┌───────────────────────┐             ┌─────────────────────────────┐
-    │    Untracked State    │             │     Materialized State      │
-    │       (local)         │             │                             │
-    │                       │             │ lix_internal_state_         │
-    │ lix_internal_state_   │             │ materialized_v1_{schema_key}│
-    │ untracked             │             │                             │
-    │                       │             │ e.g. _lix_key_value         │
-    └───────────────────────┘             │      _lix_commit            │
+    │    Untracked State    │             │        Cache State          │
+    │       (local)         │             │    (derived from changes)   │
+    │                       │             │                             │
+    │ lix_internal_state_   │             │ lix_internal_state_         │
+    │ untracked             │             │ cache_v1_{schema_key}       │
+    │                       │             │                             │
+    └───────────────────────┘             │ e.g. _lix_key_value         │
+                                          │      _lix_commit            │
                                           │      _lix_file              │
                                           └──────────────▲──────────────┘
                                                          │
-                                                         │ materialized from
+                                                         │ built from
                                                          ▼
                                           ┌──────────────────────────────┐
                                           │      lix_internal_change     │
@@ -126,7 +127,7 @@ The `file` view reads from both the state vtable and specialized file cache tabl
 │ lix_internal_file_    │ │ lix_internal_    │ │ lix_internal_file_    │
 │ data_cache            │ │ state_vtable     │ │ lixcol_cache          │
 │                       │ │                  │ │                       │
-│ (materialized file    │ │ (file metadata)  │ │ (change_id, commit_id │
+│ (cached file          │ │ (file metadata)  │ │ (change_id, commit_id │
 │  blob data)           │ │                  │ │  writer_key, etc.)    │
 ├───────────────────────┤ └──────────────────┘ └───────────────────────┘
 │ lix_internal_file_    │
@@ -149,7 +150,7 @@ The `version` view reads from state cache with special handling for inheritance:
                   │                                     │
                   ▼                                     ▼
 ┌─────────────────────────────────┐   ┌─────────────────────────────────┐
-│ lix_internal_state_vtable       │   │ lix_internal_state_materialized_v1_    │
+│ lix_internal_state_vtable       │   │ lix_internal_state_cache_v1_    │
 │                                 │   │ lix_version_descriptor          │
 │ (version descriptors,           │   │                                 │
 │  lix_version_tip)               │   │ (indexed inheritance chain)     │
@@ -162,7 +163,7 @@ The `version` view reads from state cache with special handling for inheritance:
 
 ## Milestone 1: Untracked State
 
-Untracked state is local-only data that is not synced and does not participate in constraint validation. It lives in a single table separate from the per-schema materialized tables.
+Untracked state is local-only data that is not synced and does not participate in constraint validation. It lives in a single table separate from the per-schema cache tables.
 
 ### Design
 
@@ -206,7 +207,7 @@ SELECT * FROM (
     UNION ALL
 
     -- Priority 2: Cache
-    SELECT *, 2 AS priority FROM lix_internal_state_materialized_v1_lix_key_value
+    SELECT *, 2 AS priority FROM lix_internal_state_cache_v1_lix_key_value
   )
 ) WHERE rn = 1
 ```
@@ -233,14 +234,14 @@ WHERE entity_id = 'entity-1'
 4. Include untracked table in SELECT UNION with priority 1
 5. Handle untracked DELETE as direct removal (no tombstone)
 
-## Milestone 2: Materialized Tables
+## Milestone 2: Cache Tables
 
-Per-schema materialized tables store the materialized state for committed data. Each registered schema gets its own materialized table.
+Per-schema cache tables store the cached state for committed data. Each registered schema gets its own cache table. Changes are the source of truth; cache tables are derived and can be rebuilt.
 
 ### Table Structure
 
 ```sql
-CREATE TABLE lix_internal_state_materialized_v1_{schema_key} (
+CREATE TABLE lix_internal_state_cache_v1_{schema_key} (
   entity_id TEXT NOT NULL,
   schema_key TEXT NOT NULL,
   file_id TEXT,
@@ -256,11 +257,11 @@ CREATE TABLE lix_internal_state_materialized_v1_{schema_key} (
 
 ### Schema Registration
 
-When a schema is registered, the engine creates a corresponding materialized table:
+When a schema is registered, the engine creates a corresponding cache table:
 
 ```rust
 fn register_schema(schema: &Schema, host: &impl HostBindings) -> Result<()> {
-    let table_name = format!("lix_internal_state_materialized_v1_{}", schema.key);
+    let table_name = format!("lix_internal_state_cache_v1_{}", schema.key);
 
     let create_sql = format!(r#"
         CREATE TABLE IF NOT EXISTS {} (
@@ -284,8 +285,8 @@ fn register_schema(schema: &Schema, host: &impl HostBindings) -> Result<()> {
 
 ### Tasks
 
-1. Define materialized table schema with required columns
-2. Implement `register_schema()` to create materialized tables dynamically
+1. Define cache table schema with required columns
+2. Implement `register_schema()` to create cache tables dynamically
 3. Handle schema key sanitization for table names
 4. Create indexes for common query patterns (version_id, file_id)
 
@@ -315,12 +316,14 @@ Thus, we only target two tables:
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM lix_internal_state_vtable
 WHERE schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 SELECT * FROM (
   SELECT *, ROW_NUMBER() OVER (
@@ -337,7 +340,7 @@ SELECT * FROM (
 
     -- Priority 2: Materialized state from schema-specific table
     SELECT *, 2 AS priority
-    FROM lix_internal_state_materialized_v1_lix_key_value
+    FROM lix_internal_state_cache_v1_lix_key_value
   )
 ) WHERE rn = 1
 ```
@@ -346,16 +349,17 @@ SELECT * FROM (
 
 1. Parse incoming SELECT statements targeting `lix_internal_state_vtable`
 2. Extract WHERE clause predicates (especially `schema_key`)
-3. Determine target materialized table from `schema_key` value
+3. Determine target cache table from `schema_key` value
 4. Generate UNION query with priority ordering
 5. Push down WHERE predicates to each UNION branch for performance
 
 ## Milestone 4: Rewriting `lix_internal_state_vtable` INSERT Queries
 
 INSERT operations to the vtable need to be rewritten to:
+
 1. Insert the snapshot content into `lix_internal_snapshot`
 2. Create a change record in `lix_internal_change`
-3. Update the materialized table for the schema
+3. Update the cache table for the schema
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -372,19 +376,21 @@ INSERT operations to the vtable need to be rewritten to:
 │ lix_internal_   │    │ lix_internal_change   │    │ lix_internal_state_     │
 │ snapshot        │    │                       │    │ cache_v1_{schema_key}   │
 │                 │    │ (references snapshot) │    │                         │
-│ (content blob)  │    │                       │    │ (materialized state)    │
+│ (content blob)  │    │                       │    │ (cached state)          │
 └─────────────────┘    └───────────────────────┘    └─────────────────────────┘
 ```
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 INSERT INTO lix_internal_state_vtable (entity_id, schema_key, file_id, version_id, snapshot_content, ...)
 VALUES ('entity-1', 'lix_key_value', 'file-1', 'version-1', '{"key": "foo", "value": "bar"}', ...)
 ```
 
 **Rewritten query:**
+
 ```sql
 -- 1. Insert snapshot content (content-addressed)
 INSERT INTO lix_internal_snapshot (id, content)
@@ -395,8 +401,8 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO lix_internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
 VALUES ('change-uuid', 'entity-1', 'lix_key_value', '1', 'file-1', 'plugin-1', 'snapshot-uuid', '2024-01-01T00:00:00Z');
 
--- 3. Update materialized table
-INSERT INTO lix_internal_state_materialized_v1_lix_key_value (entity_id, schema_key, file_id, version_id, snapshot_content, change_id, ...)
+-- 3. Update cache table
+INSERT INTO lix_internal_state_cache_v1_lix_key_value (entity_id, schema_key, file_id, version_id, snapshot_content, change_id, ...)
 VALUES ('entity-1', 'lix_key_value', 'file-1', 'version-1', '{"key": "foo", "value": "bar"}', 'change-uuid', ...)
 ON CONFLICT (entity_id, file_id, version_id) DO UPDATE SET
   snapshot_content = excluded.snapshot_content,
@@ -418,6 +424,7 @@ UPDATE operations can be partial (only some columns specified). To create a chan
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 UPDATE lix_internal_state_vtable
 SET snapshot_content = '{"key": "foo", "value": "updated"}'
@@ -425,9 +432,10 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 ```
 
 **Rewritten query:**
+
 ```sql
--- 1. Update materialized table and return the full row
-UPDATE lix_internal_state_materialized_v1_lix_key_value
+-- 1. Update cache table and return the full row
+UPDATE lix_internal_state_cache_v1_lix_key_value
 SET snapshot_content = '{"key": "foo", "value": "updated"}',
     updated_at = '2024-01-01T00:00:00Z'
 WHERE entity_id = 'entity-1' AND version_id = 'version-1'
@@ -448,7 +456,7 @@ INSERT INTO lix_internal_change (...) VALUES (...);
 ### Tasks
 
 1. Parse incoming UPDATE statements targeting `lix_internal_state_vtable`
-2. Rewrite to UPDATE on materialized table with RETURNING clause
+2. Rewrite to UPDATE on cache table with RETURNING clause
 3. Process returned rows to build snapshot and change records
 4. Handle partial updates (merge with existing row data)
 
@@ -459,12 +467,14 @@ DELETE operations are represented as tombstone records (`is_tombstone = 1`, `sna
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 DELETE FROM lix_internal_state_vtable
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = 'version-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- 1. Insert tombstone snapshot (special 'no-content' id)
 -- (references existing 'no-content' snapshot row)
@@ -473,8 +483,8 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 INSERT INTO lix_internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
 VALUES ('change-uuid', 'entity-1', 'lix_key_value', '1', 'file-1', 'plugin-1', 'no-content', '2024-01-01T00:00:00Z');
 
--- 3. Update materialized table with tombstone
-UPDATE lix_internal_state_materialized_v1_lix_key_value
+-- 3. Update cache table with tombstone
+UPDATE lix_internal_state_cache_v1_lix_key_value
 SET is_tombstone = 1,
     snapshot_content = NULL,
     change_id = 'change-uuid',
@@ -486,7 +496,7 @@ WHERE entity_id = 'entity-1' AND version_id = 'version-1';
 
 1. Parse incoming DELETE statements targeting `lix_internal_state_vtable`
 2. Create tombstone change records (snapshot_id = 'no-content')
-3. Update materialized table with `is_tombstone = 1` and `snapshot_content = NULL`
+3. Update cache table with `is_tombstone = 1` and `snapshot_content = NULL`
 4. Ensure tombstones are correctly handled in SELECT rewriting (filtered out by default)
 
 ---
@@ -500,6 +510,7 @@ Before rewriting queries, we need an in-memory representation of the rows being 
 > **Note:** The row representation below is illustrative, not fixed. Flexibility is expected as implementation details emerge.
 
 **Input query:**
+
 ```sql
 INSERT INTO lix_internal_state_vtable (entity_id, schema_key, file_id, version_id, snapshot_content)
 VALUES
@@ -508,6 +519,7 @@ VALUES
 ```
 
 **In-memory representation:**
+
 ```rust
 vec![
   Row {
@@ -551,9 +563,9 @@ let resolved_rows = resolve_row_values(&mutation, &host)?;
 4. Apply default values for missing columns
 5. Generate required values (id, created_at, etc.)
 
-## Milestone 8: Generate Commit and Materialized State
+## Milestone 8: Generate Commit and Cached State
 
-After extracting in-memory rows, we need to generate commit records and materialized state for the materialized tables.
+After extracting in-memory rows, we need to generate commit records and cached state for the cache tables.
 
 See the current JS implementation: [generate-commit.ts](https://github.com/opral/monorepo/blob/2413bafee26554208ec674e2a52306fcf4b77bc4/packages/lix/sdk/src/state/vtable/generate-commit.ts)
 
@@ -562,7 +574,7 @@ See the current JS implementation: [generate-commit.ts](https://github.com/opral
 ```rust
 // ... continued from Milestone 5
 
-// 6. Generate commit and materialized state
+// 6. Generate commit and cached state
 let commit_result = generate_commit(GenerateCommitArgs {
     timestamp: now(),
     changes: resolved_rows,
@@ -572,12 +584,12 @@ let commit_result = generate_commit(GenerateCommitArgs {
 });
 
 // commit_result.changes = domain changes + meta changes (commit, version_tip, etc.)
-// commit_result.materialized_state = rows ready for cache insertion
+// commit_result.cached_state = rows ready for cache insertion
 
 // 7. Build final SQL
 let sql = build_insert_sql(
     &commit_result.changes,          // -> lix_internal_change + lix_internal_snapshot
-    &commit_result.materialized_state // -> lix_internal_state_materialized_v1_*
+    &commit_result.cached_state       // -> lix_internal_state_cache_v1_*
 );
 
 host.execute(&sql)?;
@@ -589,7 +601,7 @@ host.execute(&sql)?;
 2. Generate commit snapshot with `change_ids`, `parent_commit_ids`
 3. Generate `lix_version_tip` updates per version
 4. Generate `lix_change_set_element` rows for domain changes
-5. Return both raw changes and materialized state for cache insertion
+5. Return both raw changes and cached state for cache insertion
 
 ## Milestone 9: State Materialization
 
@@ -619,14 +631,14 @@ lix_internal_materialization_     lix_internal_state_materializer
 version_ancestry                      (final output)
 ```
 
-| View | Purpose |
-|------|---------|
-| `all_commit_edges` | Union of edges from commit.parent_commit_ids and lix_commit_edge rows |
-| `version_tips` | Current tip commit per version |
-| `commit_graph` | Recursive DAG traversal with depth from tips |
+| View                   | Purpose                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `all_commit_edges`     | Union of edges from commit.parent_commit_ids and lix_commit_edge rows                                |
+| `version_tips`         | Current tip commit per version                                                                       |
+| `commit_graph`         | Recursive DAG traversal with depth from tips                                                         |
 | `latest_visible_state` | Explodes commit.change_ids, joins with change table, deduplicates by (version, entity, schema, file) |
-| `version_ancestry` | Recursive inheritance chain per version |
-| `state_materializer` | Final state with inheritance resolution |
+| `version_ancestry`     | Recursive inheritance chain per version                                                              |
+| `state_materializer`   | Final state with inheritance resolution                                                              |
 
 ### Correctness Assurance
 
@@ -636,7 +648,7 @@ After Milestone 5, we should have tests that verify:
 2. Version inheritance correctly resolves parent → child state visibility
 3. Tombstones (deletions) are correctly handled
 4. Commit graph traversal handles merge commits (multiple parents)
-5. Cache tables are populated correctly from materialized state
+5. Cache tables are populated correctly from cached state
 
 ## Milestone 10: Deterministic Mode and Simulation Testing
 
@@ -647,6 +659,7 @@ See the current JS implementation: [simulation-test.ts](https://github.com/opral
 ### Deterministic Mode
 
 The engine should support deterministic mode where:
+
 - UUIDs are generated from a seeded sequence
 - Timestamps are controlled/fixed
 - Results are reproducible given the same inputs
@@ -683,9 +696,9 @@ impl Engine {
 
 Simulation tests run the same test under different conditions to verify determinism:
 
-| Simulation | Description |
-|------------|-------------|
-| `normal` | Standard execution with cache |
+| Simulation        | Description                                                              |
+| ----------------- | ------------------------------------------------------------------------ |
+| `normal`          | Standard execution with cache                                            |
 | `materialization` | Clears cache before every SELECT, forces re-materialization from changes |
 
 ### expectDeterministic()
@@ -703,6 +716,7 @@ expect_deterministic(state_query_result);
 ### Why This Matters
 
 If materialization simulation produces different results than normal:
+
 - The materialization logic has a bug
 - Cache and source-of-truth (changes) are inconsistent
 
@@ -720,14 +734,14 @@ The engine provides built-in functions that can be called from CEL expressions a
 
 ### Function Registry
 
-| Function | Purpose | Deterministic Behavior |
-|----------|---------|------------------------|
-| `lix_uuid_v7()` | UUID v7 generation | Seeded sequence |
-| `lix_nano_id(length?)` | Short IDs (default 21 chars) | Seeded sequence |
-| `lix_human_id()` | Human-readable IDs | Seeded sequence |
-| `lix_timestamp()` | Current timestamp | Fixed timestamp |
-| `lix_random()` | Random float 0-1 | Seeded RNG |
-| `lix_next_sequence_number(namespace)` | Auto-incrementing sequence | Deterministic counter |
+| Function                              | Purpose                      | Deterministic Behavior |
+| ------------------------------------- | ---------------------------- | ---------------------- |
+| `lix_uuid_v7()`                       | UUID v7 generation           | Seeded sequence        |
+| `lix_nano_id(length?)`                | Short IDs (default 21 chars) | Seeded sequence        |
+| `lix_human_id()`                      | Human-readable IDs           | Seeded sequence        |
+| `lix_timestamp()`                     | Current timestamp            | Fixed timestamp        |
+| `lix_random()`                        | Random float 0-1             | Seeded RNG             |
+| `lix_next_sequence_number(namespace)` | Auto-incrementing sequence   | Deterministic counter  |
 
 ### Implementation
 
@@ -812,17 +826,17 @@ See RFC 002 for the Rust library: [`cel-rust`](https://github.com/clarkmcc/cel-r
 
 ```json
 {
-  "x-lix-key": "lix_message",
-  "properties": {
-    "id": {
-      "type": "string",
-      "x-lix-default": "lix_uuid_v7()"
-    },
-    "created_at": {
-      "type": "string",
-      "x-lix-default": "lix_get_timestamp()"
-    }
-  }
+	"x-lix-key": "lix_message",
+	"properties": {
+		"id": {
+			"type": "string",
+			"x-lix-default": "lix_uuid_v7()"
+		},
+		"created_at": {
+			"type": "string",
+			"x-lix-default": "lix_get_timestamp()"
+		}
+	}
 }
 ```
 
@@ -908,65 +922,307 @@ The engine should cache compiled schemas in memory for performance.
 4. Validate `snapshot_content` before commit generation
 5. Return clear error messages with path to invalid field
 
-## Milestone 14: Constraint Validation on Materialized Tables
+## Milestone 14: Constraint Validation via Query Rewriting
 
-After JSON Schema validation, enforce relational constraints by encoding them as SQLite constraints on the materialized tables themselves. Avoid preflight `SELECT … RAISE`; instead, project the constrained fields into indexed/generated columns and let SQLite enforce `PRIMARY KEY`, `UNIQUE`, and `FOREIGN KEY` directly.
+After JSON Schema validation, enforce relational constraints by rewriting INSERT/UPDATE queries to include constraint checks. This keeps the engine in control and avoids coupling to SQLite-specific constraint mechanisms.
 
 ### Constraint Types
 
-| Extension | Enforcement |
-|-----------|-------------|
-| `x-lix-primary-key` | Primary key on projected columns (plus `version_id`/scope) |
-| `x-lix-unique` | UNIQUE index on projected columns (plus `version_id`/scope) |
-| `x-lix-foreign-key` | FOREIGN KEY on projected columns pointing to referenced materialized table (immediate mode only) |
+| Extension           | Enforcement                                                           |
+| ------------------- | --------------------------------------------------------------------- |
+| `x-lix-primary-key` | Check uniqueness of key fields within version scope before INSERT     |
+| `x-lix-unique`      | Check uniqueness of field combination within version scope            |
+| `x-lix-foreign-key` | Check referenced row exists in target schema's cache table            |
 
-### Example Materialized Table (projected fields + constraints)
+### Rewriting Strategy
+
+The engine rewrites mutations to include constraint validation as part of the same SQL statement. If validation fails, the entire statement aborts.
+
+**Primary Key / Unique Check:**
 
 ```sql
-CREATE TABLE lix_internal_state_materialized_v1_lix_message (
-  entity_id TEXT NOT NULL,
-  version_id TEXT NOT NULL,
-  snapshot_content BLOB,
-  is_tombstone INTEGER NOT NULL DEFAULT 0,
-  -- generated projections for constraint fields
-  x_msg_id TEXT GENERATED ALWAYS AS (json_extract(snapshot_content, '$.id')) STORED,
-  x_thread_id TEXT GENERATED ALWAYS AS (json_extract(snapshot_content, '$.thread_id')) STORED,
-  x_seq_num INTEGER GENERATED ALWAYS AS (json_extract(snapshot_content, '$.sequence_number')) STORED,
-  PRIMARY KEY (version_id, x_msg_id),
-  UNIQUE (version_id, x_thread_id, x_seq_num)
-  -- FK: immediate mode only; materialized mode skips this and relies on materializer/deletion checks
-  , FOREIGN KEY (version_id, x_thread_id) REFERENCES lix_internal_state_materialized_v1_lix_thread(version_id, x_thread_id)
-    ON UPDATE CASCADE ON DELETE RESTRICT
-) WITHOUT ROWID;
+-- Original
+INSERT INTO state (entity_id, schema_key, snapshot_content)
+VALUES ('msg-1', 'lix_message', '{"id": "msg-1", "thread_id": "t-1"}')
 
--- Optional partial index to ignore tombstones
-CREATE INDEX lix_message_unique_active
-  ON lix_internal_state_materialized_v1_lix_message(x_thread_id, x_seq_num)
-  WHERE is_tombstone = 0;
+-- Rewritten: Check PK uniqueness BEFORE insert
+SELECT CASE WHEN EXISTS (
+  SELECT 1 FROM lix_internal_state_cache_v1_lix_message
+  WHERE version_id = 'version-1'
+    AND snapshot_content->>'id' = 'msg-1'
+    AND is_tombstone = 0
+) THEN RAISE(ABORT, 'Primary key constraint violated: lix_message.id') END;
+
+-- Then insert
+INSERT INTO lix_internal_state_cache_v1_lix_message (entity_id, version_id, snapshot_content, ...)
+VALUES ('msg-1', 'version-1', '{"id": "msg-1", "thread_id": "t-1"}', ...);
 ```
+
+**Foreign Key Check:**
+
+```sql
+-- Rewritten: Check FK exists BEFORE insert
+SELECT CASE WHEN NOT EXISTS (
+  SELECT 1 FROM lix_internal_state_cache_v1_lix_thread
+  WHERE version_id = 'version-1'
+    AND snapshot_content->>'id' = 't-1'  -- referenced thread_id
+    AND is_tombstone = 0
+) THEN RAISE(ABORT, 'Foreign key constraint violated: lix_message.thread_id -> lix_thread.id') END;
+
+-- Then insert
+INSERT INTO lix_internal_state_cache_v1_lix_message (...)
+VALUES (...);
+```
+
+### Benefits
+
+1. **Database agnostic** - No reliance on SQLite-specific features (generated columns, native FK)
+2. **Flexible error messages** - Engine controls the error text
+3. **Version-scoped** - Constraints naturally scoped to version_id
+4. **Tombstone-aware** - Easily exclude tombstones from constraint checks
+5. **Future-proof** - Can add constraint modes (deferred, cascading) without schema changes
 
 ### Notes
 
-- Generated columns (or expression indexes) must match the JSON paths exactly so the indexes are usable.
-- Prefix generated/projection columns (e.g., `x_*`) to avoid colliding with user field names.
-- Scope columns (`version_id`, `file_id`, etc.) should be included in the constraint definition to mirror the engine’s scoping rules.
-- Prefer projecting top-level properties into `x_*` generated columns so filters and joins can hit indexes without `json_extract` calls.
-- For `materialized` foreign keys, consider whether the mode is still needed; if constraints fire after materialization, immediate FKs on projected columns may suffice.
-- Untracked state is not part of constraint enforcement in this design; it lives in a separate table and is resolved at read time, so native PK/UNIQUE/FK only apply to committed/materialized rows.
+- Constraints only apply to cached (committed) state, not untracked state
+- The engine parses `x-lix-*` extensions from JSON Schema at schema registration time
+- Constraint checks are part of the rewritten SQL, not separate preflight queries
+- For bulk inserts, batch the constraint checks efficiently
 
 ### Tasks
 
-1. Parse `x-lix-primary-key`, `x-lix-foreign-key`, `x-lix-unique` from schemas.
-2. Project referenced JSON fields into generated columns (or expression indexes) on materialized tables.
-3. Emit `PRIMARY KEY`/`UNIQUE` constraints and indexes over the projected columns plus scope columns.
-4. Emit `FOREIGN KEY` constraints only for immediate-mode FKs; for materialized-mode FKs, rely on materializer and delete-time reverse checks.
-5. Ensure rewritten INSERT/UPDATE/DELETE target materialized tables with these constraints in place; constraint violations bubble up from SQLite.
+1. Parse `x-lix-primary-key`, `x-lix-foreign-key`, `x-lix-unique` from schemas
+2. Store parsed constraints in engine's schema registry
+3. Generate constraint check SQL (WHERE NOT EXISTS / WHERE EXISTS) during query rewriting
+4. Include RAISE statements for clear error messages on violation
+5. Handle UPDATE constraints (check new values don't violate uniqueness)
+6. Handle DELETE constraints (check no FK references exist, or cascade)
+
+## Milestone 15: Writer Key
+
+A writer key is a lightweight identity attached to state mutations. It lets UIs and services distinguish "my own writes" from external changes, enabling echo-suppression without polling.
+
+### Design
+
+- `writer_key` is an **optional column** on INSERT/UPDATE statements
+- If provided, it's stored with the change record
+- If not provided, defaults to `NULL` (treated as "external/unknown")
+- Propagated through the transaction pipeline and emitted on `onStateCommit`
+
+### SQL Interface
+
+```sql
+-- With writer key (editor knows its own writes)
+INSERT INTO state (entity_id, schema_key, snapshot_content, writer_key)
+VALUES ('entity-1', 'lix_message', '{"text": "hello"}', 'tiptap_session_abc123')
+
+-- Without writer key (defaults to NULL)
+INSERT INTO state (entity_id, schema_key, snapshot_content)
+VALUES ('entity-1', 'lix_message', '{"text": "hello"}')
+```
+
+### Writer Key Storage
+
+The writer key is stored in a separate table, keyed by the state row's composite key:
+
+```sql
+CREATE TABLE lix_internal_state_writer (
+  file_id TEXT NOT NULL,
+  version_id TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  schema_key TEXT NOT NULL,
+  writer_key TEXT NOT NULL,  -- NOT nullable - row deleted if no writer
+  PRIMARY KEY (file_id, version_id, entity_id, schema_key)
+);
+```
+
+**Key behavior:** If no writer key is provided, the row is **deleted** from this table (not stored with NULL). This keeps the table sparse and efficient.
+
+### Rewriting Example
+
+**With writer key:**
+
+```sql
+-- Input
+INSERT INTO state (entity_id, schema_key, snapshot_content, writer_key)
+VALUES ('entity-1', 'lix_message', '{"text": "hello"}', 'tiptap_session_abc')
+
+-- Rewritten (writer key provided)
+-- 1. Insert snapshot, change, cached state (as before)
+...
+
+-- 2. UPSERT writer key
+INSERT INTO lix_internal_state_writer (file_id, version_id, entity_id, schema_key, writer_key)
+VALUES (NULL, 'version-1', 'entity-1', 'lix_message', 'tiptap_session_abc')
+ON CONFLICT (file_id, version_id, entity_id, schema_key) DO UPDATE SET
+  writer_key = excluded.writer_key;
+```
+
+**Without writer key (or NULL):**
+
+```sql
+-- Input
+INSERT INTO state (entity_id, schema_key, snapshot_content)
+VALUES ('entity-1', 'lix_message', '{"text": "hello"}')
+
+-- Rewritten (no writer key)
+-- 1. Insert snapshot, change, cached state (as before)
+...
+
+-- 2. DELETE any existing writer key row
+DELETE FROM lix_internal_state_writer
+WHERE file_id IS NULL
+  AND version_id = 'version-1'
+  AND entity_id = 'entity-1'
+  AND schema_key = 'lix_message';
+```
+
+### Tasks
+
+1. Create `lix_internal_state_writer` table (writer_key NOT NULL)
+2. Extract `writer_key` from INSERT/UPDATE statements during parsing
+3. If writer_key provided: UPSERT into writer table
+4. If writer_key not provided or NULL: DELETE from writer table
+5. Include `writer_key` in `onStateCommit` events by LEFT JOIN with writer table
+
+## Milestone 16: onStateCommit Hook
+
+After state changes are committed (written to cache tables + change records created), the engine must notify listeners. This enables reactive UI updates and downstream processing.
+
+### Hook Interface
+
+```rust
+pub struct StateCommitChange {
+    pub id: String,                    // change_id
+    pub entity_id: String,
+    pub schema_key: String,
+    pub file_id: Option<String>,
+    pub version_id: String,
+    pub snapshot_content: Option<Value>, // null for deletions
+    pub commit_id: String,
+    pub untracked: bool,
+    pub writer_key: Option<String>,    // for echo suppression
+}
+
+pub trait HostBindings {
+    // ... existing methods ...
+
+    /// Called after state changes are committed
+    fn on_state_commit(&self, changes: &[StateCommitChange]) -> Result<()>;
+}
+```
+
+### Engine Integration
+
+```rust
+pub fn execute(sql: &str, params: &[Value], host: &impl HostBindings) -> Result<Vec<Row>> {
+    // ... mutation processing ...
+
+    // After successful commit to cache tables
+    if !committed_changes.is_empty() {
+        host.on_state_commit(&committed_changes)?;
+    }
+
+    // ...
+}
+```
+
+### Echo Suppression
+
+The `writer_key` field allows listeners to filter out their own writes:
+
+```typescript
+// SDK side
+lix.hooks.onStateCommit(({ changes }) => {
+    const relevantChanges = changes.filter(c => c.writer_key !== myWriterKey);
+    if (relevantChanges.length > 0) {
+        // Handle changes from other writers
+    }
+});
+```
+
+### Tasks
+
+1. Define `StateCommitChange` struct with all required fields
+2. Add `on_state_commit` to `HostBindings` trait
+3. Collect committed changes during mutation processing
+4. Call `host.on_state_commit()` after successful commit
+5. Include `writer_key` for echo suppression support
+
+## Milestone 17: Observe API
+
+The observe API enables reactive queries that automatically re-execute when relevant state changes. Built on top of the `onStateCommit` hook.
+
+### API Design
+
+```rust
+/// Observe query results, re-executing when relevant state changes
+pub fn observe(
+    sql: &str,
+    params: &[Value],
+    callback: impl Fn(Vec<Row>) + 'static,
+    host: &impl HostBindings
+) -> Subscription;
+
+pub struct Subscription {
+    id: String,
+}
+
+impl Subscription {
+    pub fn unsubscribe(self);
+}
+```
+
+### Internal Schema Key Extraction
+
+The engine parses the SQL to extract which `schema_key` values are being queried, so it can filter `onStateCommit` events internally:
+
+```rust
+fn extract_schema_keys(sql: &str) -> Vec<String> {
+    // Parse SQL and extract schema_key values from WHERE clauses
+    // e.g., "SELECT * FROM state WHERE schema_key = 'lix_message'"
+    // returns ["lix_message"]
+}
+
+struct ObserveSubscription {
+    id: String,
+    sql: String,
+    params: Vec<Value>,
+    schema_keys: Vec<String>,  // extracted once at registration
+    callback: Box<dyn Fn(Vec<Row>)>,
+}
+```
+
+The engine maintains subscriptions internally and only invokes callbacks when `onStateCommit` includes changes matching the subscription's schema keys.
+
+### SDK Usage
+
+```typescript
+const unsubscribe = lix.observe(
+    "SELECT * FROM state WHERE schema_key = 'lix_message'",
+    [],
+    (rows) => {
+        console.log("Messages updated:", rows);
+    }
+);
+
+// Later...
+unsubscribe();
+```
+
+### Tasks
+
+1. Implement `extract_schema_keys()` to parse schema keys from SQL
+2. Track active subscriptions in engine state (`ObserveSubscription`)
+3. Filter `onStateCommit` events by relevant schema keys
+4. Re-execute queries and invoke callbacks on relevant changes
+5. Handle subscription cleanup on unsubscribe
 
 ---
 
 # Versions
 
-## Milestone 15: Active Version
+## Milestone 18: Active Version
 
 The active version determines which version context is used for state operations. It is stored in the untracked table since it's local-only state that shouldn't be synced.
 
@@ -1003,19 +1259,21 @@ WHERE entity_id = 'lix_active_version' AND schema_key = 'lix_key_value'
 3. Provide API to switch active version
 4. Update cached value when active version changes
 
-## Milestone 16: Version View (version_descriptor + version_tip)
+## Milestone 19: Version View (version_descriptor + version_tip)
 
 The `version` view combines `lix_version_descriptor` and `lix_version_tip` to provide a unified view of versions with their current tip commits.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM version
 WHERE id = 'version-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 SELECT
   json_extract(vd.snapshot_content, '$.id') AS id,
@@ -1023,13 +1281,13 @@ SELECT
   json_extract(vd.snapshot_content, '$.parent_version_id') AS parent_version_id,
   json_extract(vt.snapshot_content, '$.commit_id') AS tip_commit_id
 FROM (
-  -- version_descriptor from materialized table
-  SELECT * FROM lix_internal_state_materialized_v1_lix_version_descriptor
+  -- version_descriptor from cache table
+  SELECT * FROM lix_internal_state_cache_v1_lix_version_descriptor
   WHERE is_tombstone = 0
 ) vd
 LEFT JOIN (
-  -- version_tip from materialized table
-  SELECT * FROM lix_internal_state_materialized_v1_lix_version_tip
+  -- version_tip from cache table
+  SELECT * FROM lix_internal_state_cache_v1_lix_version_tip
   WHERE is_tombstone = 0
 ) vt ON json_extract(vd.snapshot_content, '$.id') = json_extract(vt.snapshot_content, '$.version_id')
 WHERE json_extract(vd.snapshot_content, '$.id') = 'version-1'
@@ -1038,11 +1296,11 @@ WHERE json_extract(vd.snapshot_content, '$.id') = 'version-1'
 ### Tasks
 
 1. Parse SELECT statements targeting `version` view
-2. Rewrite to JOIN version_descriptor and version_tip materialized tables
+2. Rewrite to JOIN version_descriptor and version_tip cache tables
 3. Project relevant fields from snapshot_content
 4. Handle INSERT/UPDATE/DELETE by routing to appropriate underlying schema
 
-## Milestone 17: Version Inheritance in SELECT Rewriting
+## Milestone 20: Version Inheritance in SELECT Rewriting
 
 State queries must respect version inheritance. When querying state for a version, if an entity doesn't exist in that version, the query should fall back to parent versions.
 
@@ -1059,12 +1317,14 @@ When querying `state` for `version-child`, if an entity exists in `version-paren
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM state
 WHERE schema_key = 'lix_key_value'
 ```
 
 **Rewritten query (with inheritance):**
+
 ```sql
 WITH RECURSIVE version_chain AS (
   -- Start with active version
@@ -1072,7 +1332,7 @@ WITH RECURSIVE version_chain AS (
     json_extract(snapshot_content, '$.id') AS version_id,
     json_extract(snapshot_content, '$.parent_version_id') AS parent_version_id,
     0 AS depth
-  FROM lix_internal_state_materialized_v1_lix_version_descriptor
+  FROM lix_internal_state_cache_v1_lix_version_descriptor
   WHERE json_extract(snapshot_content, '$.id') = 'version-child'
 
   UNION ALL
@@ -1082,7 +1342,7 @@ WITH RECURSIVE version_chain AS (
     json_extract(vd.snapshot_content, '$.id'),
     json_extract(vd.snapshot_content, '$.parent_version_id'),
     vc.depth + 1
-  FROM lix_internal_state_materialized_v1_lix_version_descriptor vd
+  FROM lix_internal_state_cache_v1_lix_version_descriptor vd
   JOIN version_chain vc ON json_extract(vd.snapshot_content, '$.id') = vc.parent_version_id
 )
 SELECT * FROM (
@@ -1091,10 +1351,10 @@ SELECT * FROM (
     ORDER BY vc.depth ASC  -- Prefer closer versions
   ) AS rn
   FROM (
-    -- Untracked + materialized union
+    -- Untracked + cached union
     SELECT *, 1 AS priority FROM lix_internal_state_untracked WHERE schema_key = 'lix_key_value'
     UNION ALL
-    SELECT *, 2 AS priority FROM lix_internal_state_materialized_v1_lix_key_value
+    SELECT *, 2 AS priority FROM lix_internal_state_cache_v1_lix_key_value
   ) s
   JOIN version_chain vc ON s.version_id = vc.version_id
   WHERE s.is_tombstone = 0
@@ -1117,7 +1377,7 @@ SELECT * FROM (
 4. Handle tombstones correctly (child tombstone hides parent state)
 5. Apply inheritance only to `state` view, not `state_by_version`
 
-## Milestone 18: Active Account and Change Author
+## Milestone 21: Active Account and Change Author
 
 The active account determines which account context is used for change attribution. Like active version, it is stored in the untracked table. When changes are created, the engine generates change author records linking changes to accounts.
 
@@ -1144,7 +1404,7 @@ When a change is created, the engine automatically generates a `lix_change_autho
 
 ```sql
 -- On INSERT into lix_internal_change, also insert change author
-INSERT INTO lix_internal_state_materialized_v1_lix_change_author (entity_id, schema_key, version_id, snapshot_content, ...)
+INSERT INTO lix_internal_state_cache_v1_lix_change_author (entity_id, schema_key, version_id, snapshot_content, ...)
 VALUES (
   'change-author-uuid',
   'lix_change_author',
@@ -1201,19 +1461,21 @@ VALUES (
 
 # State Views
 
-## Milestone 19: `state_by_version` SELECT Rewriting
+## Milestone 22: `state_by_version` SELECT Rewriting
 
 The `state_by_version` view provides state scoped to a specific version. It builds on the vtable rewriting by adding version-specific filtering.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM state_by_version
 WHERE schema_key = 'lix_key_value' AND version_id = 'version-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 SELECT
   entity_id,
@@ -1235,7 +1497,7 @@ FROM (
     UNION ALL
 
     -- Priority 2: Materialized
-    SELECT *, 2 AS priority FROM lix_internal_state_materialized_v1_lix_key_value
+    SELECT *, 2 AS priority FROM lix_internal_state_cache_v1_lix_key_value
     WHERE version_id = 'version-1'
   )
 ) WHERE rn = 1 AND is_tombstone = 0
@@ -1245,22 +1507,24 @@ FROM (
 
 1. Parse SELECT statements targeting `state_by_version`
 2. Extract `version_id` from WHERE clause
-3. Apply version filtering to both untracked and materialized tables
+3. Apply version filtering to both untracked and cache tables
 4. Filter out tombstones by default
 
-## Milestone 20: `state_by_version` INSERT Rewriting
+## Milestone 23: `state_by_version` INSERT Rewriting
 
 INSERT operations on `state_by_version` write to the underlying vtable with explicit version scoping.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 INSERT INTO state_by_version (entity_id, schema_key, version_id, snapshot_content)
 VALUES ('entity-1', 'lix_key_value', 'version-1', '{"key": "foo"}')
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to lix_internal_state_vtable INSERT rewriting (Milestone 4)
 -- with version_id explicitly set
@@ -1272,13 +1536,14 @@ VALUES ('entity-1', 'lix_key_value', 'version-1', '{"key": "foo"}')
 2. Validate `version_id` is provided
 3. Delegate to vtable INSERT rewriting with version context
 
-## Milestone 21: `state_by_version` UPDATE Rewriting
+## Milestone 24: `state_by_version` UPDATE Rewriting
 
 UPDATE operations on `state_by_version` modify state for a specific version.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 UPDATE state_by_version
 SET snapshot_content = '{"key": "updated"}'
@@ -1286,6 +1551,7 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to lix_internal_state_vtable UPDATE rewriting (Milestone 5)
 -- with version_id explicitly set
@@ -1297,19 +1563,21 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 2. Extract `version_id` from WHERE clause
 3. Delegate to vtable UPDATE rewriting with version context
 
-## Milestone 22: `state_by_version` DELETE Rewriting
+## Milestone 25: `state_by_version` DELETE Rewriting
 
 DELETE operations on `state_by_version` create tombstones for the specified version.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 DELETE FROM state_by_version
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = 'version-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to lix_internal_state_vtable DELETE rewriting (Milestone 6)
 -- Creates tombstone for the specific version
@@ -1321,19 +1589,21 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 2. Extract `version_id` from WHERE clause
 3. Delegate to vtable DELETE rewriting (tombstone creation)
 
-## Milestone 23: `state` SELECT Rewriting
+## Milestone 26: `state` SELECT Rewriting
 
 The `state` view provides state for the "current" version (typically the active version in the session). It wraps `state_by_version` with implicit version resolution.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM state
 WHERE schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- First resolve current version from session/context
 -- Then rewrite as state_by_version with that version_id
@@ -1350,19 +1620,21 @@ SELECT * FROM (
 3. Delegate to `state_by_version` SELECT rewriting with resolved version
 4. Handle cases where no version is active
 
-## Milestone 24: `state` INSERT Rewriting
+## Milestone 27: `state` INSERT Rewriting
 
 INSERT operations on `state` write to the current version.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 INSERT INTO state (entity_id, schema_key, snapshot_content)
 VALUES ('entity-1', 'lix_key_value', '{"key": "foo"}')
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Resolve current version, then delegate to state_by_version INSERT
 ```
@@ -1373,13 +1645,14 @@ VALUES ('entity-1', 'lix_key_value', '{"key": "foo"}')
 2. Resolve current version from engine context
 3. Delegate to `state_by_version` INSERT rewriting with resolved version
 
-## Milestone 25: `state` UPDATE Rewriting
+## Milestone 28: `state` UPDATE Rewriting
 
 UPDATE operations on `state` modify state for the current version.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 UPDATE state
 SET snapshot_content = '{"key": "updated"}'
@@ -1387,6 +1660,7 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Resolve current version, then delegate to state_by_version UPDATE
 ```
@@ -1397,19 +1671,21 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 2. Resolve current version from engine context
 3. Delegate to `state_by_version` UPDATE rewriting with resolved version
 
-## Milestone 26: `state` DELETE Rewriting
+## Milestone 29: `state` DELETE Rewriting
 
 DELETE operations on `state` create tombstones for the current version.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 DELETE FROM state
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Resolve current version, then delegate to state_by_version DELETE
 ```
@@ -1420,7 +1696,7 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 2. Resolve current version from engine context
 3. Delegate to `state_by_version` DELETE rewriting (tombstone creation)
 
-## Milestone 27: `state_history` SELECT Rewriting (Read-Only)
+## Milestone 30: `state_history` SELECT Rewriting (Read-Only)
 
 The `state_history` view provides the full history of state changes across all versions. Unlike `state` and `state_by_version`, it does not deduplicate by entity—it returns all historical records.
 
@@ -1429,12 +1705,14 @@ The `state_history` view provides the full history of state changes across all v
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM state_history
 WHERE schema_key = 'lix_key_value' AND entity_id = 'entity-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Query change history joined with snapshots
 SELECT
@@ -1462,19 +1740,21 @@ ORDER BY c.created_at DESC
 
 # Entity Views
 
-## Milestone 28: `entity_by_version` SELECT Rewriting
+## Milestone 31: `entity_by_version` SELECT Rewriting
 
 The `entity_by_version` view is a layer on top of `state_by_version` that filters by `entity_id`. It returns state for a specific entity in a specific version.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM entity_by_version
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = 'version-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state_by_version SELECT rewriting (Milestone 14)
 -- with entity_id filter applied
@@ -1489,19 +1769,21 @@ SELECT * FROM (
 2. Extract `entity_id` from WHERE clause (required)
 3. Delegate to `state_by_version` SELECT rewriting with entity_id filter
 
-## Milestone 29: `entity_by_version` INSERT Rewriting
+## Milestone 32: `entity_by_version` INSERT Rewriting
 
 INSERT operations on `entity_by_version` delegate to `state_by_version` INSERT.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 INSERT INTO entity_by_version (entity_id, schema_key, version_id, snapshot_content)
 VALUES ('entity-1', 'lix_key_value', 'version-1', '{"key": "foo"}')
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state_by_version INSERT rewriting (Milestone 15)
 ```
@@ -1512,13 +1794,14 @@ VALUES ('entity-1', 'lix_key_value', 'version-1', '{"key": "foo"}')
 2. Validate `entity_id` and `version_id` are provided
 3. Delegate to `state_by_version` INSERT rewriting
 
-## Milestone 30: `entity_by_version` UPDATE Rewriting
+## Milestone 33: `entity_by_version` UPDATE Rewriting
 
 UPDATE operations on `entity_by_version` delegate to `state_by_version` UPDATE.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 UPDATE entity_by_version
 SET snapshot_content = '{"key": "updated"}'
@@ -1526,6 +1809,7 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state_by_version UPDATE rewriting (Milestone 16)
 ```
@@ -1536,19 +1820,21 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 2. Extract `entity_id` and `version_id` from WHERE clause
 3. Delegate to `state_by_version` UPDATE rewriting
 
-## Milestone 31: `entity_by_version` DELETE Rewriting
+## Milestone 34: `entity_by_version` DELETE Rewriting
 
 DELETE operations on `entity_by_version` delegate to `state_by_version` DELETE.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 DELETE FROM entity_by_version
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = 'version-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state_by_version DELETE rewriting (Milestone 17)
 ```
@@ -1559,19 +1845,21 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value' AND version_id = '
 2. Extract `entity_id` and `version_id` from WHERE clause
 3. Delegate to `state_by_version` DELETE rewriting
 
-## Milestone 32: `entity` SELECT Rewriting
+## Milestone 35: `entity` SELECT Rewriting
 
 The `entity` view is a layer on top of `state` that filters by `entity_id`. It returns state for a specific entity in the current version.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM entity
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state SELECT rewriting (Milestone 18)
 -- with entity_id filter applied
@@ -1586,19 +1874,21 @@ SELECT * FROM (
 2. Extract `entity_id` from WHERE clause (required)
 3. Delegate to `state` SELECT rewriting with entity_id filter
 
-## Milestone 33: `entity` INSERT Rewriting
+## Milestone 36: `entity` INSERT Rewriting
 
 INSERT operations on `entity` delegate to `state` INSERT.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 INSERT INTO entity (entity_id, schema_key, snapshot_content)
 VALUES ('entity-1', 'lix_key_value', '{"key": "foo"}')
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state INSERT rewriting (Milestone 19)
 ```
@@ -1609,13 +1899,14 @@ VALUES ('entity-1', 'lix_key_value', '{"key": "foo"}')
 2. Validate `entity_id` is provided
 3. Delegate to `state` INSERT rewriting
 
-## Milestone 34: `entity` UPDATE Rewriting
+## Milestone 37: `entity` UPDATE Rewriting
 
 UPDATE operations on `entity` delegate to `state` UPDATE.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 UPDATE entity
 SET snapshot_content = '{"key": "updated"}'
@@ -1623,6 +1914,7 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state UPDATE rewriting (Milestone 20)
 ```
@@ -1633,19 +1925,21 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 2. Extract `entity_id` from WHERE clause
 3. Delegate to `state` UPDATE rewriting
 
-## Milestone 35: `entity` DELETE Rewriting
+## Milestone 38: `entity` DELETE Rewriting
 
 DELETE operations on `entity` delegate to `state` DELETE.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 DELETE FROM entity
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state DELETE rewriting (Milestone 21)
 ```
@@ -1656,7 +1950,7 @@ WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 2. Extract `entity_id` from WHERE clause
 3. Delegate to `state` DELETE rewriting
 
-## Milestone 36: `entity_history` SELECT Rewriting (Read-Only)
+## Milestone 39: `entity_history` SELECT Rewriting (Read-Only)
 
 The `entity_history` view is a layer on top of `state_history` that filters by `entity_id`. It returns all historical records for a specific entity.
 
@@ -1665,12 +1959,14 @@ The `entity_history` view is a layer on top of `state_history` that filters by `
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 SELECT * FROM entity_history
 WHERE entity_id = 'entity-1' AND schema_key = 'lix_key_value'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- Delegates to state_history SELECT rewriting (Milestone 22)
 -- with entity_id filter applied
@@ -1690,7 +1986,7 @@ SELECT * FROM (
 
 # Filesystem
 
-## Milestone 37: Filesystem INSERT (file_descriptor, directory)
+## Milestone 40: Filesystem INSERT (file_descriptor, directory)
 
 INSERT operations on the `file` and `directory` virtual views need to be rewritten to write to the underlying physical tables: `lix_file_descriptor` and `lix_directory`.
 
@@ -1699,15 +1995,17 @@ INSERT operations on the `file` and `directory` virtual views need to be rewritt
 ### Query Rewriting Example (file)
 
 **Input query:**
+
 ```sql
 INSERT INTO file (id, path, metadata)
 VALUES ('file-1', '/src/index.ts', '{"size": 1024}')
 ```
 
 **Rewritten query:**
+
 ```sql
--- 1. Insert into file_descriptor materialized table
-INSERT INTO lix_internal_state_materialized_v1_lix_file_descriptor (entity_id, schema_key, version_id, snapshot_content, ...)
+-- 1. Insert into file_descriptor cache table
+INSERT INTO lix_internal_state_cache_v1_lix_file_descriptor (entity_id, schema_key, version_id, snapshot_content, ...)
 VALUES ('file-1', 'lix_file_descriptor', 'current-version', '{"id": "file-1", "path": "/src/index.ts", "metadata": {"size": 1024}}', ...)
 ON CONFLICT ...;
 
@@ -1719,15 +2017,17 @@ INSERT INTO lix_internal_change (...) VALUES (...);
 ### Query Rewriting Example (directory)
 
 **Input query:**
+
 ```sql
 INSERT INTO directory (id, path)
 VALUES ('dir-1', '/src')
 ```
 
 **Rewritten query:**
+
 ```sql
--- 1. Insert into directory materialized table
-INSERT INTO lix_internal_state_materialized_v1_lix_directory (entity_id, schema_key, version_id, snapshot_content, ...)
+-- 1. Insert into directory cache table
+INSERT INTO lix_internal_state_cache_v1_lix_directory (entity_id, schema_key, version_id, snapshot_content, ...)
 VALUES ('dir-1', 'lix_directory', 'current-version', '{"id": "dir-1", "path": "/src"}', ...)
 ON CONFLICT ...;
 
@@ -1741,24 +2041,26 @@ INSERT INTO lix_internal_change (...) VALUES (...);
 1. Parse INSERT statements targeting `file` and `directory` views
 2. Map virtual view columns to underlying schema fields
 3. Generate snapshot_content JSON from insert values
-4. Rewrite to INSERT on materialized tables + change/snapshot records
+4. Rewrite to INSERT on cache tables + change/snapshot records
 5. Apply schema defaults and validation (Milestones 12-14)
 
-## Milestone 38: Filesystem SELECT (file, directory)
+## Milestone 41: Filesystem SELECT (file, directory)
 
-SELECT operations on `file` and `directory` virtual views need to be rewritten to query the underlying materialized tables with proper prioritization.
+SELECT operations on `file` and `directory` virtual views need to be rewritten to query the underlying cache tables with proper prioritization.
 
-> **Note:** `file.data` is a computed column that requires materialization from changes. This milestone returns `NULL` for `file.data`; content materialization is addressed in Milestone 41.
+> **Note:** `file.data` is a computed column that requires materialization from changes. This milestone returns `NULL` for `file.data`; content materialization is addressed in Milestone 44.
 
 ### Query Rewriting Example (file without data)
 
 **Input query:**
+
 ```sql
 SELECT id, path, metadata FROM file
 WHERE path LIKE '/src/%'
 ```
 
 **Rewritten query:**
+
 ```sql
 SELECT
   json_extract(snapshot_content, '$.id') AS id,
@@ -1777,7 +2079,7 @@ FROM (
     UNION ALL
 
     -- Priority 2: Cache
-    SELECT *, 2 AS priority FROM lix_internal_state_materialized_v1_lix_file_descriptor
+    SELECT *, 2 AS priority FROM lix_internal_state_cache_v1_lix_file_descriptor
   )
 ) WHERE rn = 1 AND json_extract(snapshot_content, '$.path') LIKE '/src/%'
 ```
@@ -1785,11 +2087,13 @@ FROM (
 ### Query Rewriting Example (directory)
 
 **Input query:**
+
 ```sql
 SELECT id, path FROM directory
 ```
 
 **Rewritten query:**
+
 ```sql
 SELECT
   json_extract(snapshot_content, '$.id') AS id,
@@ -1805,7 +2109,7 @@ FROM (
 
     UNION ALL
 
-    SELECT *, 2 AS priority FROM lix_internal_state_materialized_v1_lix_directory
+    SELECT *, 2 AS priority FROM lix_internal_state_cache_v1_lix_directory
   )
 ) WHERE rn = 1
 ```
@@ -1818,13 +2122,14 @@ FROM (
 4. Handle `file.data` column specially (NULL in this milestone)
 5. Push down WHERE predicates where possible
 
-## Milestone 39: Filesystem UPDATE (file_descriptor, directory)
+## Milestone 42: Filesystem UPDATE (file_descriptor, directory)
 
 UPDATE operations on `file` and `directory` views need to be rewritten with RETURNING to capture the full row for change records.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 UPDATE file
 SET metadata = '{"size": 2048}'
@@ -1832,9 +2137,10 @@ WHERE id = 'file-1'
 ```
 
 **Rewritten query:**
+
 ```sql
--- 1. Update materialized table and return full row
-UPDATE lix_internal_state_materialized_v1_lix_file_descriptor
+-- 1. Update cache table and return full row
+UPDATE lix_internal_state_cache_v1_lix_file_descriptor
 SET snapshot_content = json_set(snapshot_content, '$.metadata', '{"size": 2048}')
 WHERE entity_id = 'file-1' AND version_id = 'current-version'
 RETURNING *;
@@ -1851,25 +2157,27 @@ INSERT INTO lix_internal_change (...) VALUES (...);
 3. Use RETURNING to get full row for change record generation
 4. Handle partial updates (merge with existing snapshot_content)
 
-## Milestone 40: Filesystem DELETE (file_descriptor, directory)
+## Milestone 43: Filesystem DELETE (file_descriptor, directory)
 
 DELETE operations create tombstone records.
 
 ### Query Rewriting Example
 
 **Input query:**
+
 ```sql
 DELETE FROM file WHERE id = 'file-1'
 ```
 
 **Rewritten query:**
+
 ```sql
 -- 1. Create tombstone change record
 INSERT INTO lix_internal_change (id, entity_id, schema_key, snapshot_id, ...)
 VALUES ('change-uuid', 'file-1', 'lix_file_descriptor', 'no-content', ...);
 
 -- 2. Update cache with tombstone
-UPDATE lix_internal_state_materialized_v1_lix_file_descriptor
+UPDATE lix_internal_state_cache_v1_lix_file_descriptor
 SET is_tombstone = 1, snapshot_content = NULL, change_id = 'change-uuid'
 WHERE entity_id = 'file-1' AND version_id = 'current-version';
 ```
@@ -1881,7 +2189,7 @@ WHERE entity_id = 'file-1' AND version_id = 'current-version';
 3. Update cache with is_tombstone = 1, snapshot_content = NULL
 4. Ensure SELECT rewriting filters out tombstones
 
-## Milestone 41: File Data Materialization and Change Detection
+## Milestone 44: File Data Materialization and Change Detection
 
 Once file descriptors can be written and read, we need to handle `file.data` - the actual file content. This requires:
 
@@ -1896,13 +2204,13 @@ When a SELECT includes `file.data`, the engine must materialize the file content
 2. Finding the matching plugin via `detectChangesGlob`
 3. Querying entities (changes) for that file
 4. Calling `host.apply_changes(plugin_key, file, changes)` → `plugin.applyChanges()`
-5. Returning the materialized fileData
+5. Returning the cached fileData
 
 ```rust
 fn materialize_file_data(file_id: &str, version_id: &str, host: &impl HostBindings) -> Result<Vec<u8>> {
     // 1. Get file descriptor
     let descriptor = host.execute(
-        "SELECT * FROM lix_internal_state_materialized_v1_lix_file_descriptor WHERE entity_id = ?",
+        "SELECT * FROM lix_internal_state_cache_v1_lix_file_descriptor WHERE entity_id = ?",
         &[file_id]
     )?;
 
@@ -1974,11 +2282,78 @@ pub trait HostBindings {
 5. Wire plugin callbacks through the WASM host interface
 6. Handle the "unknown file" plugin fallback
 
+## Milestone 45: Lazy Working Commit Materialization
+
+When a query references a commit that is the current `working_commit_id` of a version, the engine must lazily materialize its change set before the query can proceed.
+
+### Detection
+
+The engine detects queries that reference working commits:
+
+```rust
+fn execute_query(sql: &str, host: &impl HostBindings) -> Result<Vec<Row>> {
+    let ast = parse(sql)?;
+
+    // Extract commit_id references from query
+    let referenced_commits = extract_commit_references(&ast);
+
+    for commit_id in referenced_commits {
+        // Check if this commit is a working commit of any version
+        if is_working_commit(&commit_id, host)? {
+            materialize_working_commit(&commit_id, host)?;
+        }
+    }
+
+    // Proceed with query execution
+    // ...
+}
+```
+
+### Materialization
+
+When materializing a working commit:
+
+1. **Collect changes** - Gather all changes referencing this commit
+2. **Generate change set** - Create `lix_change_set` and `lix_change_set_element` records
+3. **Handle tombstones** - Ensure deletions are properly recorded in the change set
+
+```sql
+-- 1. Create change set
+INSERT INTO lix_internal_state_cache_v1_lix_change_set (...)
+VALUES ('change-set-uuid', ...);
+
+-- 2. Link changes to change set
+INSERT INTO lix_internal_state_cache_v1_lix_change_set_element (...)
+SELECT ... FROM lix_internal_change WHERE commit_id = 'working-commit-id';
+
+-- 3. Update commit to reference change set
+UPDATE lix_internal_state_cache_v1_lix_commit
+SET snapshot_content = json_set(snapshot_content, '$.change_set_id', 'change-set-uuid')
+WHERE entity_id = 'working-commit-id';
+```
+
+### Tasks
+
+1. Implement `is_working_commit()` check against `lix_version_tip.working_commit_id`
+2. Implement `extract_commit_references()` to find commit_id values in queries
+3. Implement `materialize_working_commit()` to generate change set on demand
+4. Handle tombstone changes correctly during materialization
+
+## Milestone 46: Create Checkpoint
+
+Explicit checkpoint creation that converts the working commit into an immutable checkpoint and creates a new working commit.
+
+### Tasks
+
+1. Materialize working commit change set (via Milestone 45)
+2. Apply checkpoint label (if configured)
+3. Create new empty working commit with parent = old working commit
+4. Update `lix_version_tip`: `commit_id` = old working, `working_commit_id` = new empty
+
 ---
 
 ## Bonus Milestone: Better SQLite3 on node js
 
-
-## Bonus Milestone: Target PostgreSQL as environment (pglite for example)
+## Bonus Milestone: Target PostgreSQL as environment (embedded Postgres or pglite)
 
 ## Bonus Milestone: Rust SDK
