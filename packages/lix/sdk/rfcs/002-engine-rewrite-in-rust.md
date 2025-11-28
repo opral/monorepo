@@ -8,7 +8,7 @@
 
 1. **Leverage existing Rust libraries** - Rust has production-grade SQL parsers (`sqlparser-rs`), CEL evaluators (`cel-rust`), and JSON Schema validators that don't exist in JS. Our custom JS SQL parser is fragile and limited.
 
-2. **Portable engine for multi-language bindings** - A Rust engine can be exposed to JS (NAPI-RS, WASM), Python (PyO3), and other languages. Implementing in Rust now means the core is written once.
+2. **Portable engine for multi-language bindings** - A Rust engine compiled to **WASM** can be embedded from different hosts (Node, Python, Go, etc.) via a small host interface. Implementing in Rust now means the core is written once while keeping deployment binary-free.
 
 ## Non-Goals
 
@@ -76,11 +76,7 @@ const engine = createEngine({
 const result = engine.execute("INSERT INTO messages ...", [params]);
 ```
 
-The Rust engine exposes bindings via:
-
-- **NAPI-RS** for Node.js (native addon)
-- **WASM** for browser environments
-- **C FFI** for other languages (Python via PyO3, etc.)
+The Rust engine is built as **WASM** and called through a minimal host interface (`execute`, `detectChanges`). Host environments (Node, Python, Go, etc.) embed the WASM module and provide `host.execute` against their chosen driver (SQLite, Postgres, pglite).
 
 ### Implementation
 
