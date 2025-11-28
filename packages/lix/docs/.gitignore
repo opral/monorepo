@@ -10,6 +10,9 @@ src/docs/api/*
 docs/react-integration.mdx
 src/docs/react-integration.mdx
 
+# generated from @lix-js/sdk/CHANGELOG.md
+src/docs/release-notes.mdx
+
 # generated from plugin registry/READMEs
 src/plugins/_meta.json
 src/plugins/*.mdx

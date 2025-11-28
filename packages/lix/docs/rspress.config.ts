@@ -6,6 +6,7 @@ import {
   syncPluginReadmesPlugin,
   generatePluginsSidebar,
 } from "./rspress-plugins/sync-plugin-readmes";
+import { syncChangelogPlugin } from "./rspress-plugins/sync-changelog";
 import {
   generateApiDocs,
   generateApiSidebar,
@@ -98,6 +99,7 @@ export default defineConfig({
     }),
     syncReactUtilsReadmePlugin(),
     syncPluginReadmesPlugin(),
+    syncChangelogPlugin(),
   ],
   themeConfig: {
     darkMode: false,
@@ -115,6 +117,7 @@ export default defineConfig({
             { text: "Getting Started", link: "/docs/getting-started" },
             { text: "Comparison to Git", link: "/docs/comparison-to-git" },
             { text: "Lix for AI Agents", link: "/docs/lix-for-ai-agents" },
+            { text: "Release Notes", link: "/docs/release-notes" },
           ],
         },
         {
