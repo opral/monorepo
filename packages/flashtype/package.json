@@ -38,6 +38,7 @@
 		"@tiptap/core": "^3.3.0",
 		"@tiptap/extension-history": "^3.4.4",
 		"@tiptap/extension-placeholder": "^3.4.4",
+		"@tiptap/pm": "^3.3.0",
 		"@tiptap/react": "^3.0.0",
 		"ai": "^5.0.34",
 		"class-variance-authority": "^0.7.1",

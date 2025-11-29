@@ -9,6 +9,7 @@ import "./style.css";
 import { createReactViewDefinition } from "../../app/react-view";
 import { FILE_VIEW_KIND } from "../../app/view-instance-helpers";
 import { FormattingToolbar } from "./components/formatting-toolbar";
+import { SlashCommandMenu } from "./components/slash-command-menu";
 
 type MarkdownViewProps = {
 	readonly fileId?: string;
@@ -94,6 +95,7 @@ function MarkdownViewContent({
 						isActiveView={isActiveView}
 						focusOnLoad={focusOnLoad}
 					/>
+					<SlashCommandMenu />
 				</div>
 			</EditorProvider>
 		);
