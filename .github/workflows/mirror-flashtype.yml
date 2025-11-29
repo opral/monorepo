@@ -11,8 +11,6 @@ on:
 jobs:
   mirror-flashtype:
     runs-on: ubuntu-latest
-    env:
-      MIRROR_PAT: ${{ secrets.MIRROR_PAT }}
 
     steps:
       - name: Checkout repository
@@ -25,16 +23,23 @@ jobs:
           git config user.name "opral-bot"
           git config user.email "dev@opral.com"
 
-      - name: Install splitsh-lite
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Build splitsh-lite
         run: |
-          curl -L https://github.com/splitsh/lite/releases/latest/download/splitsh-lite-linux-amd64 -o splitsh-lite
-          chmod +x splitsh-lite
+          git clone https://github.com/splitsh/lite.git /tmp/splitsh-lite
+          cd /tmp/splitsh-lite
+          go build -o "$GITHUB_WORKSPACE/splitsh-lite"
 
       - name: Split and push flashtype
         env:
           PREFIX: packages/flashtype
           REMOTE_REPO: opral/flashtype
           BRANCH: main
+          MIRROR_PAT: ${{ secrets.MIRROR_PAT }}
         run: |
           set -euo pipefail
 
@@ -56,18 +61,15 @@ jobs:
 
           pushd "$WORKTREE_DIR" >/dev/null
 
-          cat > README.md.new <<'EOF'
-          > [!NOTE]
-          > The repo is mirrored from [opral/monorepo/tree/main/packages/flashtype](https://github.com/opral/monorepo/tree/main/packages/flashtype). This repo serves as an issue tracker.
-
-          EOF
+          printf "%s\n" "> [!NOTE]" "> The repo is mirrored from [opral/monorepo/tree/main/packages/flashtype](https://github.com/opral/monorepo/tree/main/packages/flashtype). This repo serves as an issue tracker." > README.md.new
+          printf "\n" >> README.md.new
           if [ -f README.md ]; then
             cat README.md >> README.md.new
           fi
           mv README.md.new README.md
 
           git add README.md
-          git commit -m "chore: add mirror note"
+          git commit -m "chore: add mirror note" || true
 
           git push --force "${REMOTE_NAME}" HEAD:"${BRANCH}"
 
