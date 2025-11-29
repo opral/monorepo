@@ -1,0 +1,76 @@
+name: Mirror flashtype (splitsh-lite)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/flashtype/**"
+  workflow_dispatch:
+
+jobs:
+  mirror-flashtype:
+    runs-on: ubuntu-latest
+    env:
+      MIRROR_PAT: ${{ secrets.MIRROR_PAT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "opral-bot"
+          git config user.email "dev@opral.com"
+
+      - name: Install splitsh-lite
+        run: |
+          curl -L https://github.com/splitsh/lite/releases/latest/download/splitsh-lite-linux-amd64 -o splitsh-lite
+          chmod +x splitsh-lite
+
+      - name: Split and push flashtype
+        env:
+          PREFIX: packages/flashtype
+          REMOTE_REPO: opral/flashtype
+          BRANCH: main
+        run: |
+          set -euo pipefail
+
+          echo "Splitting ${PREFIX}"
+          COMMIT=$(./splitsh-lite --prefix="$PREFIX")
+          echo "Split commit: $COMMIT"
+
+          REMOTE_URL="https://x-access-token:${MIRROR_PAT}@github.com/${REMOTE_REPO}.git"
+          REMOTE_NAME="mirror-flashtype"
+
+          if git remote | grep -q "^${REMOTE_NAME}$"; then
+            git remote set-url "${REMOTE_NAME}" "$REMOTE_URL"
+          else
+            git remote add "${REMOTE_NAME}" "$REMOTE_URL"
+          fi
+
+          WORKTREE_DIR=$(mktemp -d)
+          git worktree add "$WORKTREE_DIR" "$COMMIT"
+
+          pushd "$WORKTREE_DIR" >/dev/null
+
+          cat > README.md.new <<'EOF'
+          > [!NOTE]
+          > The repo is mirrored from [opral/monorepo/tree/main/packages/flashtype](https://github.com/opral/monorepo/tree/main/packages/flashtype). This repo serves as an issue tracker.
+
+          EOF
+          if [ -f README.md ]; then
+            cat README.md >> README.md.new
+          fi
+          mv README.md.new README.md
+
+          git add README.md
+          git commit -m "chore: add mirror note"
+
+          git push --force "${REMOTE_NAME}" HEAD:"${BRANCH}"
+
+          popd >/dev/null
+          git worktree remove "$WORKTREE_DIR"
+        shell: bash
