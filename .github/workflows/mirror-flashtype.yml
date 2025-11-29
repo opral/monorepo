@@ -23,7 +23,10 @@ jobs:
           set -euo pipefail
 
           SRC="packages/flashtype"
-          WORKDIR=$(mktemp -d)
+          WORKDIR="$GITHUB_WORKSPACE/.mirror-flashtype"
+
+          rm -rf "$WORKDIR"
+          mkdir -p "$WORKDIR"
 
           rsync -av --delete "$SRC"/ "$WORKDIR"/
 
@@ -40,14 +43,12 @@ jobs:
             printf "%b\n" "$NOTE" > README.md
           fi
 
-          echo "WORKDIR=$WORKDIR" >> "$GITHUB_ENV"
-
       - name: Push to flashtype mirror
         uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.MIRROR_PAT }}
         with:
-          source-directory: ${{ env.WORKDIR }}
+          source-directory: .mirror-flashtype
           destination-github-username: opral
           destination-repository-name: flashtype
           target-branch: main
