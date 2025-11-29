@@ -133,16 +133,10 @@ Each file is automatically processed by the plugin whose `detectChangesGlob` pat
 
 ## Finding Plugins
 
-Official plugins:
-- [@lix-js/plugin-json](https://www.npmjs.com/package/@lix-js/plugin-json)
-- [@lix-js/plugin-csv](https://www.npmjs.com/package/@lix-js/plugin-csv)
-- [@lix-js/plugin-md](https://www.npmjs.com/package/@lix-js/plugin-md)
-- [@lix-js/plugin-prosemirror](https://www.npmjs.com/package/@lix-js/plugin-prosemirror)
-
-Community plugins: Check the [Lix GitHub organization](https://github.com/opral/lix-sdk)
+Browse the [plugins directory](/plugins) for official and community plugins, installation instructions, and file type coverage.
 
 ## Next Steps
 
-- Learn about [Data Model](/docs/data-model) to understand entities and schemas
-- See [Querying Changes](/docs/querying-changes) to work with plugin-detected changes
+- Learn about [Schemas](/docs/schemas) to understand entities and schemas
+- See [SQL Interface](/docs/sql-interface) to work with plugin-detected changes
 - Explore the [API Reference](/docs/api/) for detailed plugin interfaces

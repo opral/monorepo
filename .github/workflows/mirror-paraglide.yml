@@ -1,0 +1,63 @@
+name: Mirror paraglide-js (copy)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "inlang/packages/paraglide/paraglide-js/**"
+  workflow_dispatch:
+
+jobs:
+  mirror-paraglide-js:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare mirror contents with note and issue templates
+        run: |
+          set -euo pipefail
+
+          SRC="inlang/packages/paraglide/paraglide-js"
+          WORKDIR="$GITHUB_WORKSPACE/.mirror-paraglide-js"
+
+          rm -rf "$WORKDIR"
+          mkdir -p "$WORKDIR"
+
+          rsync -av --delete "$SRC"/ "$WORKDIR"/
+
+          # Preserve issue templates from the public repo
+          TEMPLATE_DIR=$(mktemp -d)
+          git clone --depth 1 https://github.com/opral/inlang-paraglide-js.git "$TEMPLATE_DIR"
+          if [ -d "$TEMPLATE_DIR/.github" ]; then
+            rsync -av --delete "$TEMPLATE_DIR/.github"/ "$WORKDIR/.github"/
+          fi
+
+          cd "$WORKDIR"
+          NOTE="> [!NOTE]\n> This repo is mirrored from [opral/monorepo](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js). Use this mirrored repo as the issue tracker."
+          if [ -f README.md ]; then
+            if ! grep -q "The repo is mirrored from .*paraglide" README.md; then
+              tmpfile=$(mktemp)
+              printf "%b\n\n" "$NOTE" > "$tmpfile"
+              cat README.md >> "$tmpfile"
+              mv "$tmpfile" README.md
+            fi
+          else
+            printf "%b\n" "$NOTE" > README.md
+          fi
+
+      - name: Push to inlang-paraglide-js mirror
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.MIRROR_PAT }}
+        with:
+          source-directory: .mirror-paraglide-js
+          destination-github-username: opral
+          destination-repository-name: inlang-paraglide-js
+          target-branch: main
+          user-email: dev@opral.com
+          user-name: opral-bot

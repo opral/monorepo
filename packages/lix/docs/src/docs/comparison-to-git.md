@@ -1,140 +1,95 @@
 # Comparison to Git
 
-> [!INFO]
-> Lix is not a git replacement, nor is it designed for software engineering. The goal is to enable change-related workflows like CI/CD, open source, or AI agents in industries other than software engineering.
+**Lix is not a Git replacement.** It's designed for files other than source code and built to be embedded in applications.
 
-Traditional version control systems like Git are designed for text files and source code. While Git excels at tracking code, it falls short for structured data, binary formats, and embedded application use:
+The fundamental difference between Git and Lix:
+- **Git**: "line 5 changed"
+- **Lix**: "price changed from $10 to $12"
 
-| Aspect | Git | Lix |
-|--------|-----|-----|
-| **Change Granularity** | Line-based | Entity-based (semantic) |
-| **Data Understanding** | Opaque text | Format-aware via plugins |
-| **Query Interface** | CLI commands | SQL queries |
-| **Runtime** | Separate tool | Embedded JavaScript SDK |
-| **Persistence** | `.git` directory | Portable `.lix` blob (SQLite) |
-| **Primary Use Case** | Source code | Structured data + AI agents |
+Git tracks text line-by-line. Lix is schema-aware - it understands data structure. This means tracking specific fields (price, email, status) instead of arbitrary line numbers.
 
-## Why Git Falls Short for Structured Data
+| Git | Lix |
+| :--- | :--- |
+| Line-based diffs | Schema-aware change tracking |
+| CLI tool | Embeddable SDK |
+| Text files | Any file format via plugins |
 
-**Line-by-line diffing loses semantic meaning:**
-Git sees line changes without understanding the data structure. In JSON, CSV, or databases, this makes it hard to track *what* actually changed semantically.
+## When to Use Git vs Lix
 
-**No support for binary formats:**
-Excel, design files, and PDFs are opaque blobs to Git—you can't query "what changed in cell C45?"
+**Use Git for source code.** Git is purpose-built for software engineering and developer workflows.
 
-**Not designed to run inside applications:**
-Git is a CLI tool, not an SDK. There's no way to embed Git in a browser app, query change history with SQL, or build custom workflows programmatically.
+**Use Lix for everything else.** Applications that need change control for structured data, non-code files, or embedded change control.
 
-## What Makes Lix Different
+## Key Differences
 
-**1. Entity-Level Change Tracking**
+### 1. Schema-Aware Change Tracking
 
-Lix tracks changes at an [entity level](/docs/data-model), not text lines. This makes Lix semantically aware of *what* changes:
+**Git** tracks changes line-by-line without understanding data structure. A JSON property change appears as "line 5 modified" with no semantic context.
 
-- **JSON**: Each property path is an entity (`/sku_124/price`)
-- **CSV**: Each row is an entity
-- **Markdown**: Paragraphs, headings, code blocks are entities
+**Lix** is schema-aware. It can track:
+- **JSON**: Individual properties (`/product/price` changed from $10 to $12)
+- **CSV**: Specific cells or rows
+- **Excel**: Individual cells with row/column context
 
-This enables fine-grained diffs, precise commenting at the entity level, and smart merging when different entities on the same line change.
-
-**2. Embedded JavaScript SDK**
-
-Lix runs *inside* your application—in browsers, Node.js, or Web Workers. The portable `.lix` blob format (SQLite binary) can be stored anywhere:
-
-- Browser OPFS (persistent, non-blocking)
-- Node.js filesystem
-- Object storage (S3, GCS)
-- Database columns (Postgres bytea)
-- In-memory for tests
-
-**3. SQL Query Engine**
-
-Query changes programmatically instead of parsing CLI output:
+This enables:
+- **Precise diffs**: "price field changed from $10 to $12" instead of line numbers
+- **Granular queries**: SQL queries like "show all email changes in the last week"
+- **Smarter conflict resolution**: Schema-aware merging reduces conflicts
 
 ```typescript
-// Time-travel: query file state history
-const history = await lix.db
-  .selectFrom("file_state_history")
-  .where("file_id", "=", "catalog.json")
-  .orderBy("lixcol_depth", "asc")
+// Query history of a single JSON property
+const priceHistory = await lix.db
+  .selectFrom("state_history")
+  .innerJoin("change_author", "change_author.change_id", "state_history.change_id")
+  .innerJoin("account", "account.id", "change_author.account_id")
+  .where("entity_id", "=", "/sku_124/price")
+  .where("schema_key", "=", "plugin_json_pointer_value")
+  .orderBy("lixcol_depth", "asc") // depth 0 = current
+  .select([
+    "state_history.change_id",
+    "state_history.snapshot_content", // { value: 250 }
+    "account.display_name"
+  ])
   .execute();
+```
 
-// Attribution: who changed what in a file
-const changes = await lix.db
-  .selectFrom("change")
-  .innerJoin("account", "change.author_id", "account.id")
-  .where("change.file_id", "=", "catalog.json")
-  .where("change.entity_id", "=", "/sku_124/price")
+### 2. Plugin System for Any File Format
+
+**Git** treats binary files as opaque blobs. You can't query "what changed in cell C45?" for Excel or "which layer was modified?" for design files.
+
+**Lix** uses plugins to understand file formats. Each plugin defines:
+- What constitutes a trackable unit (a cell, a row, a JSON property)
+- How to detect changes between versions
+- How to reconstruct files from changes
+
+Plugins can handle JSON, CSV, Excel, PDFs, design files, or proprietary formats.
+
+### 3. Embeddable with SQL Queries
+
+**Git** is an external CLI tool. Integrating it into applications requires shelling out to commands and parsing text output.
+
+**Lix** is an embeddable JavaScript library that runs directly in your application:
+- **Runs anywhere**: Browsers, Node.js, edge functions, Web Workers
+- **SQL queries**: Query change history programmatically instead of parsing CLI output
+- **Portable storage**: `.lix` files (SQLite) can be stored in OPFS, S3, database columns, or in-memory
+
+```typescript
+// Time-travel: query file history from a specific commit
+const history = await lix.db
+  .selectFrom("file_history")
+  .where("path", "=", "/catalog.json")
+  .where("lixcol_root_commit_id", "=", versionCommit)
+  .orderBy("lixcol_depth", "asc")
   .execute();
 
 // Cross-version file comparison
 const diff = await lix.db
-  .selectFrom("file_state as v1")
-  .innerJoin("file_state as v2", "v1.file_id", "v2.file_id")
-  .where("v1.lixcol_version_id", "=", versionA)
-  .where("v2.lixcol_version_id", "=", versionB)
-  .where("v1.file_id", "=", "catalog.json")
+  .selectFrom("file_history as v1")
+  .innerJoin("file_history as v2", "v1.id", "v2.id")
+  .where("v1.lixcol_root_commit_id", "=", versionACommit)
+  .where("v2.lixcol_root_commit_id", "=", versionBCommit)
+  .where("v1.lixcol_depth", "=", 0)
+  .where("v2.lixcol_depth", "=", 0)
+  .select(["v1.path", "v1.data as versionAData", "v2.data as versionBData"])
   .execute();
 ```
-
-**4. Plugin System for Any Format**
-
-Plugins teach Lix to understand file formats by defining:
-- What constitutes an entity (a cell, a row, a JSON path)
-- How to detect changes between versions
-- How to serialize entities back to the original format
-
-Official plugins support JSON, CSV, and Markdown. Custom plugins can handle Excel, design files, or proprietary formats.
-
-**5. Built for AI Agents**
-
-Lix enables safe, auditable AI workflows:
-
-- **Sandboxed experimentation**: Agents work in isolated [versions](/docs/versions) without touching production
-- **Structured diffs**: Agents can query exactly what they changed and self-correct
-- **Human approval gates**: [Change proposals](/docs/change-proposals) require review before merging
-- **Full audit trails**: Every change is attributed to a specific agent or human with timestamps
-- **Parallel testing**: Run competing agents in separate versions, compare results, promote the winner
-
-**6. On-Demand State Materialization**
-
-Unlike Git's full snapshots, Lix stores only raw changes and materializes state on-demand:
-1. Collect reachable change sets from target commit
-2. Take union of all underlying changes
-3. Select latest change per entity
-
-This reduces storage footprint while maintaining fast query performance through internal caching.
-
-## Git vs Lix (real diff output)
-
-Git shows line replacements, which is noisy for structured data:
-
-```diff
-{
-  "sku_123": { "price": 100, "name": "Red Chair" },
--  "sku_124": { "price": 200, "name": "Blue Sofa" }
-+  "sku_124": { "price": 250, "name": "Blue Sofa" }
-}
-```
-
-Why this hurts:
-- Hard to query: you can't easily answer "who changed `price` on `sku_124`?"—it's just line churn.
-- Merge pain: splitting JSON across lines creates frequent conflicts when multiple editors touch nearby fields.
-- No semantics: Git cannot tell if the line move is a rename, a deletion, or just reformatting.
-
-Lix diff rows are structured (real shape from `selectVersionDiff` / `selectWorkingDiff` with snapshots joined from the `change` table). The built-in JSON plugin emits one entity per JSON Pointer, so a price change is reported like this:
-
-```json
-{
-  "entity_id": "/sku_124/price",
-  "schema_key": "plugin_json_pointer_value",
-  "file_id": "catalog.json",
-  "status": "modified",
-  "before_change_id": "chg_price_200",
-  "after_change_id": "chg_price_250",
-  "before_snapshot": { "path": "/sku_124/price", "value": 200 },
-  "after_snapshot": { "path": "/sku_124/price", "value": 250 }
-}
-```
-
-Because Lix diffs carry entity IDs, schema keys, and before/after snapshots, review UIs can highlight just the changed field and keep JSON valid, instead of showing raw line noise.

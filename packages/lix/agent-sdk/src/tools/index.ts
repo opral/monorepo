@@ -1,5 +1,8 @@
 import type { Lix } from "@lix-js/sdk";
-import { createReadFileTool } from "./read-file.js";
+import {
+	createReadFileByPathTool,
+	createReadFileByIdTool,
+} from "./read-file.js";
 import { createListFilesTool } from "./list-files.js";
 import { createSqlSelectTool } from "./sql-select.js";
 import { createSqlIntrospectSchemaTool } from "./sql-introspect-schema.js";
@@ -10,7 +13,8 @@ import { createExecuteJavascriptTool } from "./execute-javascript.js";
 export function createAgentToolSet(args: { lix: Lix }) {
 	const { lix } = args;
 	return {
-		read_file: createReadFileTool({ lix }),
+		read_file_by_path: createReadFileByPathTool({ lix }),
+		read_file_by_id: createReadFileByIdTool({ lix }),
 		list_files: createListFilesTool({ lix }),
 		sql_select: createSqlSelectTool({ lix }),
 		sql_introspect_schema: createSqlIntrospectSchemaTool({ lix }),

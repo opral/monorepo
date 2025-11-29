@@ -364,9 +364,9 @@ function LandingPage() {
   const howItWorksSteps = [
     {
       number: "1",
-      title: "Create a lix with the plugins",
+      title: "Open a lix with plugins",
       description:
-        "Lix becomes file format-aware via plugins (`.json`, `.xlsx`, etc.). Otherwise, everything is just a blob.",
+        "Plugins (`.json`, `.xlsx`, etc.) make lix file-format aware. The environment can be swapped for persistence.",
       offsetClass: "",
     },
     {
@@ -644,7 +644,7 @@ function LandingPage() {
                   <code>
                     <span className="text-indigo-600">import</span>{" "}
                     <span className="text-gray-900">
-                      {"{ openLix, selectWorkingDiff, newLixFile }"}
+                      {"{ openLix, selectWorkingDiff, InMemoryEnvironment }"}
                     </span>{" "}
                     <span className="text-indigo-600">from</span>{" "}
                     <span className="text-amber-600">"@lix-js/sdk";</span>
@@ -659,7 +659,9 @@ function LandingPage() {
                     </span>
                     <br />
                     <br />
-                    <span className="text-gray-500">// 1) Create a lix</span>
+                    <span className="text-gray-500">
+                      // 1) Create an in-memory lix
+                    </span>
                     <br />
                     <span className="text-indigo-600">const</span>{" "}
                     <span className="text-sky-700">lix</span>{" "}
@@ -668,6 +670,13 @@ function LandingPage() {
                     <span className="text-sky-700">openLix</span>
                     <span className="text-gray-900">(</span>
                     <span className="text-gray-900">{"{"}</span>
+                    <br />
+                    {"  "}
+                    <span className="text-sky-700">environment</span>
+                    <span className="text-gray-900">:</span>{" "}
+                    <span className="text-indigo-600">new</span>{" "}
+                    <span className="text-sky-700">InMemoryEnvironment</span>
+                    <span className="text-gray-900">(),</span>
                     <br />
                     {"  "}
                     <span className="text-sky-700">providePlugins</span>

@@ -3,6 +3,10 @@ import { defineConfig } from "@rspress/core";
 import { pluginLlms } from "@rspress/plugin-llms";
 import { syncReactUtilsReadmePlugin } from "./rspress-plugins/sync-react-utils-readme";
 import {
+  syncPluginReadmesPlugin,
+  generatePluginsSidebar,
+} from "./rspress-plugins/sync-plugin-readmes";
+import {
   generateApiDocs,
   generateApiSidebar,
 } from "./rspress-plugins/typedoc-plugin";
@@ -53,6 +57,7 @@ export default defineConfig({
     mdxRs: false,
     globalComponents: [
       path.join(__dirname, "src/docs/components/InteractiveExampleCard.tsx"),
+      path.join(__dirname, "src/docs/components/PluginMetadataCard.tsx"),
       mermaidComponentPath,
     ],
     remarkPlugins: [remarkMermaid],
@@ -64,6 +69,10 @@ export default defineConfig({
     },
     tools: {
       rspack: {
+        optimization: {
+          // Avoid scope-hoisting collisions between the TypeBox Promise helper and the global Promise.
+          concatenateModules: false,
+        },
         module: {
           rules: [
             {
@@ -88,11 +97,13 @@ export default defineConfig({
       siteUrl: "https://lix.dev",
     }),
     syncReactUtilsReadmePlugin(),
+    syncPluginReadmesPlugin(),
   ],
   themeConfig: {
     darkMode: false,
     nav: [
       { text: "Docs", link: "/docs/what-is-lix" },
+      { text: "Plugins", link: "/plugins/" },
       { text: "API Reference", link: "/docs/api/" },
     ],
     sidebar: {
@@ -110,8 +121,9 @@ export default defineConfig({
           text: "Essentials",
           items: [
             { text: "How Lix Works", link: "/docs/how-lix-works" },
-            { text: "Querying Changes", link: "/docs/querying-changes" },
-            { text: "Data Model", link: "/docs/data-model" },
+            { text: "SQL Interface", link: "/docs/sql-interface" },
+            { text: "Filesystem", link: "/docs/filesystem" },
+            { text: "Schemas", link: "/docs/schemas" },
             { text: "Plugins", link: "/docs/plugins" },
             { text: "Persistence", link: "/docs/persistence" },
           ],
@@ -142,6 +154,7 @@ export default defineConfig({
           ],
         },
       ],
+      "/plugins/": generatePluginsSidebar(path.join(__dirname, "src")),
       "/docs/api/": generateApiSidebar(path.join(__dirname, "src/docs")),
     },
     socialLinks: [

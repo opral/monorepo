@@ -1,19 +1,18 @@
 # What is Lix?
 
-Lix is a change control system that enables Git-like features for applications and AI agents such as [Change Proposals](/docs/change-proposals), [Versions](/docs/versions) (branching), [History](/docs/history), and [Blame](/docs/attribution).
+Lix is an embeddable change control system that enables Git-like features such as [history](/docs/history), [versions](/docs/versions) (branches), [diffs](/docs/diffs), or [blame](/docs/attribution) for any file format.
 
 What makes lix unique:
 
-- 🌐 Embeddable - Works is in the Browser, Node.js, etc.
-- 📄 Supports any data format (Excel, JSON, CSV, etc.)
-- 🛠️ SDK-first - Designed for applications
+- **Supports any file format** - Like JSON, CSV, Excel etc. via plugins.
+- **Embedded** - Runs as part of your application with no separate database, server, or process.
+- **SDK-first** - Programmatic APIs for versioning, change propsoals, diffs, history, and merge workflows.
+
+_Read more on how Lix's change control compares to traditional version control systems like Git [here](/docs/comparison-to-git)._
 
 ## Use Cases
 
-- AI agent safety rails: agents propose edits instead of applying directly; humans review diffs and restore if needed.
-- Collaborative editing in apps: multi-user workflows with change proposals, conversations, and history/blame for structured data.
-- Approval workflows: branch/merge-style reviews for non-code data before changes go live.
-- Auditable data changes: track who changed what and when with versioned history and diff views.
-- Product experiments and variants: spin up versions of data models or content, compare diffs, and merge back selectively.
+- **AI Agent sandboxing:** Agents propose changes, humans review and approve before applying.
+- **Applications with change control:** Branch/merge-style reviews, audit trails, and versioning for structured data.
 
 ![Lix features](/lix-features.svg)

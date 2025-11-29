@@ -14,7 +14,7 @@ async function getActiveVersionId(lix: Awaited<ReturnType<typeof openLix>>) {
 	return active.version_id as unknown as string;
 }
 
-describe("readFile / createReadFileTool", () => {
+describe("readFile / createReadFileByPathTool / createReadFileByIdTool", () => {
 	test("reads a small UTF-8 file by path (readFile)", async () => {
 		const lix = await openLix({});
 		const versionId = await getActiveVersionId(lix);
