@@ -1,4 +1,4 @@
-name: Mirror flashtype (splitsh-lite)
+name: Mirror flashtype (copy)
 
 on:
   push:
@@ -18,39 +18,38 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure git identity
-        run: |
-          git config user.name "opral-bot"
-          git config user.email "dev@opral.com"
-
-      - name: Split and push flashtype
-        env:
-          PREFIX: packages/flashtype
-          REMOTE_REPO: opral/flashtype
-          BRANCH: main
-          MIRROR_PAT: ${{ secrets.MIRROR_PAT }}
+      - name: Prepare mirror contents with note
         run: |
           set -euo pipefail
 
-          git subtree split --prefix="$PREFIX" -b flashtype-split || git branch -f flashtype-split
+          SRC="packages/flashtype"
+          WORKDIR=$(mktemp -d)
 
-          WORKTREE_DIR=$(mktemp -d)
-          git worktree add "$WORKTREE_DIR" flashtype-split
-          pushd "$WORKTREE_DIR" >/dev/null
+          rsync -av --delete "$SRC"/ "$WORKDIR"/
 
-          printf "%s\n" "> [!NOTE]" "> The repo is mirrored from [opral/monorepo/tree/main/packages/flashtype](https://github.com/opral/monorepo/tree/main/packages/flashtype). This repo serves as an issue tracker." > README.md.new
-          printf "\n" >> README.md.new
+          cd "$WORKDIR"
+          NOTE="> [!NOTE]\n> The repo is mirrored from [opral/monorepo/tree/main/packages/flashtype](https://github.com/opral/monorepo/tree/main/packages/flashtype). This repo serves as an issue tracker."
           if [ -f README.md ]; then
-            cat README.md >> README.md.new
+            if ! grep -q "The repo is mirrored from .*flashtype" README.md; then
+              tmpfile=$(mktemp)
+              printf "%b\n\n" "$NOTE" > "$tmpfile"
+              cat README.md >> "$tmpfile"
+              mv "$tmpfile" README.md
+            fi
+          else
+            printf "%b\n" "$NOTE" > README.md
           fi
-          mv README.md.new README.md
 
-          git add README.md
-          git commit -m "chore: add mirror note" || true
+          echo "WORKDIR=$WORKDIR" >> "$GITHUB_ENV"
 
-          git push --force "https://x-access-token:${MIRROR_PAT}@github.com/${REMOTE_REPO}.git" HEAD:"${BRANCH}"
-
-          popd >/dev/null
-          git worktree remove "$WORKTREE_DIR"
-          git branch -D flashtype-split || true
-        shell: bash
+      - name: Push to flashtype mirror
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.MIRROR_PAT }}
+        with:
+          source-directory: ${{ env.WORKDIR }}
+          destination-github-username: opral
+          destination-repository-name: flashtype
+          target-branch: main
+          user-email: dev@opral.com
+          user-name: opral-bot
