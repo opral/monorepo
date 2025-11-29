@@ -31,7 +31,7 @@ jobs:
           rsync -av --delete "$SRC"/ "$WORKDIR"/
 
           cd "$WORKDIR"
-          NOTE="> [!NOTE]\n> The repo is mirrored from [opral/monorepo/packages/flashtype](https://github.com/opral/monorepo/tree/main/packages/flashtype). This repo serves as an issue tracker."
+          NOTE="> [!NOTE]\n> This repo is mirrored from [opral/monorepo](https://github.com/opral/monorepo/tree/main/packages/flashtype). Use this mirrored repo as the issue tracker."
           if [ -f README.md ]; then
             if ! grep -q "The repo is mirrored from .*flashtype" README.md; then
               tmpfile=$(mktemp)

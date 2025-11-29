@@ -38,7 +38,7 @@ jobs:
           fi
 
           cd "$WORKDIR"
-          NOTE="> [!NOTE]\n> The repo is mirrored from [opral/monorepo](https://github.com/opral/monorepo). This repo serves as an issue tracker."
+          NOTE="> [!NOTE]\n> This repo is mirrored from [opral/monorepo](https://github.com/opral/monorepo/tree/main/inlang/packages/sdk). Use this mirrored repo as the issue tracker."
           if [ -f README.md ]; then
             if ! grep -q "The repo is mirrored from .*monorepo" README.md; then
               tmpfile=$(mktemp)
