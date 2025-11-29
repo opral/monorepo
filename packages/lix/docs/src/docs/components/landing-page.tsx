@@ -310,12 +310,429 @@ const PackageInstaller = () => {
 };
 
 /**
+ * JavaScript icon for code tabs.
+ */
+const JsIcon = ({ className = "" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    className={className}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect width="24" height="24" fill="#F7DF1E" rx="2" />
+    <path
+      d="M6 18l2-12h4l2 12h-2l-1-4h-4l-1 4H6z" // Placeholder path if text doesn't work well, but let's try text
+      fill="none" 
+    />
+    <text x="12" y="17" textAnchor="middle" fontSize="11" fontWeight="bold" fill="black" fontFamily="sans-serif">JS</text>
+  </svg>
+);
+
+/**
+ * Python icon for code tabs.
+ */
+const PythonIcon = ({ className = "" }) => (
+  <svg
+    viewBox="16 16 32 32"
+    className={className}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill="url(#python__a)"
+      d="M31.885 16c-8.124 0-7.617 3.523-7.617 3.523l.01 3.65h7.752v1.095H21.197S16 23.678 16 31.876c0 8.196 4.537 7.906 4.537 7.906h2.708v-3.804s-.146-4.537 4.465-4.537h7.688s4.32.07 4.32-4.175v-7.019S40.374 16 31.885 16zm-4.275 2.454a1.394 1.394 0 1 1 0 2.79 1.393 1.393 0 0 1-1.395-1.395c0-.771.624-1.395 1.395-1.395z"
+    />
+    <path
+      fill="url(#python__b)"
+      d="M32.115 47.833c8.124 0 7.617-3.523 7.617-3.523l-.01-3.65H31.97v-1.095h10.832S48 40.155 48 31.958c0-8.197-4.537-7.906-4.537-7.906h-2.708v3.803s.146 4.537-4.465 4.537h-7.688s-4.32-.07-4.32 4.175v7.019s-.656 4.247 7.833 4.247zm4.275-2.454a1.393 1.393 0 0 1-1.395-1.395 1.394 1.394 0 1 1 1.395 1.395z"
+    />
+    <defs>
+      <linearGradient
+        id="python__a"
+        x1="19.075"
+        x2="34.898"
+        y1="18.782"
+        y2="34.658"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#387EB8" />
+        <stop offset="1" stopColor="#366994" />
+      </linearGradient>
+      <linearGradient
+        id="python__b"
+        x1="28.809"
+        x2="45.803"
+        y1="28.882"
+        y2="45.163"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#FFE052" />
+        <stop offset="1" stopColor="#FFC331" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+/**
+ * Rust icon for code tabs.
+ */
+const RustIcon = ({ className = "" }) => (
+  <svg
+    viewBox="0 0 224 224"
+    className={className}
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill="#000"
+      d="M218.46 109.358l-9.062-5.614c-.076-.882-.162-1.762-.258-2.642l7.803-7.265a3.107 3.107 0 00.933-2.89 3.093 3.093 0 00-1.967-2.312l-9.97-3.715c-.25-.863-.512-1.72-.781-2.58l6.214-8.628a3.114 3.114 0 00-.592-4.263 3.134 3.134 0 00-1.431-.637l-10.507-1.709a80.869 80.869 0 00-1.263-2.353l4.417-9.7a3.12 3.12 0 00-.243-3.035 3.106 3.106 0 00-2.705-1.385l-10.671.372a85.152 85.152 0 00-1.685-2.044l2.456-10.381a3.125 3.125 0 00-3.762-3.763l-10.384 2.456a88.996 88.996 0 00-2.047-1.684l.373-10.671a3.11 3.11 0 00-1.385-2.704 3.127 3.127 0 00-3.034-.246l-9.681 4.417c-.782-.429-1.567-.854-2.353-1.265l-1.713-10.506a3.098 3.098 0 00-1.887-2.373 3.108 3.108 0 00-3.014.35l-8.628 6.213c-.85-.27-1.703-.53-2.56-.778l-3.716-9.97a3.111 3.111 0 00-2.311-1.97 3.134 3.134 0 00-2.89.933l-7.266 7.802a93.746 93.746 0 00-2.643-.258l-5.614-9.082A3.125 3.125 0 00111.97 4c-1.09 0-2.085.56-2.642 1.478l-5.615 9.081a93.32 93.32 0 00-2.642.259l-7.266-7.802a3.13 3.13 0 00-2.89-.933 3.106 3.106 0 00-2.312 1.97l-3.715 9.97c-.857.247-1.71.506-2.56.778L73.7 12.588a3.101 3.101 0 00-3.014-.35A3.127 3.127 0 0068.8 14.61l-1.713 10.506c-.79.41-1.575.832-2.353 1.265l-9.681-4.417a3.125 3.125 0 00-4.42 2.95l.372 10.67c-.69.553-1.373 1.115-2.048 1.685l-10.383-2.456a3.143 3.143 0 00-2.93.832 3.124 3.124 0 00-.833 2.93l2.436 10.383a93.897 93.897 0 00-1.68 2.043l-10.672-.372a3.138 3.138 0 00-2.704 1.385 3.126 3.126 0 00-.246 3.035l4.418 9.7c-.43.779-.855 1.563-1.266 2.353l-10.507 1.71a3.097 3.097 0 00-2.373 1.886 3.117 3.117 0 00.35 3.013l6.214 8.628a89.12 89.12 0 00-.78 2.58l-9.97 3.715a3.117 3.117 0 00-1.035 5.202l7.803 7.265c-.098.879-.184 1.76-.258 2.642l-9.062 5.614A3.122 3.122 0 004 112.021c0 1.092.56 2.084 1.478 2.642l9.062 5.614c.074.882.16 1.762.258 2.642l-7.803 7.265a3.117 3.117 0 001.034 5.201l9.97 3.716a110 110 0 00.78 2.58l-6.212 8.627a3.112 3.112 0 00.6 4.27c.419.33.916.547 1.443.63l10.507 1.709c.407.792.83 1.576 1.265 2.353l-4.417 9.68a3.126 3.126 0 002.95 4.42l10.65-.374c.553.69 1.115 1.372 1.685 2.047l-2.435 10.383a3.09 3.09 0 00.831 2.91 3.117 3.117 0 002.931.83l10.384-2.436a82.268 82.268 0 002.047 1.68l-.371 10.671a3.11 3.11 0 001.385 2.704 3.125 3.125 0 003.034.241l9.681-4.416c.779.432 1.563.854 2.353 1.265l1.713 10.505a3.147 3.147 0 001.887 2.395 3.111 3.111 0 003.014-.349l8.628-6.213c.853.271 1.71.535 2.58.783l3.716 9.969a3.112 3.112 0 002.312 1.967 3.112 3.112 0 002.89-.933l7.266-7.802c.877.101 1.761.186 2.642.264l5.615 9.061a3.12 3.12 0 002.642 1.478 3.165 3.165 0 002.663-1.478l5.614-9.061c.884-.078 1.765-.163 2.643-.264l7.265 7.802a3.106 3.106 0 002.89.933 3.105 3.105 0 002.312-1.967l3.716-9.969c.863-.248 1.719-.512 2.58-.783l8.629 6.213a3.12 3.12 0 004.9-2.045l1.713-10.506c.793-.411 1.577-.838 2.353-1.265l9.681 4.416a3.13 3.13 0 003.035-.241 3.126 3.126 0 001.385-2.704l-.372-10.671a81.794 81.794 0 002.046-1.68l10.383 2.436a3.123 3.123 0 003.763-3.74l-2.436-10.382a84.588 84.588 0 001.68-2.048l10.672.374a3.104 3.104 0 002.704-1.385 3.118 3.118 0 00.244-3.035l-4.417-9.68c.43-.779.852-1.563 1.263-2.353l10.507-1.709a3.08 3.08 0 002.373-1.886 3.11 3.11 0 00-.35-3.014l-6.214-8.627c.272-.857.532-1.717.781-2.58l9.97-3.716a3.109 3.109 0 001.967-2.311 3.107 3.107 0 00-.933-2.89l-7.803-7.265c.096-.88.182-1.761.258-2.642l9.062-5.614a3.11 3.11 0 001.478-2.642 3.157 3.157 0 00-1.476-2.663h-.064zm-60.687 75.337c-3.468-.747-5.656-4.169-4.913-7.637a6.412 6.412 0 017.617-4.933c3.468.741 5.676 4.169 4.933 7.637a6.414 6.414 0 01-7.617 4.933h-.02zm-3.076-20.847c-3.158-.677-6.275 1.334-6.936 4.5l-3.22 15.026c-9.929 4.5-21.055 7.018-32.614 7.018-11.89 0-23.12-2.622-33.234-7.328l-3.22-15.026c-.677-3.158-3.778-5.18-6.936-4.499l-13.273 2.848a80.222 80.222 0 01-6.853-8.091h64.61c.731 0 1.218-.132 1.218-.797v-22.91c0-.665-.487-.797-1.218-.797H94.133v-14.469h20.415c1.864 0 9.97.533 12.551 10.898.811 3.179 2.601 13.54 3.818 16.863 1.214 3.715 6.152 11.146 11.415 11.146h32.202c.365 0 .755-.041 1.166-.116a80.56 80.56 0 01-7.307 8.587l-13.583-2.911-.113.058zm-89.38 20.537a6.407 6.407 0 01-7.617-4.933c-.74-3.467 1.462-6.894 4.934-7.637a6.417 6.417 0 017.617 4.933c.74 3.468-1.464 6.894-4.934 7.637zm-24.564-99.28a6.438 6.438 0 01-3.261 8.484c-3.241 1.438-7.019-.025-8.464-3.261-1.445-3.237.025-7.039 3.262-8.483a6.416 6.416 0 018.463 3.26zM33.22 102.94l13.83-6.15c2.952-1.311 4.294-4.769 2.972-7.72l-2.848-6.44H58.36v50.362h-22.5a79.158 79.158 0 01-3.014-21.672c0-2.869.155-5.697.452-8.483l-.08.103zm60.687-4.892v-14.86h26.629c1.376 0 9.722 1.59 9.722 7.822 0 5.18-6.399 7.038-11.663 7.038h-24.77.082zm96.811 13.375c0 1.973-.072 3.922-.216 5.862h-8.113c-.811 0-1.137.532-1.137 1.327v3.715c0 8.752-4.934 10.671-9.268 11.146-4.129.464-8.691-1.726-9.248-4.252-2.436-13.684-6.482-16.595-12.881-21.672 7.948-5.036 16.204-12.487 16.204-22.498 0-10.753-7.369-17.523-12.385-20.847-7.059-4.644-14.862-5.572-16.968-5.572H52.899c11.374-12.673 26.835-21.673 44.174-24.975l9.887 10.361a5.849 5.849 0 008.278.19l11.064-10.568c23.119 4.314 42.729 18.721 54.082 38.598l-7.576 17.09c-1.306 2.951.027 6.419 2.973 7.72l14.573 6.48c.255 2.607.383 5.224.384 7.843l-.021.052zM106.912 24.94a6.398 6.398 0 019.062.209 6.437 6.437 0 01-.213 9.082 6.396 6.396 0 01-9.062-.21 6.436 6.436 0 01.213-9.083v.002zm75.137 60.476a6.402 6.402 0 018.463-3.26 6.425 6.425 0 013.261 8.482 6.402 6.402 0 01-8.463 3.261 6.425 6.425 0 01-3.261-8.483z"
+    />
+  </svg>
+);
+
+/**
+ * PostgresSQL icon for code tabs.
+ */
+const PostgresIcon = ({ className = "" }) => (
+  <svg
+    xmlSpace="preserve"
+    viewBox="0 0 432.071 445.383"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g style={{ fillRule: "nonzero", clipRule: "nonzero", fill: "none", stroke: "#fff", strokeWidth: "12.4651", strokeLinecap: "round", strokeLinejoin: "round", strokeMiterlimit: 4 }}>
+      <path
+        d="M323.205 324.227c2.833-23.601 1.984-27.062 19.563-23.239l4.463.392c13.517.615 31.199-2.174 41.587-7 22.362-10.376 35.622-27.7 13.572-23.148-50.297 10.376-53.755-6.655-53.755-6.655 53.111-78.803 75.313-178.836 56.149-203.322-52.27-66.789-142.748-35.206-144.262-34.386l-.482.089c-9.938-2.062-21.06-3.294-33.554-3.496-22.761-.374-40.032 5.967-53.133 15.904 0 0-161.408-66.498-153.899 83.628 1.597 31.936 45.777 241.655 98.47 178.31 19.259-23.163 37.871-42.748 37.871-42.748 9.242 6.14 20.307 9.272 31.912 8.147l.897-.765c-.281 2.876-.157 5.689.359 9.019-13.572 15.167-9.584 17.83-36.723 23.416-27.457 5.659-11.326 15.734-.797 18.367 12.768 3.193 42.305 7.716 62.268-20.224l-.795 3.188c5.325 4.26 4.965 30.619 5.72 49.452.756 18.834 2.017 36.409 5.856 46.771 3.839 10.36 8.369 37.05 44.036 29.406 29.809-6.388 52.6-15.582 54.677-101.107"
+        style={{ fill: "#000", stroke: "#000", strokeWidth: "37.3953", strokeLinecap: "butt", strokeLinejoin: "miter" }}
+      />
+      <path
+        d="M402.395 271.23c-50.302 10.376-53.76-6.655-53.76-6.655 53.111-78.808 75.313-178.843 56.153-203.326-52.27-66.785-142.752-35.2-144.262-34.38l-.486.087c-9.938-2.063-21.06-3.292-33.56-3.496-22.761-.373-40.026 5.967-53.127 15.902 0 0-161.411-66.495-153.904 83.63 1.597 31.938 45.776 241.657 98.471 178.312 19.26-23.163 37.869-42.748 37.869-42.748 9.243 6.14 20.308 9.272 31.908 8.147l.901-.765c-.28 2.876-.152 5.689.361 9.019-13.575 15.167-9.586 17.83-36.723 23.416-27.459 5.659-11.328 15.734-.796 18.367 12.768 3.193 42.307 7.716 62.266-20.224l-.796 3.188c5.319 4.26 9.054 27.711 8.428 48.969-.626 21.259-1.044 35.854 3.147 47.254 4.191 11.4 8.368 37.05 44.042 29.406 29.809-6.388 45.256-22.942 47.405-50.555 1.525-19.631 4.976-16.729 5.194-34.28l2.768-8.309c3.192-26.611.507-35.196 18.872-31.203l4.463.392c13.517.615 31.208-2.174 41.591-7 22.358-10.376 35.618-27.7 13.573-23.148z"
+        style={{ fill: "#336791", stroke: "none" }}
+      />
+      <path
+        d="M215.866 286.484c-1.385 49.516.348 99.377 5.193 111.495 4.848 12.118 15.223 35.688 50.9 28.045 29.806-6.39 40.651-18.756 45.357-46.051 3.466-20.082 10.148-75.854 11.005-87.281M173.104 38.256S11.583-27.76 19.092 122.365c1.597 31.938 45.779 241.664 98.473 178.316 19.256-23.166 36.671-41.335 36.671-41.335M260.349 26.207c-5.591 1.753 89.848-34.889 144.087 34.417 19.159 24.484-3.043 124.519-56.153 203.329"
+      />
+      <path
+        d="M348.282 263.953s3.461 17.036 53.764 6.653c22.04-4.552 8.776 12.774-13.577 23.155-18.345 8.514-59.474 10.696-60.146-1.069-1.729-30.355 21.647-21.133 19.96-28.739-1.525-6.85-11.979-13.573-18.894-30.338-6.037-14.633-82.796-126.849 21.287-110.183 3.813-.789-27.146-99.002-124.553-100.599-97.385-1.597-94.19 119.762-94.19 119.762"
+        style={{ strokeLinejoin: "bevel" }}
+      />
+      <path d="M188.604 274.334c-13.577 15.166-9.584 17.829-36.723 23.417-27.459 5.66-11.326 15.733-.797 18.365 12.768 3.195 42.307 7.718 62.266-20.229 6.078-8.509-.036-22.086-8.385-25.547-4.034-1.671-9.428-3.765-16.361 3.994z" />
+      <path d="M187.715 274.069c-1.368-8.917 2.93-19.528 7.536-31.942 6.922-18.626 22.893-37.255 10.117-96.339-9.523-44.029-73.396-9.163-73.436-3.193-.039 5.968 2.889 30.26-1.067 58.548-5.162 36.913 23.488 68.132 56.479 64.938" />
+      <path
+        d="M172.517 141.7c-.288 2.039 3.733 7.48 8.976 8.207 5.234.73 9.714-3.522 9.998-5.559.284-2.039-3.732-4.285-8.977-5.015-5.237-.731-9.719.333-9.996 2.367z"
+        style={{ fill: "#fff", strokeWidth: "4.155", strokeLinecap: "butt", strokeLinejoin: "miter" }}
+      />
+      <path
+        d="M331.941 137.543c.284 2.039-3.732 7.48-8.976 8.207-5.238.73-9.718-3.522-10.005-5.559-.277-2.039 3.74-4.285 8.979-5.015 5.239-.73 9.718.333 10.002 2.368z"
+        style={{ fill: "#fff", strokeWidth: "2.0775", strokeLinecap: "butt", strokeLinejoin: "miter" }}
+      />
+      <path d="M350.676 123.432c.863 15.994-3.445 26.888-3.988 43.914-.804 24.748 11.799 53.074-7.191 81.435" />
+    </g>
+  </svg>
+);
+
+/**
  * Landing page for the Lix documentation site.
  *
  * @example
  * <LandingPage />
  */
 function LandingPage() {
+  const [activeFeature, setActiveFeature] = useState("filesystem");
+
+  const getFeatureCode = (featureId: string) => {
+    switch (featureId) {
+      case "filesystem":
+        return (
+          <>
+            <span className="text-gray-500">// 2) Write a file via SQL</span>
+            <br />
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">lix</span>
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">db</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">insertInto</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"file"</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">values</span>
+            <span className="text-gray-900">({"{"}</span>
+            <br />
+            {"    "}
+            <span className="text-sky-700">path</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-amber-600">"/config.json"</span>
+            <span className="text-gray-900">,</span>
+            <br />
+            {"    "}
+            <span className="text-sky-700">data</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-indigo-600">new</span>{" "}
+            <span className="text-sky-700">TextEncoder</span>
+            <span className="text-gray-900">().</span>
+            <span className="text-sky-700">encode</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-sky-700">JSON</span>
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">stringify</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-gray-900">{"{"}</span>{" "}
+            <span className="text-sky-700">theme</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-amber-600">"light"</span>{" "}
+            <span className="text-gray-900">{"}"}</span>
+            <span className="text-gray-900">)</span>
+            <span className="text-gray-900">),</span>
+            <br />
+            <span className="text-gray-900">{"  })"}</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">execute</span>
+            <span className="text-gray-900">();</span>
+            <br />
+            <br />
+            <span className="text-gray-500">// 3) Update a file</span>
+            <br />
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">lix</span>
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">db</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">updateTable</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"file"</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">set</span>
+            <span className="text-gray-900">({"{"}</span>{" "}
+            <span className="text-sky-700">data</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-amber-600">"..."</span>{" "}
+            <span className="text-gray-900">{"}"})</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">where</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"path"</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-amber-600">"="</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-amber-600">"/config.json"</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">execute</span>
+            <span className="text-gray-900">();</span>
+          </>
+        );
+      case "history":
+        return (
+          <>
+            <span className="text-gray-500">
+              // Query file history at a specific checkpoint
+            </span>
+            <br />
+            <span className="text-indigo-600">const</span>{" "}
+            <span className="text-sky-700">history</span>{" "}
+            <span className="text-indigo-600">=</span>{" "}
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">lix</span>
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">db</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">selectFrom</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"file_history"</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">selectAll</span>
+            <span className="text-gray-900">()</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">where</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"path"</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-amber-600">"="</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-amber-600">"/config.json"</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">where</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"lixcol_commit_id"</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-amber-600">"="</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-sky-700">checkpoint</span>
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">id</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">execute</span>
+            <span className="text-gray-900">();</span>
+
+          </>
+        );
+      case "branching":
+        return (
+          <>
+            <span className="text-gray-500">
+              // Create a new version
+            </span>
+            <br />
+            <span className="text-indigo-600">const</span>{" "}
+            <span className="text-sky-700">v2</span>{" "}
+            <span className="text-indigo-600">=</span>{" "}
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">createVersion</span>
+            <span className="text-gray-900">({"{"}</span>
+            <br />
+            {"  "}
+            <span className="text-sky-700">lix</span>
+            <span className="text-gray-900">,</span>
+            <br />
+            {"  "}
+            <span className="text-sky-700">name</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-amber-600">"v2-draft"</span>
+            <span className="text-gray-900">,</span>
+            <br />
+            <span className="text-gray-900">{"});"}</span>
+            <br />
+            <br />
+            <span className="text-gray-500">
+              // Update file in the new version
+            </span>
+            <br />
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">lix</span>
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">db</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">updateTable</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"file_by_version"</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">set</span>
+            <span className="text-gray-900">({"{"}</span>{" "}
+            <span className="text-sky-700">data</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-amber-600">"..."</span>{" "}
+            <span className="text-gray-900">{"}"})</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">where</span>
+            <span className="text-gray-900">(</span>
+            <span className="text-amber-600">"lixcol_version_id"</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-amber-600">"="</span>
+            <span className="text-gray-900">,</span>{" "}
+            <span className="text-sky-700">v2</span>
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">id</span>
+            <span className="text-gray-900">)</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">execute</span>
+            <span className="text-gray-900">();</span>
+          </>
+        );
+      case "diffs":
+        return (
+          <>
+            <span className="text-gray-500">// Create versions</span>
+            <br />
+            <span className="text-indigo-600">const</span>{" "}
+            <span className="text-sky-700">v1</span>{" "}
+            <span className="text-indigo-600">=</span>{" "}
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">createVersion</span>
+            <span className="text-gray-900">({"{"}</span>{" "}
+            <span className="text-sky-700">name</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-amber-600">"v1"</span>{" "}
+            <span className="text-gray-900">{"}"})</span>
+            <br />
+            <span className="text-indigo-600">const</span>{" "}
+            <span className="text-sky-700">v2</span>{" "}
+            <span className="text-indigo-600">=</span>{" "}
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">createVersion</span>
+            <span className="text-gray-900">({"{"}</span>{" "}
+            <span className="text-sky-700">name</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-amber-600">"v2"</span>{" "}
+            <span className="text-gray-900">{"}"})</span>
+            <br />
+            <br />
+            <span className="text-gray-500">// Compare versions</span>
+            <br />
+            <span className="text-indigo-600">const</span>{" "}
+            <span className="text-sky-700">diff</span>{" "}
+            <span className="text-indigo-600">=</span>{" "}
+            <span className="text-indigo-600">await</span>{" "}
+            <span className="text-sky-700">selectVersionDiff</span>
+            <span className="text-gray-900">({"{"}</span>
+            <br />
+            {"  "}
+            <span className="text-sky-700">lix</span>
+            <span className="text-gray-900">,</span>
+            <br />
+            {"  "}
+            <span className="text-sky-700">source</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-sky-700">v1</span>
+            <span className="text-gray-900">,</span>
+            <br />
+            {"  "}
+            <span className="text-sky-700">target</span>
+            <span className="text-gray-900">:</span>{" "}
+            <span className="text-sky-700">v2</span>
+            <span className="text-gray-900">,</span>
+            <br />
+            <span className="text-gray-900">{"})"}</span>
+            <br />
+            {"  "}
+            <span className="text-gray-900">.</span>
+            <span className="text-sky-700">execute</span>
+            <span className="text-gray-900">();</span>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
   const buildShowcases = [
     {
       id: "flashtype",
@@ -358,30 +775,6 @@ function LandingPage() {
       creator: "Studio Alva",
       creatorRole: "Product studio",
       creatorInitials: "SA",
-    },
-  ];
-
-  const howItWorksSteps = [
-    {
-      number: "1",
-      title: "Open a lix with plugins",
-      description:
-        "Plugins (`.json`, `.xlsx`, etc.) make lix file-format aware. The environment can be swapped for persistence.",
-      offsetClass: "",
-    },
-    {
-      number: "2",
-      title: "Write a file into the lix",
-      description:
-        "Lix is powered by SQL under the hood. Writing a file, querying diffs, etc. happens all via SQL.",
-      offsetClass: "mt-10 sm:mt-12",
-    },
-    {
-      number: "3",
-      title: "Query changes, diffs, etc.",
-      description:
-        "Query working diffs, history, propose changes or merge similar to git, right in the browser.",
-      offsetClass: "mt-10 sm:mt-12",
     },
   ];
 
@@ -440,8 +833,8 @@ function LandingPage() {
 
             <p className="text-gray-600 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed mt-12">
               Lix is an embeddable change control system that enables Git-like
-              features such as history, versions (branches), diffs, or blame for
-              any file format.
+            features such as history, versions (branches), diffs, or blame for
+            any file format and application.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16  mt-8">
@@ -602,52 +995,186 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* How It Works */}
-        <section className="pt-6 pb-14 px-6 sm:px-12 md:px-16 bg-white">
+        {/* Primary Features */}
+        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                How lix works
+                Out of the box features
               </h2>
             </div>
-
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,260px)_1fr]">
-              <div className="flex flex-col justify-between gap-4">
-                {howItWorksSteps.map(
-                  ({ number, title, description, offsetClass }) => (
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,340px)_1fr]">
+              {/* Left: Features List */}
+              <div className="flex flex-col border-t border-gray-100">
+                {[
+                  {
+                    id: "filesystem",
+                    title: "Filesystem",
+                    description:
+                      "Store and manage files with SQL. Read, write, and organize files just like a traditional filesystem.",
+                    icon: (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "history",
+                    title: "History",
+                    description:
+                      "Track every operation, not just snapshots. Know exactly what changed, when, and by whom.",
+                    icon: (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "branching",
+                    title: "Versions (Branching)",
+                    description:
+                      "Create named versions and branches. Experiment safely without affecting the main state.",
+                    icon: (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 3v12"
+                        />
+                        <circle cx="18" cy="6" r="3" />
+                        <circle cx="6" cy="18" r="3" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M18 9a9 9 0 0 1-9 9"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    id: "diffs",
+                    title: "Diffs",
+                    description:
+                      "Compare any two points in time. See granular differences at the operation level.",
+                    icon: (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <line x1="12" y1="3" x2="12" y2="21" />
+                      </svg>
+                    ),
+                  },
+                ].map((feature) => (
+                  <button
+                    key={feature.id}
+                    onClick={() => setActiveFeature(feature.id)}
+                    className={`group flex gap-4 p-6 text-left transition-all rounded-xl hover:bg-gray-50 cursor-pointer ${
+                      activeFeature === feature.id
+                        ? "bg-gray-100"
+                        : "bg-white"
+                    }`}
+                  >
                     <div
-                      key={number}
-                      className={`flex flex-col gap-2 ${offsetClass}`}
+                      className={`flex-shrink-0 mt-1 ${
+                        activeFeature === feature.id
+                          ? "text-gray-900"
+                          : "text-gray-400 group-hover:text-gray-600"
+                      }`}
                     >
-                      <span className="text-sm font-semibold text-gray-500">
-                        Step {number}
-                      </span>
-                      <h3 className="text-base font-semibold text-gray-900">
-                        {title}
-                      </h3>
-                      <p className="text-sm text-gray-600">{description}</p>
+                      {feature.icon}
                     </div>
-                  ),
-                )}
+                    <div className="flex flex-col gap-2">
+                      <h3
+                        className={`text-lg font-semibold ${
+                          activeFeature === feature.id
+                            ? "text-gray-900"
+                            : "text-gray-900"
+                        }`}
+                      >
+                        {feature.title}
+                      </h3>
+                      <p className="text-base text-gray-600 leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+                <a
+                  href="/docs/what-is-lix"
+                  className="inline-flex items-center gap-2 p-6 text-[#0692B6] font-medium hover:text-[#047497] transition-colors"
+                >
+                  Explore all features <span aria-hidden>→</span>
+                </a>
               </div>
 
-              <div className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white">
-                <div className="flex items-center gap-2 rounded-t-2xl border-b border-gray-200 px-4 py-3 bg-gray-50">
-                  <span className="flex h-3 w-3 rounded-full bg-red-400" />
-                  <span className="flex h-3 w-3 rounded-full bg-yellow-300" />
-                  <span className="flex h-3 w-3 rounded-full bg-green-400" />
-                  <span className="ml-4 text-xs font-medium text-gray-500">
-                    example.ts
-                  </span>
+              {/* Right: Code Examples */}
+              <div className="relative min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white flex flex-col">
+                <div className="flex items-center px-4 border-b border-gray-200 bg-gray-50">
+                  <div className="flex gap-6 text-sm">
+                    <button className="flex items-center gap-2 text-gray-900 font-medium border-b-2 border-gray-900 py-3 px-1 cursor-pointer">
+                      <JsIcon className="h-4 w-4" />
+                      JavaScript
+                    </button>
+                    <button className="flex items-center gap-2 text-gray-500 py-3 px-1 hover:text-gray-700 transition-colors cursor-pointer">
+                      <PythonIcon className="h-4 w-4" />
+                      Python
+                    </button>
+                    <button className="flex items-center gap-2 text-gray-500 py-3 px-1 hover:text-gray-700 transition-colors cursor-pointer">
+                      <RustIcon className="h-4 w-4" />
+                      Rust
+                    </button>
+                    <button className="flex items-center gap-2 text-gray-500 py-3 px-1 hover:text-gray-700 transition-colors cursor-pointer">
+                      <PostgresIcon className="h-4 w-4" />
+                      PostgreSQL
+                    </button>
+                  </div>
                 </div>
-                <pre className="w-full overflow-x-auto px-6 py-6 text-sm leading-7 text-gray-900 bg-white">
-                  <code>
+                <div className="flex-1 overflow-x-auto p-6 text-sm leading-7 font-mono whitespace-pre">
+                  <div className="mb-6">
+                    <span className="text-gray-500">// JavaScript SDK</span>
+                    <br />
                     <span className="text-indigo-600">import</span>{" "}
                     <span className="text-gray-900">
                       {"{ openLix, selectWorkingDiff, InMemoryEnvironment }"}
                     </span>{" "}
                     <span className="text-indigo-600">from</span>{" "}
-                    <span className="text-amber-600">"@lix-js/sdk";</span>
+                    <span className="text-amber-600">"@lix-js/sdk"</span>
+                    <span className="text-gray-900">;</span>
                     <br />
                     <span className="text-indigo-600">import</span>{" "}
                     <span className="text-gray-900">
@@ -655,8 +1182,9 @@ function LandingPage() {
                     </span>{" "}
                     <span className="text-indigo-600">from</span>{" "}
                     <span className="text-amber-600">
-                      "@lix-js/plugin-json";
+                      "@lix-js/plugin-json"
                     </span>
+                    <span className="text-gray-900">;</span>
                     <br />
                     <br />
                     <span className="text-gray-500">
@@ -668,17 +1196,16 @@ function LandingPage() {
                     <span className="text-indigo-600">=</span>{" "}
                     <span className="text-indigo-600">await</span>{" "}
                     <span className="text-sky-700">openLix</span>
-                    <span className="text-gray-900">(</span>
-                    <span className="text-gray-900">{"{"}</span>
+                    <span className="text-gray-900">({"{"}</span>
                     <br />
-                    {"  "}
+                    {"    "}
                     <span className="text-sky-700">environment</span>
                     <span className="text-gray-900">:</span>{" "}
                     <span className="text-indigo-600">new</span>{" "}
                     <span className="text-sky-700">InMemoryEnvironment</span>
                     <span className="text-gray-900">(),</span>
                     <br />
-                    {"  "}
+                    {"    "}
                     <span className="text-sky-700">providePlugins</span>
                     <span className="text-gray-900">:</span>{" "}
                     <span className="text-gray-900">[</span>
@@ -686,95 +1213,16 @@ function LandingPage() {
                     <span className="text-gray-900">]</span>
                     <br />
                     <span className="text-gray-900">{"});"}</span>
-                    <br />
-                    <br />
-                    <span className="text-gray-500">
-                      // 2) Write a file via SQL
-                    </span>
-                    <br />
-                    <span className="text-indigo-600">await</span>{" "}
-                    <span className="text-sky-700">lix</span>
-                    <span className="text-gray-900">.</span>
-                    <span className="text-sky-700">db</span>
-                    <br />
-                    {"  "}
-                    <span className="text-gray-900">.</span>
-                    <span className="text-sky-700">insertInto</span>
-                    <span className="text-gray-900">(</span>
-                    <span className="text-amber-600">"file"</span>
-                    <span className="text-gray-900">)</span>
-                    <br />
-                    {"  "}
-                    <span className="text-gray-900">.</span>
-                    <span className="text-sky-700">values</span>
-                    <span className="text-gray-900">(</span>
-                    <span className="text-gray-900">{"{"}</span>
-                    <br />
-                    {"    "}
-                    <span className="text-sky-700">path</span>
-                    <span className="text-gray-900">:</span>{" "}
-                    <span className="text-amber-600">"/settings.json"</span>
-                    <span className="text-gray-900">,</span>
-                    <br />
-                    {"    "}
-                    <span className="text-sky-700">data</span>
-                    <span className="text-gray-900">:</span>{" "}
-                    <span className="text-indigo-600">new</span>{" "}
-                    <span className="text-sky-700">TextEncoder</span>
-                    <span className="text-gray-900">().</span>
-                    <span className="text-sky-700">encode</span>
-                    <span className="text-gray-900">(</span>
-                    <br />
-                    {"      "}
-                    <span className="text-sky-700">JSON</span>
-                    <span className="text-gray-900">.</span>
-                    <span className="text-sky-700">stringify</span>
-                    <span className="text-gray-900">(</span>
-                    <span className="text-gray-900">{"{"}</span>{" "}
-                    <span className="text-sky-700">theme</span>
-                    <span className="text-gray-900">:</span>{" "}
-                    <span className="text-amber-600">"light"</span>{" "}
-                    <span className="text-gray-900">{"}"}</span>
-                    <span className="text-gray-900">)</span>
-                    <br />
-                    {"    "}
-                    <span className="text-gray-900">),</span>
-                    <br />
-                    <span className="text-gray-900">{"  })"}</span>
-                    <br />
-                    {"  "}
-                    <span className="text-gray-900">.</span>
-                    <span className="text-sky-700">execute</span>
-                    <span className="text-gray-900">();</span>
-                    <br />
-                    <br />
-                    <span className="text-gray-500">// 3) Log the changes</span>
-                    <br />
-                    <span className="text-indigo-600">const</span>{" "}
-                    <span className="text-sky-700">diff</span>{" "}
-                    <span className="text-indigo-600">=</span>{" "}
-                    <span className="text-indigo-600">await</span>{" "}
-                    <span className="text-sky-700">selectWorkingDiff</span>
-                    <span className="text-gray-900">(</span>
-                    <span className="text-gray-900">{"{"}</span>{" "}
-                    <span className="text-sky-700">lix</span>{" "}
-                    <span className="text-gray-900">{"}"}</span>
-                    <span className="text-gray-900">).</span>
-                    <span className="text-sky-700">execute</span>
-                    <span className="text-gray-900">();</span>
-                    <br />
-                    <span className="text-sky-700">console</span>
-                    <span className="text-gray-900">.</span>
-                    <span className="text-sky-700">log</span>
-                    <span className="text-gray-900">(</span>
-                    <span className="text-sky-700">diff</span>
-                    <span className="text-gray-900">);</span>
-                  </code>
-                </pre>
+                  </div>
+                  <code>{getFeatureCode(activeFeature)}</code>
+                </div>
               </div>
             </div>
           </div>
         </section>
+
+
+
 
         {/* Feature Spotlights */}
         <section className="py-12 px-6 sm:px-12 md:px-16 bg-white">
