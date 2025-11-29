@@ -1,6 +1,5 @@
 import type { ViewContext } from "./types";
 import {
-	AGENT_VIEW_KIND,
 	FILE_VIEW_KIND,
 	fileViewInstance,
 	buildFileViewProps,
@@ -52,19 +51,6 @@ export function sanitizeFilename(input: string): string {
 }
 
 /**
- * Creates a unique invocation ID for the agent view.
- */
-function createInvocationId(): string {
-	if (
-		typeof crypto !== "undefined" &&
-		typeof crypto.randomUUID === "function"
-	) {
-		return crypto.randomUUID();
-	}
-	return `import-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-/**
  * Imports content as a new file and opens the editor with agent panel.
  */
 export async function importFile({
@@ -109,23 +95,6 @@ export async function importFile({
 		focus: true,
 	});
 
-	// Open agent in right panel with a fresh conversation
-	const invocationId = createInvocationId();
-	context.openView?.({
-		panel: "right",
-		kind: AGENT_VIEW_KIND,
-		instance: `${AGENT_VIEW_KIND}:${invocationId}`,
-		launchArgs: {
-			source,
-			invocationId,
-			fileId,
-			filePath,
-		},
-		focus: false,
-	});
-
-	// Resize right panel
-	context.resizePanel?.("right", 30);
 }
 
 /**

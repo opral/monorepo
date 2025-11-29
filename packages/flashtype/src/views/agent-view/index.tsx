@@ -150,17 +150,12 @@ export function AgentView({ context, instance }: AgentViewProps) {
 	}, [conversationId, lix, setConversationId]);
 
 	useEffect(() => {
-		// Skip for import sessions - they use importConversationId instead
-		const hasInvocationId = Boolean(
-			(instance?.launchArgs as AgentViewLaunchProps | undefined)?.invocationId,
-		);
-		if (hasInvocationId) return;
 		if (conversationId) return;
 		const timer = setTimeout(() => {
 			void ensureConversationId();
 		}, 100);
 		return () => clearTimeout(timer);
-	}, [conversationId, ensureConversationId, instance?.launchArgs]);
+	}, [conversationId, ensureConversationId]);
 
 	useEffect(() => {
 		if (devApiKey) {
@@ -228,32 +223,10 @@ export function AgentView({ context, instance }: AgentViewProps) {
 	const hasKey = Boolean(storedApiKey);
 	const launchProps = instance?.launchArgs as AgentViewLaunchProps | undefined;
 
-	// Track processed invocationId to avoid re-creating conversation
-	const processedInvocationIdRef = useRef<string | null>(null);
-	// Local conversation ID for import sessions (doesn't affect global state)
-	const [importConversationId, setImportConversationId] = useState<
-		string | null
-	>(null);
-
-	// Create fresh conversation when opened from import with invocationId
-	useEffect(() => {
-		if (!launchProps?.invocationId) return;
-		if (processedInvocationIdRef.current === launchProps.invocationId) return;
-		processedInvocationIdRef.current = launchProps.invocationId;
-
-		createConversation({ lix }).then((conversation) => {
-			// Use local state for import sessions, don't touch global conversationId
-			setImportConversationId(conversation.id);
-		});
-	}, [launchProps?.invocationId, lix]);
-
-	// Use import-specific conversation if available, otherwise use global
-	const activeConversationId = importConversationId ?? conversationId;
-
 	const messages = useQuery(({ lix }) =>
 		lix.db
 			.selectFrom("conversation_message")
-			.where("conversation_id", "=", activeConversationId)
+			.where("conversation_id", "=", conversationId)
 			.selectAll()
 			.orderBy("lixcol_created_at", "asc")
 			.orderBy("id", "asc"),
@@ -330,10 +303,10 @@ export function AgentView({ context, instance }: AgentViewProps) {
 
 	const clear = useCallback(async () => {
 		if (!agent) throw new Error("Agent not ready");
-		await runClearConversation({ agent, conversationId: activeConversationId });
+		await runClearConversation({ agent, conversationId });
 		clearPendingProposal();
 		setPendingMessage(null);
-	}, [agent, clearPendingProposal, activeConversationId]);
+	}, [agent, clearPendingProposal, conversationId]);
 
 	const handleModelChange = useCallback(
 		(next: string) => {
@@ -451,9 +424,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 			},
 		) => {
 			if (!agent) throw new Error("Agent not ready");
-			// Use import-specific conversation if available, otherwise ensure global one
-			const activeConversationId =
-				importConversationId ?? (await ensureConversationId());
+			const activeConversationId = await ensureConversationId();
 			const trimmed = text.trim();
 			if (!trimmed) return;
 			setError(null);
@@ -636,7 +607,6 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		[
 			agent,
 			ensureConversationId,
-			importConversationId,
 			context,
 			autoAcceptEnabled,
 			clearPendingProposal,
@@ -678,8 +648,8 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		// or fallback to the first one if there's only one (heuristic)
 		const proposal = (openProposals.find(
 			(p: any) =>
-				p.conversation_id === activeConversationId ||
-				p.lixcol_conversation_id === activeConversationId,
+				p.conversation_id === conversationId ||
+				p.lixcol_conversation_id === conversationId,
 		) ?? openProposals[0]) as any;
 
 		if (!proposal) return;
@@ -739,7 +709,7 @@ export function AgentView({ context, instance }: AgentViewProps) {
 		agent,
 		lix,
 		context,
-		activeConversationId,
+		conversationId,
 	]);
 
 	const handleSlashCommand = useCallback(
