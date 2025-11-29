@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "packages/lix/**"
+      - "packages/lix/sdk/**"
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          SRC="packages/lix"
+          SRC="packages/lix/sdk"
           WORKDIR="$GITHUB_WORKSPACE/.mirror-lix-sdk"
 
           rm -rf "$WORKDIR"
