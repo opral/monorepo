@@ -23,17 +23,6 @@ jobs:
           git config user.name "opral-bot"
           git config user.email "dev@opral.com"
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
-      - name: Build splitsh-lite
-        run: |
-          git clone https://github.com/splitsh/lite.git /tmp/splitsh-lite
-          cd /tmp/splitsh-lite
-          go build -o "$GITHUB_WORKSPACE/splitsh-lite"
-
       - name: Split and push flashtype
         env:
           PREFIX: packages/flashtype
@@ -43,22 +32,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "Splitting ${PREFIX}"
-          COMMIT=$(./splitsh-lite --prefix="$PREFIX")
-          echo "Split commit: $COMMIT"
-
-          REMOTE_URL="https://x-access-token:${MIRROR_PAT}@github.com/${REMOTE_REPO}.git"
-          REMOTE_NAME="mirror-flashtype"
-
-          if git remote | grep -q "^${REMOTE_NAME}$"; then
-            git remote set-url "${REMOTE_NAME}" "$REMOTE_URL"
-          else
-            git remote add "${REMOTE_NAME}" "$REMOTE_URL"
-          fi
+          git subtree split --prefix="$PREFIX" -b flashtype-split || git branch -f flashtype-split
 
           WORKTREE_DIR=$(mktemp -d)
-          git worktree add "$WORKTREE_DIR" "$COMMIT"
-
+          git worktree add "$WORKTREE_DIR" flashtype-split
           pushd "$WORKTREE_DIR" >/dev/null
 
           printf "%s\n" "> [!NOTE]" "> The repo is mirrored from [opral/monorepo/tree/main/packages/flashtype](https://github.com/opral/monorepo/tree/main/packages/flashtype). This repo serves as an issue tracker." > README.md.new
@@ -71,8 +48,9 @@ jobs:
           git add README.md
           git commit -m "chore: add mirror note" || true
 
-          git push --force "${REMOTE_NAME}" HEAD:"${BRANCH}"
+          git push --force "https://x-access-token:${MIRROR_PAT}@github.com/${REMOTE_REPO}.git" HEAD:"${BRANCH}"
 
           popd >/dev/null
           git worktree remove "$WORKTREE_DIR"
+          git branch -D flashtype-split || true
         shell: bash
