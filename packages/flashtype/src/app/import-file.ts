@@ -9,7 +9,6 @@ type ImportFileOptions = {
 	context: ViewContext;
 	content: string;
 	filename: string;
-	source: "paste" | "file-open";
 };
 
 /**
@@ -57,7 +56,6 @@ export async function importFile({
 	context,
 	content,
 	filename,
-	source,
 }: ImportFileOptions): Promise<void> {
 	const sanitizedFilename = sanitizeFilename(filename);
 	const filePath = await generateUniqueFilePath(context, sanitizedFilename);
@@ -118,7 +116,6 @@ export async function importFromClipboard(
 		context,
 		content,
 		filename: title,
-		source: "paste",
 	});
 }
 
@@ -149,6 +146,5 @@ export async function importFromComputer(
 		context,
 		content,
 		filename,
-		source: "file-open",
 	});
 }
