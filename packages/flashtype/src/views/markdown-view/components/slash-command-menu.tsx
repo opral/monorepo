@@ -67,8 +67,9 @@ const SLASH_COMMANDS: SlashCommand[] = [
 		keywords: ["ul", "-", "unordered", "bullets"],
 		action: (editor) => {
 			const chain = editor.chain().focus() as any;
-			chain.wrapIn?.("bulletList")?.run?.() ||
+			if (!chain.wrapIn?.("bulletList")?.run?.()) {
 				chain.toggleBulletList?.()?.run?.();
+			}
 		},
 	},
 	{
@@ -78,8 +79,9 @@ const SLASH_COMMANDS: SlashCommand[] = [
 		keywords: ["ol", "1.", "numbered", "ordered"],
 		action: (editor) => {
 			const chain = editor.chain().focus() as any;
-			chain.wrapIn?.("orderedList")?.run?.() ||
+			if (!chain.wrapIn?.("orderedList")?.run?.()) {
 				chain.toggleOrderedList?.()?.run?.();
+			}
 		},
 	},
 	{
@@ -201,6 +203,26 @@ export function SlashCommandMenu() {
 		});
 	}, [slashState.active, slashState.range, editor]);
 
+	const executeCommand = useCallback(
+		(command: SlashCommand) => {
+			if (!editor) return;
+
+			// Delete the slash and query text
+			(editor.commands as any).deleteSlashCommand?.();
+
+			// Execute the command action
+			command.action(editor);
+		},
+		[editor]
+	);
+
+	const handleItemClick = useCallback(
+		(command: SlashCommand) => {
+			executeCommand(command);
+		},
+		[executeCommand]
+	);
+
 	// Handle keyboard navigation
 	useEffect(() => {
 		if (!slashState.active || !editor) return;
@@ -239,7 +261,7 @@ export function SlashCommandMenu() {
 
 		window.addEventListener("keydown", handleKeyDown, true);
 		return () => window.removeEventListener("keydown", handleKeyDown, true);
-	}, [slashState.active, editor, filteredCommands, selectedIndex]);
+	}, [slashState.active, editor, filteredCommands, selectedIndex, executeCommand]);
 
 	// Scroll selected item into view
 	useEffect(() => {
@@ -252,33 +274,13 @@ export function SlashCommandMenu() {
 		}
 	}, [selectedIndex]);
 
-	const executeCommand = useCallback(
-		(command: SlashCommand) => {
-			if (!editor) return;
-
-			// Delete the slash and query text
-			(editor.commands as any).deleteSlashCommand?.();
-
-			// Execute the command action
-			command.action(editor);
-		},
-		[editor]
-	);
-
-	const handleItemClick = useCallback(
-		(command: SlashCommand) => {
-			executeCommand(command);
-		},
-		[executeCommand]
-	);
-
 	// Close menu when clicking outside
 	useEffect(() => {
-		if (!slashState.active) return;
+		if (!slashState.active || !editor) return;
 
 		const handleClickOutside = (event: MouseEvent) => {
 			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-				(editor?.commands as any).closeSlashMenu?.();
+				(editor.commands as any).closeSlashMenu?.();
 			}
 		};
 
@@ -311,7 +313,14 @@ export function SlashCommandMenu() {
 					role="option"
 					aria-selected={index === selectedIndex}
 					onClick={() => handleItemClick(command)}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" || e.key === " ") {
+							e.preventDefault();
+							handleItemClick(command);
+						}
+					}}
 					onMouseEnter={() => setSelectedIndex(index)}
+					tabIndex={0}
 				>
 					<command.icon className="slash-command-item-icon" aria-hidden />
 					<span className="slash-command-item-label">{command.label}</span>
