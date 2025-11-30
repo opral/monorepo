@@ -7,7 +7,7 @@ import {
 	useState,
 	type JSX,
 } from "react";
-import { Zap, ExternalLink } from "lucide-react";
+import { Zap, ExternalLink, ClipboardPaste, FolderOpen } from "lucide-react";
 import { useQuery } from "@lix-js/react-utils";
 import { PromptComposer } from "@/views/agent-view/components/prompt-composer";
 import { COMMANDS } from "@/views/agent-view/commands";
@@ -15,8 +15,10 @@ import { selectFilePaths } from "@/views/agent-view/select-file-paths";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { Input } from "@/components/ui/input";
+import { ActionButton } from "@/components/ui/action-button";
 import type { ViewContext, ViewLaunchArgs } from "./types";
 import { AGENT_VIEW_KIND } from "./view-instance-helpers";
+import { importFromClipboard, importFromComputer } from "./import-file";
 
 const DEFAULT_MODEL_ID = "z-ai/glm-4.6";
 const DEFAULT_PLACEHOLDER = "Ask Flashtype to...";
@@ -252,6 +254,22 @@ function LandingScreenContent({
 		[openAgentView, hasKey],
 	);
 
+	const handlePasteFromClipboard = useCallback(async () => {
+		try {
+			await importFromClipboard(context);
+		} catch (error) {
+			console.error("Failed to paste from clipboard:", error);
+		}
+	}, [context]);
+
+	const handleOpenFileFromComputer = useCallback(async () => {
+		try {
+			await importFromComputer(context);
+		} catch (error) {
+			console.error("Failed to open file:", error);
+		}
+	}, [context]);
+
 	const handleApiKeyChange = useCallback((value: string) => {
 		setApiKeyDraft(value);
 	}, []);
@@ -374,6 +392,22 @@ function LandingScreenContent({
 						onSlashCommand={handleSlashCommand}
 						onSendMessage={handleSendMessage}
 						placeholderText={placeholderText || DEFAULT_PLACEHOLDER}
+					/>
+				</div>
+
+				{/* Action Buttons */}
+				<div className="flex flex-wrap items-center justify-center gap-4">
+					<ActionButton
+						icon={<ClipboardPaste className="size-6" />}
+						label="Paste from clipboard"
+						onClick={handlePasteFromClipboard}
+						ariaLabel="Paste markdown from clipboard"
+					/>
+					<ActionButton
+						icon={<FolderOpen className="size-6" />}
+						label="Open file from computer"
+						onClick={handleOpenFileFromComputer}
+						ariaLabel="Open file from computer"
 					/>
 				</div>
 
