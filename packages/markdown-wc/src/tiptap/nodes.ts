@@ -1,4 +1,13 @@
-import { Node, Mark, type Extensions } from "@tiptap/core"
+import { Node, Mark, type Extensions, type CommandProps } from "@tiptap/core"
+
+// Extend TipTap's command types
+declare module "@tiptap/core" {
+	interface Commands<ReturnType> {
+		horizontalRule: {
+			setHorizontalRule: () => ReturnType
+		}
+	}
+}
 
 // Minimal schema-only nodes and marks for MarkdownWc
 export function markdownWcNodes(): Extensions {
@@ -193,6 +202,16 @@ export function markdownWcNodes(): Extensions {
 			},
 			renderHTML() {
 				return ["hr"]
+			},
+			addCommands() {
+				const nodeName = this.name
+				return {
+					setHorizontalRule:
+						() =>
+						({ commands }: CommandProps) => {
+							return commands.insertContent({ type: nodeName })
+						},
+				}
 			},
 		}),
 		// Unsupported blocks (html, yaml, etc.)
