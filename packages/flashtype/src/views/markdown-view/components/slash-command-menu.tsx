@@ -185,22 +185,30 @@ export function SlashCommandMenu() {
 		};
 	}, [editor]);
 
-	// Calculate position when active
+	// Calculate position when active and update on scroll
 	useEffect(() => {
 		if (!slashState.active || !slashState.range || !editor) {
 			setPosition(null);
 			return;
 		}
 
-		const { view } = editor;
-		const coords = view.coordsAtPos(slashState.range.from);
-		const editorRect = view.dom.getBoundingClientRect();
+		const updatePosition = () => {
+			const { view } = editor;
+			const coords = view.coordsAtPos(slashState.range.from);
+			const editorRect = view.dom.getBoundingClientRect();
 
-		// Position below the slash character
-		setPosition({
-			top: coords.bottom + 8,
-			left: Math.max(coords.left, editorRect.left),
-		});
+			// Position below the slash character
+			setPosition({
+				top: coords.bottom + 8,
+				left: Math.max(coords.left, editorRect.left),
+			});
+		};
+
+		updatePosition();
+
+		// Update position on scroll
+		window.addEventListener("scroll", updatePosition, true);
+		return () => window.removeEventListener("scroll", updatePosition, true);
 	}, [slashState.active, slashState.range, editor]);
 
 	const executeCommand = useCallback(
