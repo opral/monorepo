@@ -5,6 +5,7 @@ Lix is designed to be used as the foundation for application-specific file forma
 ## Overview
 
 Let's say you want to build a markdown editor where:
+
 - Documents are portable (share via email, Dropbox, USB)
 - Images are embedded, not broken links
 - Changes sync between devices
@@ -155,6 +156,7 @@ const version = await createVersion({ lix: doc.lix, name: "draft" });
 [Inlang](https://inlang.com) built a production i18n file format on lix used by thousands of developers:
 
 **Why it works:**
+
 - **Multiple apps, one file** - Editor, CLI, IDE extensions, and Figma plugin all work with `.inlang` files
 - **Custom schema** - Bundle, message, and variant tables for translation data
 - **Natural API** - `project.db.selectFrom("message")` feels intuitive for i18n developers
@@ -167,6 +169,7 @@ See the [[Inlang](https://inlang.com) SDK source code](https://github.com/opral/
 ## Key Patterns
 
 **1. Store structure as files**
+
 ```
 /doc.md           # Content
 /assets/          # Binary assets

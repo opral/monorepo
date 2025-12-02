@@ -5,18 +5,84 @@ import { PackageManagerTabs } from "@theme";
 
 # Getting Started
 
-Build a simple app that tracks JSON file changes with Lix.
+Lix tracks changes at the entity level using SQLite and a commit graph. [Plugins](/docs/plugins) define what constitutes an entity for each file format.
 
 ## Install
 
 <PackageManagerTabs command="install @lix-js/sdk @lix-js/plugin-json" />
 
-## Step 1: Open a Lix with Plugins
-
-Open a Lix with plugins for the file formats you want to track. Plugins teach Lix what constitutes a meaningful change in each format.
-
 > [!NOTE]
-> In this example, we're using the default in-memory mode. For persistence to disk, cloud storage, or browser storage, see [Persistence](/docs/persistence).
+> Lix is currently **JavaScript/TypeScript only**. Upvote [Python](https://github.com/opral/lix-sdk/issues/370), [Rust](https://github.com/opral/lix-sdk/issues/371), or [Go](https://github.com/opral/lix-sdk/issues/373) to prioritize other languages.
+
+## Step 1: Open a Lix with plugins
+
+Plugins (`.json`, `.xlsx`, etc.) make Lix file-format aware. The environment can be swapped for [persistence](/docs/persistence).
+
+```ts
+import { openLix, selectWorkingDiff, InMemoryEnvironment } from "@lix-js/sdk";
+import { plugin as json } from "@lix-js/plugin-json";
+
+const lix = await openLix({
+  environment: new InMemoryEnvironment(),
+  providePlugins: [json],
+});
+```
+
+## Step 2: Write a file
+
+Lix is powered by SQL under the hood. Writing a file, querying diffs, etc. happens all via SQL.
+
+```ts
+await lix.db
+  .insertInto("file")
+  .values({
+    path: "/config.json",
+    data: new TextEncoder().encode(JSON.stringify({ theme: "light" })),
+  })
+  .execute();
+```
+
+## Step 3: Query changes
+
+Lix tracks changes on the entity level. You can query the history of a specific entity, or the diff between two versions.
+
+```ts
+const diff = await selectWorkingDiff({ lix }).execute();
+console.log(diff);
+```
+
+---
+
+## JSON file example
+
+A more detailed example showing Lix tracking property-level changes in a JSON config file.
+
+### The config file
+
+We'll track changes in this config file:
+
+```json
+{
+  "theme": "light",
+  "notifications": true,
+  "language": "en"
+}
+```
+
+When the config changes, Lix detects exactly which property changed:
+
+```diff
+  {
+-   "theme": "light",
++   "theme": "dark",
+    "notifications": true,
+    "language": "en"
+  }
+```
+
+### 1. Create a Lix
+
+Open a Lix with the [JSON plugin](/docs/plugins). Plugins teach Lix what a "meaningful change" is for each file format.
 
 <CodeSnippet
   module={example}
@@ -24,13 +90,9 @@ Open a Lix with plugins for the file formats you want to track. Plugins teach Li
   sections={["opening-lix"]}
 />
 
-Without plugins, Lix treats files as binary blobs. The `jsonPlugin` enables entity-level tracking by detecting that the `age` property changed from `50` to `51`, rather than just "line 3 changed."
+### 2. Write the config file
 
-## Step 2: Insert and Update Files
-
-Files are stored as `Uint8Array` (binary data), making Lix format-agnostic. Once inserted, every change is automatically tracked.
-
-**Insert a file:**
+The JavaScript SDK uses [Kysely](https://kysely.dev/) for type-safe query building. Insert the config file into the `file` table. Files are stored as binary (`Uint8Array`), making Lix format-agnostic.
 
 <CodeSnippet
   module={example}
@@ -38,7 +100,9 @@ Files are stored as `Uint8Array` (binary data), making Lix format-agnostic. Once
   sections={["inserting-file"]}
 />
 
-**Update the file:**
+### 3. Update the file
+
+Update the config by changing `theme` from `"light"` to `"dark"`:
 
 <CodeSnippet
   module={example}
@@ -46,11 +110,20 @@ Files are stored as `Uint8Array` (binary data), making Lix format-agnostic. Once
   sections={["updating-file"]}
 />
 
-The JSON plugin detects precisely what changed (in this case, the `age` property from `50` to `51`) while preserving all previous states.
+Lix detects that `theme` changed, not just "the file changed":
 
-## Step 3: Query History
+```diff
+  {
+-   "theme": "light",
++   "theme": "dark",
+    "notifications": true,
+    "language": "en"
+  }
+```
 
-Query file state at any point in time using SQL and checkpoints:
+### 4. Query history
+
+Query the file's history using the `file_history` view. The `lixcol_root_commit_id` specifies the starting point. Here we use the active version's commit to get history from the current state. The `lixcol_depth` indicates how far back (0 = current, 1 = previous, etc.):
 
 <CodeSnippet
   module={example}
@@ -58,19 +131,17 @@ Query file state at any point in time using SQL and checkpoints:
   sections={["querying-file-history"]}
 />
 
-The `file_history` view reconstructs file state by walking backwards from a commit (`lixcol_root_commit_id`). Use `lixcol_depth = 0` to get the exact state at that checkpoint.
+```js
+// Output:
+// Depth 0: { path: '/config.json', data: { theme: 'dark', notifications: true, language: 'en' } }
+// Depth 1: { path: '/config.json', data: { theme: 'light', notifications: true, language: 'en' } }
+```
 
-> [!TIP]
-> Lix automatically commits every change. Checkpoints are optionally [labelled commits](/docs/labels) for important moments like before/after a migration or deployment.
+---
 
-## Next Steps
+## Next steps
 
-**Track changes in your app:**
-
-- [Versions](/docs/versions) - Create isolated versions (branching) for parallel work
-- [Change Proposals](/docs/change-proposals) - Review and approve changes before merging
-- [SQL Interface](/docs/sql-interface) - Advanced SQL queries for diffs and attribution
-
-**Add more file types:**
-
-- [Plugins](/docs/plugins) - CSV, Markdown, or create custom plugins
+- [Versions](/docs/versions) – Create isolated versions (branches) for parallel work
+- [Diffs](/docs/diffs) – Query exactly what changed between any two points
+- [Change Proposals](/docs/change-proposals) – Review changes before merging
+- [Plugins](/docs/plugins) – Track CSV, Markdown, or create your own

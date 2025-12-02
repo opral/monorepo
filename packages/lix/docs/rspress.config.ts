@@ -123,9 +123,8 @@ export default defineConfig({
         {
           text: "Essentials",
           items: [
-            { text: "How Lix Works", link: "/docs/how-lix-works" },
-            { text: "SQL Interface", link: "/docs/sql-interface" },
             { text: "Filesystem", link: "/docs/filesystem" },
+            { text: "SQL Interface", link: "/docs/sql-interface" },
             { text: "Schemas", link: "/docs/schemas" },
             { text: "Plugins", link: "/docs/plugins" },
             { text: "Persistence", link: "/docs/persistence" },

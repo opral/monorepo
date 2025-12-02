@@ -73,7 +73,6 @@ export default function PluginMetadataCard({
         </div>
       </a>
 
-
       <a
         href={githubUrl}
         target="_blank"
@@ -129,47 +128,44 @@ export default function PluginMetadataCard({
 
       {exampleUrl && (
         <a
-            href={exampleUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              color: "#2563eb",
-              flex: "1",
-              minWidth: "200px",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#2563eb";
-              e.currentTarget.style.backgroundColor = "#eff6ff";
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#e5e7eb";
-              e.currentTarget.style.backgroundColor = "#ffffff";
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-          >
-            <span style={{ fontSize: "20px" }}>💻</span>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: "14px" }}>Example</div>
-              <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                Try demo →
-              </div>
-            </div>
-          </a>
+          href={exampleUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            textDecoration: "none",
+            color: "#2563eb",
+            flex: "1",
+            minWidth: "200px",
+            padding: "8px 12px",
+            borderRadius: "6px",
+            border: "1px solid #e5e7eb",
+            backgroundColor: "#ffffff",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "#2563eb";
+            e.currentTarget.style.backgroundColor = "#eff6ff";
+            e.currentTarget.style.transform = "translateY(-1px)";
+            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "#e5e7eb";
+            e.currentTarget.style.backgroundColor = "#ffffff";
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          <span style={{ fontSize: "20px" }}>💻</span>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: "14px" }}>Example</div>
+            <div style={{ fontSize: "13px", color: "#6b7280" }}>Try demo →</div>
+          </div>
+        </a>
       )}
     </div>
   );
 }
-

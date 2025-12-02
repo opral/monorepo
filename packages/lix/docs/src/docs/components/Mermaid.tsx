@@ -14,7 +14,7 @@ const ensureMermaidInitialized = () => {
 
   mermaidInitialized = true;
   mermaidInitPromise = Promise.resolve().then(() =>
-    mermaid.initialize({ startOnLoad: false, securityLevel: "loose" })
+    mermaid.initialize({ startOnLoad: false, securityLevel: "loose" }),
   );
 
   return mermaidInitPromise;

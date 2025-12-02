@@ -7,16 +7,19 @@ Plugins teach Lix how to understand specific file formats by detecting changes a
 A plugin handles two core responsibilities:
 
 **1. Detect changes**
+
 - Compare old and new file content
 - Identify which entities changed (added, modified, or deleted)
 - Return detected changes with entity IDs and snapshots
 
 **2. Apply changes**
+
 - Reconstruct a file from entity states
 - Serialize entities back to the original file format
 - Preserve structure and formatting where possible
 
 **Optional: Render diffs**
+
 - Generate HTML to visualize changes
 - Provide custom diff UIs for specific file formats
 
@@ -82,6 +85,7 @@ For implementation examples, see the official plugin source code:
 - **[plugin-md](https://github.com/opral/monorepo/tree/main/packages/lix/plugin-md)** - Advanced example with stable ID reconciliation using `querySync`
 
 These implementations demonstrate:
+
 - Parsing files and detecting entity changes
 - Using `querySync` to preserve stable entity IDs
 - Applying changes to reconstruct files
@@ -90,27 +94,32 @@ These implementations demonstrate:
 ## Plugin Best Practices
 
 **Use Stable Entity IDs**
+
 - Generate deterministic IDs based on content or position
 - Use `querySync` to preserve existing IDs across changes
 - Avoid random IDs that change on every edit
 
 **Choose the Right Granularity**
+
 - Too fine: Many entities, complex queries, harder merges
 - Too coarse: Large entities, less precise diffs
 - Consider your use case: commenting needs fine granularity, auditing may not
 
 **Handle Edge Cases**
+
 - Empty files
 - Deleted files (file.data may be undefined in applyChanges)
 - Malformed content
 - Unicode and special characters
 
 **Optimize Performance**
+
 - Use `querySync` sparingly - it's synchronous but has overhead
 - Cache parsed data when possible
 - Consider incremental parsing for large files
 
 **Test Thoroughly**
+
 - Verify `detectChanges` and `applyChanges` are inverses
 - Test with various file sizes and content types
 - Ensure entity IDs remain stable across edits

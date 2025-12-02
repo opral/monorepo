@@ -5,15 +5,18 @@ Labels are flexible tags you can attach to any entity (change sets, files, versi
 ## Common Use Cases
 
 **Categorization:**
+
 - Tag files by importance: `important`, `draft`, `reviewed`
 - Tag changes by type: `type:feature`, `type:bugfix`, `type:refactor`
 
 **Workflows:**
+
 - Track status: `status:review`, `status:approved`, `status:rejected`
 - Priority management: `priority:high`, `priority:low`
 - Release milestones: `release:v1.2.0`, `release:v2.0.0`
 
 **Filtering:**
+
 - Query all files labeled `important`
 - Find all change sets with `status:review`
 - Filter entities by multiple labels

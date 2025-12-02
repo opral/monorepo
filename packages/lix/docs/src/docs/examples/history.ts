@@ -50,7 +50,7 @@ export default async function runExample(console: any) {
 
     history.push({
       checkpoint: checkpoint.id,
-      data: JSON.parse(new TextDecoder().decode(state.data))
+      data: JSON.parse(new TextDecoder().decode(state.data)),
     });
   }
 
@@ -86,11 +86,12 @@ export default async function runExample(console: any) {
     .select(["snapshot_content", "depth"])
     .execute();
 
-  console.log("Entity history for app_version:",
-    entityHistory.map(h => ({
+  console.log(
+    "Entity history for app_version:",
+    entityHistory.map((h) => ({
       value: h.snapshot_content.value,
-      depth: h.depth
-    }))
+      depth: h.depth,
+    })),
   );
 
   console.log("SECTION END 'entity-history'");
@@ -106,8 +107,9 @@ export default async function runExample(console: any) {
     .select(["data"])
     .executeTakeFirstOrThrow();
 
-  console.log("State at checkpoint 2:",
-    JSON.parse(new TextDecoder().decode(stateAtCheckpoint2.data))
+  console.log(
+    "State at checkpoint 2:",
+    JSON.parse(new TextDecoder().decode(stateAtCheckpoint2.data)),
   );
 
   console.log("SECTION END 'checkpoint-history'");

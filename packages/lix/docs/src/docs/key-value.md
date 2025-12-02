@@ -2,7 +2,6 @@
 
 Lix has a built-in [entity](/docs/schemas) for key values. Store any JSON value - from feature flags to UI preferences - and access it across your application.
 
-
 ## Common Use Cases
 
 - **UI state persistence** - Sidebar positions, dismissed prompts, user preferences
@@ -55,7 +54,7 @@ await lix.db
   .values({
     key: "myapp_sidebar_width",
     value: 240,
-    lixcol_untracked: 1
+    lixcol_untracked: 1,
   })
   .execute();
 ```
@@ -68,13 +67,13 @@ Always prefix keys with your app name to avoid collisions:
 
 ```ts
 // Good
-"myapp_theme"
-"myapp_sidebar_collapsed"
-"myapp_feature_enabled"
+"myapp_theme";
+"myapp_sidebar_collapsed";
+"myapp_feature_enabled";
 
 // Bad - can conflict with other apps or Lix internals
-"theme"
-"enabled"
+"theme";
+"enabled";
 ```
 
 Lix uses the `lix_*` prefix internally (`lix_id`, `lix_name`, `lix_deterministic_mode`). Avoid this prefix.

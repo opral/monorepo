@@ -1,6 +1,6 @@
 # Architecture
 
-This document explains Lix's technical design, state materialisation algorithm, and data model constraints. For a practical operational guide, see [How Lix Works](/docs/how-lix-works).
+This document explains Lix's technical design, state materialisation algorithm, and data model constraints. For a practical operational guide, see [What Is Lix](/docs/what-is-lix).
 
 ## Data Structures
 
@@ -144,6 +144,7 @@ CS1 ∪ CS2 ∪ CS3 = { e1: "benn", e1: "julia", e2: "gunther" }
 ```
 
 **Step 2:** Filter for leaf changes, which are the latest changes for each entity:
+
 - For `e1`, the latest change is `"julia"` from `CS2`
 - For `e2`, the latest change is `"gunther"` from `CS3`
 
@@ -156,11 +157,13 @@ State = { e1: "julia", e2: "gunther" }
 ### Performance Characteristics
 
 **Cache behavior:**
+
 - The engine caches commit graph traversals internally
 - Repeated queries to the same version are fast
 - No need to materialize full snapshots on disk
 
 **Trade-offs:**
+
 - First query to a version requires graph traversal
 - Subsequent queries benefit from cached traversal
 - Storage efficient—only changes are stored, not full snapshots
@@ -219,6 +222,6 @@ Applications query these views without needing to understand state materialisati
 
 ## Next Steps
 
-- **[How Lix Works](/docs/how-lix-works)** - Practical guide to using Lix and understanding operational mechanics
+- **[What Is Lix](/docs/what-is-lix)** - Practical guide to using Lix and understanding operational mechanics
 - **[Plugins](/docs/plugins)** - Learn how to build plugins that integrate with this architecture
 - **[Schemas](/docs/schemas)** - Understand entities, schemas, and how they relate to this architecture

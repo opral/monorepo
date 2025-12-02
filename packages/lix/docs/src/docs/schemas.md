@@ -12,9 +12,9 @@ Example from the [JSON plugin](/plugins/plugin_json):
 import type { LixSchemaDefinition } from "@lix-js/sdk";
 
 export const JSONPointerValueSchema: LixSchemaDefinition = {
-  "x-lix-key": "plugin_json_pointer_value",   // Unique identifier
-  "x-lix-version": "1.0",                      // Schema version
-  "x-lix-primary-key": ["/path"],              // Primary key
+  "x-lix-key": "plugin_json_pointer_value", // Unique identifier
+  "x-lix-version": "1.0", // Schema version
+  "x-lix-primary-key": ["/path"], // Primary key
   type: "object",
   properties: {
     path: {
@@ -31,11 +31,13 @@ export const JSONPointerValueSchema: LixSchemaDefinition = {
 ```
 
 **Lix-Specific Fields:**
+
 - `x-lix-key`: Globally unique schema identifier (snake_case)
 - `x-lix-version`: Version number for schema evolution
 - `x-lix-primary-key`: JSON Pointer(s) to properties that uniquely identify an entity
 
 **Standard JSON Schema Fields:**
+
 - `type`, `properties`, `required`, `additionalProperties`, etc.
 
 ## Additional Schema Features
@@ -47,8 +49,9 @@ const MySchema: LixSchemaDefinition = {
   "x-lix-key": "my_entity",
   "x-lix-version": "1.0",
   "x-lix-primary-key": ["/id"],
-  "x-lix-unique": [["/email"]],              // Unique constraints
-  "x-lix-foreign-keys": [                    // Relationships
+  "x-lix-unique": [["/email"]], // Unique constraints
+  "x-lix-foreign-keys": [
+    // Relationships
     {
       properties: ["/user_id"],
       references: {
@@ -61,14 +64,14 @@ const MySchema: LixSchemaDefinition = {
   properties: {
     id: {
       type: "string",
-      "x-lix-default": "lix_uuid_v7()",      // Auto-generated ID
+      "x-lix-default": "lix_uuid_v7()", // Auto-generated ID
     },
     email: { type: "string" },
     user_id: { type: "string" },
     created_at: {
       type: "string",
       format: "date-time",
-      "x-lix-default": "lix_now()",          // Auto-generated timestamp
+      "x-lix-default": "lix_now()", // Auto-generated timestamp
     },
   },
   required: ["id", "email"],
@@ -76,6 +79,7 @@ const MySchema: LixSchemaDefinition = {
 ```
 
 **Available Fields:**
+
 - `x-lix-unique`: Properties that must be unique across entities
 - `x-lix-foreign-keys`: Define relationships between entity types
 - `x-lix-default`: Auto-generated values using `lix_uuid_v7()`, `lix_now()`, etc.
@@ -88,13 +92,13 @@ An **entity** is a meaningful unit of data tracked by Lix. Schemas define entity
 
 ### Entity Examples by File Type
 
-| File Type                          | Example Entities                                                        |
-| :--------------------------------- | :---------------------------------------------------------------------- |
-| **JSON**                           | `/user/name`, `/theme`, `/items/0` (JSON Pointer paths)                |
-| **CSV/Excel**                      | A row, or an individual cell                                            |
-| **Markdown**                       | A paragraph, heading, list, or code block                               |
-| **Design Files**                   | A component, frame, layer, text node, vector shape                      |
-| **3D Models**                      | A mesh, material, bone, or scene graph node                             |
+| File Type        | Example Entities                                        |
+| :--------------- | :------------------------------------------------------ |
+| **JSON**         | `/user/name`, `/theme`, `/items/0` (JSON Pointer paths) |
+| **CSV/Excel**    | A row, or an individual cell                            |
+| **Markdown**     | A paragraph, heading, list, or code block               |
+| **Design Files** | A component, frame, layer, text node, vector shape      |
+| **3D Models**    | A mesh, material, bone, or scene graph node             |
 
 ### Example: JSON Entities
 
@@ -111,6 +115,7 @@ For this JSON file:
 ```
 
 The JSON plugin creates entities:
+
 - `/user/name` = `"John Doe"`
 - `/user/age` = `30`
 - `/theme` = `"dark"`

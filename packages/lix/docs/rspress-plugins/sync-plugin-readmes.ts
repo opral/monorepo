@@ -71,13 +71,7 @@ export function syncPluginReadmesPlugin(): RspressPlugin {
         }
 
         // Sync README
-        const src = path.join(
-          __dirname,
-          "..",
-          "..",
-          packageDir,
-          "README.md",
-        );
+        const src = path.join(__dirname, "..", "..", packageDir, "README.md");
         const dest = path.join(pluginsDir, `${slug}.mdx`);
 
         let readme = await fs.readFile(src, "utf8");
@@ -160,6 +154,12 @@ export function generatePluginsSidebar(docsRoot: string) {
       link: `/plugins/${slug}`,
     });
   }
+
+  // Add "Build your own" link at the end
+  sidebar.push({
+    text: "Build your own",
+    link: "/docs/plugins",
+  });
 
   return sidebar;
 }

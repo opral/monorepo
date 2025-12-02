@@ -16,7 +16,11 @@ Paths must be normalized before use:
 Use the exported helpers to normalize paths:
 
 ```ts
-import { normalizeFilePath, normalizeDirectoryPath, normalizePathSegment } from "@lix-js/sdk";
+import {
+  normalizeFilePath,
+  normalizeDirectoryPath,
+  normalizePathSegment,
+} from "@lix-js/sdk";
 
 const filePath = normalizeFilePath("/config.json");
 const dirPath = normalizeDirectoryPath("/configs/");
@@ -53,10 +57,7 @@ const file = await lix.db
   .selectFirst();
 
 // Get all files
-const allFiles = await lix.db
-  .selectFrom("file")
-  .selectAll()
-  .execute();
+const allFiles = await lix.db.selectFrom("file").selectAll().execute();
 ```
 
 #### By Version
@@ -73,7 +74,7 @@ const file = await lix.db
     lix.db
       .selectFrom("version")
       .where("name", "=", "feature-branch")
-      .select("commit_id")
+      .select("commit_id"),
   )
   .selectFirst();
 ```
@@ -110,10 +111,7 @@ When you update a file, [plugins](/docs/plugins) automatically detect changes an
 ### Deleting Files
 
 ```ts
-await lix.db
-  .deleteFrom("file")
-  .where("path", "=", "/config.json")
-  .execute();
+await lix.db.deleteFrom("file").where("path", "=", "/config.json").execute();
 ```
 
 ### File Metadata
@@ -139,6 +137,7 @@ await lix.db
 Directories organize files in a hierarchical structure. The root directory is represented by `/`.
 
 Each directory has:
+
 - **name**: Directory segment name
 - **parent_id**: Reference to parent directory (null for root-level directories)
 - **hidden**: Boolean flag for hidden directories (defaults to false)
@@ -179,10 +178,7 @@ const subdirs = await lix.db
 ### Deleting Directories
 
 ```ts
-await lix.db
-  .deleteFrom("directory")
-  .where("path", "=", "/configs/")
-  .execute();
+await lix.db.deleteFrom("directory").where("path", "=", "/configs/").execute();
 ```
 
 **Cascade delete:** Deleting a directory automatically removes all files and subdirectories within it.

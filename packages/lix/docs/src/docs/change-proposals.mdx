@@ -26,9 +26,9 @@ Change proposals are simple - they just track the relationship between versions:
 
 ```ts
 {
-  id: string;                    // Unique identifier
-  source_version_id: string;     // Version with proposed changes
-  target_version_id: string;     // Version to merge into
+  id: string; // Unique identifier
+  source_version_id: string; // Version with proposed changes
+  target_version_id: string; // Version to merge into
   status: "open" | "accepted" | "rejected";
 }
 ```
@@ -46,6 +46,7 @@ Change proposals are simple - they just track the relationship between versions:
 />
 
 **What happens:**
+
 1. A feature version is created from main
 2. Changes are made in the feature version
 3. A proposal is created linking source → target versions
@@ -70,6 +71,7 @@ Query proposals by status, target version, or any other criteria using standard 
 />
 
 **What happens:**
+
 1. Changes from source version are merged into target version
 2. Proposal status is set to "accepted"
 3. Source version is **deleted** (changes are now in target)
@@ -83,22 +85,26 @@ Query proposals by status, target version, or any other criteria using standard 
 />
 
 **What happens:**
+
 1. Proposal status is set to "rejected"
 2. Source version **remains** (can be modified or deleted manually)
 
 ## Use Cases
 
 **User collaboration**
+
 - Users propose changes for review
 - Reviewers accept or reject proposals
 - History of all proposals is preserved
 
 **AI agent safety**
+
 - AI proposes changes instead of directly modifying
 - User reviews AI suggestions before applying
 - Failed proposals can be retried with feedback
 
 **Approval workflows**
+
 - Require approval before changes go live
 - Track who approved what and when
 - Audit trail of all change proposals
@@ -108,6 +114,7 @@ Query proposals by status, target version, or any other criteria using standard 
 To build a full review UI, you'll likely want to:
 
 **1. Add your own metadata:**
+
 ```ts
 // Store title, description, etc. in your own schema
 await lix.db.insertInto("proposal_metadata").values({
@@ -119,6 +126,7 @@ await lix.db.insertInto("proposal_metadata").values({
 ```
 
 **2. Show diffs:**
+
 ```ts
 // Compare source and target versions to show changes
 const diff = await lix.db
@@ -129,10 +137,12 @@ const diff = await lix.db
 ```
 
 **3. Add comments/discussions:**
+
 - Store comments that reference proposal ID
 - Use Lix's built-in [conversations](/docs/conversations) feature
 
 **4. Handle rejection reasons:**
+
 - Store rejection reasons in your own metadata
 - Link them to the proposal ID
 
