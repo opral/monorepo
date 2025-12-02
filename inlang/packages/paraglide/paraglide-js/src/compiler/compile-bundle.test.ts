@@ -237,6 +237,6 @@ test("handles message pattern with duplicate variable references", async () => {
 	const enMessage = result.messages?.en;
 	expect(enMessage).toBeDefined();
 	expect(enMessage?.code).toContain(
-		"Last ${i.days} days, showing ${i.days} items"
+		"Last ${i?.days} days, showing ${i?.days} items"
 	);
 });

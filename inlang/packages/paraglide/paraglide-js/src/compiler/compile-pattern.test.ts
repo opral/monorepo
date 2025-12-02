@@ -31,7 +31,7 @@ test("should compile a pattern with multiple VariableReference's", () => {
 		],
 	});
 
-	expect(code).toBe("`Hello ${i.name}! You have ${i.count} messages.`");
+	expect(code).toBe("`Hello ${i?.name}! You have ${i?.count} messages.`");
 });
 
 test("should escape backticks", () => {

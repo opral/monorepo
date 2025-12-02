@@ -13,7 +13,7 @@ import { escapeForTemplateLiteral } from "../services/codegen/escape.js";
  *
  *   const { code } = compilePattern({ pattern, declarations: [{ type: "input-variable", name: "age" }] });
  *
- *   // code will be: `Your age is ${i.age}`
+ *   // code will be: `Your age is ${i?.age}`
  */
 export const compilePattern = (args: {
 	pattern: Pattern;
@@ -30,7 +30,7 @@ export const compilePattern = (args: {
 					(decl) => decl.name === (part.arg as VariableReference).name
 				);
 				if (declaration?.type === "input-variable") {
-					result += `\${i.${part.arg.name}}`;
+					result += `\${i?.${part.arg.name}}`;
 				} else if (declaration?.type === "local-variable") {
 					result += `\${${part.arg.name}}`;
 				} else {

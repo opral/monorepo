@@ -59,6 +59,6 @@ function compileLiteralOrVarRef(value: Literal | VariableReference): string {
 		case "literal":
 			return `"${value.value}"`;
 		case "variable-reference":
-			return `i.${value.name}`;
+			return `i?.${value.name}`;
 	}
 }
