@@ -25,7 +25,7 @@ test("compiles a variable reference local variable", () => {
 			},
 		},
 	});
-	expect(code).toEqual("const myVar = i.name;");
+	expect(code).toEqual("const myVar = i?.name;");
 });
 
 test("compiles a local variable with an annotation and empty options", () => {
@@ -72,6 +72,6 @@ test("compiles a local variable with an annotation and options", () => {
 		},
 	});
 	expect(code).toEqual(
-		'const myVar = registry.myFunction("en", "Hello", { option1: "value1", option2: i.varRef });'
+		'const myVar = registry.myFunction("en", "Hello", { option1: "value1", option2: i?.varRef });'
 	);
 });

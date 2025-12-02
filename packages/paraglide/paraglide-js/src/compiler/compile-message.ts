@@ -101,7 +101,7 @@ function compileMessageWithMultipleVariants(
 				(decl) => decl.name === match.key
 			)?.type;
 			if (variableType === "input-variable") {
-				conditions.push(`i.${match.key} == ${doubleQuote(match.value)}`);
+				conditions.push(`i?.${match.key} == ${doubleQuote(match.value)}`);
 			} else if (variableType === "local-variable") {
 				conditions.push(`${match.key} == ${doubleQuote(match.value)}`);
 			}
