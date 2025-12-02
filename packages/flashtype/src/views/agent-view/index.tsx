@@ -43,6 +43,7 @@ import { PromptComposer } from "./components/prompt-composer";
 import { VITE_DEV_OPENROUTER_API_KEY } from "@/env-variables";
 import { useKeyValue } from "@/hooks/key-value/use-key-value";
 import { WelcomeScreen } from "./components/welcome-screen";
+import { AgentEmptyState } from "./components/agent-empty-state";
 import {
 	AGENT_VIEW_KIND,
 	DIFF_VIEW_KIND,
@@ -772,27 +773,33 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				<div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
 					{hasKey ? (
 						<>
-							{messages?.map((message) => (
-								<ConversationMessage key={message.id} message={message} />
-							))}
-							{pendingMessage && !isMessageEmpty(pendingMessage) ? (
-								<ConversationMessage
-									key={pendingMessage.id || "agent-pending"}
-									message={pendingMessage}
-								/>
-							) : pending ? (
-								<div className="px-3 py-1 text-xs text-muted-foreground">
-									Thinking…
-								</div>
-							) : null}
-							{notice ? (
-								<div className="px-3 py-1 text-xs text-muted-foreground">
-									{notice}
-								</div>
-							) : null}
-							{error ? (
-								<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
-							) : null}
+							{(!messages || messages.length === 0) && !pending && !pendingMessage ? (
+								<AgentEmptyState />
+							) : (
+								<>
+									{messages?.map((message) => (
+										<ConversationMessage key={message.id} message={message} />
+									))}
+									{pendingMessage && !isMessageEmpty(pendingMessage) ? (
+										<ConversationMessage
+											key={pendingMessage.id || "agent-pending"}
+											message={pendingMessage}
+										/>
+									) : pending ? (
+										<div className="px-3 py-1 text-xs text-muted-foreground">
+											Thinking…
+										</div>
+									) : null}
+									{notice ? (
+										<div className="px-3 py-1 text-xs text-muted-foreground">
+											{notice}
+										</div>
+									) : null}
+									{error ? (
+										<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
+									) : null}
+								</>
+							)}
 						</>
 					) : keyLoaded ? (
 						<WelcomeScreen
