@@ -181,7 +181,7 @@ export function SlashCommandMenu() {
 	return createPortal(
 		<div
 			ref={menuRef}
-			className="slash-command-menu"
+			className="bg-popover text-popover-foreground border rounded-md shadow-md z-50 p-1 min-w-[180px] max-h-80 overflow-y-auto"
 			style={{
 				position: "fixed",
 				top: position.top,
@@ -194,7 +194,7 @@ export function SlashCommandMenu() {
 				<div
 					key={command.id}
 					data-index={index}
-					className="slash-command-item"
+					className="flex items-center gap-2 px-2 py-1.5 rounded-sm text-sm cursor-pointer select-none hover:bg-accent hover:text-accent-foreground data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
 					data-selected={index === selectedIndex}
 					role="option"
 					aria-selected={index === selectedIndex}
@@ -208,8 +208,8 @@ export function SlashCommandMenu() {
 					onMouseEnter={() => setSelectedIndex(index)}
 					tabIndex={0}
 				>
-					<command.icon className="slash-command-item-icon" aria-hidden />
-					<span className="slash-command-item-label">{command.label}</span>
+					<command.icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+					<span>{command.label}</span>
 				</div>
 			))}
 		</div>,
