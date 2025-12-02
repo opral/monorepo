@@ -70,6 +70,14 @@ export const compileProject = async (args: {
 			"export * as m from './messages/_index.js'",
 		].join("\n"),
 	};
+	if (settings.emitTsDeclarations) {
+		const messageKeys = bundles.map((bundle) => `"${bundle.id}"`);
+		output["messages.d.ts"] = [
+			"type MessageKeys = " + messageKeys.join(" | ") + ";",
+			"export const m: Record<MessageKeys, (...args: any[]) => string>;",
+			"export { " + messageKeys.join(", ") + " } from './messages/_index.js'",
+		].join("\n");
+	}
 
 	// generate the output modules
 	Object.assign(
