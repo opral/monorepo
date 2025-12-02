@@ -25,9 +25,11 @@ export function SlashCommandMenu() {
 		range: null,
 	});
 	const [selectedIndex, setSelectedIndex] = useState(0);
-	const [position, setPosition] = useState<{ top: number; left: number } | null>(
-		null
-	);
+	const [position, setPosition] = useState<{
+		top: number;
+		left: number;
+		placement: "above" | "below";
+	} | null>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	const filteredCommands = useMemo(
@@ -75,18 +77,49 @@ export function SlashCommandMenu() {
 			const coords = view.coordsAtPos(range.from);
 			const editorRect = view.dom.getBoundingClientRect();
 
-			// Position below the slash character
-			setPosition({
-				top: coords.bottom + 8,
-				left: Math.max(coords.left, editorRect.left),
-			});
+			// Menu dimensions (max-h-80 = 320px)
+			const menuHeight = 320;
+			const menuWidth = 180;
+			const gap = 8;
+
+			const viewportHeight = window.innerHeight;
+			const viewportWidth = window.innerWidth;
+
+			// Check if there's enough space below
+			const spaceBelow = viewportHeight - coords.bottom - gap;
+			const spaceAbove = coords.top - gap;
+
+			let top: number;
+			let placement: "above" | "below";
+
+			if (spaceBelow >= menuHeight || spaceBelow >= spaceAbove) {
+				// Position below
+				top = coords.bottom + gap;
+				placement = "below";
+			} else {
+				// Position above
+				top = coords.top - gap - Math.min(menuHeight, spaceAbove);
+				placement = "above";
+			}
+
+			// Ensure left doesn't go off-screen
+			let left = Math.max(coords.left, editorRect.left);
+			if (left + menuWidth > viewportWidth) {
+				left = viewportWidth - menuWidth - gap;
+			}
+
+			setPosition({ top, left, placement });
 		};
 
 		updatePosition();
 
-		// Update position on scroll
+		// Update position on scroll and resize
 		window.addEventListener("scroll", updatePosition, true);
-		return () => window.removeEventListener("scroll", updatePosition, true);
+		window.addEventListener("resize", updatePosition);
+		return () => {
+			window.removeEventListener("scroll", updatePosition, true);
+			window.removeEventListener("resize", updatePosition);
+		};
 	}, [slashState.active, slashState.range, editor]);
 
 	const executeCommand = useCallback(
