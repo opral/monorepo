@@ -1,138 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-	CheckSquare,
-	Code2,
-	Heading1,
-	Heading2,
-	Heading3,
-	List,
-	ListOrdered,
-	Minus,
-	Pilcrow,
-	Table,
-	TextQuote,
-} from "lucide-react";
-import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../editor/editor-context";
 import {
 	slashCommandsPluginKey,
 	type SlashCommandState,
 } from "../editor/extensions/slash-commands";
+import { SLASH_BLOCK_COMMANDS, type BlockCommand } from "../editor/block-commands";
 
-type SlashCommand = {
-	id: string;
-	label: string;
-	icon: React.ComponentType<{ className?: string }>;
-	keywords: string[];
-	action: (editor: Editor) => void;
-};
-
-const SLASH_COMMANDS: SlashCommand[] = [
-	{
-		id: "paragraph",
-		label: "Text",
-		icon: Pilcrow,
-		keywords: ["p", "text", "paragraph"],
-		action: (editor) => editor.chain().focus().setNode("paragraph").run(),
-	},
-	{
-		id: "heading1",
-		label: "Heading 1",
-		icon: Heading1,
-		keywords: ["h1", "#", "title"],
-		action: (editor) =>
-			editor.chain().focus().setNode("heading", { level: 1 }).run(),
-	},
-	{
-		id: "heading2",
-		label: "Heading 2",
-		icon: Heading2,
-		keywords: ["h2", "##", "subtitle"],
-		action: (editor) =>
-			editor.chain().focus().setNode("heading", { level: 2 }).run(),
-	},
-	{
-		id: "heading3",
-		label: "Heading 3",
-		icon: Heading3,
-		keywords: ["h3", "###"],
-		action: (editor) =>
-			editor.chain().focus().setNode("heading", { level: 3 }).run(),
-	},
-	{
-		id: "bulletList",
-		label: "Bullet List",
-		icon: List,
-		keywords: ["ul", "-", "unordered", "bullets"],
-		action: (editor) => {
-			const chain = editor.chain().focus() as any;
-			if (!chain.wrapIn?.("bulletList")?.run?.()) {
-				chain.toggleBulletList?.()?.run?.();
-			}
-		},
-	},
-	{
-		id: "orderedList",
-		label: "Numbered List",
-		icon: ListOrdered,
-		keywords: ["ol", "1.", "numbered", "ordered"],
-		action: (editor) => {
-			const chain = editor.chain().focus() as any;
-			if (!chain.wrapIn?.("orderedList")?.run?.()) {
-				chain.toggleOrderedList?.()?.run?.();
-			}
-		},
-	},
-	{
-		id: "taskList",
-		label: "To-do List",
-		icon: CheckSquare,
-		keywords: ["todo", "checkbox", "checklist", "task", "[]"],
-		action: (editor) => {
-			if (typeof editor.chain().focus().toggleTaskList === "function") {
-				editor.chain().focus().toggleTaskList().run();
-				return;
-			}
-			// Fallback: create bullet list with checked attribute
-			const chain = editor.chain().focus() as any;
-			chain.wrapIn?.("bulletList")?.run?.();
-		},
-	},
-	{
-		id: "codeBlock",
-		label: "Code Block",
-		icon: Code2,
-		keywords: ["code", "```", "pre", "snippet"],
-		action: (editor) => editor.chain().focus().setNode("codeBlock").run(),
-	},
-	{
-		id: "blockquote",
-		label: "Quote",
-		icon: TextQuote,
-		keywords: [">", "quote", "blockquote"],
-		action: (editor) => editor.chain().focus().wrapIn("blockquote").run(),
-	},
-	{
-		id: "horizontalRule",
-		label: "Divider",
-		icon: Minus,
-		keywords: ["hr", "---", "divider", "line", "separator"],
-		action: (editor) => editor.chain().focus().setHorizontalRule().run(),
-	},
-	{
-		id: "table",
-		label: "Table",
-		icon: Table,
-		keywords: ["table", "grid"],
-		action: (editor) => {
-			const chain = editor.chain().focus() as any;
-			chain.insertTable?.({ rows: 3, cols: 3, withHeaderRow: true })?.run?.();
-		},
-	},
-];
-
-function filterCommands(commands: SlashCommand[], query: string): SlashCommand[] {
+function filterCommands(commands: BlockCommand[], query: string): BlockCommand[] {
 	if (!query) return commands;
 	const lowerQuery = query.toLowerCase();
 	return commands.filter(
@@ -156,7 +31,7 @@ export function SlashCommandMenu() {
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	const filteredCommands = useMemo(
-		() => filterCommands(SLASH_COMMANDS, slashState.query),
+		() => filterCommands(SLASH_BLOCK_COMMANDS, slashState.query),
 		[slashState.query]
 	);
 
@@ -192,9 +67,12 @@ export function SlashCommandMenu() {
 			return;
 		}
 
+		// Capture range value for closure
+		const range = slashState.range;
+
 		const updatePosition = () => {
 			const { view } = editor;
-			const coords = view.coordsAtPos(slashState.range.from);
+			const coords = view.coordsAtPos(range.from);
 			const editorRect = view.dom.getBoundingClientRect();
 
 			// Position below the slash character
@@ -212,20 +90,20 @@ export function SlashCommandMenu() {
 	}, [slashState.active, slashState.range, editor]);
 
 	const executeCommand = useCallback(
-		(command: SlashCommand) => {
+		(command: BlockCommand) => {
 			if (!editor) return;
 
 			// Delete the slash and query text
 			(editor.commands as any).deleteSlashCommand?.();
 
-			// Execute the command action
-			command.action(editor);
+			// Execute the command insert action
+			command.insert(editor);
 		},
 		[editor]
 	);
 
 	const handleItemClick = useCallback(
-		(command: SlashCommand) => {
+		(command: BlockCommand) => {
 			executeCommand(command);
 		},
 		[executeCommand]

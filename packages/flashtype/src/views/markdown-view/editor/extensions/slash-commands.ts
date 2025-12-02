@@ -1,8 +1,20 @@
-import { Extension } from "@tiptap/core";
+import { Extension, type CommandProps } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 
-export const slashCommandsPluginKey = new PluginKey("slashCommands");
+// Extend Commands interface for slash command extension
+declare module "@tiptap/core" {
+	interface Commands<ReturnType> {
+		slashCommands: {
+			closeSlashMenu: () => ReturnType;
+			deleteSlashCommand: () => ReturnType;
+		};
+	}
+}
+
+export const slashCommandsPluginKey = new PluginKey<SlashCommandState>(
+	"slashCommands"
+);
 
 export type SlashCommandState = {
 	active: boolean;
@@ -165,7 +177,7 @@ export const SlashCommandsExtension = Extension.create<SlashCommandsOptions>({
 		return {
 			closeSlashMenu:
 				() =>
-				({ tr, dispatch }) => {
+				({ tr, dispatch }: CommandProps) => {
 					if (dispatch) {
 						dispatch(tr.setMeta(slashCommandsPluginKey, { close: true }));
 					}
@@ -173,7 +185,7 @@ export const SlashCommandsExtension = Extension.create<SlashCommandsOptions>({
 				},
 			deleteSlashCommand:
 				() =>
-				({ tr, dispatch, state }) => {
+				({ tr, dispatch, state }: CommandProps) => {
 					const pluginState = slashCommandsPluginKey.getState(state);
 					if (!pluginState?.active || !pluginState.range) {
 						return false;

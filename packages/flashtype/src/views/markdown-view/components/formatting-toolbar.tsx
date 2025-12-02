@@ -4,7 +4,6 @@ import {
 	useMemo,
 	useRef,
 	useState,
-	type ComponentType,
 	type MouseEvent,
 	type SVGProps,
 } from "react";
@@ -18,29 +17,20 @@ import {
 	CheckSquare,
 	ChevronDown,
 	Code2,
-	Heading1,
-	Heading2,
-	Heading3,
 	Italic,
 	List,
 	ListOrdered,
-	Pilcrow,
-	TextQuote,
 } from "lucide-react";
 import type { Editor } from "@tiptap/core";
 import { useEditorCtx } from "../editor/editor-context";
 import { buildMarkdownFromEditor } from "../editor/build-markdown-from-editor";
-
-type BlockType =
-	| "paragraph"
-	| "heading-1"
-	| "heading-2"
-	| "heading-3"
-	| "code"
-	| "blockquote";
+import {
+	TOOLBAR_BLOCK_OPTIONS,
+	type ToolbarBlockType,
+} from "../editor/block-commands";
 
 type FormatState = {
-	block: BlockType;
+	block: ToolbarBlockType;
 	isBold: boolean;
 	isItalic: boolean;
 	isCode: boolean;
@@ -49,85 +39,12 @@ type FormatState = {
 	isTaskList: boolean;
 };
 
-type BlockOption = {
-	value: BlockType;
-	label: string;
-	description: string;
-	icon: ComponentType<{ className?: string }>;
-	apply: (editor: Editor) => void;
-};
-
 const toolbarButtonClass =
 	"inline-flex h-7 min-w-7 select-none items-center rounded-sm px-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40";
 
 const ToolbarSeparator = () => (
 	<Toolbar.Separator className="mx-1 h-4 w-px bg-border" />
 );
-
-const BLOCK_OPTIONS: BlockOption[] = [
-	{
-		value: "paragraph",
-		label: "Text",
-		description: "Paragraph",
-		icon: Pilcrow,
-		apply: (editor) => {
-			editor.chain().focus().setNode("paragraph").run();
-		},
-	},
-	{
-		value: "heading-1",
-		label: "Heading 1",
-		description: "Large heading",
-		icon: Heading1,
-		apply: (editor) => {
-			editor.chain().focus().setNode("heading", { level: 1 }).run();
-		},
-	},
-	{
-		value: "heading-2",
-		label: "Heading 2",
-		description: "Section heading",
-		icon: Heading2,
-		apply: (editor) => {
-			editor.chain().focus().setNode("heading", { level: 2 }).run();
-		},
-	},
-	{
-		value: "heading-3",
-		label: "Heading 3",
-		description: "Subheading",
-		icon: Heading3,
-		apply: (editor) => {
-			editor.chain().focus().setNode("heading", { level: 3 }).run();
-		},
-	},
-	{
-		value: "code",
-		label: "Code",
-		description: "Code block",
-		icon: Code2,
-		apply: (editor) => {
-			if (editor.isActive("codeBlock")) {
-				editor.chain().focus().lift("codeBlock").run();
-			} else {
-				editor.chain().focus().setNode("codeBlock").run();
-			}
-		},
-	},
-	{
-		value: "blockquote",
-		label: "Quote",
-		description: "Quoted text",
-		icon: TextQuote,
-		apply: (editor) => {
-			if (editor.isActive("blockquote")) {
-				editor.chain().focus().lift("blockquote").run();
-			} else {
-				editor.chain().focus().wrapIn("blockquote").run();
-			}
-		},
-	},
-];
 
 const initialFormatState: FormatState = {
 	block: "paragraph",
@@ -155,7 +72,7 @@ export function FormattingToolbar({ className }: { className?: string }) {
 	const [blockMenuOpen, setBlockMenuOpen] = useState(false);
 	const longestBlockLabel = useMemo(
 		() =>
-			BLOCK_OPTIONS.reduce(
+			TOOLBAR_BLOCK_OPTIONS.reduce(
 				(acc, option) =>
 					option.label.length > acc.length ? option.label : acc,
 				"",
@@ -206,16 +123,16 @@ export function FormattingToolbar({ className }: { className?: string }) {
 	}, [editor, hasTaskListCommand]);
 
 	const activeBlockLabel = useMemo(() => {
-		const active = BLOCK_OPTIONS.find(
+		const active = TOOLBAR_BLOCK_OPTIONS.find(
 			(option) => option.value === formatState.block,
 		);
 		return active?.label ?? "Text";
 	}, [formatState.block]);
 
 	const handleBlockChange = useCallback(
-		(value: BlockType) => {
+		(value: ToolbarBlockType) => {
 			if (!editor) return;
-			const option = BLOCK_OPTIONS.find((entry) => entry.value === value);
+			const option = TOOLBAR_BLOCK_OPTIONS.find((entry) => entry.value === value);
 			option?.apply(editor);
 			setBlockMenuOpen(false);
 		},
@@ -380,7 +297,7 @@ export function FormattingToolbar({ className }: { className?: string }) {
 									<div className="px-2 pb-1 pt-1 text-xs font-medium text-muted-foreground">
 										Turn into
 									</div>
-									{BLOCK_OPTIONS.map((option) => (
+									{TOOLBAR_BLOCK_OPTIONS.map((option) => (
 										<Select.Item
 											key={option.value}
 											value={option.value}
@@ -549,7 +466,7 @@ export function FormattingToolbar({ className }: { className?: string }) {
 	);
 }
 
-function getActiveBlock(editor: Editor): BlockType {
+function getActiveBlock(editor: Editor): ToolbarBlockType {
 	if (editor.isActive("heading", { level: 1 })) return "heading-1";
 	if (editor.isActive("heading", { level: 2 })) return "heading-2";
 	if (editor.isActive("heading", { level: 3 })) return "heading-3";
