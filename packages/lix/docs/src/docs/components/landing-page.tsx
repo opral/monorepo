@@ -836,25 +836,32 @@ function LandingPage() {
 
   const featureSpotlights = [
     {
+      id: "async-workflows",
+      title: "Agents can branch",
+      description: (
+        <>
+          Agents work in isolated{" "}
+          <a href="/docs/version" className="underline hover:text-[#0891b2]">
+            versions
+          </a>{" "}
+          without affecting user data.
+        </>
+      ),
+      Illustration: AsyncWorkflowIllustration,
+    },
+    {
       id: "review-everything",
-      title: "Every AI change is tracked",
+      title: "Every change is tracked",
       description:
-        "Lix tracks every change AI agents do. Query the changes and display diffs in apps.",
+        "Lix tracks every change. Query the history and display diffs in your app.",
       Illustration: CursorEditingIllustration,
     },
     {
       id: "human-approval",
       title: "Users stay in control",
       description:
-        "Change proposals allow users to accept or reject AI changes.",
+        "Change proposals let users review, accept, or reject changes.",
       Illustration: AuditWorkflowIllustration,
-    },
-    {
-      id: "async-workflows",
-      title: "Sandboxed state for AI agents",
-      description:
-        "Versions let AI agents experiment without affecting user data.",
-      Illustration: AsyncWorkflowIllustration,
     },
   ];
 
@@ -873,47 +880,92 @@ function LandingPage() {
     };
 
   return (
-    <div className="font-sans text-gray-900 bg-gradient-to-b from-gray-50 to-white">
+    <div className="font-sans text-gray-900 bg-white">
       {/* Main content */}
       <main className="relative px-4 sm:px-6">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden pt-16 pb-16 px-4 sm:px-6">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-white pointer-events-none" />
-          <div className="relative max-w-5xl mx-auto text-center">
-            <h1 className="text-gray-900 font-bold leading-tight text-4xl sm:text-6xl tracking-tight mb-8">
-              Change control SDK for
+        {/* Hero Section - Simplified */}
+        <section className="relative pt-20 pb-16 px-4 sm:px-6">
+          <div className="relative max-w-4xl mx-auto text-center">
+            <h1 className="text-gray-900 font-bold leading-[1.1] text-4xl sm:text-5xl md:text-6xl tracking-tight">
+              Change control for
               <br />
-              apps and <span style={{ color: "#0692B6" }}>AI agents</span>
+              apps and <span className="text-[#0891b2]">AI agents</span>
             </h1>
 
-            <p className="text-gray-600 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed mt-12">
+            <p className="text-gray-500 text-lg sm:text-xl max-w-4xl mx-auto mt-8">
               Lix is an embeddable change control system that enables Git-like
-              features such as history, versions (branches), diffs, or blame for
-              any file format and application.
+              features for any file format.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16  mt-8">
-              <a
-                href="/docs/getting-started"
-                className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                style={{ backgroundColor: "#0692B6", color: "#ffffff" }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.backgroundColor = "#047497";
-                  event.currentTarget.style.color = "#ffffff";
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.backgroundColor = "#0692B6";
-                  event.currentTarget.style.color = "#ffffff";
-                }}
-              >
-                Getting started
+            {/* Trust signals - Large stat blocks with icons */}
+            <div className="flex items-center justify-center gap-8 sm:gap-12 mt-12">
+              <div className="flex flex-col items-center">
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2"
+                  className="w-5 h-5 text-gray-400 mb-1.5"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="#ffffff"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                  />
+                </svg>
+                <div className="text-2xl font-bold text-gray-900">50k+</div>
+                <div className="text-sm text-gray-500 mt-1">
+                  Weekly downloads
+                </div>
+              </div>
+              <div className="w-px h-14 bg-gray-200" />
+              <a
+                href="https://github.com/opral/monorepo/graphs/contributors"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center hover:opacity-70 transition-opacity"
+              >
+                <svg
+                  className="w-5 h-5 text-gray-400 mb-1.5"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.48 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
+                </svg>
+                <div className="text-2xl font-bold text-gray-900">100+</div>
+                <div className="text-sm text-gray-500 mt-1">Contributors</div>
+              </a>
+              <div className="w-px h-14 bg-gray-200" />
+              <div className="flex flex-col items-center">
+                <svg
+                  className="w-5 h-5 text-gray-400 mb-1.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
+                  />
+                </svg>
+                <div className="text-2xl font-bold text-gray-900">MIT</div>
+                <div className="text-sm text-gray-500 mt-1">Open Source</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+              <a
+                href="/docs/getting-started"
+                className="inline-flex items-center justify-center h-11 px-6 rounded-lg text-sm font-medium bg-[#0891b2] text-white hover:bg-[#0e7490] transition-colors"
+              >
+                Get started
+                <svg
+                  className="h-4 w-4 ml-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                   strokeWidth={2}
                 >
                   <path
@@ -923,89 +975,197 @@ function LandingPage() {
                   />
                 </svg>
               </a>
-              <PackageInstaller />
               <a
-                href="https://flashtype.ai"
+                href="https://github.com/opral/lix-sdk"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 border border-gray-300 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-300"
-              >
-                Try an example app
-              </a>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
-              <a
-                href="https://www.npmjs.com/package/@lix-js/sdk"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-2.5 py-6 px-5 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
+                className="inline-flex h-11 items-center justify-center gap-2 px-5 rounded-lg border border-gray-300 bg-white text-sm text-gray-800 transition-colors duration-200 hover:bg-gray-50"
               >
                 <svg
-                  className="w-8 h-8 text-red-500"
+                  className="w-5 h-5"
                   viewBox="0 0 24 24"
                   fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
-                </svg>
-                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
-                  npm
-                </span>
-                <span className="font-semibold text-sm text-gray-900">
-                  50k+ weekly downloads
-                </span>
-              </a>
-
-              <a
-                href="https://github.com/opral/monorepo/graphs/contributors"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-2.5 py-6 px-5 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
-              >
-                <svg
-                  className="w-8 h-8 text-gray-700"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.48 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
                 </svg>
-                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
-                  GitHub
-                </span>
-                <span className="font-semibold text-sm text-gray-900">
-                  100+ contributors
-                </span>
+                GitHub
               </a>
+            </div>
 
-              <a
-                href="https://github.com/opral/monorepo/blob/main/packages/lix/sdk/LICENSE"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-2.5 py-6 px-5 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
-              >
+            {/* Hero code snippet with language tabs */}
+            <div className="mt-10 w-full max-w-2xl mx-auto">
+              <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+                <div className="flex items-center px-4 border-b border-gray-200 bg-gray-50">
+                  <div className="flex gap-6 text-sm">
+                    <button className="flex items-center gap-2 text-gray-900 font-medium border-b-2 border-gray-900 py-3 px-1 cursor-pointer">
+                      <JsIcon className="h-4 w-4" />
+                      JavaScript
+                    </button>
+                    <a
+                      href="https://github.com/opral/lix-sdk/issues/370"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-400 py-3 px-1 hover:text-gray-600 transition-colors cursor-pointer"
+                    >
+                      <PythonIcon className="h-4 w-4" />
+                      Python
+                    </a>
+                    <a
+                      href="https://github.com/opral/lix-sdk/issues/371"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-400 py-3 px-1 hover:text-gray-600 transition-colors cursor-pointer"
+                    >
+                      <RustIcon className="h-4 w-4" />
+                      Rust
+                    </a>
+                    <a
+                      href="https://github.com/opral/lix-sdk/issues/373"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-400 py-3 px-1 hover:text-gray-600 transition-colors cursor-pointer"
+                    >
+                      <GoIcon className="h-4 w-4" />
+                      Go
+                    </a>
+                  </div>
+                </div>
+                <div className="p-5 text-sm leading-relaxed font-mono text-left overflow-x-auto whitespace-pre-wrap">
+                  <span className="text-indigo-600">import</span>{" "}
+                  <span className="text-gray-900">
+                    {"{ openLix, InMemoryEnvironment }"}
+                  </span>{" "}
+                  <span className="text-indigo-600">from</span>{" "}
+                  <span className="text-amber-600">"@lix-js/sdk"</span>
+                  <span className="text-gray-900">;</span>
+                  <br />
+                  <span className="text-indigo-600">import</span>{" "}
+                  <span className="text-gray-900">{"{ plugin "}</span>
+                  <span className="text-indigo-600">as</span>
+                  <span className="text-gray-900">{" json }"}</span>{" "}
+                  <span className="text-indigo-600">from</span>{" "}
+                  <span className="text-amber-600">"@lix-js/plugin-json"</span>
+                  <span className="text-gray-900">;</span>
+                  <br />
+                  <br />
+                  <span className="text-indigo-600">const</span>{" "}
+                  <span className="text-gray-900">lix</span>{" "}
+                  <span className="text-gray-900">= openLix</span>
+                  <span className="text-gray-900">{"({"}</span>
+                  <br />
+                  <span className="text-sky-600">{"  environment"}</span>
+                  <span className="text-gray-900">{": "}</span>
+                  <span className="text-indigo-600">new</span>
+                  <span className="text-gray-900">
+                    {" InMemoryEnvironment(),"}
+                  </span>
+                  <br />
+                  <span className="text-sky-600">{"  providePlugins"}</span>
+                  <span className="text-gray-900">{": ["}</span>
+                  <span className="text-gray-900">json</span>
+                  <span className="text-gray-900">{"]"}</span>
+                  <br />
+                  <span className="text-gray-900">{"})"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Value Props - Lightweight */}
+        <section className="py-12 px-6 sm:px-12 md:px-16 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
+              <div className="flex flex-col items-center sm:items-start gap-3">
                 <svg
-                  className="w-8 h-8 text-gray-700"
+                  className="w-7 h-7 text-[#0891b2]"
+                  fill="none"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
                 >
-                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12zM11 7h2v6h-2V7zm0 8h2v2h-2v-2z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                  />
                 </svg>
-                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
-                  License
-                </span>
-                <span className="font-semibold text-sm text-gray-900">
-                  MIT Open Source
-                </span>
-              </a>
+                <div className="text-center sm:text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Any file format
+                  </h3>
+                  <p className="text-gray-600 text-base mt-2">
+                    Lix can track changes in any file format like{" "}
+                    <code className="text-sm bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 font-medium">
+                      .xlsx
+                    </code>
+                    ,{" "}
+                    <code className="text-sm bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 font-medium">
+                      .pdf
+                    </code>
+                    ,{" "}
+                    <code className="text-sm bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 font-medium">
+                      .json
+                    </code>{" "}
+                    etc. via plugins.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center sm:items-start gap-3">
+                <svg
+                  className="w-7 h-7 text-[#0891b2]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <circle cx="18" cy="18" r="3" />
+                  <circle cx="6" cy="6" r="3" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 21V9a9 9 0 009 9"
+                  />
+                </svg>
+                <div className="text-center sm:text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Diff, merge & branch
+                  </h3>
+                  <p className="text-gray-600 text-base mt-2">
+                    Query history, compare versions, and manage changes via SQL.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center sm:items-start gap-3">
+                <svg
+                  className="w-7 h-7 text-[#0891b2]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z"
+                  />
+                </svg>
+                <div className="text-center sm:text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Integrates with your stack
+                  </h3>
+                  <p className="text-gray-600 text-base mt-2">
+                    Lix runs embedded in your app as a single SQLite file,
+                    persistable anywhere e.g. local FS, S3, your database.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* What You Can Build Section */}
-        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
+        <section className="py-16 px-6 sm:px-12 md:px-16 bg-white border-t border-gray-200">
           <div className="max-w-6xl mx-auto">
             <h2 className="flex flex-wrap items-center justify-center gap-2 text-center text-2xl sm:text-3xl font-bold text-gray-900">
               <span>What people build with</span>
@@ -1030,9 +1190,7 @@ function LandingPage() {
                       />
                     </div>
                     <div className="flex items-center justify-between gap-4 px-5 py-4 text-gray-900">
-                      <h3 className="text-base font-semibold sm:text-lg md:text-xl">
-                        {title}
-                      </h3>
+                      <h3 className="text-lg font-semibold">{title}</h3>
                       <span className="relative inline-flex items-center text-sm font-medium text-[#0692B6]">
                         <span className="sr-only">{ctaLabel}</span>
                         <span
@@ -1052,11 +1210,11 @@ function LandingPage() {
         </section>
 
         {/* Primary Features */}
-        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white">
+        <section className="pt-10 pb-16 px-6 sm:px-12 md:px-16 bg-white border-t border-gray-200">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Key features
+                How lix works
               </h2>
             </div>
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,340px)_1fr]">
@@ -1298,10 +1456,10 @@ function LandingPage() {
         </section>
 
         {/* Feature Spotlights */}
-        <section className="py-12 px-6 sm:px-12 md:px-16 bg-white">
+        <section className="py-12 px-6 sm:px-12 md:px-16 bg-white border-t border-gray-200">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900">
-              Lix enables the most powerful AI apps
+              Lix enables the most powerful apps & agents
             </h2>
             <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
               {featureSpotlights.map(
@@ -1314,7 +1472,7 @@ function LandingPage() {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {title}
                       </h3>
-                      <p className="mt-3 text-base text-gray-600">
+                      <p className="mt-2 text-base text-gray-600">
                         {description}
                       </p>
                     </div>
