@@ -465,3 +465,77 @@ test("compiles messages that use datetime a function with options", async () => 
 		/Today is \d{1,2}\. März\./
 	);
 });
+
+test("does not throw when input is omitted for a single-variant message", async () => {
+	const declarations: Declaration[] = [
+		{ type: "input-variable", name: "name" },
+	];
+	const message: Message = {
+		locale: "en",
+		bundleId: "greeting",
+		id: "greeting",
+		selectors: [{ type: "variable-reference", name: "name" }],
+	};
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "greeting",
+			matches: [{ type: "catchall-match", key: "name" }],
+			pattern: [
+				{ type: "text", value: "Hello " },
+				{
+					type: "expression",
+					arg: { type: "variable-reference", name: "name" },
+				},
+				{ type: "text", value: "!" },
+			],
+		},
+	];
+
+	const compiled = compileMessage(declarations, message, variants);
+
+	const { greeting } = await import(
+		"data:text/javascript;base64," +
+			btoa("export const greeting = " + compiled.code)
+	);
+
+	expect(() => greeting()).not.toThrow();
+	expect(greeting()).toBe("Hello undefined!");
+});
+
+test("does not throw when input is omitted for multi-variant message", async () => {
+	const declarations: Declaration[] = [
+		{ type: "input-variable", name: "status" },
+	];
+	const message: Message = {
+		locale: "en",
+		bundleId: "status_message",
+		id: "status_message",
+		selectors: [{ type: "variable-reference", name: "status" }],
+	};
+	const variants: Variant[] = [
+		{
+			id: "1",
+			messageId: "status_message",
+			matches: [{ type: "literal-match", key: "status", value: "ready" }],
+			pattern: [{ type: "text", value: "Ready to go" }],
+		},
+		{
+			id: "2",
+			messageId: "status_message",
+			matches: [{ type: "catchall-match", key: "status" }],
+			pattern: [{ type: "text", value: "Unknown status" }],
+		},
+	];
+
+	const compiled = compileMessage(declarations, message, variants);
+
+	const { status_message } = await import(
+		"data:text/javascript;base64," +
+			btoa("export const status_message = " + compiled.code)
+	);
+
+	expect(status_message({ status: "ready" })).toBe("Ready to go");
+	expect(() => status_message()).not.toThrow();
+	expect(status_message()).toBe("Unknown status");
+});
