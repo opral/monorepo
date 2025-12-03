@@ -836,20 +836,6 @@ function LandingPage() {
 
   const featureSpotlights = [
     {
-      id: "async-workflows",
-      title: "Agents can branch",
-      description: (
-        <>
-          Agents work in isolated{" "}
-          <a href="/docs/version" className="underline hover:text-[#0891b2]">
-            versions
-          </a>{" "}
-          without affecting user data.
-        </>
-      ),
-      Illustration: AsyncWorkflowIllustration,
-    },
-    {
       id: "review-everything",
       title: "Every change is tracked",
       description:
@@ -862,6 +848,20 @@ function LandingPage() {
       description:
         "Change proposals let users review, accept, or reject changes.",
       Illustration: AuditWorkflowIllustration,
+    },
+    {
+      id: "async-workflows",
+      title: "Agents can experiment",
+      description: (
+        <>
+          Agents work in isolated{" "}
+          <a href="/docs/version" className="underline hover:text-[#0891b2]">
+            versions
+          </a>{" "}
+          without affecting user data.
+        </>
+      ),
+      Illustration: AsyncWorkflowIllustration,
     },
   ];
 
