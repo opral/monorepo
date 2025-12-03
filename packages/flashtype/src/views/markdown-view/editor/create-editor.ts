@@ -10,6 +10,8 @@ import {
 import { parseMarkdown, AstSchemas, normalizeAst } from "@opral/markdown-wc";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { handlePaste as defaultHandlePaste } from "./handle-paste";
+import { SlashCommandsExtension } from "./extensions/slash-commands";
+import { TableNavigationExtension } from "./extensions/table-navigation";
 
 type CreateEditorArgs = {
 	lix: Lix;
@@ -206,6 +208,10 @@ export function createEditor(args: CreateEditorArgs): Editor {
 				newGroupDelay: 500,
 			}),
 			Placeholder.configure(placeholderConfig),
+			SlashCommandsExtension.configure({
+				onStateChange: () => {},
+			}),
+			TableNavigationExtension,
 		],
 		content: astToTiptapDoc(ast) as any,
 		onCreate: ({ editor }) => {
