@@ -19,7 +19,7 @@ Git tracks text line-by-line. Lix is schema-aware - it understands data structur
 
 **Use Git for source code.** Git is purpose-built for software engineering and developer workflows.
 
-**Use Lix for everything else.** Applications that need change control for structured data, non-code files, or embedded change control.
+**Use Lix for everything else.** Structured data like JSON, CSV, Excel, or any non-code file format.
 
 ## Key Differences
 
@@ -72,7 +72,7 @@ const priceHistory = await lix.db
 
 Plugins can handle JSON, CSV, Excel, PDFs, design files, or proprietary formats.
 
-### 3. Embeddable with SQL Queries
+### 3. SDK, Not CLI
 
 **Git** is an external CLI tool. Integrating it into applications requires shelling out to commands and parsing text output.
 
