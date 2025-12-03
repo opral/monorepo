@@ -886,6 +886,32 @@ function LandingPage() {
         {/* Hero Section - Simplified */}
         <section className="relative pt-20 pb-12 px-4 sm:px-6">
           <div className="relative max-w-4xl mx-auto text-center">
+            {/* Beta Chip */}
+            <a
+              href="https://github.com/opral/lix-sdk/issues/374"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-sm text-amber-800 hover:bg-amber-100 transition-colors"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
+              <span>
+                <span className="font-medium">Lix is in beta</span> · Follow
+                progress to v1.0
+              </span>
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
             <h1 className="text-gray-900 font-bold leading-[1.1] text-4xl sm:text-5xl md:text-6xl tracking-tight">
               Change control for
               <br />
