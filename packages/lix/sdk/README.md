@@ -2,13 +2,16 @@
 
 [![NPM Downloads](https://img.shields.io/npm/dw/%40lix-js%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads)](https://www.npmjs.com/package/@lix-js/sdk) [![Discord](https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white)](https://discord.gg/gdMPPWy57R) [![X (Twitter)](https://img.shields.io/badge/Follow-@lixCCS-black?logo=x&logoColor=white)](https://x.com/lixCCS)
 
+> [!NOTE]
+> **Lix is in beta** · [Follow progress to v1.0 →](https://github.com/opral/lix-sdk/issues/374)
+
 Lix is an embeddable change control system that enables Git-like features such as [history](https://lix.dev/docs/history), [versions](https://lix.dev/docs/versions) (branches), [diffs](https://lix.dev/docs/), or [blame](https://lix.dev/docs/attribution) for any file format.
 
 **What makes Lix unique:**
 
-- **Supports any file format** - Like JSON, CSV, Excel etc. via plugins.
-- **Embedded** - Runs as part of your application with no separate database, server, or process.
-- **SDK-first** - Programmatic APIs for versioning, change proposals, diffs, history, and merge workflows.
+- **Supports any file format** - Track changes in `.xlsx`, `.pdf`, `.json` etc. via plugins.
+- **SQL powered** - History, versions, and diffs are all queryable via SQL.
+- **Embedded** - Runs as a single SQLite file, persistable anywhere (local FS, S3, your database).
 
 ---
 

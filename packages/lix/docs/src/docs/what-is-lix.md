@@ -2,11 +2,11 @@
 
 Lix is an embeddable change control system that enables Git-like features such as [history](/docs/history), [versions](/docs/versions) (branches), [diffs](/docs/diffs), or [blame](/docs/attribution) for any file format and application.
 
-What makes lix unique:
+What makes Lix unique:
 
-- **Supports any file format** - Like JSON, CSV, Excel etc. via plugins.
-- **Embedded** - Runs as part of your application with no separate database, server, or process.
-- **SDK-first** - Programmatic APIs for versioning, change propsoals, diffs, history, and merge workflows.
+- **Supports any file format** - Track changes in `.xlsx`, `.pdf`, `.json` etc. via plugins.
+- **SQL powered** - History, versions, and diffs are all queryable via SQL.
+- **Embedded** - Runs as a single SQLite file, persistable anywhere (local FS, S3, your database).
 
 ## Features
 
