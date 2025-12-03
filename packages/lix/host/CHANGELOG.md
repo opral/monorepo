@@ -1,5 +1,15 @@
 # @lix-js/host
 
+## 0.0.17
+
+### Patch Changes
+
+- Updated dependencies [65d2f15]
+- Updated dependencies [784ee7b]
+  - @lix-js/sdk@0.5.1
+  - csv-app@0.2.13
+  - lix-file-manager@0.2.13
+
 ## 0.0.16
 
 ### Patch Changes

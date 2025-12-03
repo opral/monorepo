@@ -1,5 +1,14 @@
 # @lix-js/plugin-md
 
+## 0.2.1
+
+### Patch Changes
+
+- 7fb4c69: improved readme
+- Updated dependencies [65d2f15]
+- Updated dependencies [784ee7b]
+  - @lix-js/sdk@0.5.1
+
 ## 0.2.0
 
 ### Minor Changes
