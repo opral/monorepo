@@ -55,7 +55,7 @@ test("compiles to jsdoc", async () => {
 * 
 * @param {{ age: NonNullable<unknown> }} inputs
 * @param {{ locale?: "en" | "en-US" }} options
-* @returns {string}
+* @returns {LocalizedString}
 */
 /* @__NO_SIDE_EFFECTS__ */
 export const blue_moon_bottle = (inputs, options = {}) => {
@@ -122,7 +122,7 @@ test("compiles to jsdoc with missing translation", async () => {
 * 
 * @param {{ age: NonNullable<unknown> }} inputs
 * @param {{ locale?: "en" | "en-US" }} options
-* @returns {string}
+* @returns {LocalizedString}
 */
 /* @__NO_SIDE_EFFECTS__ */
 export const blue_moon_bottle = (inputs, options = {}) => {

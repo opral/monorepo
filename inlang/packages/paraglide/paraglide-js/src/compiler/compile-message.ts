@@ -51,8 +51,8 @@ function compileMessageWithOneVariant(
 		}
 	}
 
-	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */ (${hasInputs ? "i" : ""}) => {
-	${compiledLocalVariables.join("\n\t")}return ${compiledPattern.code}
+	const code = `/** @type {(inputs: ${inputsType(inputs)}) => LocalizedString} */ (${hasInputs ? "i" : ""}) => {
+	${compiledLocalVariables.join("\n\t")}return /** @type {LocalizedString} */ (${compiledPattern.code})
 };`;
 
 	return { code, node: message };
@@ -86,7 +86,7 @@ function compileMessageWithMultipleVariants(
 		);
 
 		if (isCatchAll) {
-			compiledVariants.push(`return ${compiledPattern.code}`);
+			compiledVariants.push(`return /** @type {LocalizedString} */ (${compiledPattern.code})`);
 			hasCatchAll = true;
 		}
 
@@ -109,7 +109,7 @@ function compileMessageWithMultipleVariants(
 
 		if (conditions.length === 0) continue;
 		compiledVariants.push(
-			`if (${conditions.join(" && ")}) return ${compiledPattern.code};`
+			`if (${conditions.join(" && ")}) return /** @type {LocalizedString} */ (${compiledPattern.code});`
 		);
 	}
 
@@ -123,9 +123,9 @@ function compileMessageWithMultipleVariants(
 		}
 	}
 
-	const code = `/** @type {(inputs: ${inputsType(inputs)}) => string} */ (${hasInputs ? "i" : ""}) => {${compiledLocalVariables.join("\n\t")}
+	const code = `/** @type {(inputs: ${inputsType(inputs)}) => LocalizedString} */ (${hasInputs ? "i" : ""}) => {${compiledLocalVariables.join("\n\t")}
 	${compiledVariants.join("\n\t")}
-	${hasCatchAll ? "" : `return "${message.bundleId}";`}
+	${hasCatchAll ? "" : `return /** @type {LocalizedString} */ ("${message.bundleId}");`}
 };`;
 
 	return { code, node: message };

@@ -171,7 +171,7 @@ test("only emits input arguments when inputs exist", async () => {
 	const compiled = compileMessage(declarations, message, variants);
 
 	expect(compiled.code).toBe(
-		"/** @type {(inputs: {}) => string} */ () => {\n\treturn `Hello`\n};"
+		"/** @type {(inputs: {}) => LocalizedString} */ () => {\n\treturn /** @type {LocalizedString} */ (`Hello`)\n};"
 	);
 });
 
