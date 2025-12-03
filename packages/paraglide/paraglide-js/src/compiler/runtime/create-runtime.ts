@@ -157,6 +157,13 @@ ${injectCode("./strategy.js")}
  * @typedef {(typeof locales)[number]} Locale
  */
 
+/**
+ * A branded type representing a localized string.
+ * Message functions return this type to distinguish translated strings from regular strings at compile time.
+ *
+ * @typedef {string & { readonly __brand: 'LocalizedString' }} LocalizedString
+ */
+
 `;
 
 	return code;

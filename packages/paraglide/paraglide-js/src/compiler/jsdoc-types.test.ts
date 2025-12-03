@@ -37,3 +37,16 @@ test("jsDocBundleFunctionTypes correctly handles messages with duplicate inputs"
 		"@param {{ days: NonNullable<unknown>, days: NonNullable<unknown> }} inputs"
 	);
 });
+
+test("jsDocBundleFunctionTypes returns LocalizedString type", () => {
+	const inputs: InputVariable[] = [];
+	const locales = ["en", "de"];
+
+	const result = jsDocBundleFunctionTypes({ inputs, locales });
+
+	// The JSDoc should specify LocalizedString as the return type
+	expect(result).toContain("@returns {LocalizedString}");
+
+	// It should not return plain string
+	expect(result).not.toContain("@returns {string}");
+});
