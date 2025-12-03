@@ -1,5 +1,12 @@
 # @lix-js/sdk
 
+## 0.5.1
+
+### Patch Changes
+
+- 65d2f15: Add webpack/rspack ignore hints to dynamic inline plugin imports and document usage with a JSDoc example.
+- 784ee7b: Fix observe invalidation for file queries so file reads re-emit when state commits touch the same file, preventing stale data from being served.
+
 ## 0.5.0
 
 ### Minor Changes
