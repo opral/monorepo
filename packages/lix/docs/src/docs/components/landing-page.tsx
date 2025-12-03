@@ -1485,7 +1485,7 @@ function LandingPage() {
         <section className="py-12 px-6 sm:px-12 md:px-16 bg-white border-t border-gray-200">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900">
-              Lix enables the most powerful apps & agents
+              Lix enables the most powerful AI apps & agents
             </h2>
             <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-3">
               {featureSpotlights.map(
