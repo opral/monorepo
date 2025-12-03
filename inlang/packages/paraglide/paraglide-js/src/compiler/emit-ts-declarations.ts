@@ -51,6 +51,8 @@ export async function emitTsDeclarations(
 			return directories;
 		})
 	);
+	// Ensure the virtual root itself is treated as existing
+	virtualDirectories.add(virtualRoot);
 
 	const compilerOptions: import("typescript").CompilerOptions = {
 		allowJs: true,
