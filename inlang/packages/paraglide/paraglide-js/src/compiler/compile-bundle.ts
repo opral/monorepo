@@ -107,7 +107,7 @@ ${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "
 			(locale, index) =>
 				`${index > 0 ? "	" : ""}${!isFullyTranslated || index < args.availableLocales.length - 1 ? `if (locale === "${locale}") ` : ""}return ${args.messageReferenceExpression(locale, args.bundle.id)}(inputs)`
 		)
-		.join("\n")}${!isFullyTranslated ? `\n	return "${args.bundle.id}"` : ""}
+		.join("\n")}${!isFullyTranslated ? `\n	return /** @type {LocalizedString} */ ("${args.bundle.id}")` : ""}
 };`;
 
 	if (isSafeBundleId === false) {
