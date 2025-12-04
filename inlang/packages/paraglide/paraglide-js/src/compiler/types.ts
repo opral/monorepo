@@ -26,7 +26,9 @@ export type LocalizedString = string & { readonly __brand: "LocalizedString" };
  * @example
  *   m.hello({ name: 'world' })
  */
-export type MessageFunction = (inputs?: Record<string, never>) => LocalizedString;
+export type MessageFunction = (
+	inputs?: Record<string, never>
+) => LocalizedString;
 
 /**
  * A message bundle function that selects the message to be returned.

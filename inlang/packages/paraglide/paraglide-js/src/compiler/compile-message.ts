@@ -86,7 +86,9 @@ function compileMessageWithMultipleVariants(
 		);
 
 		if (isCatchAll) {
-			compiledVariants.push(`return /** @type {LocalizedString} */ (${compiledPattern.code})`);
+			compiledVariants.push(
+				`return /** @type {LocalizedString} */ (${compiledPattern.code})`
+			);
 			hasCatchAll = true;
 		}
 
