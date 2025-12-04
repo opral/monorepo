@@ -9,8 +9,8 @@
 
 Welcome to Opral's repository. 
 
-[./lix](./packages/lix/sdk) - **change control** backend for apps </br>
-[./inlang](./inlang) - **globalization ecosystem** for software companies   
+[./lix](./packages/lix/sdk) - **change control system** </br>
+[./inlang](./inlang) - **globalization ecosystem** for software   
 
 ---
 
