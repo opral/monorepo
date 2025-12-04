@@ -157,6 +157,48 @@ ${injectCode("./strategy.js")}
  * @typedef {(typeof locales)[number]} Locale
  */
 
+/**
+ * A branded type representing a localized string.
+ *
+ * Message functions return this type instead of \`string\`, enabling TypeScript
+ * to distinguish translated strings from regular strings at compile time.
+ * This allows you to enforce that only properly localized content is used
+ * in your UI components.
+ *
+ * Since \`LocalizedString\` is a branded subtype of \`string\`, it remains fully
+ * backward compatible—you can pass it anywhere a \`string\` is expected.
+ *
+ * @example
+ *   // Enforce localized strings in your components
+ *   function PageTitle(props: { title: LocalizedString }) {
+ *     return <h1>{props.title}</h1>
+ *   }
+ *
+ *   // ✅ Correct: using a message function
+ *   <PageTitle title={m.welcome_title()} />
+ *
+ *   // ❌ Type error: raw strings are not LocalizedString
+ *   <PageTitle title="Welcome" />
+ *
+ * @example
+ *   // LocalizedString is assignable to string (backward compatible)
+ *   const localized: LocalizedString = m.greeting()
+ *   const str: string = localized  // ✅ works fine
+ *
+ *   // But string is not assignable to LocalizedString
+ *   const raw: LocalizedString = "Hello"  // ❌ Type error
+ *
+ * @example
+ *   // Catches accidental string concatenation
+ *   function showMessage(msg: LocalizedString) { ... }
+ *
+ *   showMessage(m.hello())                    // ✅
+ *   showMessage("Hello " + userName)          // ❌ Type error
+ *   showMessage(m.hello_user({ name: userName }))  // ✅ use params instead
+ *
+ * @typedef {string & { readonly __brand: 'LocalizedString' }} LocalizedString
+ */
+
 `;
 
 	return code;

@@ -171,6 +171,49 @@ console.log(messages[messageKey]());
 // "Hello World!"
 ```
 
+## Type-safe localized strings
+
+Message functions return a `LocalizedString` type instead of a plain `string`. This branded type lets TypeScript distinguish between translated and untranslated strings at compile time, helping you enforce that only localized content is used in your UI.
+
+```ts
+import { m } from "./paraglide/messages.js";
+import type { LocalizedString } from "./paraglide/runtime.js";
+
+// Enforce localized strings in your components
+function PageTitle(props: { title: LocalizedString }) {
+  return <h1>{props.title}</h1>;
+}
+
+// ✅ Correct: using a message function
+<PageTitle title={m.welcome_title()} />
+
+// ❌ Type error: raw strings are not LocalizedString
+<PageTitle title="Welcome" />
+```
+
+Since `LocalizedString` is a branded subtype of `string`, it's fully backward compatible—you can pass it anywhere a `string` is expected:
+
+```ts
+const localized: LocalizedString = m.greeting();
+const str: string = localized;  // ✅ works fine
+
+const raw: LocalizedString = "Hello";  // ❌ Type error
+```
+
+This also catches accidental string concatenation, which would bypass translation:
+
+```ts
+function showMessage(msg: LocalizedString) { /* ... */ }
+
+showMessage(m.hello());                        // ✅
+showMessage("Hello " + userName);              // ❌ Type error
+showMessage(m.hello_user({ name: userName })); // ✅ use message params instead
+```
+
+<doc-callout type="tip">
+  You don't need to use <code>LocalizedString</code> if you don't want to—since it's a subtype of <code>string</code>, existing code that expects <code>string</code> will continue to work without changes.
+</doc-callout>
+
 ## Advanced usage
 
 - [Choosing your strategy](/m/gerre34r/library-inlang-paraglideJs/strategy)

@@ -9,7 +9,7 @@ export function jsDocBundleFunctionTypes(args: {
 	return `
 * @param {${inputsType(args.inputs)}} inputs
 * @param {{ locale?: ${localesUnion} }} options
-* @returns {string}`;
+* @returns {LocalizedString}`;
 }
 
 /**

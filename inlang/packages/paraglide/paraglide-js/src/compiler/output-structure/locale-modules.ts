@@ -14,6 +14,7 @@ export function generateOutput(
 ): Record<string, string> {
 	const indexFile = [
 		`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from "../runtime.js"`,
+		`/** @typedef {import('../runtime.js').LocalizedString} LocalizedString */`,
 		settings.locales
 			.map(
 				(locale) =>
@@ -47,7 +48,7 @@ export function generateOutput(
 					file += `\nexport { ${bundleModuleId} } from "./${fallbackLocale}.js"`;
 				} else {
 					// no fallback exists, render the bundleId
-					file += `\n/** @type {(inputs: ${inputsType(inputs)}) => string} */\nexport const ${bundleModuleId} = () => '${bundleId}'`;
+					file += `\n/** @type {(inputs: ${inputsType(inputs)}) => LocalizedString} */\nexport const ${bundleModuleId} = () => /** @type {LocalizedString} */ ('${bundleId}')`;
 				}
 				continue;
 			}
@@ -58,6 +59,13 @@ export function generateOutput(
 		// add import if used
 		if (file.includes("registry.")) {
 			file = `import * as registry from "../registry.js"\n` + file;
+		}
+
+		// add LocalizedString typedef reference if used
+		if (file.includes("LocalizedString")) {
+			file =
+				`/** @typedef {import('../runtime.js').LocalizedString} LocalizedString */\n` +
+				file;
 		}
 
 		output[filename] = file;

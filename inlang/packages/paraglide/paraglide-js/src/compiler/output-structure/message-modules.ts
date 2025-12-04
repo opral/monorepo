@@ -84,13 +84,13 @@ export function generateOutput(
 			if (fallbackLocale) {
 				const safeFallbackLocale = toSafeModuleId(fallbackLocale);
 				messages.push(
-					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = ${safeFallbackLocale}_${safeModuleId};`
+					`/** @type {(inputs: ${inputsType(inputs)}) => LocalizedString} */\nconst ${safeLocale}_${safeModuleId} = ${safeFallbackLocale}_${safeModuleId};`
 				);
 			} else {
 				messages.push(
-					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = () => '${escapeForSingleQuoteString(
+					`/** @type {(inputs: ${inputsType(inputs)}) => LocalizedString} */\nconst ${safeLocale}_${safeModuleId} = () => /** @type {LocalizedString} */ ('${escapeForSingleQuoteString(
 						bundleId
-					)}'`
+					)}')`
 				);
 			}
 
@@ -104,9 +104,10 @@ export function generateOutput(
 
 		output[filename] = messages.join("\n\n") + "\n\n" + output[filename];
 
-		// add the imports
+		// add the imports and type reference (LocalizedString is defined in runtime.js)
 		output[filename] =
-			`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from '../runtime.js';\n\n` +
+			`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from '../runtime.js';\n` +
+			`/** @typedef {import('../runtime.js').LocalizedString} LocalizedString */\n\n` +
 			output[filename];
 
 		// Add the registry import to the message file
@@ -118,9 +119,11 @@ export function generateOutput(
 	}
 
 	// all messages index file
-	output["messages/_index.js"] = Array.from(moduleFilenames)
-		.map((filename) => `export * from './${filename}'`)
-		.join("\n");
+	output["messages/_index.js"] =
+		`/** @typedef {import('../runtime.js').LocalizedString} LocalizedString */\n` +
+		Array.from(moduleFilenames)
+			.map((filename) => `export * from './${filename}'`)
+			.join("\n");
 
 	return output;
 }
