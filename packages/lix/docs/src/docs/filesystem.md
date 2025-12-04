@@ -2,34 +2,9 @@
 
 Lix provides a filesystem with files and directories. Files contain binary data that [plugins](/docs/plugins) process to detect changes.
 
-## Path Requirements
-
-Paths must be normalized before use:
-
-- **NFC-normalized** Unicode strings
-- **Slash-prefixed** (e.g., `/config.json`)
-- **No relative segments** (`.` or `..`)
-- **No backslashes** or invalid percent-encoding
-- **File paths**: No trailing slash (e.g., `/dir/file.json`)
-- **Directory paths**: Trailing slash required (e.g., `/dir/`)
-
-Use the exported helpers to normalize paths:
-
-```ts
-import {
-  normalizeFilePath,
-  normalizeDirectoryPath,
-  normalizePathSegment,
-} from "@lix-js/sdk";
-
-const filePath = normalizeFilePath("/config.json");
-const dirPath = normalizeDirectoryPath("/configs/");
-const segment = normalizePathSegment("my-file");
-```
-
 ## Files
 
-### Adding Files
+### Write files
 
 ```ts
 await lix.db
@@ -45,7 +20,7 @@ await lix.db
 
 **Path collision detection:** Inserting a file will fail if a directory already exists at that path.
 
-### Reading Files
+### Read files
 
 #### Current State
 
@@ -94,7 +69,7 @@ const history = await lix.db
 
 See [History](/docs/history) for more details.
 
-### Updating Files
+### Update files
 
 ```ts
 await lix.db
@@ -108,13 +83,13 @@ await lix.db
 
 When you update a file, [plugins](/docs/plugins) automatically detect changes and create entity records.
 
-### Deleting Files
+### Delete files
 
 ```ts
 await lix.db.deleteFrom("file").where("path", "=", "/config.json").execute();
 ```
 
-### File Metadata
+### Metadata
 
 Add application-specific data using [metadata](/docs/metadata):
 
@@ -211,6 +186,31 @@ The `file.data` column is not stored directly. It's materialized from [plugin](/
 5. **Fallback**: If no plugin matches, the built-in `lix_unknown_file_fallback_plugin` stores the raw bytes
 
 This design enables schema-aware change tracking while still providing direct file access.
+
+## Path Requirements
+
+Paths must be normalized before use:
+
+- **NFC-normalized** Unicode strings
+- **Slash-prefixed** (e.g., `/config.json`)
+- **No relative segments** (`.` or `..`)
+- **No backslashes** or invalid percent-encoding
+- **File paths**: No trailing slash (e.g., `/dir/file.json`)
+- **Directory paths**: Trailing slash required (e.g., `/dir/`)
+
+Use the exported helpers to normalize paths:
+
+```ts
+import {
+  normalizeFilePath,
+  normalizeDirectoryPath,
+  normalizePathSegment,
+} from "@lix-js/sdk";
+
+const filePath = normalizeFilePath("/config.json");
+const dirPath = normalizeDirectoryPath("/configs/");
+const segment = normalizePathSegment("my-file");
+```
 
 ## See Also
 
