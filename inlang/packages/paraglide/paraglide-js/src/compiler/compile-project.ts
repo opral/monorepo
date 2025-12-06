@@ -10,6 +10,7 @@ import {
 import { createRuntimeFile } from "./runtime/create-runtime.js";
 import { createServerFile } from "./server/create-server-file.js";
 import { createRegistry } from "./registry.js";
+import { emitTsDeclarations } from "./emit-ts-declarations.js";
 
 const outputStructures = {
 	"locale-modules": localeModules,
@@ -97,6 +98,11 @@ export const compileProject = async (args: {
 				output[filename] = `/* eslint-disable */\n${content}`;
 			}
 		}
+	}
+
+	if (optionsWithDefaults.emitTsDeclarations) {
+		const declarations = await emitTsDeclarations(output);
+		Object.assign(output, declarations);
 	}
 
 	return output;

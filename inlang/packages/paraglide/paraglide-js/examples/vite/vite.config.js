@@ -9,6 +9,7 @@ export default defineConfig({
 			// forcing locale modules to detect problems during CI/CD
 			// (all other projects use message-modules)
 			outputStructure: "locale-modules",
+			emitTsDeclarations: true,
 		}),
 	],
 	build: {
