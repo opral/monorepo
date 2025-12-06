@@ -1520,7 +1520,7 @@ function LandingPage() {
               Go to Docs
             </a>
             <a
-              href="https://discord.gg/GhjdFXsEgM"
+              href="https://discord.gg/gdMPPWy57R"
               className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>💬</span>

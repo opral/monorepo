@@ -506,7 +506,7 @@ function LandingScreenContent({
 					</a>
 					<span aria-hidden="true">·</span>
 					<a
-						href="https://discord.gg/StVekJpyBp"
+						href="https://discord.gg/gdMPPWy57R"
 						target="_blank"
 						rel="noreferrer"
 						className="inline-flex items-center gap-1.5 transition hover:text-neutral-600"
