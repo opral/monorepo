@@ -98,3 +98,17 @@ setLocale("de");
   reload={true}
 >Deutsch</a>
 ```
+
+## TS does not autocomplete messages and shows errors 
+
+> Property 'some_message_key' does not exist on type 'typeof import("/path/to/your/repo/src/lib/paraglide/messages/_index")'
+
+TS does not pick up the new message keys, after the TS language server started. Try using the `emitTsDeclarations` flag, to emit a `messages.d.ts` declaration file for your Typescript intellisense to grab. It will update on each paraglide compilation.
+
+```diff
+// project.inlang/settings.json
+{
+  // ...
++  "emitTsDeclarations": true
+}
+```
