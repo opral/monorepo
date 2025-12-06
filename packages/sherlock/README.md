@@ -251,7 +251,7 @@ If you are having trouble with the **loading icon** not disappearing, this is a 
 
 ## Support: Join our Discord / Open an issue on GitHub!
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/CNPfhWpcAa) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
 
 <style>
 .flex-container {
