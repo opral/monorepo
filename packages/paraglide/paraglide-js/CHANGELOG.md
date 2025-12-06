@@ -1,5 +1,40 @@
 # @inlang/paraglide-js
 
+## 2.6.0
+
+### Minor Changes
+
+- 3d6259c: Add `LocalizedString` branded type for compile-time i18n safety.
+
+  Message functions now return `LocalizedString` instead of `string`, enabling TypeScript users to distinguish between translated and untranslated strings at compile time. This is fully backward compatible since branded types are assignable to their base type.
+
+  ```typescript
+  import { m } from "./paraglide/messages.js";
+  import type { LocalizedString } from "@inlang/paraglide-js";
+
+  const greeting: LocalizedString = m.hello(); // ✓ Type-safe
+  const raw: LocalizedString = "Hello"; // ✗ Type error
+  ```
+
+- 4bde3eb: Add optional chaining to compiled message inputs so missing inputs no longer throw at runtime; include tests covering single- and multi-variant messages.
+
+  Closes https://github.com/opral/inlang-paraglide-js/issues/568
+
+  Example:
+
+  ```js
+  // compiled translation
+  export const greeting = (i) => `Hello ${i?.name}`;
+
+  // TypeScript still enforces the input shape; this is purely runtime safety (handy in dev).
+  greeting(); // no throw, returns "Hello undefined"
+  greeting({ name: "Ada" }); // "Hello Ada"
+
+  // previously (boom 💥)
+  export const greetingOld = (i) => `Hello ${i.name}`;
+  greetingOld(); // TypeError: Cannot read properties of undefined (reading 'name')
+  ```
+
 ## 2.5.0
 
 - 72d1c53: Ensure the CLI honours allowJs flags defined in extended or referenced tsconfig files instead of prompting unnecessarily.
