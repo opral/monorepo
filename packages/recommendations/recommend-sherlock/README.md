@@ -64,4 +64,4 @@ async function addSherlock(fs: NodeishFilesystem) {
 
 ## Contributing
 
-Contributions are welcome! If you have a feature request, bug report, or proposal, please open an issue or submit a pull request. Our Discord can be found [here](https://discord.gg/CNPfhWpcAa).
+Contributions are welcome! If you have a feature request, bug report, or proposal, please open an issue or submit a pull request. Our Discord can be found [here](https://discord.gg/gdMPPWy57R).

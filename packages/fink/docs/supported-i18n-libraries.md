@@ -14,4 +14,4 @@ Here you can find a list of supported i18n libraries and their corresponding plu
 ## Is there no plugin for your library?
 
 - [Create a new plugin](/documentation/plugin/guide) for your library.
-- [Join our Discord](https://discord.gg/CNPfhWpcAa) and let us know which library you would like to see supported.
+- [Join our Discord](https://discord.gg/gdMPPWy57R) and let us know which library you would like to see supported.
