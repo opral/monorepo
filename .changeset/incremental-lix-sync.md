@@ -1,6 +1,5 @@
 ---
 "@inlang/sdk": major
-"@inlang/paraglide-js": minor
 "@inlang/cli": minor
 ---
 
