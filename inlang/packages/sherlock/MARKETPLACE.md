@@ -58,7 +58,7 @@ You can have multiple projects in your repository. By using the Sherlock tab, it
 
 ## Support: Join our Discord!
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/CNPfhWpcAa) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
 
 ## Requirements:
 

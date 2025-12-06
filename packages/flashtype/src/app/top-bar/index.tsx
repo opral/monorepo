@@ -147,7 +147,7 @@ export function TopBar({
 									<span aria-hidden>·</span>
 									<a
 										className="text-primary underline-offset-4 hover:underline"
-										href="https://discord.gg/StVekJpyBp"
+										href="https://discord.gg/gdMPPWy57R"
 										target="_blank"
 										rel="noreferrer"
 									>
@@ -193,7 +193,7 @@ export function TopBar({
 					asChild
 				>
 					<a
-						href="https://discord.gg/StVekJpyBp"
+						href="https://discord.gg/gdMPPWy57R"
 						target="_blank"
 						rel="noreferrer"
 						title="Discord"

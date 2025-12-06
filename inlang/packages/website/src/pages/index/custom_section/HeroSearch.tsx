@@ -45,7 +45,7 @@ const HeroSearch = () => {
 					<a href="https://www.npmjs.com/package/@inlang/sdk" target="_blank">
 						<img src="https://img.shields.io/npm/dw/%40inlang%2Fsdk?logo=npm&logoColor=red&labelColor=white&color=gray&label=npm%20downloads"></img>
 					</a>
-					<a href="https://discord.gg/ecsc6bFtZw" target="_blank">
+					<a href="https://discord.gg/gdMPPWy57R" target="_blank">
 						<img src="https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&color=gray&labelColor=white"></img>
 					</a>
 				</div>

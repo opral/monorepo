@@ -51,7 +51,7 @@ function Banner() {
 				</a>{" "}
 				and join{" "}
 				<a
-					href="https://discord.gg/xjQA897RyK"
+					href="https://discord.gg/gdMPPWy57R"
 					target="__blank"
 					className="underline"
 				>
