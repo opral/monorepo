@@ -174,13 +174,19 @@ export const BLOCK_COMMANDS: BlockCommand[] = [
 				}
 				rows.push({ type: "tableRow", content: cells });
 			}
-			editor.chain().focus().insertContent({ type: "table", content: rows }).run();
+			editor
+				.chain()
+				.focus()
+				.insertContent({ type: "table", content: rows })
+				.run();
 		},
 	},
 ];
 
 /** Block commands that can be used in the toolbar (have toggle action) */
-export const TOOLBAR_BLOCK_COMMANDS = BLOCK_COMMANDS.filter((cmd) => cmd.toggle);
+export const TOOLBAR_BLOCK_COMMANDS = BLOCK_COMMANDS.filter(
+	(cmd) => cmd.toggle,
+);
 
 /** All block commands for slash menu */
 export const SLASH_BLOCK_COMMANDS = BLOCK_COMMANDS;
@@ -214,17 +220,22 @@ const idToToolbarValue: Record<string, ToolbarBlockType> = {
 };
 
 /** Toolbar-specific label overrides (where different from slash menu) */
-const toolbarLabelOverrides: Record<string, { label: string; description: string }> = {
+const toolbarLabelOverrides: Record<
+	string,
+	{ label: string; description: string }
+> = {
 	codeBlock: { label: "Code", description: "Code block" },
 };
 
 /** Block options formatted for toolbar dropdown */
-export const TOOLBAR_BLOCK_OPTIONS: ToolbarBlockOption[] = TOOLBAR_BLOCK_COMMANDS
-	.filter((cmd) => idToToolbarValue[cmd.id])
-	.map((cmd) => ({
-		value: idToToolbarValue[cmd.id]!,
-		label: toolbarLabelOverrides[cmd.id]?.label ?? cmd.label,
-		description: toolbarLabelOverrides[cmd.id]?.description ?? cmd.description,
-		icon: cmd.icon,
-		apply: cmd.toggle!,
-	}));
+export const TOOLBAR_BLOCK_OPTIONS: ToolbarBlockOption[] =
+	TOOLBAR_BLOCK_COMMANDS.filter((cmd) => idToToolbarValue[cmd.id]).map(
+		(cmd) => ({
+			value: idToToolbarValue[cmd.id]!,
+			label: toolbarLabelOverrides[cmd.id]?.label ?? cmd.label,
+			description:
+				toolbarLabelOverrides[cmd.id]?.description ?? cmd.description,
+			icon: cmd.icon,
+			apply: cmd.toggle!,
+		}),
+	);

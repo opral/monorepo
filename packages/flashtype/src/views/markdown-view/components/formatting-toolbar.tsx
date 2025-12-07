@@ -132,7 +132,9 @@ export function FormattingToolbar({ className }: { className?: string }) {
 	const handleBlockChange = useCallback(
 		(value: ToolbarBlockType) => {
 			if (!editor) return;
-			const option = TOOLBAR_BLOCK_OPTIONS.find((entry) => entry.value === value);
+			const option = TOOLBAR_BLOCK_OPTIONS.find(
+				(entry) => entry.value === value,
+			);
 			option?.apply(editor);
 			setBlockMenuOpen(false);
 		},
