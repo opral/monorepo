@@ -1770,6 +1770,9 @@ importers:
       dedent:
         specifier: 1.5.1
         version: 1.5.1(babel-plugin-macros@3.1.0)
+      entities:
+        specifier: 2.2.0
+        version: 2.2.0
       prettier:
         specifier: ^3.5.1
         version: 3.6.2
@@ -11588,6 +11591,9 @@ packages:
 
   entities@2.1.0:
     resolution: {integrity: sha512-hCx1oky9PFrJ611mf0ifBLBRW8lUUVRlFolb5gWRfIELabBlbp9xZvrqZLZAs+NxFnbfQoeGd8wDkygjg7U85w==}
+
+  entities@2.2.0:
+    resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
 
   entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
@@ -22019,21 +22025,6 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nrwl/js@18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.8.3)':
-    dependencies:
-      '@nx/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.8.3)
-    transitivePeerDependencies:
-      - '@babel/traverse'
-      - '@swc-node/register'
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/node'
-      - debug
-      - nx
-      - supports-color
-      - typescript
-      - verdaccio
-
   '@nrwl/nx-cloud@19.1.0':
     dependencies:
       nx-cloud: 19.1.0
@@ -22234,7 +22225,7 @@ snapshots:
       '@babel/preset-env': 7.26.0(@babel/core@7.28.3)
       '@babel/preset-typescript': 7.26.0(@babel/core@7.28.3)
       '@babel/runtime': 7.28.3
-      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.8.3)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.28.3)(@types/node@24.10.1)(nx@21.4.1)(typescript@5.4.5)
       '@nx/devkit': 18.3.5(nx@21.4.1)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.8.3)
@@ -29741,7 +29732,7 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
       domhandler: 4.3.1
-      entities: 2.1.0
+      entities: 2.2.0
 
   dom-serializer@2.0.0:
     dependencies:
@@ -29912,6 +29903,8 @@ snapshots:
       strip-ansi: 6.0.1
 
   entities@2.1.0: {}
+
+  entities@2.2.0: {}
 
   entities@4.5.0: {}
 
@@ -31552,7 +31545,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 4.3.1
       domutils: 2.8.0
-      entities: 2.1.0
+      entities: 2.2.0
 
   htmlparser2@8.0.2:
     dependencies:
