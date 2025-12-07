@@ -5,15 +5,21 @@ import {
 	slashCommandsPluginKey,
 	type SlashCommandState,
 } from "../editor/extensions/slash-commands";
-import { SLASH_BLOCK_COMMANDS, type BlockCommand } from "../editor/block-commands";
+import {
+	SLASH_BLOCK_COMMANDS,
+	type BlockCommand,
+} from "../editor/block-commands";
 
-function filterCommands(commands: BlockCommand[], query: string): BlockCommand[] {
+function filterCommands(
+	commands: BlockCommand[],
+	query: string,
+): BlockCommand[] {
 	if (!query) return commands;
 	const lowerQuery = query.toLowerCase();
 	return commands.filter(
 		(cmd) =>
 			cmd.label.toLowerCase().includes(lowerQuery) ||
-			cmd.keywords.some((kw) => kw.toLowerCase().includes(lowerQuery))
+			cmd.keywords.some((kw) => kw.toLowerCase().includes(lowerQuery)),
 	);
 }
 
@@ -34,7 +40,7 @@ export function SlashCommandMenu() {
 
 	const filteredCommands = useMemo(
 		() => filterCommands(SLASH_BLOCK_COMMANDS, slashState.query),
-		[slashState.query]
+		[slashState.query],
 	);
 
 	// Reset selection when filtered list changes
@@ -132,14 +138,14 @@ export function SlashCommandMenu() {
 			// Execute the command insert action
 			command.insert(editor);
 		},
-		[editor]
+		[editor],
 	);
 
 	const handleItemClick = useCallback(
 		(command: BlockCommand) => {
 			executeCommand(command);
 		},
-		[executeCommand]
+		[executeCommand],
 	);
 
 	// Handle keyboard navigation
@@ -150,7 +156,7 @@ export function SlashCommandMenu() {
 			if (event.key === "ArrowDown") {
 				event.preventDefault();
 				setSelectedIndex((prev) =>
-					prev < filteredCommands.length - 1 ? prev + 1 : 0
+					prev < filteredCommands.length - 1 ? prev + 1 : 0,
 				);
 				return;
 			}
@@ -158,7 +164,7 @@ export function SlashCommandMenu() {
 			if (event.key === "ArrowUp") {
 				event.preventDefault();
 				setSelectedIndex((prev) =>
-					prev > 0 ? prev - 1 : filteredCommands.length - 1
+					prev > 0 ? prev - 1 : filteredCommands.length - 1,
 				);
 				return;
 			}
@@ -180,13 +186,19 @@ export function SlashCommandMenu() {
 
 		window.addEventListener("keydown", handleKeyDown, true);
 		return () => window.removeEventListener("keydown", handleKeyDown, true);
-	}, [slashState.active, editor, filteredCommands, selectedIndex, executeCommand]);
+	}, [
+		slashState.active,
+		editor,
+		filteredCommands,
+		selectedIndex,
+		executeCommand,
+	]);
 
 	// Scroll selected item into view
 	useEffect(() => {
 		if (!menuRef.current) return;
 		const selectedEl = menuRef.current.querySelector(
-			`[data-index="${selectedIndex}"]`
+			`[data-index="${selectedIndex}"]`,
 		);
 		if (selectedEl) {
 			selectedEl.scrollIntoView({ block: "nearest" });
@@ -241,11 +253,14 @@ export function SlashCommandMenu() {
 					onMouseEnter={() => setSelectedIndex(index)}
 					tabIndex={0}
 				>
-					<command.icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+					<command.icon
+						className="size-4 shrink-0 text-muted-foreground"
+						aria-hidden
+					/>
 					<span>{command.label}</span>
 				</div>
 			))}
 		</div>,
-		document.body
+		document.body,
 	);
 }
