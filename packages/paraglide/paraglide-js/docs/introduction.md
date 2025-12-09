@@ -42,6 +42,8 @@ If you use a bundler like [Vite](/m/gerre34r/library-inlang-paraglideJs/vite) in
 <doc-links>
   <doc-link title="Vanilla JS/TS" icon="devicon:javascript" href="/m/gerre34r/library-inlang-paraglideJs/vanilla-js-ts" description="Open example"></doc-link>
   <doc-link title="React" icon="devicon:react" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Open example"></doc-link>
+  <doc-link title="TanStack Router" icon="simple-icons:tanstack" href="https://github.com/TanStack/router/tree/main/examples/react/i18n-paraglide" description="Open example"></doc-link>
+  <doc-link title="TanStack Start" icon="simple-icons:tanstack" href="https://github.com/TanStack/router/tree/main/examples/react/start-i18n-paraglide" description="Open example"></doc-link>
   <doc-link title="Vue" icon="devicon:vuejs" href="/m/gerre34r/library-inlang-paraglideJs/vite" description="Open example"></doc-link>
   <doc-link title="SvelteKit" icon="devicon:svelte" href="/m/gerre34r/library-inlang-paraglideJs/sveltekit" description="Open example"></doc-link>
   <doc-link title="NextJS" icon="devicon:nextjs" href="/m/gerre34r/library-inlang-paraglideJs/next-js" description="Open example"></doc-link>
