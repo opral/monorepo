@@ -1,5 +1,6 @@
 import { loader } from "fumadocs-core/source";
 import * as icons from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { createElement } from "react";
 import { docs } from "fumadocs-mdx:collections/server";
 
@@ -12,7 +13,7 @@ export const source = loader({
     }
 
     if (icon in icons) {
-      const Icon = icons[icon as keyof typeof icons];
+      const Icon = icons[icon as keyof typeof icons] as LucideIcon;
       return createElement(Icon);
     }
   },

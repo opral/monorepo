@@ -10,14 +10,15 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { baseOptions } from '@/lib/layout.shared';
-import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
-import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import type { MDXComponents } from "mdx/types";
+import { baseOptions } from "@/lib/layout.shared";
+import { staticFunctionMiddleware } from "@tanstack/start-static-server-functions";
+import { useFumadocsLoader } from "fumadocs-core/source/client";
 
-export const Route = createFileRoute('/docs/$')({
+export const Route = createFileRoute("/docs/$")({
   component: Page,
   loader: async ({ params }) => {
-    const slugs = params._splat?.split('/') ?? [];
+    const slugs = params._splat?.split("/") ?? [];
     const data = await loader({ data: slugs });
     await clientLoader.preload(data.path);
     return data;
@@ -25,7 +26,7 @@ export const Route = createFileRoute('/docs/$')({
 });
 
 const loader = createServerFn({
-  method: 'GET',
+  method: "GET",
 })
   .inputValidator((slugs: string[]) => slugs)
   .middleware([staticFunctionMiddleware])
@@ -46,11 +47,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
         <DocsBody>
-          <MDX
-            components={{
-              ...defaultMdxComponents,
-            }}
-          />
+          <MDX components={defaultMdxComponents as MDXComponents} />
         </DocsBody>
       </DocsPage>
     );
@@ -61,6 +58,8 @@ function Page() {
   const data = Route.useLoaderData();
   const Content = clientLoader.getComponent(data.path);
   const { pageTree } = useFumadocsLoader(data);
+
+  if (!pageTree) return null;
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>

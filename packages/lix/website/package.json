@@ -7,6 +7,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "serve dist/client",
+    "preview": "wrangler dev",
     "types:check": "fumadocs-mdx && tsc --noEmit",
     "postinstall": "fumadocs-mdx"
   },
@@ -26,6 +27,7 @@
     "vite": "^7.2.7"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241230.0",
     "@tailwindcss/vite": "^4.1.17",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.2",
@@ -35,6 +37,7 @@
     "serve": "^14.2.5",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "wrangler": "^4.19.1"
   }
 }

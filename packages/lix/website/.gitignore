@@ -14,5 +14,9 @@ node_modules
 /blob-report/
 /playwright/.cache/
 .tanstack
-
+.wrangler
 .source
+
+# Generated files
+src/routeTree.gen.ts
+dist
