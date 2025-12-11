@@ -144,3 +144,15 @@ test("externalLinks option adds target and rel to external links only", async ()
 	expect(html).toContain('target="_blank"')
 	expect(html).toContain('rel="noopener noreferrer"')
 })
+
+test("adds data-mwc-codeblock to pre elements", async () => {
+	const markdown = `
+\`\`\`js
+const a = 1
+\`\`\`
+`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain("<pre")
+	expect(html).toContain("data-mwc-codeblock")
+})

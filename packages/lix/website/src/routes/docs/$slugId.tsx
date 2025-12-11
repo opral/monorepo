@@ -19,13 +19,10 @@ const docs = import.meta.glob<string>("/content/docs/**/*.md", {
 
 const tocMap = buildTocMap(tableOfContents as Toc);
 const { byId: docsById } = buildDocMaps(docs);
-const docsByRelativePath = Object.values(docsById).reduce(
-  (acc, doc) => {
-    acc[doc.relativePath] = doc;
-    return acc;
-  },
-  {} as Record<string, (typeof docsById)[string]>,
-);
+const docsByRelativePath = Object.values(docsById).reduce((acc, doc) => {
+  acc[doc.relativePath] = doc;
+  return acc;
+}, {} as Record<string, (typeof docsById)[string]>);
 
 function buildSidebarSections(toc: Toc): SidebarSection[] {
   return toc.sidebar
@@ -71,7 +68,7 @@ export const Route = createFileRoute("/docs/$slugId")({
     }
 
     const tocEntry = tocMap.get(doc.relativePath);
-    const parsedMarkdown = await parse(doc.content);
+    const parsedMarkdown = await parse(doc.content, { externalLinks: true });
 
     return {
       doc,

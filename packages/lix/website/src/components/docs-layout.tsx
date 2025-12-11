@@ -43,7 +43,7 @@ export function DocsLayout({
     <div className="min-h-screen bg-white text-slate-900">
       <Header />
       <div className="flex">
-        <aside className="fixed left-0 top-14 hidden h-[calc(100vh-3.5rem)] w-64 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50 px-6 pt-8 pb-8 lg:block">
+        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-64 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50 px-6 pt-8 pb-8 lg:block">
           <nav aria-label="Documentation sidebar" className="space-y-6">
             {sidebarSections.map((section) => (
               <section key={section.label} className="space-y-3">
@@ -77,7 +77,7 @@ export function DocsLayout({
 
         <main
           id="VPContent"
-          className="min-w-0 flex-1 px-6 py-8 lg:pl-72 lg:pr-8"
+          className="min-w-0 flex-1 px-6 py-8 lg:px-8"
         >
           <div className="mx-auto w-full max-w-3xl">{children}</div>
         </main>
@@ -85,4 +85,3 @@ export function DocsLayout({
     </div>
   );
 }
-

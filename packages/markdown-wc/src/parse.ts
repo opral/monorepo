@@ -14,6 +14,7 @@ import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
 import { visit } from "unist-util-visit"
 import { rehypeGithubAlerts } from "./html/rehype-github-alerts.js"
+import { rehypeCodeBlocks } from "./html/rehype-codeblocks.js"
 import {
 	remarkExternalLinks,
 	type ExternalLinksOptions,
@@ -104,6 +105,7 @@ export async function parse(
 		// })
 		.use(rehypeHighlight)
 		.use(rehypeSlug)
+		.use(rehypeCodeBlocks as any)
 		.use(rehypeInlineStyles(withDefaults.inlineStyles))
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",

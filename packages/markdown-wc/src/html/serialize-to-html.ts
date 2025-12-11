@@ -3,6 +3,7 @@ import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
 import { visit } from "unist-util-visit"
 import { rehypeGithubAlerts } from "./rehype-github-alerts.js"
+import { rehypeCodeBlocks } from "./rehype-codeblocks.js"
 import {
 	remarkExternalLinks,
 	type ExternalLinksOptions,
@@ -91,6 +92,7 @@ export async function serializeToHtml(
 	const hast = await processor
 		.use(remarkRehype as any, { allowDangerousHtml: true })
 		.use(rehypeGithubAlerts as any)
+		.use(rehypeCodeBlocks as any)
 		.run(ast)
 
 	if (withDefaults.diffHints) {

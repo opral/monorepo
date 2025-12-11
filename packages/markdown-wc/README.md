@@ -178,6 +178,22 @@ blockquote[data-mwc-alert="note"]::before {
 }
 ```
 
+## Code blocks and copy buttons
+
+Markdown WC keeps code blocks portable by rendering standard HTML:
+
+```html
+<pre data-mwc-codeblock>
+  <code class="language-js">...</code>
+</pre>
+```
+
+The `data-mwc-codeblock` attribute is a stable hook for consumer styling and
+client-side hydration such as adding a “Copy” button. Markdown WC intentionally
+does not render custom UI elements for code blocks; consumers should implement
+copy buttons and other enhancements with CSS and client-side scripts to keep the
+renderer framework-agnostic and portable.
+
 ## FAQ 
 
 ### Why not use React MDX or Svelte MDsveX?

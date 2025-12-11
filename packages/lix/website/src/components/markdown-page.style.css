@@ -102,6 +102,68 @@
   font-size: 18px;
 }
 
+/* Anchor scroll offset so hash links don't stick to viewport top */
+.markdown-body h2[id],
+.markdown-body h3[id],
+.markdown-body h4[id],
+.markdown-body h5[id],
+.markdown-body h6[id] {
+  scroll-margin-top: 96px;
+}
+
+/* Heading anchor hash on hover (VitePress-style)
+ * rehypeAutolinkHeadings wraps heading text in <a>, but markdown-wc also adds
+ * inline styles to anchors. To avoid layout quirks, render the hash on the
+ * heading itself when it has a direct anchor child.
+ */
+.markdown-body h2:has(> a),
+.markdown-body h3:has(> a),
+.markdown-body h4:has(> a),
+.markdown-body h5:has(> a),
+.markdown-body h6:has(> a) {
+  position: relative;
+}
+
+.markdown-body h2:has(> a)::before,
+.markdown-body h3:has(> a)::before,
+.markdown-body h4:has(> a)::before,
+.markdown-body h5:has(> a)::before,
+.markdown-body h6:has(> a)::before {
+  content: "#";
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateX(-1.1em);
+  color: var(--vp-c-brand-1);
+  opacity: 0;
+  font-weight: 600;
+  line-height: inherit;
+  transition: opacity 0.25s;
+}
+
+/* h2 has extra padding-top for the divider; align hash with text */
+.markdown-body h2:has(> a)::before {
+  top: 24px;
+}
+
+/* First h2 after h1 has no divider/padding */
+.markdown-body h1 + h2:has(> a)::before {
+  top: 0;
+}
+
+.markdown-body h2:has(> a):hover::before,
+.markdown-body h3:has(> a):hover::before,
+.markdown-body h4:has(> a):hover::before,
+.markdown-body h5:has(> a):hover::before,
+.markdown-body h6:has(> a):hover::before,
+.markdown-body h2:has(> a):focus-within::before,
+.markdown-body h3:has(> a):focus-within::before,
+.markdown-body h4:has(> a):focus-within::before,
+.markdown-body h5:has(> a):focus-within::before,
+.markdown-body h6:has(> a):focus-within::before {
+  opacity: 1;
+}
+
 /* First h2 should not have border-top */
 .markdown-body h1 + h2 {
   margin-top: 24px;
@@ -204,6 +266,35 @@
   border-radius: 8px;
   overflow-x: auto;
   position: relative;
+}
+
+/* Copy button for mwc code blocks */
+.markdown-body pre[data-mwc-codeblock] {
+  position: relative;
+}
+
+.markdown-body pre[data-mwc-codeblock] > button[data-mwc-copy-button] {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-2);
+  border: 1px solid var(--vp-c-divider);
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.markdown-body pre[data-mwc-codeblock]:hover > button[data-mwc-copy-button] {
+  opacity: 1;
+}
+
+.markdown-body pre[data-mwc-codeblock] > button[data-mwc-copy-button]:hover {
+  color: var(--vp-c-text-1);
+  border-color: var(--vp-c-border);
 }
 
 .markdown-body pre code {

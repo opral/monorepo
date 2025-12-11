@@ -246,3 +246,20 @@ test("serializeToHtml externalLinks option annotates external links", async () =
 	expect(html).toContain('target="_blank"')
 	expect(html).toContain('rel="noopener noreferrer"')
 })
+
+test("serializeToHtml annotates code blocks with data-mwc-codeblock", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "code",
+				lang: "js",
+				value: "const a = 1",
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast)
+	expect(html).toContain("<pre")
+	expect(html).toContain("data-mwc-codeblock")
+})
