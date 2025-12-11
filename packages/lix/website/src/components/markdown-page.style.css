@@ -1,0 +1,421 @@
+/**
+ * VitePress-style markdown content styles
+ * Based on VitePress's vp-doc styling
+ */
+
+/* CSS Custom Properties matching VitePress */
+:root {
+  --vp-c-brand-1: #3451b2;
+  --vp-c-brand-2: #3a5ccc;
+  --vp-c-brand-soft: rgba(100, 108, 255, 0.14);
+  --vp-c-text-1: rgba(60, 60, 67);
+  --vp-c-text-2: rgba(60, 60, 67, 0.78);
+  --vp-c-text-3: rgba(60, 60, 67, 0.56);
+  --vp-c-divider: rgba(60, 60, 67, 0.12);
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f6f6f7;
+  --vp-c-bg-alt: #f6f6f7;
+  --vp-c-border: rgba(60, 60, 67, 0.12);
+  --vp-c-gutter: rgba(60, 60, 67, 0.05);
+
+  /* Tip colors */
+  --vp-c-tip-1: #3451b2;
+  --vp-c-tip-2: rgba(100, 108, 255, 0.16);
+  --vp-c-tip-3: rgba(100, 108, 255, 0.08);
+
+  /* Warning colors */
+  --vp-c-warning-1: #915930;
+  --vp-c-warning-2: rgba(234, 179, 8, 0.16);
+  --vp-c-warning-3: rgba(234, 179, 8, 0.08);
+
+  /* Danger colors */
+  --vp-c-danger-1: #b8272c;
+  --vp-c-danger-2: rgba(244, 63, 94, 0.16);
+  --vp-c-danger-3: rgba(244, 63, 94, 0.08);
+
+  /* Note/Info colors */
+  --vp-c-note-1: #3451b2;
+  --vp-c-note-2: rgba(100, 108, 255, 0.16);
+  --vp-c-note-3: rgba(100, 108, 255, 0.08);
+
+  /* Important colors */
+  --vp-c-important-1: #8250df;
+  --vp-c-important-2: rgba(130, 80, 223, 0.16);
+  --vp-c-important-3: rgba(130, 80, 223, 0.08);
+
+  /* Caution colors */
+  --vp-c-caution-1: #b8272c;
+  --vp-c-caution-2: rgba(244, 63, 94, 0.16);
+  --vp-c-caution-3: rgba(244, 63, 94, 0.08);
+
+  --vp-code-font-size: 0.875em;
+  --vp-code-line-height: 1.7;
+}
+
+/* Base markdown body styles */
+.markdown-body {
+  color: var(--vp-c-text-1);
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* Headings */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  position: relative;
+  font-weight: 600;
+  outline: none;
+  color: var(--vp-c-text-1);
+}
+
+.markdown-body h1 {
+  letter-spacing: -0.02em;
+  line-height: 40px;
+  font-size: 28px;
+  margin: 0;
+}
+
+.markdown-body h2 {
+  margin: 48px 0 16px;
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 24px;
+  letter-spacing: -0.02em;
+  line-height: 32px;
+  font-size: 24px;
+}
+
+.markdown-body h3 {
+  margin: 32px 0 0;
+  letter-spacing: -0.01em;
+  line-height: 28px;
+  font-size: 20px;
+}
+
+.markdown-body h4 {
+  margin: 24px 0 0;
+  letter-spacing: -0.01em;
+  line-height: 24px;
+  font-size: 18px;
+}
+
+/* First h2 should not have border-top */
+.markdown-body h1 + h2 {
+  margin-top: 24px;
+  border-top: none;
+  padding-top: 0;
+}
+
+/* Paragraphs */
+.markdown-body p {
+  margin: 16px 0;
+  line-height: 28px;
+}
+
+/* First paragraph after heading */
+.markdown-body h1 + p,
+.markdown-body h2 + p,
+.markdown-body h3 + p,
+.markdown-body h4 + p {
+  margin-top: 8px;
+}
+
+/* Links */
+.markdown-body a {
+  font-weight: 500;
+  color: var(--vp-c-brand-1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.25s, opacity 0.25s;
+}
+
+.markdown-body a:hover {
+  color: var(--vp-c-brand-2);
+}
+
+/* Links inside headings should inherit heading styles */
+.markdown-body h1 a,
+.markdown-body h2 a,
+.markdown-body h3 a,
+.markdown-body h4 a,
+.markdown-body h5 a,
+.markdown-body h6 a {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.markdown-body h1 a:hover,
+.markdown-body h2 a:hover,
+.markdown-body h3 a:hover,
+.markdown-body h4 a:hover,
+.markdown-body h5 a:hover,
+.markdown-body h6 a:hover {
+  color: inherit;
+}
+
+/* Lists */
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.25rem;
+  margin: 16px 0;
+}
+
+.markdown-body ul {
+  list-style: disc;
+}
+
+.markdown-body ol {
+  list-style: decimal;
+}
+
+.markdown-body li + li {
+  margin-top: 8px;
+}
+
+.markdown-body li > ol,
+.markdown-body li > ul {
+  margin: 8px 0 0;
+}
+
+/* Inline code */
+.markdown-body :not(pre) > code {
+  font-size: var(--vp-code-font-size);
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-weight: 500;
+  transition: color 0.25s, background-color 0.5s;
+}
+
+.markdown-body a > code {
+  color: var(--vp-c-brand-1);
+}
+
+/* Code blocks */
+.markdown-body pre {
+  margin: 16px 0;
+  padding: 20px 24px;
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 8px;
+  overflow-x: auto;
+  position: relative;
+}
+
+.markdown-body pre code {
+  display: block;
+  padding: 0;
+  width: fit-content;
+  min-width: 100%;
+  line-height: var(--vp-code-line-height);
+  font-size: var(--vp-code-font-size);
+  color: var(--vp-c-text-1);
+  background: transparent;
+  border-radius: 0;
+  font-weight: 400;
+  transition: color 0.25s;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+  margin: 16px 0;
+  border-left: 2px solid var(--vp-c-divider);
+  padding-left: 16px;
+  color: var(--vp-c-text-2);
+  transition: border-color 0.5s, color 0.5s;
+}
+
+.markdown-body blockquote > p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 28px;
+}
+
+/* GitHub-style alerts/callouts */
+.markdown-body blockquote:has(> p:first-child > strong:first-child) {
+  border-left: none;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+/* [!NOTE] */
+.markdown-body
+  blockquote:has(
+    > p:first-child
+      > strong:first-child:where([data-callout="NOTE"], :not([data-callout]))
+  ) {
+  background-color: var(--vp-c-note-3);
+  border: 1px solid var(--vp-c-note-2);
+  color: var(--vp-c-text-1);
+}
+
+/* Custom callout styling via data attributes or content detection */
+.markdown-body .callout,
+.markdown-body .custom-block {
+  margin: 16px 0;
+  border-radius: 8px;
+  padding: 16px 16px 8px;
+  line-height: 24px;
+  font-size: 14px;
+  color: var(--vp-c-text-1);
+}
+
+.markdown-body .callout p,
+.markdown-body .custom-block p {
+  margin: 8px 0;
+  line-height: 24px;
+}
+
+.markdown-body .callout-title,
+.markdown-body .custom-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* TIP callout */
+.markdown-body .callout.tip,
+.markdown-body .custom-block.tip {
+  background-color: var(--vp-c-tip-3);
+  border: 1px solid var(--vp-c-tip-2);
+}
+
+.markdown-body .callout.tip .callout-title,
+.markdown-body .custom-block.tip .custom-block-title {
+  color: var(--vp-c-tip-1);
+}
+
+/* NOTE/INFO callout */
+.markdown-body .callout.note,
+.markdown-body .callout.info,
+.markdown-body .custom-block.info {
+  background-color: var(--vp-c-note-3);
+  border: 1px solid var(--vp-c-note-2);
+}
+
+.markdown-body .callout.note .callout-title,
+.markdown-body .callout.info .callout-title,
+.markdown-body .custom-block.info .custom-block-title {
+  color: var(--vp-c-note-1);
+}
+
+/* WARNING callout */
+.markdown-body .callout.warning,
+.markdown-body .custom-block.warning {
+  background-color: var(--vp-c-warning-3);
+  border: 1px solid var(--vp-c-warning-2);
+}
+
+.markdown-body .callout.warning .callout-title,
+.markdown-body .custom-block.warning .custom-block-title {
+  color: var(--vp-c-warning-1);
+}
+
+/* DANGER/CAUTION callout */
+.markdown-body .callout.danger,
+.markdown-body .callout.caution,
+.markdown-body .custom-block.danger {
+  background-color: var(--vp-c-danger-3);
+  border: 1px solid var(--vp-c-danger-2);
+}
+
+.markdown-body .callout.danger .callout-title,
+.markdown-body .callout.caution .callout-title,
+.markdown-body .custom-block.danger .custom-block-title {
+  color: var(--vp-c-danger-1);
+}
+
+/* IMPORTANT callout */
+.markdown-body .callout.important {
+  background-color: var(--vp-c-important-3);
+  border: 1px solid var(--vp-c-important-2);
+}
+
+.markdown-body .callout.important .callout-title {
+  color: var(--vp-c-important-1);
+}
+
+/* Tables */
+.markdown-body table {
+  display: block;
+  border-collapse: collapse;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+.markdown-body tr {
+  background-color: var(--vp-c-bg);
+  border-top: 1px solid var(--vp-c-divider);
+  transition: background-color 0.5s;
+}
+
+.markdown-body tr:nth-child(2n) {
+  background-color: var(--vp-c-bg-soft);
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--vp-c-divider);
+  padding: 8px 16px;
+}
+
+.markdown-body th {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
+}
+
+.markdown-body td {
+  font-size: 14px;
+}
+
+/* Horizontal rule */
+.markdown-body hr {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+/* Images */
+.markdown-body img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+/* Strong/Bold */
+.markdown-body strong {
+  font-weight: 600;
+}
+
+/* Definition lists */
+.markdown-body dt {
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.markdown-body dd {
+  margin-left: 1.25rem;
+  margin-top: 4px;
+}
+
+/* Keyboard shortcuts */
+.markdown-body kbd {
+  display: inline-block;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}

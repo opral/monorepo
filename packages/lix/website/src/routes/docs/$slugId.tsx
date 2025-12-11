@@ -1,9 +1,11 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { DocsLayout, type SidebarSection } from "../../components/docs-layout";
 import { MarkdownPage } from "../../components/markdown-page";
 import tableOfContents from "../../../content/docs/table_of_contents.json";
 import {
   buildDocMaps,
   buildTocMap,
+  normalizeRelativePath,
   parseSlugId,
   type Toc,
 } from "../../lib/build-doc-map";
@@ -17,6 +19,37 @@ const docs = import.meta.glob<string>("/content/docs/**/*.md", {
 
 const tocMap = buildTocMap(tableOfContents as Toc);
 const { byId: docsById } = buildDocMaps(docs);
+const docsByRelativePath = Object.values(docsById).reduce(
+  (acc, doc) => {
+    acc[doc.relativePath] = doc;
+    return acc;
+  },
+  {} as Record<string, (typeof docsById)[string]>,
+);
+
+function buildSidebarSections(toc: Toc): SidebarSection[] {
+  return toc.sidebar
+    .map((section) => {
+      const items = section.items
+        .map((item) => {
+          const relativePath = normalizeRelativePath(item.file);
+          const doc = docsByRelativePath[relativePath];
+          if (!doc) {
+            return null;
+          }
+
+          return {
+            label: item.label,
+            href: `/docs/${doc.slugWithId}`,
+            relativePath,
+          };
+        })
+        .filter((value): value is NonNullable<typeof value> => Boolean(value));
+
+      return { label: section.label, items };
+    })
+    .filter((section) => section.items.length > 0);
+}
 
 export const Route = createFileRoute("/docs/$slugId")({
   loader: async ({ params }) => {
@@ -43,6 +76,7 @@ export const Route = createFileRoute("/docs/$slugId")({
     return {
       doc,
       tocEntry,
+      sidebarSections: buildSidebarSections(tableOfContents as Toc),
       html: parsedMarkdown.html,
       frontmatter: parsedMarkdown.frontmatter,
     };
@@ -51,13 +85,15 @@ export const Route = createFileRoute("/docs/$slugId")({
 });
 
 function DocsPage() {
-  const { doc, tocEntry, html, frontmatter } = Route.useLoaderData();
-  const title =
-    (frontmatter.title as string | undefined) ??
-    tocEntry?.label ??
-    doc.slugBase;
-  const description =
-    (frontmatter.description as string | undefined) ?? doc.description;
+  const { doc, sidebarSections, html } = Route.useLoaderData();
 
-  return <MarkdownPage title={title} description={description} html={html} />;
+  return (
+    <DocsLayout
+      toc={tableOfContents as Toc}
+      sidebarSections={sidebarSections}
+      activeRelativePath={doc.relativePath}
+    >
+      <MarkdownPage html={html} />
+    </DocsLayout>
+  );
 }

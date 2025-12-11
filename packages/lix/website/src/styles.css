@@ -2,68 +2,15 @@
 
 body {
   @apply m-0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #213547;
+  background: #ffffff;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-
-.markdown-body {
-  color: #e2e8f0;
-  line-height: 1.7;
-}
-
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3 {
-  color: #f8fafc;
-  font-weight: 700;
-}
-
-.markdown-body h1 {
-  margin-bottom: 0.75rem;
-  font-size: 2.25rem;
-}
-
-.markdown-body h2 {
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-  font-size: 1.75rem;
-}
-
-.markdown-body h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 1.25rem;
-}
-
-.markdown-body p {
-  margin: 0 0 1rem;
-}
-
-.markdown-body ul {
-  margin: 0 0 1rem 1.25rem;
-  padding: 0;
-  list-style: disc;
-}
-
-.markdown-body code {
-  padding: 0.15rem 0.35rem;
-  border-radius: 0.35rem;
-  background: rgba(15, 23, 42, 0.9);
-  font-size: 0.95em;
-}
-
-.markdown-body pre {
-  margin: 0 0 1.25rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  background: rgba(15, 23, 42, 0.85);
-  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
