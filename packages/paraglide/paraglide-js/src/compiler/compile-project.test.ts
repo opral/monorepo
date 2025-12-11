@@ -87,6 +87,20 @@ test("emitPrettierIgnore", async () => {
 	expect(_false).not.toHaveProperty(".prettierignore");
 });
 
+test("emitTsDeclarations generates declaration files", async () => {
+	const output = await compileProject({
+		project,
+		compilerOptions: {
+			emitTsDeclarations: true,
+			outputStructure: "locale-modules",
+		},
+	});
+
+	expect(output).toHaveProperty("messages/_index.d.ts");
+	expect(output).toHaveProperty("messages.d.ts");
+	expect(output["messages/_index.d.ts"]).toContain("sad_penguin_bundle");
+});
+
 test("handles message bundles with a : in the id", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject({

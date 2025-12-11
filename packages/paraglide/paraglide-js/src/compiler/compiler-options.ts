@@ -5,6 +5,7 @@ export const defaultCompilerOptions = {
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
+	emitTsDeclarations: false,
 	cleanOutdir: true,
 	disableAsyncLocalStorage: false,
 	experimentalMiddlewareLocaleSplitting: false,
@@ -166,6 +167,25 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitPrettierIgnore?: boolean;
+	/**
+	 * Emit `.d.ts` files for the generated output using the TypeScript compiler.
+	 *
+	 * Enable this to give IDEs fresh, explicit typings for generated message modules
+	 * (useful when using `locale-modules` during development). Requires `typescript`
+	 * to be resolvable in your toolchain.
+	 *
+	 * @example
+	 * ```ts
+	 * await compile({
+	 *   project: "./project.inlang",
+	 *   outdir: "./src/paraglide",
+	 *   emitTsDeclarations: true,
+	 * });
+	 * ```
+	 *
+	 * @default false
+	 */
+	emitTsDeclarations?: boolean;
 	/**
 	 * https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url
 	 */
