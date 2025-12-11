@@ -7,6 +7,7 @@ import {
   parseSlugId,
   type Toc,
 } from "../../lib/build-doc-map";
+import { parse } from "@opral/markdown-wc";
 
 const docs = import.meta.glob<string>("/content/docs/**/*.md", {
   eager: true,
@@ -18,7 +19,7 @@ const tocMap = buildTocMap(tableOfContents as Toc);
 const { byId: docsById } = buildDocMaps(docs);
 
 export const Route = createFileRoute("/docs/$slugId")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const parsedSlug = parseSlugId(params.slugId);
     if (!parsedSlug) {
       throw notFound();
@@ -37,23 +38,26 @@ export const Route = createFileRoute("/docs/$slugId")({
     }
 
     const tocEntry = tocMap.get(doc.relativePath);
+    const parsedMarkdown = await parse(doc.content);
 
     return {
       doc,
       tocEntry,
+      html: parsedMarkdown.html,
+      frontmatter: parsedMarkdown.frontmatter,
     };
   },
   component: DocsPage,
 });
 
 function DocsPage() {
-  const { doc, tocEntry } = Route.useLoaderData();
+  const { doc, tocEntry, html, frontmatter } = Route.useLoaderData();
+  const title =
+    (frontmatter.title as string | undefined) ??
+    tocEntry?.label ??
+    doc.slugBase;
+  const description =
+    (frontmatter.description as string | undefined) ?? doc.description;
 
-  return (
-    <MarkdownPage
-      title={doc.title ?? tocEntry?.label ?? doc.slugBase}
-      description={doc.description}
-      markdown={doc.content}
-    />
-  );
+  return <MarkdownPage title={title} description={description} html={html} />;
 }

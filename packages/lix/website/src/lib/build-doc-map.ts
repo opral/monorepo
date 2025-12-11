@@ -1,5 +1,3 @@
-import matter from "gray-matter";
-
 export type TocItem = {
   file: string;
   label: string;
@@ -16,8 +14,9 @@ export type DocRecord = {
   id: string;
   slugBase: string;
   slugWithId: string;
-  title?: string;
-  description?: string;
+  /**
+   * Raw markdown including frontmatter.
+   */
   content: string;
   relativePath: string;
 };
@@ -50,25 +49,21 @@ export function buildTocMap(toc: Toc): Map<string, TocItem> {
 export function buildDocMaps(entries: Record<string, string>) {
   return Object.entries(entries).reduce(
     (acc, [filePath, raw]) => {
-      const parsed = matter(raw);
+      const frontmatter = extractFrontmatter(raw);
 
-      if (!parsed.data.id) {
+      if (!frontmatter?.id) {
         throw new Error(`Missing required "id" frontmatter in ${filePath}`);
       }
 
       const relativePath = normalizeRelativePath(filePath);
       const slugBase = slugifyRelativePath(relativePath);
-      const slugWithId = `${slugBase}-${String(parsed.data.id)}`;
+      const slugWithId = `${slugBase}-${String(frontmatter.id)}`;
 
       const record: DocRecord = {
-        id: String(parsed.data.id),
+        id: String(frontmatter.id),
         slugBase,
         slugWithId,
-        title: parsed.data.title ? String(parsed.data.title) : undefined,
-        description: parsed.data.description
-          ? String(parsed.data.description)
-          : undefined,
-        content: parsed.content,
+        content: raw,
         relativePath,
       };
 
@@ -130,4 +125,45 @@ export function slugifyRelativePath(relativePath: string) {
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Extracts a minimal YAML frontmatter object from markdown.
+ *
+ * Only supports simple `key: value` pairs. This is sufficient for stable ids
+ * and avoids pulling in Node-only parsers in the browser bundle.
+ *
+ * @example
+ * extractFrontmatter("---\\nid: abc123\\n---\\n# Title") // { id: "abc123" }
+ */
+function extractFrontmatter(markdown: string): Record<string, string> | null {
+  const match = markdown.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+  if (!match) {
+    return null;
+  }
+
+  const lines = match[1].split("\n");
+  const data: Record<string, string> = {};
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+
+    const separatorIndex = trimmed.indexOf(":");
+    if (separatorIndex === -1) {
+      continue;
+    }
+
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const value = trimmed.slice(separatorIndex + 1).trim();
+    if (!key) {
+      continue;
+    }
+
+    data[key] = value.replace(/^['"]|['"]$/g, "");
+  }
+
+  return data;
 }

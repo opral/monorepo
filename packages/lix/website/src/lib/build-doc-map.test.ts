@@ -26,11 +26,9 @@ API contents`,
 
     expect(byId.abc123.slugWithId).toBe("guide-hello-world-abc123");
     expect(byId.abc123.relativePath).toBe("./guide/hello-world.md");
-    expect(byId.abc123.title).toBe("Hello World");
     expect(bySlugId["guide-hello-world-abc123"]).toBe(byId.abc123);
 
     expect(byId.def456.slugWithId).toBe("reference-api-def456");
-    expect(byId.def456.description).toBeUndefined();
   });
 
   test("throws when frontmatter id is missing", () => {

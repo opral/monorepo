@@ -1,22 +1,21 @@
-import { marked } from "marked";
 import { useMemo } from "react";
 
 /**
- * Renders markdown content inside the docs layout.
+ * Renders pre-parsed markdown HTML inside the docs layout.
  *
  * @example
- * <MarkdownPage title="Hello" markdown="# Hi from Lix" />
+ * <MarkdownPage title="Hello" html="<h1>Hi from Lix</h1>" />
  */
 export function MarkdownPage({
-  markdown,
+  html,
   title,
   description,
 }: {
-  markdown: string;
+  html: string;
   title: string;
   description?: string;
 }) {
-  const html = useMemo(() => renderMarkdown(markdown), [markdown]);
+  const renderedHtml = useMemo(() => html, [html]);
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-50">
@@ -35,19 +34,9 @@ export function MarkdownPage({
 
         <article
           className="markdown-body rounded-2xl border border-slate-800 bg-slate-900/70 px-6 py-8 shadow-[0_20px_80px_-40px_rgba(0,0,0,0.8)]"
-          dangerouslySetInnerHTML={{ __html: html }}
+          dangerouslySetInnerHTML={{ __html: renderedHtml }}
         />
       </div>
     </main>
   );
-}
-
-/**
- * Converts markdown into HTML for display inside the docs page.
- *
- * @example
- * const html = renderMarkdown("# Welcome to Lix");
- */
-function renderMarkdown(markdown: string): string {
-  return marked.parse(markdown, { mangle: false, headerIds: true }) as string;
 }
