@@ -13,6 +13,7 @@ import yaml from "yaml"
 import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
 import { visit } from "unist-util-visit"
+import { rehypeGithubAlerts } from "./html/rehype-github-alerts.js"
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function parse(
@@ -67,6 +68,7 @@ export async function parse(
 		// @ts-ignore
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeRaw)
+		.use(rehypeGithubAlerts as any)
 		// TODO sanitization
 		// sanitization broke for attributes of custom elements
 		// took too much time to fix now

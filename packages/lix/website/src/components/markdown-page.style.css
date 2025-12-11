@@ -235,23 +235,71 @@
   line-height: 28px;
 }
 
-/* GitHub-style alerts/callouts */
-.markdown-body blockquote:has(> p:first-child > strong:first-child) {
+/* GitHub-style alerts/callouts from markdown-wc
+ * Blockquotes with `data-mwc-alert` are styled like VitePress callouts.
+ * The marker span is hidden by default.
+ */
+.markdown-body blockquote[data-mwc-alert] {
   border-left: none;
   border-radius: 8px;
   padding: 16px;
   margin: 16px 0;
+  color: var(--vp-c-text-1);
 }
 
-/* [!NOTE] */
-.markdown-body
-  blockquote:has(
-    > p:first-child
-      > strong:first-child:where([data-callout="NOTE"], :not([data-callout]))
-  ) {
+.markdown-body blockquote[data-mwc-alert] [data-mwc-alert-marker] {
+  display: none;
+}
+
+.markdown-body blockquote[data-mwc-alert]::before {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.markdown-body blockquote[data-mwc-alert="note"] {
   background-color: var(--vp-c-note-3);
   border: 1px solid var(--vp-c-note-2);
-  color: var(--vp-c-text-1);
+}
+.markdown-body blockquote[data-mwc-alert="note"]::before {
+  content: "Note";
+  color: var(--vp-c-note-1);
+}
+
+.markdown-body blockquote[data-mwc-alert="tip"] {
+  background-color: var(--vp-c-tip-3);
+  border: 1px solid var(--vp-c-tip-2);
+}
+.markdown-body blockquote[data-mwc-alert="tip"]::before {
+  content: "Tip";
+  color: var(--vp-c-tip-1);
+}
+
+.markdown-body blockquote[data-mwc-alert="important"] {
+  background-color: var(--vp-c-important-3);
+  border: 1px solid var(--vp-c-important-2);
+}
+.markdown-body blockquote[data-mwc-alert="important"]::before {
+  content: "Important";
+  color: var(--vp-c-important-1);
+}
+
+.markdown-body blockquote[data-mwc-alert="warning"] {
+  background-color: var(--vp-c-warning-3);
+  border: 1px solid var(--vp-c-warning-2);
+}
+.markdown-body blockquote[data-mwc-alert="warning"]::before {
+  content: "Warning";
+  color: var(--vp-c-warning-1);
+}
+
+.markdown-body blockquote[data-mwc-alert="caution"] {
+  background-color: var(--vp-c-caution-3);
+  border: 1px solid var(--vp-c-caution-2);
+}
+.markdown-body blockquote[data-mwc-alert="caution"]::before {
+  content: "Caution";
+  color: var(--vp-c-caution-1);
 }
 
 /* Custom callout styling via data attributes or content detection */

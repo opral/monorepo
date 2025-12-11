@@ -108,6 +108,73 @@ render(parsed.html);
 - sanitzation of markdown as well as custom elements is not implemented atm
 - SSR is DIY atm (use the `parse` function and SSR the markdown with [lit for example](https://lit.dev/docs/ssr/overview/)) 
 
+## GitHub-style alerts / callouts
+
+Markdown WC recognizes GitHub-style alert syntax inside blockquotes:
+
+```md
+> [!NOTE]
+> Highlights information that users should take into account.
+
+> [!TIP]
+> A helpful tip.
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+> [!WARNING]
+> Critical content demanding immediate attention.
+
+> [!CAUTION]
+> Dangerous or destructive actions.
+```
+
+### Rendered HTML
+
+Alerts are emitted as normal blockquotes annotated with data attributes:
+
+```html
+<blockquote data-mwc-alert="note">
+  <p>
+    <span data-mwc-alert-marker>[!NOTE]</span>
+    Highlights information that users should take into account.
+  </p>
+</blockquote>
+```
+
+Supported alert types: `note`, `tip`, `important`, `warning`, `caution`.
+
+### Styling alerts
+
+Markdown WC does not ship alert CSS. Style them in your site using the data attributes.
+
+Example (VitePress-like):
+
+```css
+blockquote[data-mwc-alert] {
+  border-left: none;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+blockquote[data-mwc-alert] [data-mwc-alert-marker] {
+  display: none;
+}
+
+blockquote[data-mwc-alert="note"] {
+  background: rgba(100, 108, 255, 0.08);
+  border: 1px solid rgba(100, 108, 255, 0.16);
+}
+blockquote[data-mwc-alert="note"]::before {
+  content: "Note";
+  font-weight: 600;
+  color: #3451b2;
+  display: block;
+  margin-bottom: 8px;
+}
+```
+
 ## FAQ 
 
 ### Why not use React MDX or Svelte MDsveX?

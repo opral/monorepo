@@ -105,3 +105,29 @@ A --> B
 		"https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js",
 	])
 })
+
+test("renders GitHub-style markdown alerts as markdown-alert divs", async () => {
+	const markdown = `
+> [!NOTE]
+> Highlights information that users should take into account.
+`
+
+	const html = (await parse(markdown)).html
+
+	expect(html).toContain('data-mwc-alert="note"')
+	expect(html).toContain("data-mwc-alert-marker")
+	expect(html).toContain("Highlights information")
+})
+
+test("supports custom alert titles", async () => {
+	const markdown = `
+> [!TIP] Try this
+>
+> Use pnpm.
+`
+
+	const html = (await parse(markdown)).html
+
+	expect(html).toContain('data-mwc-alert="tip"')
+	expect(html).toContain("Try this")
+})

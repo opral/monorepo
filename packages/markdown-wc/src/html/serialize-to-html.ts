@@ -2,6 +2,7 @@ import { unified, type Plugin } from "unified"
 import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
 import { visit } from "unist-util-visit"
+import { rehypeGithubAlerts } from "./rehype-github-alerts.js"
 
 export type SerializeToHtmlOptions = {
 	/**
@@ -19,6 +20,10 @@ export async function serializeToHtml(
 	ast: any,
 	options: SerializeToHtmlOptions = {}
 ): Promise<string> {
+	const withDefaults: SerializeToHtmlOptions = {
+		diffHints: false,
+		...options,
+	}
 	// Single-pass remark plugin to serialize mdast data.* to HTML data-* and loosen lists
 	// - Make lists "loose" so list items render paragraphs inside <li>
 	// - Promote node.data.* to hProperties data-* attributes
@@ -28,7 +33,7 @@ export async function serializeToHtml(
 			// loose lists
 			if (node.type === "list" || node.type === "listItem") (node as any).spread = true
 			// diff hints: set diff attributes when requested (non-destructive: don't override if present)
-			if (options.diffHints) {
+			if (withDefaults.diffHints) {
 				const diffData = ((node as any).data ||= {}) as Record<string, any>
 				const parentIsListItem = parent?.type === "listItem"
 				if (node.type === "listItem" && diffData["diff-mode"] == null) {
@@ -63,9 +68,10 @@ export async function serializeToHtml(
 	const hast = await unified()
 		.use(remarkSerializeDataAttributes as any)
 		.use(remarkRehype as any, { allowDangerousHtml: true })
+		.use(rehypeGithubAlerts as any)
 		.run(ast)
 
-	if (options.diffHints) {
+	if (withDefaults.diffHints) {
 		addWrapperIdsToTables(hast)
 	}
 	// hast -> html
