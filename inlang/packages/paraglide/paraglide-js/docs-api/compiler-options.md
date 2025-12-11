@@ -40,7 +40,7 @@ The output will look like this:
 
 > `optional` **cleanOutdir**: `boolean`
 
-Defined in: [compiler-options.ts:280](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:284](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 Whether to clean the output directory before writing the new files.
 
@@ -111,7 +111,7 @@ The name of the cookie to use for the cookie strategy.
 
 > `optional` **disableAsyncLocalStorage**: `boolean`
 
-Defined in: [compiler-options.ts:209](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:213](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 Replaces AsyncLocalStorage with a synchronous implementation.
 
@@ -126,7 +126,7 @@ leak into another concurrent request.
 
 > `optional` **emitGitIgnore**: `boolean`
 
-Defined in: [compiler-options.ts:223](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:227](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 If `emitGitIgnore` is set to `true` a `.gitignore` file will be emitted in the output directory. Defaults to `true`.
 
@@ -170,13 +170,17 @@ true
 
 > `optional` **emitTsDeclarations**: `boolean`
 
-Defined in: [compiler-options.ts:188](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:192](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 Emit `.d.ts` files for the generated output using the TypeScript compiler.
 
-Enable this to give IDEs fresh, explicit typings for generated message modules
-(useful when using `locale-modules` during development). Requires `typescript`
-to be resolvable in your toolchain.
+Useful when `allowJs: true` cannot be set in your `tsconfig.json`
+(e.g., due to project constraints or conflicting compiler options).
+
+Requires `typescript` to be resolvable in your toolchain.
+
+**Note:** Enabling this option reduces compiler speed because TypeScript
+needs to generate declaration files for all output modules.
 
 ##### Example
 
@@ -222,7 +226,7 @@ false
 
 > `optional` **fs**: `any`
 
-Defined in: [compiler-options.ts:287](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:291](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 The file system to use. Defaults to `await import('node:fs')`.
 
@@ -232,7 +236,7 @@ Useful for testing the paraglide compiler by mocking the fs.
 
 > `optional` **includeEslintDisableComment**: `boolean`
 
-Defined in: [compiler-options.ts:198](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:202](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 Whether to include an eslint-disable comment at the top of each .js file.
 
@@ -301,7 +305,7 @@ await compile({
 
 > `optional` **outputStructure**: `"locale-modules"` \| `"message-modules"`
 
-Defined in: [compiler-options.ts:274](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:278](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 The `outputStructure` defines how modules are structured in the output.
 
@@ -403,7 +407,7 @@ Custom strategies with the pattern `custom-[A-Za-z0-9]+` are supported.
 
 > `optional` **urlPatterns**: [`Runtime`](runtime/type/README.md#runtime)\[`"urlPatterns"`\]
 
-Defined in: [compiler-options.ts:192](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:196](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url
 
