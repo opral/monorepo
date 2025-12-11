@@ -131,3 +131,16 @@ test("supports custom alert titles", async () => {
 	expect(html).toContain('data-mwc-alert="tip"')
 	expect(html).toContain("Try this")
 })
+
+test("externalLinks option adds target and rel to external links only", async () => {
+	const markdown = `
+[internal](/docs/hello)
+[external](https://example.com)
+`
+
+	const html = (await parse(markdown, { externalLinks: true })).html
+	expect(html).toContain('href="/docs/hello"')
+	expect(html).toContain('href="https://example.com"')
+	expect(html).toContain('target="_blank"')
+	expect(html).toContain('rel="noopener noreferrer"')
+})

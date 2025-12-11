@@ -3,6 +3,10 @@ import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
 import { visit } from "unist-util-visit"
 import { rehypeGithubAlerts } from "./rehype-github-alerts.js"
+import {
+	remarkExternalLinks,
+	type ExternalLinksOptions,
+} from "../remark-external-links.js"
 
 export type SerializeToHtmlOptions = {
 	/**
@@ -13,6 +17,15 @@ export type SerializeToHtmlOptions = {
 	 * @default false.
 	 */
 	diffHints?: boolean
+	/**
+	 * When enabled, external links open in a new tab and get a safe rel.
+	 *
+	 * `true` applies defaults to all absolute http(s) links (treated as external).
+	 * Mirrors the `parse()` option.
+	 *
+	 * @default false
+	 */
+	externalLinks?: boolean | ExternalLinksOptions
 }
 
 // Public API: serialize Ast (mdast-shaped) to HTML string
@@ -22,6 +35,7 @@ export async function serializeToHtml(
 ): Promise<string> {
 	const withDefaults: SerializeToHtmlOptions = {
 		diffHints: false,
+		externalLinks: false,
 		...options,
 	}
 	// Single-pass remark plugin to serialize mdast data.* to HTML data-* and loosen lists
@@ -65,8 +79,16 @@ export async function serializeToHtml(
 		})
 	}
 	// mdast -> hast
-	const hast = await unified()
-		.use(remarkSerializeDataAttributes as any)
+	const processor = unified().use(remarkSerializeDataAttributes as any)
+	if (withDefaults.externalLinks) {
+		if (typeof withDefaults.externalLinks === "object") {
+			processor.use(remarkExternalLinks as any, withDefaults.externalLinks)
+		} else {
+			processor.use(remarkExternalLinks as any)
+		}
+	}
+
+	const hast = await processor
 		.use(remarkRehype as any, { allowDangerousHtml: true })
 		.use(rehypeGithubAlerts as any)
 		.run(ast)

@@ -216,3 +216,33 @@ test("serializeToHtml with diffHints leaves task list checkboxes without diff id
 	expect(html).not.toMatch(/data-diff-key="item-1_checkbox"/)
 	expect(html).not.toMatch(/item-1_checkbox[^>]*data-diff-show-when-removed=/)
 })
+
+test("serializeToHtml externalLinks option annotates external links", async () => {
+	const ast = {
+		type: "root",
+		children: [
+			{
+				type: "paragraph",
+				children: [
+					{
+						type: "link",
+						url: "/docs/hello",
+						children: [{ type: "text", value: "internal" }],
+					},
+					{ type: "text", value: " " },
+					{
+						type: "link",
+						url: "https://example.com",
+						children: [{ type: "text", value: "external" }],
+					},
+				],
+			},
+		],
+	}
+
+	const html = await serializeToHtml(ast, { externalLinks: true })
+	expect(html).toContain('href="/docs/hello"')
+	expect(html).toContain('href="https://example.com"')
+	expect(html).toContain('target="_blank"')
+	expect(html).toContain('rel="noopener noreferrer"')
+})

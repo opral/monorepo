@@ -14,6 +14,10 @@ import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
 import { visit } from "unist-util-visit"
 import { rehypeGithubAlerts } from "./html/rehype-github-alerts.js"
+import {
+	remarkExternalLinks,
+	type ExternalLinksOptions,
+} from "./remark-external-links.js"
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function parse(
@@ -31,6 +35,18 @@ export async function parse(
 		 *   }
 		 */
 		inlineStyles?: Record<string, Record<string, string>>
+		/**
+		 * When enabled, external links open in a new tab and get a safe rel.
+		 *
+		 * `true` applies defaults to all absolute http(s) links (treated as external).
+		 * You can pass an object to customize detection and attributes.
+		 *
+		 * @default false
+		 *
+		 * @example
+		 * parse(markdown, { externalLinks: true })
+		 */
+		externalLinks?: boolean | ExternalLinksOptions
 	}
 ): Promise<{
 	frontmatter: Record<string, any> & { imports?: string[] }
@@ -39,16 +55,26 @@ export async function parse(
 }> {
 	const withDefaults = {
 		inlineStyles: defaultInlineStyles,
+		externalLinks: false,
 		...options,
 	}
 
-	const content = await unified()
+	const processor = unified()
 		// @ts-ignore
 		.use(remarkParse)
 		// @ts-ignore
 		.use(remarkGfm)
 		.use(remarkFrontmatter, ["yaml"])
-		.use(() => (tree, file) => {
+
+	if (withDefaults.externalLinks) {
+		if (typeof withDefaults.externalLinks === "object") {
+			processor.use(remarkExternalLinks as any, withDefaults.externalLinks)
+		} else {
+			processor.use(remarkExternalLinks as any)
+		}
+	}
+
+	const content = await processor.use(() => (tree, file) => {
 			// @ts-ignore
 			const yamlNode = tree.children.find((node: any) => node.type === "yaml")
 			if (yamlNode && yamlNode.value) {

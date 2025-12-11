@@ -92,6 +92,9 @@ const markdown = `
 // Parse markdown
 const parsed = parse(markdown);
 
+// Optionally open external links in new tabs
+// const parsed = parse(markdown, { externalLinks: true })
+
 // Register web components
 for (const url of parsed.frontmatter.imports ?? []) {
   // optionally sanitize the imported imported here
