@@ -59,6 +59,7 @@ export async function emitTsDeclarations(
 		checkJs: true,
 		declaration: true,
 		emitDeclarationOnly: true,
+		isolatedDeclarations: true,
 		esModuleInterop: true,
 		lib: ["ESNext", "DOM"],
 		module: ts.ModuleKind.ESNext,

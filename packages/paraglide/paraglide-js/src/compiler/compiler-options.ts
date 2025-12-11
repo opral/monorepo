@@ -170,9 +170,13 @@ export type CompilerOptions = {
 	/**
 	 * Emit `.d.ts` files for the generated output using the TypeScript compiler.
 	 *
-	 * Enable this to give IDEs fresh, explicit typings for generated message modules
-	 * (useful when using `locale-modules` during development). Requires `typescript`
-	 * to be resolvable in your toolchain.
+	 * Useful when `allowJs: true` cannot be set in your `tsconfig.json`
+	 * (e.g., due to project constraints or conflicting compiler options).
+	 *
+	 * Requires `typescript` to be resolvable in your toolchain.
+	 *
+	 * **Note:** Enabling this option reduces compiler speed because TypeScript
+	 * needs to generate declaration files for all output modules.
 	 *
 	 * @example
 	 * ```ts
