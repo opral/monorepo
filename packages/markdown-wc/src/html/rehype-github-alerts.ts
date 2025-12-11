@@ -79,14 +79,17 @@ export const rehypeGithubAlerts: Plugin<[], any> = () => (tree: any) => {
       ],
     };
 
+    const originalChildren = Array.isArray(firstParagraph.children)
+      ? [...firstParagraph.children]
+      : [];
+    const remainingChildren = stripMarkerFromParagraphChildren(
+      originalChildren,
+      alertType,
+    );
+
     const newFirstParagraph = {
       ...firstParagraph,
-      children: titleOverride
-        ? [
-            markerSpan,
-            { type: "text", value: ` ${titleOverride}` },
-          ]
-        : [markerSpan],
+      children: [markerSpan, ...remainingChildren],
     };
 
     children.splice(firstParagraphIndex, 1, newFirstParagraph);
@@ -101,4 +104,20 @@ function getTextContent(node: any): string {
   if (node.type === "text") return String(node.value ?? "");
   if (!Array.isArray(node.children)) return "";
   return node.children.map(getTextContent).join("");
+}
+
+function stripMarkerFromParagraphChildren(children: any[], alertType: string) {
+  if (children.length === 0) return [];
+
+  const markerRegex = new RegExp(`^\\[!${alertType}\\]\\s*`, "i");
+
+  const [first, ...rest] = children;
+  if (first?.type === "text" && typeof first.value === "string") {
+    let value = first.value.replace(markerRegex, "");
+    value = value.replace(/^[\s\r\n]+/, "");
+    const nextChildren = value ? [{ ...first, value }] : [];
+    return [...nextChildren, ...rest];
+  }
+
+  return children;
 }

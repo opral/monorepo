@@ -107,10 +107,8 @@ A --> B
 })
 
 test("renders GitHub-style markdown alerts as markdown-alert divs", async () => {
-	const markdown = `
-> [!NOTE]
-> Highlights information that users should take into account.
-`
+	const markdown = `> [!NOTE]
+> Highlights information that users should take into account.`
 
 	const html = (await parse(markdown)).html
 
@@ -120,16 +118,26 @@ test("renders GitHub-style markdown alerts as markdown-alert divs", async () => 
 })
 
 test("supports custom alert titles", async () => {
-	const markdown = `
-> [!TIP] Try this
+	const markdown = `> [!TIP] Try this
 >
-> Use pnpm.
-`
+> Use pnpm.`
 
 	const html = (await parse(markdown)).html
 
 	expect(html).toContain('data-mwc-alert="tip"')
 	expect(html).toContain("Try this")
+})
+
+test("preserves inline markdown in alert paragraphs", async () => {
+	const markdown = `
+> [!NOTE]
+> This is \`code\`
+`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain('data-mwc-alert="note"')
+	expect(html).toContain("<code")
+	expect(html).toContain("code</code>")
 })
 
 test("externalLinks option adds target and rel to external links only", async () => {
