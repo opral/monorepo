@@ -140,6 +140,17 @@ test("preserves inline markdown in alert paragraphs", async () => {
 	expect(html).toContain("code</code>")
 })
 
+test("parses GitHub alerts with title and body without blank line", async () => {
+	const markdown = `> [!TIP] Vue as Peer Dependency
+> If you intend to perform customization that uses Vue components or APIs, you should also explicitly install \`vue\` as a dependency.`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain('data-mwc-alert="tip"')
+	expect(html).toContain("Vue as Peer Dependency")
+	expect(html).toContain("<code")
+	expect(html).toContain("vue</code>")
+})
+
 test("externalLinks option adds target and rel to external links only", async () => {
 	const markdown = `
 [internal](/docs/hello)

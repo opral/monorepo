@@ -13,7 +13,7 @@ import yaml from "yaml"
 import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
 import { visit } from "unist-util-visit"
-import { rehypeGithubAlerts } from "./html/rehype-github-alerts.js"
+import { remarkGithubAlerts } from "./remark-github-alerts.js"
 import { rehypeCodeBlocks } from "./html/rehype-codeblocks.js"
 import {
 	remarkExternalLinks,
@@ -66,6 +66,7 @@ export async function parse(
 		// @ts-ignore
 		.use(remarkGfm)
 		.use(remarkFrontmatter, ["yaml"])
+		.use(remarkGithubAlerts as any)
 
 	if (withDefaults.externalLinks) {
 		if (typeof withDefaults.externalLinks === "object") {
@@ -95,7 +96,6 @@ export async function parse(
 		// @ts-ignore
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeRaw)
-		.use(rehypeGithubAlerts as any)
 		// TODO sanitization
 		// sanitization broke for attributes of custom elements
 		// took too much time to fix now

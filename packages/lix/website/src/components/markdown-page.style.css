@@ -18,15 +18,15 @@
   --vp-c-border: rgba(60, 60, 67, 0.12);
   --vp-c-gutter: rgba(60, 60, 67, 0.05);
 
-  /* Tip colors */
-  --vp-c-tip-1: #3451b2;
-  --vp-c-tip-2: rgba(100, 108, 255, 0.16);
-  --vp-c-tip-3: rgba(100, 108, 255, 0.08);
+  /* Tip colors - Green */
+  --vp-c-tip-1: #059669;
+  --vp-c-tip-2: rgba(5, 150, 105, 0.16);
+  --vp-c-tip-3: rgba(5, 150, 105, 0.08);
 
-  /* Warning colors */
-  --vp-c-warning-1: #915930;
-  --vp-c-warning-2: rgba(234, 179, 8, 0.16);
-  --vp-c-warning-3: rgba(234, 179, 8, 0.08);
+  /* Warning colors - Orange */
+  --vp-c-warning-1: #ea580c;
+  --vp-c-warning-2: rgba(234, 88, 12, 0.16);
+  --vp-c-warning-3: rgba(234, 88, 12, 0.08);
 
   /* Danger colors */
   --vp-c-danger-1: #b8272c;
@@ -48,8 +48,8 @@
   --vp-c-caution-2: rgba(244, 63, 94, 0.16);
   --vp-c-caution-3: rgba(244, 63, 94, 0.08);
 
-  --vp-code-font-size: 0.875em;
-  --vp-code-line-height: 1.7;
+  --vp-code-font-size: 0.9375em;
+  --vp-code-line-height: 1.6;
 }
 
 /* Base markdown body styles */
@@ -249,9 +249,61 @@
   color: var(--vp-c-text-1);
   background-color: var(--vp-c-bg-soft);
   border-radius: 4px;
-  padding: 3px 6px;
+  padding: 2px 6px;
   font-weight: 500;
   transition: color 0.25s, background-color 0.5s;
+}
+
+/* Ensure code inside pre doesn't have nested background */
+.markdown-body pre code {
+  background: transparent !important;
+}
+
+/* Syntax highlighting color overrides for better contrast */
+.markdown-body pre .hljs {
+  color: var(--vp-c-text-1);
+}
+
+/* Keywords (export, default, const, etc.) */
+.markdown-body pre .hljs-keyword,
+.markdown-body pre .hljs-selector-tag,
+.markdown-body pre .hljs-built_in {
+  color: #d73a49;
+}
+
+/* Strings */
+.markdown-body pre .hljs-string,
+.markdown-body pre .hljs-attr {
+  color: #032f62;
+}
+
+/* Object property names / attributes */
+.markdown-body pre .hljs-attr {
+  color: #005cc5;
+}
+
+/* Comments */
+.markdown-body pre .hljs-comment,
+.markdown-body pre .hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+/* Numbers */
+.markdown-body pre .hljs-number {
+  color: #005cc5;
+}
+
+/* Functions */
+.markdown-body pre .hljs-title,
+.markdown-body pre .hljs-title.function_ {
+  color: #6f42c1;
+}
+
+/* Types */
+.markdown-body pre .hljs-type,
+.markdown-body pre .hljs-class {
+  color: #d73a49;
 }
 
 .markdown-body a > code {
@@ -261,7 +313,7 @@
 /* Code blocks */
 .markdown-body pre {
   margin: 16px 0;
-  padding: 20px 24px;
+  padding: 8px 12px;
   background-color: var(--vp-c-bg-soft);
   border-radius: 8px;
   overflow-x: auto;
@@ -326,6 +378,11 @@
   line-height: 28px;
 }
 
+.markdown-body blockquote[data-mwc-alert] > p {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
 /* GitHub-style alerts/callouts from markdown-wc
  * Blockquotes with `data-mwc-alert` are styled like VitePress callouts.
  * The marker span is hidden by default.
@@ -336,6 +393,8 @@
   padding: 16px;
   margin: 16px 0;
   color: var(--vp-c-text-1);
+  font-size: 0.875rem;
+  line-height: 1.5rem;
 }
 
 .markdown-body blockquote[data-mwc-alert] [data-mwc-alert-marker] {

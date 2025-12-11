@@ -964,8 +964,8 @@ function LandingPage() {
 
   return (
     <div className="font-sans text-gray-900 bg-white">
-      <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between pl-6 pr-6 py-3">
           <a
             href="/"
             className="flex items-center text-[#0891B2]"

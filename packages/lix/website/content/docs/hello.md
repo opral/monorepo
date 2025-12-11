@@ -89,7 +89,7 @@ Markdown files outside the `.vitepress` directory are considered **source files*
 
 VitePress uses **file-based routing**: each `.md` file is compiled into a corresponding `.html` file with the same path. For example, `index.md` will be compiled into `index.html`, and can be visited at the root path `/` of the resulting VitePress site.
 
-VitePress also provides the ability to generate clean URLs, rewrite paths, and dynamically generate pages. These will be covered in the [Routing Guide](./routing).
+VitePress also provides the ability to generate clean URLs, rewrite paths, and dynamically generate pages. These are covered in the VitePress [Routing Guide](https://vitepress.dev/guide/routing).
 
 ## Up and Running
 
@@ -124,12 +124,12 @@ The dev server should be running at `http://localhost:5173`. Visit the URL in yo
 
 ## What's Next?
 
-- To better understand how markdown files are mapped to generated HTML, proceed to the [Routing Guide](./routing).
+- To better understand how markdown files are mapped to generated HTML, proceed to the VitePress [Routing Guide](https://vitepress.dev/guide/routing).
 
-- To discover more about what you can do on the page, such as writing markdown content or using Vue Components, refer to the "Writing" section of the guide. A great place to start would be to learn about [Markdown Extensions](./markdown).
+- To discover more about what you can do on the page, such as writing markdown content or using Vue Components, refer to the VitePress guide on [Markdown Extensions](https://vitepress.dev/guide/markdown).
 
-- To explore the features provided by the default documentation theme, check out the [Default Theme Config Reference](../reference/default-theme-config).
+- To explore the features provided by the default documentation theme, check out the VitePress [Default Theme Config Reference](https://vitepress.dev/reference/default-theme-config).
 
-- If you want to further customize the appearance of your site, explore how to either [Extend the Default Theme](./extending-default-theme) or [Build a Custom Theme](./custom-theme).
+- If you want to further customize the appearance of your site, explore how to either [Extend the Default Theme](https://vitepress.dev/guide/extending-default-theme) or [Build a Custom Theme](https://vitepress.dev/guide/custom-theme).
 
-- Once your documentation site takes shape, make sure to read the [Deployment Guide](./deploy).
+- Once your documentation site takes shape, make sure to read the VitePress [Deployment Guide](https://vitepress.dev/guide/deploy).

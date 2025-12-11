@@ -2,7 +2,7 @@ import { unified, type Plugin } from "unified"
 import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
 import { visit } from "unist-util-visit"
-import { rehypeGithubAlerts } from "./rehype-github-alerts.js"
+import { remarkGithubAlerts } from "../remark-github-alerts.js"
 import { rehypeCodeBlocks } from "./rehype-codeblocks.js"
 import {
 	remarkExternalLinks,
@@ -88,10 +88,10 @@ export async function serializeToHtml(
 			processor.use(remarkExternalLinks as any)
 		}
 	}
+	processor.use(remarkGithubAlerts as any)
 
 	const hast = await processor
 		.use(remarkRehype as any, { allowDangerousHtml: true })
-		.use(rehypeGithubAlerts as any)
 		.use(rehypeCodeBlocks as any)
 		.run(ast)
 

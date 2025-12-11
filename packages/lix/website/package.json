@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "wrangler dev dist/server/server.js",
     "test": "vitest run"
   },
   "dependencies": {

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 /**
  * Lix logo used across the site.
@@ -94,6 +95,30 @@ export const XIcon = ({ className = "" }) => (
   </svg>
 );
 
+/**
+ * Hamburger menu icon for mobile navigation.
+ *
+ * @example
+ * <MenuIcon className="h-5 w-5" />
+ */
+export const MenuIcon = ({ className = "" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
 const navLinks = [
   { href: "/docs/hello-490j9s", label: "Docs" },
   { href: "/plugins/", label: "Plugins" },
@@ -130,7 +155,7 @@ const socialLinks = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between pl-6 pr-6 py-3">
         <Link
           to="/"
           className="flex items-center text-[#0891B2]"
