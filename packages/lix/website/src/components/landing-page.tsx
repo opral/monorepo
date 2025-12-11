@@ -326,9 +326,7 @@ const XIcon = ({ className = "" }) => (
     className={className}
     aria-hidden="true"
   >
-    <path
-      d="M714.163 519.284 1160.89 0h-105.86L667.137 450.887 357.328 0H0l468.492 681.821L0 1226.37h105.866l409.625-476.152 327.181 476.152H1200L714.137 519.284h.026ZM569.165 687.828l-47.468-67.894-377.686-540.24h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z"
-    />
+    <path d="M714.163 519.284 1160.89 0h-105.86L667.137 450.887 357.328 0H0l468.492 681.821L0 1226.37h105.866l409.625-476.152 327.181 476.152H1200L714.137 519.284h.026ZM569.165 687.828l-47.468-67.894-377.686-540.24h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z" />
   </svg>
 );
 
@@ -890,6 +888,8 @@ function LandingPage() {
     },
   ];
 
+  const helloDocPath = "/docs/hello-490j9s";
+
   const featureSpotlights = [
     {
       id: "review-everything",
@@ -911,7 +911,7 @@ function LandingPage() {
       description: (
         <>
           Agents work in isolated{" "}
-          <a href="/docs/version" className="underline hover:text-[#0891b2]">
+          <a href={helloDocPath} className="underline hover:text-[#0891b2]">
             versions
           </a>{" "}
           without affecting user data.
@@ -936,9 +936,9 @@ function LandingPage() {
     };
 
   const navLinks = [
-    { href: "/docs/what-is-lix", label: "Docs" },
+    { href: helloDocPath, label: "Docs" },
     { href: "/plugins/", label: "Plugins" },
-    { href: "/docs/api/", label: "API Reference" },
+    { href: helloDocPath, label: "API Reference" },
   ];
 
   const socialLinks = [
@@ -1105,7 +1105,7 @@ function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
               <a
-                href="/docs/getting-started"
+                href={helloDocPath}
                 className="inline-flex items-center justify-center h-11 px-6 rounded-lg text-sm font-medium bg-[#0891b2] text-white hover:bg-[#0e7490] transition-colors"
               >
                 Get started
@@ -1351,7 +1351,7 @@ function LandingPage() {
                       </span>
                     </div>
                   </a>
-                ),
+                )
               )}
             </div>
           </div>
@@ -1502,7 +1502,7 @@ function LandingPage() {
                   </button>
                 ))}
                 <a
-                  href="/docs/what-is-lix"
+                  href={helloDocPath}
                   className="inline-flex items-center gap-2 p-6 text-[#0692B6] font-medium hover:text-[#047497] transition-colors"
                 >
                   Explore all features <span aria-hidden>→</span>
@@ -1625,7 +1625,7 @@ function LandingPage() {
                       </p>
                     </div>
                   </div>
-                ),
+                )
               )}
             </div>
           </div>
@@ -1635,7 +1635,7 @@ function LandingPage() {
         <section className="py-14 px-6 sm:px-12 md:px-16 bg-white">
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-6">
             <a
-              href="/docs/getting-started"
+              href={helloDocPath}
               className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>📘</span>

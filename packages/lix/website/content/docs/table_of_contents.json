@@ -1,0 +1,10 @@
+{
+  "sidebar": [
+    {
+      "label": "Overview",
+      "items": [
+        { "file": "./hello.md", "label": "Hello, Lix" }
+      ]
+    }
+  ]
+}
