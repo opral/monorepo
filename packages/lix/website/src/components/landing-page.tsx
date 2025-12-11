@@ -888,7 +888,7 @@ function LandingPage() {
     },
   ];
 
-  const helloDocPath = "/docs/hello-490j9s";
+  const helloDocPath = "/docs/hello";
 
   const featureSpotlights = [
     {

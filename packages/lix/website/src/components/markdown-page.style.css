@@ -306,6 +306,35 @@
   color: #d73a49;
 }
 
+/* Diff styling for code blocks */
+/* Highlight.js uses .hljs-deletion and .hljs-addition for diff syntax */
+.markdown-body pre code .hljs-deletion {
+  background-color: #ffebee;
+  color: #b71c1c;
+  padding: 0 2px;
+}
+
+.markdown-body pre code .hljs-addition {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+  padding: 0 2px;
+}
+
+/* Ensure nested syntax highlighting has good contrast in diff lines */
+.markdown-body pre code .hljs-deletion * {
+  color: #b71c1c !important;
+}
+
+.markdown-body pre code .hljs-addition * {
+  color: #1b5e20 !important;
+}
+
+/* Meta/diff markers (- and +) should be bold and visible */
+.markdown-body pre code .hljs-meta {
+  color: inherit;
+  font-weight: 600;
+}
+
 .markdown-body a > code {
   color: var(--vp-c-brand-1);
 }

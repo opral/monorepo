@@ -3,7 +3,10 @@
     {
       "label": "Overview",
       "items": [
-        { "file": "./hello.md", "label": "Hello, Lix" }
+        { "file": "./what-is-lix.md", "label": "What is Lix?" },
+        { "file": "./getting-started.md", "label": "Getting Started" },
+        { "file": "./comparison-to-git.md", "label": "Comparison to Git" },
+        { "file": "./lix-for-ai-agents.md", "label": "Lix for AI Agents" }
       ]
     }
   ]

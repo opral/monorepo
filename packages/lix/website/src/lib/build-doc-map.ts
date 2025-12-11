@@ -11,9 +11,7 @@ export type Toc = {
 };
 
 export type DocRecord = {
-  id: string;
   slugBase: string;
-  slugWithId: string;
   /**
    * Raw markdown including frontmatter.
    */
@@ -41,7 +39,7 @@ export function buildTocMap(toc: Toc): Map<string, TocItem> {
 }
 
 /**
- * Builds doc lookup maps keyed by both id and slug-with-id.
+ * Builds doc lookup maps keyed by slug base.
  *
  * @example
  * buildDocMaps({ "/content/docs/hello.md": rawMarkdown });
@@ -49,57 +47,25 @@ export function buildTocMap(toc: Toc): Map<string, TocItem> {
 export function buildDocMaps(entries: Record<string, string>) {
   return Object.entries(entries).reduce(
     (acc, [filePath, raw]) => {
-      const frontmatter = extractFrontmatter(raw);
-
-      if (!frontmatter?.id) {
-        throw new Error(`Missing required "id" frontmatter in ${filePath}`);
-      }
-
       const relativePath = normalizeRelativePath(filePath);
       const slugBase = slugifyRelativePath(relativePath);
-      const slugWithId = `${slugBase}-${String(frontmatter.id)}`;
 
       const record: DocRecord = {
-        id: String(frontmatter.id),
         slugBase,
-        slugWithId,
         content: raw,
         relativePath,
       };
 
-      acc.byId[record.id] = record;
-      acc.bySlugId[record.slugWithId] = record;
+      acc.bySlug[slugBase] = record;
 
       return acc;
     },
     {
-      byId: {} as Record<string, DocRecord>,
-      bySlugId: {} as Record<string, DocRecord>,
-    },
+      bySlug: {} as Record<string, DocRecord>,
+    }
   );
 }
 
-/**
- * Splits "hello-123abc" into its constituent slug base and id.
- *
- * @example
- * parseSlugId("hello-123") // { slugBase: "hello", id: "123", slugWithId: "hello-123" }
- */
-export function parseSlugId(slugId: string) {
-  const lastDashIndex = slugId.lastIndexOf("-");
-  if (lastDashIndex <= 0) {
-    return null;
-  }
-
-  const slugBase = slugId.slice(0, lastDashIndex);
-  const id = slugId.slice(lastDashIndex + 1);
-
-  if (!slugBase || !id) {
-    return null;
-  }
-
-  return { slugBase, id, slugWithId: slugId };
-}
 
 /**
  * Normalizes a doc file path to a relative form rooted at content/docs.
@@ -130,11 +96,10 @@ export function slugifyRelativePath(relativePath: string) {
 /**
  * Extracts a minimal YAML frontmatter object from markdown.
  *
- * Only supports simple `key: value` pairs. This is sufficient for stable ids
- * and avoids pulling in Node-only parsers in the browser bundle.
+ * Only supports simple `key: value` pairs.
  *
  * @example
- * extractFrontmatter("---\\nid: abc123\\n---\\n# Title") // { id: "abc123" }
+ * extractFrontmatter("---\\ntitle: Hello\\n---\\n# Title") // { title: "Hello" }
  */
 function extractFrontmatter(markdown: string): Record<string, string> | null {
   const match = markdown.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);

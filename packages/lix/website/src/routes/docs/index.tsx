@@ -12,14 +12,11 @@ const docs = import.meta.glob<string>("/content/docs/**/*.md", {
   query: "?raw",
 });
 
-const { byId: docsById } = buildDocMaps(docs);
-const docsByRelativePath = Object.values(docsById).reduce(
-  (acc, doc) => {
-    acc[doc.relativePath] = doc;
-    return acc;
-  },
-  {} as Record<string, (typeof docsById)[string]>,
-);
+const { bySlug: docsBySlug } = buildDocMaps(docs);
+const docsByRelativePath = Object.values(docsBySlug).reduce((acc, doc) => {
+  acc[doc.relativePath] = doc;
+  return acc;
+}, {} as Record<string, (typeof docsBySlug)[string]>);
 
 export const Route = createFileRoute("/docs/")({
   loader: () => {
@@ -30,14 +27,14 @@ export const Route = createFileRoute("/docs/")({
       : undefined;
     const firstDoc =
       (firstRelative && docsByRelativePath[firstRelative]) ||
-      Object.values(docsById)[0];
+      Object.values(docsBySlug)[0];
 
     if (!firstDoc) {
       throw notFound();
     }
 
     throw redirect({
-      to: `/docs/${firstDoc.slugWithId}`,
+      to: `/docs/${firstDoc.slugBase}`,
     });
   },
 });

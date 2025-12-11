@@ -22,7 +22,7 @@ export type SidebarSection = {
  * <DocsLayout
  *   toc={toc}
  *   sidebarSections={[
- *     { label: "Overview", items: [{ label: "Hello", href: "/docs/hello-123", relativePath: "./hello.md" }] },
+ *     { label: "Overview", items: [{ label: "Hello", href: "/docs/hello", relativePath: "./hello.md" }] },
  *   ]}
  *   activeRelativePath="./hello.md"
  * >

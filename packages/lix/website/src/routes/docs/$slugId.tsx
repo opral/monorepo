@@ -6,7 +6,6 @@ import {
   buildDocMaps,
   buildTocMap,
   normalizeRelativePath,
-  parseSlugId,
   type Toc,
 } from "../../lib/build-doc-map";
 import { parse } from "@opral/markdown-wc";
@@ -18,11 +17,11 @@ const docs = import.meta.glob<string>("/content/docs/**/*.md", {
 });
 
 const tocMap = buildTocMap(tableOfContents as Toc);
-const { byId: docsById } = buildDocMaps(docs);
-const docsByRelativePath = Object.values(docsById).reduce((acc, doc) => {
+const { bySlug: docsBySlug } = buildDocMaps(docs);
+const docsByRelativePath = Object.values(docsBySlug).reduce((acc, doc) => {
   acc[doc.relativePath] = doc;
   return acc;
-}, {} as Record<string, (typeof docsById)[string]>);
+}, {} as Record<string, (typeof docsBySlug)[string]>);
 
 function buildSidebarSections(toc: Toc): SidebarSection[] {
   return toc.sidebar
@@ -37,7 +36,7 @@ function buildSidebarSections(toc: Toc): SidebarSection[] {
 
           return {
             label: item.label,
-            href: `/docs/${doc.slugWithId}`,
+            href: `/docs/${doc.slugBase}`,
             relativePath,
           };
         })
@@ -50,21 +49,10 @@ function buildSidebarSections(toc: Toc): SidebarSection[] {
 
 export const Route = createFileRoute("/docs/$slugId")({
   loader: async ({ params }) => {
-    const parsedSlug = parseSlugId(params.slugId);
-    if (!parsedSlug) {
-      throw notFound();
-    }
-
-    const doc = docsById[parsedSlug.id];
+    const doc = docsBySlug[params.slugId];
 
     if (!doc) {
       throw notFound();
-    }
-
-    if (doc.slugWithId !== parsedSlug.slugWithId) {
-      throw redirect({
-        to: `/docs/${doc.slugWithId}`,
-      });
     }
 
     const tocEntry = tocMap.get(doc.relativePath);
