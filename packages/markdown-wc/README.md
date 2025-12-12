@@ -106,6 +106,108 @@ for (const url of parsed.frontmatter.imports ?? []) {
 render(parsed.html);
 ```
 
+## Styling markdown-wc
+
+Markdown WC renders standard HTML elements (headings, paragraphs, lists, blockquotes,
+code blocks, tables, etc.) and does not inject inline styles. This keeps the output
+portable and allows the host application to fully control styling.
+
+To get the previous default look, import the bundled stylesheet:
+
+```css
+@import "@opral/markdown-wc/default.css";
+```
+
+Or provide your own CSS. Example:
+
+```css
+/* Wrap rendered HTML in a container and style inside it */
+.markdown-body {
+  color: #213547;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.markdown-body h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.markdown-body h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem;
+  border-top: 1px solid #e2e2e3;
+  padding-top: 1.25rem;
+}
+
+.markdown-body p {
+  margin: 1rem 0;
+}
+
+.markdown-body a {
+  color: #3a5ccc;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+```
+
+Alert styling example (GitHub alerts):
+
+```css
+.markdown-body blockquote[data-mwc-alert] {
+  border-left: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 1rem 0;
+}
+
+.markdown-body blockquote[data-mwc-alert] [data-mwc-alert-marker] {
+  display: none;
+}
+
+.markdown-body blockquote[data-mwc-alert="note"] {
+  background: rgba(100, 108, 255, 0.08);
+  border: 1px solid rgba(100, 108, 255, 0.16);
+}
+.markdown-body blockquote[data-mwc-alert="note"]::before {
+  content: "Note";
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #3451b2;
+}
+```
+
+Code block styling / copy button hook example:
+
+```css
+.markdown-body pre[data-mwc-codeblock] {
+  position: relative;
+  padding: 16px 20px;
+  border-radius: 8px;
+  background: #f6f6f7;
+  overflow-x: auto;
+}
+
+.markdown-body pre[data-mwc-codeblock] > button[data-mwc-copy-button] {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e2e3;
+  background: #fff;
+  opacity: 0;
+}
+
+.markdown-body pre[data-mwc-codeblock]:hover > button[data-mwc-copy-button] {
+  opacity: 1;
+}
+```
+
 ## Limitations
 
 - sanitzation of markdown as well as custom elements is not implemented atm

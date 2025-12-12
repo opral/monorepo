@@ -10,7 +10,6 @@ import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import { preprocess } from "./preprocess.js"
 import yaml from "yaml"
-import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
 import { visit } from "unist-util-visit"
 import { remarkGithubAlerts } from "./remark-github-alerts.js"
@@ -24,18 +23,6 @@ import {
 export async function parse(
 	markdown: string,
 	options?: {
-		/**
-		 * Inline styles to be applied to the HTML elements
-		 *
-		 * @example
-		 *   const inlineStyles = {
-		 *     h1: {
-		 *      font-weight: "600",
-		 *      line-height: "1.625",
-		 *     }
-		 *   }
-		 */
-		inlineStyles?: Record<string, Record<string, string>>
 		/**
 		 * When enabled, external links open in a new tab and get a safe rel.
 		 *
@@ -55,7 +42,6 @@ export async function parse(
 	html: string
 }> {
 	const withDefaults = {
-		inlineStyles: defaultInlineStyles,
 		externalLinks: false,
 		...options,
 	}
@@ -76,7 +62,8 @@ export async function parse(
 		}
 	}
 
-	const content = await processor.use(() => (tree, file) => {
+	processor
+		.use(() => (tree, file) => {
 			// @ts-ignore
 			const yamlNode = tree.children.find((node: any) => node.type === "yaml")
 			if (yamlNode && yamlNode.value) {
@@ -106,12 +93,14 @@ export async function parse(
 		.use(rehypeHighlight)
 		.use(rehypeSlug)
 		.use(rehypeCodeBlocks as any)
-		.use(rehypeInlineStyles(withDefaults.inlineStyles))
+
+	processor
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
 		})
 		.use(rehypeStringify)
-		.process(preprocess(markdown))
+
+	const content = await processor.process(preprocess(markdown))
 
 	let html = String(content)
 
