@@ -1,0 +1,159 @@
+# Change Proposals
+
+Change proposals enable review and approval workflows in your application. Users and AI agents can propose changes in isolated versions that are reviewed before merging into the main version.
+
+![Change Proposals](/change-proposal.svg)
+
+> [!INFO]
+> Lix uses "change proposal" instead of "pull request" because many non-technical users aren't familiar with Git terminology. "Change proposal" clearly describes proposing changes for review.
+
+## How It Works
+
+A change proposal tracks two versions:
+
+- **Source version** - Contains the proposed changes
+- **Target version** - Where changes will be merged (usually "main")
+
+The proposal can be **accepted** (merging changes and deleting the source version) or **rejected** (marking the proposal without merging).
+
+## Schema
+
+Change proposals are simple - they just track the relationship between versions:
+
+```ts
+{
+  id: string; // Unique identifier
+  source_version_id: string; // Version with proposed changes
+  target_version_id: string; // Version to merge into
+  status: "open" | "accepted" | "rejected";
+}
+```
+
+**Note:** There are no built-in title, description, or comment fields. It's common to attach a [conversation](/docs/conversations) to a proposal for descriptions and comments, or store additional data as metadata in your own schema.
+
+## Examples
+
+### Create a change proposal
+
+<CodeSnippet
+module={example}
+srcCode={exampleSrcCode}
+sections={["create-proposal"]}
+/>
+
+**What happens:**
+
+1. A feature version is created from main
+2. Changes are made in the feature version
+3. A proposal is created linking source → target versions
+4. Proposal status is set to "open"
+
+### Query proposals
+
+<CodeSnippet
+module={example}
+srcCode={exampleSrcCode}
+sections={["query-proposals"]}
+/>
+
+Query proposals by status, target version, or any other criteria using standard SQL.
+
+### Accept a proposal
+
+<CodeSnippet
+module={example}
+srcCode={exampleSrcCode}
+sections={["accept-proposal"]}
+/>
+
+**What happens:**
+
+1. Changes from source version are merged into target version
+2. Proposal status is set to "accepted"
+3. Source version is **deleted** (changes are now in target)
+
+### Reject a proposal
+
+<CodeSnippet
+module={example}
+srcCode={exampleSrcCode}
+sections={["reject-proposal"]}
+/>
+
+**What happens:**
+
+1. Proposal status is set to "rejected"
+2. Source version **remains** (can be modified or deleted manually)
+
+## Use Cases
+
+**User collaboration**
+
+- Users propose changes for review
+- Reviewers accept or reject proposals
+- History of all proposals is preserved
+
+**AI agent safety**
+
+- AI proposes changes instead of directly modifying
+- User reviews AI suggestions before applying
+- Failed proposals can be retried with feedback
+
+**Approval workflows**
+
+- Require approval before changes go live
+- Track who approved what and when
+- Audit trail of all change proposals
+
+## Building a review UI
+
+To build a full review UI, you'll likely want to:
+
+**1. Add your own metadata:**
+
+```ts
+// Store title, description, etc. in your own schema
+await lix.db.insertInto("proposal_metadata").values({
+  proposal_id: proposal.id,
+  title: "Fix typos in documentation",
+  description: "Corrects spelling errors in user guide",
+  author_id: currentUser.id,
+});
+```
+
+**2. Show diffs:**
+
+```ts
+// Compare source and target versions to show changes
+const diff = await lix.db
+  .selectFrom("file")
+  .where("lixcol_version_id", "=", proposal.source_version_id)
+  // ... compare with target version
+  .execute();
+```
+
+**3. Add comments/discussions:**
+
+- Store comments that reference proposal ID
+- Use Lix's built-in [conversations](/docs/conversations) feature
+
+**4. Handle rejection reasons:**
+
+- Store rejection reasons in your own metadata
+- Link them to the proposal ID
+
+## Agent SDK Integration
+
+The [@lix-js/agent-sdk](https://github.com/opral/monorepo/tree/main/packages/lix/agent-sdk) provides higher-level abstractions:
+
+- **Auto-accept mode** - Skip proposals when user trusts the agent
+- **Proposal rejection errors** - Structured error handling
+- **Proposal lifecycle hooks** - React to proposal events
+
+See the [agent SDK documentation](https://github.com/opral/monorepo/tree/main/packages/lix/agent-sdk) for details.
+
+## Next Steps
+
+- Learn about [Versions](/docs/versions) to understand source and target versions
+- Explore [Conversations](/docs/conversations) for adding discussion to proposals
+- See [Metadata](/docs/metadata) for storing additional proposal information

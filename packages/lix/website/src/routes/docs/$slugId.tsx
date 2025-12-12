@@ -70,7 +70,7 @@ export const Route = createFileRoute("/docs/$slugId")({
 });
 
 function DocsPage() {
-  const { doc, sidebarSections, html } = Route.useLoaderData();
+  const { doc, sidebarSections, html, frontmatter } = Route.useLoaderData();
 
   return (
     <DocsLayout
@@ -78,7 +78,10 @@ function DocsPage() {
       sidebarSections={sidebarSections}
       activeRelativePath={doc.relativePath}
     >
-      <MarkdownPage html={html} />
+      <MarkdownPage
+        html={html}
+        imports={(frontmatter.imports as string[] | undefined) ?? undefined}
+      />
     </DocsLayout>
   );
 }

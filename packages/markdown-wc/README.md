@@ -296,6 +296,27 @@ does not render custom UI elements for code blocks; consumers should implement
 copy buttons and other enhancements with CSS and client-side scripts to keep the
 renderer framework-agnostic and portable.
 
+## Mermaid diagrams
+
+Markdown WC supports Mermaid fenced code blocks:
+
+```md
+```mermaid
+graph TD
+  A --> B
+```
+```
+
+When Mermaid blocks are detected, Markdown WC emits a `<markdown-wc-mermaid>` element and adds an import URL to frontmatter:
+
+```ts
+const { html, frontmatter } = await parse(markdown)
+// frontmatter.imports includes:
+// "https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js"
+```
+
+Consumers must load `frontmatter.imports` on the client so the custom element is registered before render.
+
 ## FAQ 
 
 ### Why not use React MDX or Svelte MDsveX?

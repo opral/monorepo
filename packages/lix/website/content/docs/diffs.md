@@ -1,0 +1,76 @@
+# Diffs
+
+Unlike traditional version control that treats files as opaque blobs of text, Lix understands the structure of your data. Diffs are computed at the [entity](/docs/schemas) level, where an "entity" is a semantic unit defined by a [plugin](/docs/plugins). For example:
+
+- **JSON**: A property, array, or nested path.
+- **Tables/CSV**: A row or an individual cell.
+- **Prose/Markdown**: A paragraph, heading, or list item.
+
+[Schema-aware](/docs/schemas) state enables semantic diffs: "price changed from $10 to $12" instead of "line 5 changed."
+
+![Diff](/diff.svg)
+
+## The SQL API
+
+Lix's main value is providing **queryable, diffable state** via SQL. You can query entity state at different [versions](/docs/versions) to build diffs.
+
+The SDK exposes pre-built queries:
+
+| Query               | Description                                       |
+| :------------------ | :------------------------------------------------ |
+| `selectVersionDiff` | Compare two versions (e.g., branch A vs branch B) |
+| `selectWorkingDiff` | Compare working state against the last checkpoint |
+
+Both return rows with `status` ('added', 'modified', 'removed', 'unchanged'), `before_change_id`, and `after_change_id` that you can join to get snapshot content.
+
+### Using selectVersionDiff
+
+Compare entities between two versions:
+
+<CodeSnippet
+module={example}
+srcCode={exampleSrcCode}
+sections={["version-diff"]}
+/>
+
+### Custom Diff Queries
+
+The real power is composing any diff query you need. Both `selectVersionDiff` and `selectWorkingDiff` return Kysely query builders, so you can filter, join, and transform results:
+
+<CodeSnippet
+module={example}
+srcCode={exampleSrcCode}
+sections={["custom-diff"]}
+/>
+
+## Rendering Diffs
+
+Lix provides before/after data. You choose how to visualize it:
+
+| Approach               | Best For                                                   | Control Level |
+| :--------------------- | :--------------------------------------------------------- | :------------ |
+| **Use a Plugin's UI**  | Quick integration with standard, pre-built components.     | Low           |
+| **Use a Diff Library** | Custom integration with powerful, pre-built diffing logic. | Medium        |
+| **Build Your Own UI**  | Complete control for bespoke or complex visualizations.    | High          |
+
+### Use a Plugin's UI
+
+[Plugins](/docs/plugins) can provide ready-to-use diff components. Fastest way to display changes:
+
+```ts
+const plugin = await lix.plugin.get({ key: "lix_plugin_csv" });
+
+if (plugin?.renderDiff) {
+  const diffComponent = plugin.renderDiff({ before, after });
+}
+```
+
+### Use a Diff Library
+
+Use a library to visualize changes. Options include [diff](https://www.npmjs.com/package/diff) for text or [@lix-js/html-diff](https://github.com/opral/monorepo/tree/main/packages/lix/html-diff) for comparing rendered HTML output.
+
+### Build Your Own UI
+
+Build custom diff rendering with complete control. Lix provides structured before/after states for any visualization you need.
+
+![Diffs come in many different types](/diffs-many-types.svg)
