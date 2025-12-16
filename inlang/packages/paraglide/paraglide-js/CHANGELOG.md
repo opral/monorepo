@@ -1,5 +1,58 @@
 # @inlang/paraglide-js
 
+## 2.7.0
+
+### Minor Changes
+
+- Add an opt-in `emitTsDeclarations` compiler flag to generate `.d.ts` files for the compiled output.
+
+  This is useful when `allowJs: true` cannot be set in your `tsconfig.json` (e.g., due to project constraints or conflicting compiler options).
+
+  **Usage:**
+
+  ```ts
+  // vite.config.ts
+  import { defineConfig } from "vite";
+  import { paraglideVitePlugin } from "@inlang/paraglide-js";
+
+  export default defineConfig({
+    plugins: [
+      paraglideVitePlugin({
+        project: "./project.inlang",
+        outdir: "./src/paraglide",
+        emitTsDeclarations: true,
+      }),
+    ],
+  });
+  ```
+
+  Or via CLI:
+
+  ```bash
+  paraglide compile --project ./project.inlang --outdir ./src/paraglide --emitTsDeclarations
+  ```
+
+  **Note:** Enabling this option reduces compiler speed because TypeScript needs to generate declaration files for all output modules.
+
+  Closes https://github.com/opral/inlang-paraglide-js/issues/566
+  Closes https://github.com/opral/inlang-paraglide-js/issues/238
+  Closes https://github.com/opral/inlang-paraglide-js/issues/160
+
+  Example output (locale-modules):
+
+  ```diff
+    src/paraglide/
+      messages/
+        _index.js
+  +     _index.d.ts
+        de.js
+  +     de.d.ts
+        en.js
+  +     en.d.ts
+      messages.js
+  +   messages.d.ts
+  ```
+
 ## 2.6.0
 
 ### Minor Changes
