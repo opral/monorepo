@@ -773,7 +773,9 @@ export function AgentView({ context, instance }: AgentViewProps) {
 				<div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
 					{hasKey ? (
 						<>
-							{(!messages || messages.length === 0) && !pending && !pendingMessage ? (
+							{(!messages || messages.length === 0) &&
+							!pending &&
+							!pendingMessage ? (
 								<AgentEmptyState />
 							) : (
 								<>
@@ -796,7 +798,9 @@ export function AgentView({ context, instance }: AgentViewProps) {
 										</div>
 									) : null}
 									{error ? (
-										<div className="px-3 py-1 text-xs text-rose-500">{error}</div>
+										<div className="px-3 py-1 text-xs text-rose-500">
+											{error}
+										</div>
 									) : null}
 								</>
 							)}

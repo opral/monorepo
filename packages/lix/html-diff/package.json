@@ -32,6 +32,7 @@
     "@tailwindcss/postcss": "^4.1.10",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
+    "entities": "2.2.0",
     "dedent": "1.5.1",
     "prettier": "^3.5.1",
     "react": "^19.1.0",
@@ -45,6 +46,6 @@
   },
   "dependencies": {
     "diff": "^8.0.2",
-    "parse5": "^7.3.0"
+    "parse5": "^8.0.0"
   }
 }
