@@ -1079,12 +1079,13 @@ async function importLocalPlugins(args: {
 			if (args.preprocessPluginBeforeImport) {
 				moduleAsText = await args.preprocessPluginBeforeImport(moduleAsText);
 			}
-			const moduleWithMimeType =
-				"data:application/javascript," + encodeURIComponent(moduleAsText);
-			const { default: plugin } = await import(
-				/* @vite-ignore */ moduleWithMimeType
-			);
-			locallyImportedPlugins.push(plugin);
+			const blob = new Blob([moduleAsText], { type: 'application/javascript' });
+            const blobUrl = URL.createObjectURL(blob);
+            const { default: plugin } = await import(
+                /* @vite-ignore */ blobUrl
+            );
+            locallyImportedPlugins.push(plugin);
+            URL.revokeObjectURL(blobUrl);
 		} catch (e) {
 			errors.push(new PluginImportError({ plugin: module, cause: e as Error }));
 			continue;
