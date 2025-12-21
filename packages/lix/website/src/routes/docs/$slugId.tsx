@@ -9,6 +9,7 @@ import {
   type Toc,
 } from "../../lib/build-doc-map";
 import { parse } from "@opral/markdown-wc";
+import markdownPageCss from "../../components/markdown-page.style.css?url";
 
 const docs = import.meta.glob<string>("/content/docs/**/*.md", {
   eager: true,
@@ -48,6 +49,14 @@ function buildSidebarSections(toc: Toc): SidebarSection[] {
 }
 
 export const Route = createFileRoute("/docs/$slugId")({
+  head: () => ({
+    links: [
+      {
+        rel: "stylesheet",
+        href: markdownPageCss,
+      },
+    ],
+  }),
   loader: async ({ params }) => {
     const doc = docsBySlug[params.slugId];
 

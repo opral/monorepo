@@ -1,4 +1,3 @@
-import "./markdown-page.style.css";
 import { useEffect } from "react";
 
 /**
@@ -24,7 +23,7 @@ export function MarkdownPage({
     for (const url of imports) {
       if (!url) continue;
       const existing = document.querySelector(
-        `script[data-mdwc-import="${url}"]`,
+        `script[data-mdwc-import="${url}"]`
       );
       if (existing) continue;
 
