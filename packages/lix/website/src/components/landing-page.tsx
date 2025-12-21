@@ -938,7 +938,6 @@ function LandingPage() {
   const navLinks = [
     { href: docsPath, label: "Docs" },
     { href: "/plugins/", label: "Plugins" },
-    { href: docsPath, label: "API Reference" },
   ];
 
   const socialLinks = [

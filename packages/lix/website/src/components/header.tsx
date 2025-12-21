@@ -122,7 +122,6 @@ export const MenuIcon = ({ className = "" }) => (
 const navLinks = [
   { href: "/docs", label: "Docs" },
   { href: "/plugins/", label: "Plugins" },
-  { href: "/docs", label: "API Reference" },
 ];
 
 const socialLinks = [
