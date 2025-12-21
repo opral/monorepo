@@ -23,7 +23,7 @@ export type DocRecord = {
  * Converts file path entries in the table of contents into a quick lookup map.
  *
  * @example
- * buildTocMap({ sidebar: [{ items: [{ file: "./hello.md", label: "Hello" }] }] });
+ * buildTocMap({ sidebar: [{ items: [{ file: "./what-is-lix.md", label: "What is Lix?" }] }] });
  */
 export function buildTocMap(toc: Toc): Map<string, TocItem> {
   const map = new Map<string, TocItem>();
@@ -42,7 +42,7 @@ export function buildTocMap(toc: Toc): Map<string, TocItem> {
  * Builds doc lookup maps keyed by slug.
  *
  * @example
- * buildDocMaps({ "/content/docs/hello.md": rawMarkdown });
+ * buildDocMaps({ "/content/docs/what-is-lix.md": rawMarkdown });
  */
 export function buildDocMaps(entries: Record<string, string>) {
   return Object.entries(entries).reduce(
@@ -75,7 +75,7 @@ export function buildDocMaps(entries: Record<string, string>) {
  * Normalizes a doc file path to a relative form rooted at content/docs.
  *
  * @example
- * normalizeRelativePath("/content/docs/guide/hello.md") // "./guide/hello.md"
+ * normalizeRelativePath("/content/docs/guide/setup.md") // "./guide/setup.md"
  */
 export function normalizeRelativePath(filePath: string) {
   return filePath.replace(/^\/?content\/docs\//, "./");

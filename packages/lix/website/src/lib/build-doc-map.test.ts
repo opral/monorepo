@@ -36,22 +36,22 @@ describe("buildTocMap", () => {
         {
           label: "Overview",
           items: [
-            { file: "./hello.md", label: "Hello" },
+            { file: "./what-is-lix.md", label: "What is Lix?" },
             { file: "/content/docs/guide/setup.md", label: "Setup" },
           ],
         },
       ],
     });
 
-    expect(tocMap.get("./hello.md")?.label).toBe("Hello");
+    expect(tocMap.get("./what-is-lix.md")?.label).toBe("What is Lix?");
     expect(tocMap.get("./guide/setup.md")?.label).toBe("Setup");
   });
 });
 
 describe("path helpers", () => {
   test("normalizeRelativePath removes content/docs prefix", () => {
-    expect(normalizeRelativePath("/content/docs/guide/hello.md")).toBe(
-      "./guide/hello.md",
+    expect(normalizeRelativePath("/content/docs/guide/setup.md")).toBe(
+      "./guide/setup.md",
     );
   });
 

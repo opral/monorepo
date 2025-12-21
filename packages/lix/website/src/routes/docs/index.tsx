@@ -5,6 +5,19 @@ import {
   normalizeRelativePath,
   type Toc,
 } from "../../lib/build-doc-map";
+import redirects from "./redirects.json";
+
+/**
+ * Resolves a redirect destination from the docs redirect map.
+ *
+ * @example
+ * resolveDocsRedirect("/docs") // "/docs/what-is-lix"
+ */
+function resolveDocsRedirect(pathname: string): string | undefined {
+  const normalized = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const redirectMap = redirects as Record<string, string>;
+  return redirectMap[normalized] ?? redirectMap[pathname];
+}
 
 const docs = import.meta.glob<string>("/content/docs/**/*.md", {
   eager: true,
@@ -20,6 +33,13 @@ const docsByRelativePath = Object.values(docsBySlug).reduce((acc, doc) => {
 
 export const Route = createFileRoute("/docs/")({
   loader: () => {
+    const redirected = resolveDocsRedirect("/docs");
+    if (redirected) {
+      throw redirect({
+        to: redirected,
+      });
+    }
+
     const toc = tableOfContents as Toc;
     const firstFile = toc.sidebar[0]?.items[0]?.file;
     const firstRelative = firstFile
@@ -34,6 +54,7 @@ export const Route = createFileRoute("/docs/")({
     }
 
     throw redirect({
+      // @ts-ignore
       to: `/docs/${firstDoc.slug}`,
     });
   },

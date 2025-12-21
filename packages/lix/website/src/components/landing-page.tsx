@@ -888,7 +888,7 @@ function LandingPage() {
     },
   ];
 
-  const helloDocPath = "/docs/hello";
+  const docsPath = "/docs";
 
   const featureSpotlights = [
     {
@@ -911,7 +911,7 @@ function LandingPage() {
       description: (
         <>
           Agents work in isolated{" "}
-          <a href={helloDocPath} className="underline hover:text-[#0891b2]">
+          <a href={docsPath} className="underline hover:text-[#0891b2]">
             versions
           </a>{" "}
           without affecting user data.
@@ -936,9 +936,9 @@ function LandingPage() {
     };
 
   const navLinks = [
-    { href: helloDocPath, label: "Docs" },
+    { href: docsPath, label: "Docs" },
     { href: "/plugins/", label: "Plugins" },
-    { href: helloDocPath, label: "API Reference" },
+    { href: docsPath, label: "API Reference" },
   ];
 
   const socialLinks = [
@@ -1105,7 +1105,7 @@ function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
               <a
-                href={helloDocPath}
+                href={docsPath}
                 className="inline-flex items-center justify-center h-11 px-6 rounded-lg text-sm font-medium bg-[#0891b2] text-white hover:bg-[#0e7490] transition-colors"
               >
                 Get started
@@ -1502,7 +1502,7 @@ function LandingPage() {
                   </button>
                 ))}
                 <a
-                  href={helloDocPath}
+                  href={docsPath}
                   className="inline-flex items-center gap-2 p-6 text-[#0692B6] font-medium hover:text-[#047497] transition-colors"
                 >
                   Explore all features <span aria-hidden>→</span>
@@ -1635,7 +1635,7 @@ function LandingPage() {
         <section className="py-14 px-6 sm:px-12 md:px-16 bg-white">
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-6">
             <a
-              href={helloDocPath}
+              href={docsPath}
               className="inline-flex items-center justify-center gap-2 text-base font-medium text-gray-700 transition-colors hover:text-[#0692B6]"
             >
               <span aria-hidden>📘</span>

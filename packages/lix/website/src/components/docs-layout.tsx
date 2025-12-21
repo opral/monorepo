@@ -28,9 +28,9 @@ export type PageTocItem = {
  * <DocsLayout
  *   toc={toc}
  *   sidebarSections={[
- *     { label: "Overview", items: [{ label: "Hello", href: "/docs/hello", relativePath: "./hello.md" }] },
+ *     { label: "Overview", items: [{ label: "What is Lix?", href: "/docs/what-is-lix", relativePath: "./what-is-lix.md" }] },
  *   ]}
- *   activeRelativePath="./hello.md"
+ *   activeRelativePath="./what-is-lix.md"
  *   pageToc={[{ id: "intro", label: "Intro", level: 2 }]}
  * >
  *   <MarkdownPage title="Hello" html="<h1>Hello</h1>" />
