@@ -100,7 +100,7 @@ Versions let you work with different states of your data in isolation. Here's a 
 
 | Function / Type      | Purpose                     | Docs                                        |
 | -------------------- | --------------------------- | ------------------------------------------- |
-| `createVersion()`    | Create a new version branch | [API](/docs/api/functions/createVersion)    |
-| `switchVersion()`    | Change active version       | [API](/docs/api/functions/switchVersion)    |
-| `createCheckpoint()` | Create a labeled commit     | [API](/docs/api/functions/createCheckpoint) |
-| `LixVersion`         | Version type definition     | [API](/docs/api/types/LixVersion)           |
+| `createVersion()`    | Create a new version branch | API reference                            |
+| `switchVersion()`    | Change active version       | API reference                            |
+| `createCheckpoint()` | Create a labeled commit     | API reference                            |
+| `LixVersion`         | Version type definition     | API reference                            |

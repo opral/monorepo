@@ -190,7 +190,7 @@ Implement `toBlob()` for serialization and accept `blob` in your load function.
 
 ## Next Steps
 
-- Learn about [Lix Plugins](./plugins) to support different file formats
-- Explore [Versions](./versions) for branching workflows
-- See [Change Proposals](./change-proposals) for review workflows
+- Learn about [Lix Plugins](/docs/plugins) to support different file formats
+- Explore [Versions](/docs/versions) for branching workflows
+- See [Change Proposals](/docs/change-proposals) for review workflows
 - Check the [Inlang SDK source code](https://github.com/opral/monorepo/tree/main/inlang/packages/sdk) for a complete example

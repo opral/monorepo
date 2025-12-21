@@ -95,4 +95,4 @@ const lix = await openLix({
 // Now, any Lix-generated IDs or timestamps will be predictable
 ```
 
-See [Deterministic Mode](./deterministic-mode) for more configuration options.
+See [Deterministic Mode](/docs/deterministic-mode) for more configuration options.

@@ -6,25 +6,25 @@ AI agents generate a tremendous volume of changes. These changes need to be revi
 
 ## Every change is reviewable
 
-- Use [attribution](./attribution) to see exactly which agent (or human) changed a field, paragraph, or table cell.
-- Compare versions with entity-aware [diffs](./diffs.mdx) so reviewers understand the intent of a change instead of guessing from raw text.
+- Use [attribution](/docs/attribution) to see exactly which agent (or human) changed a field, paragraph, or table cell.
+- Compare versions with entity-aware [diffs](/docs/diffs) so reviewers understand the intent of a change instead of guessing from raw text.
 - Keep a durable audit trail; you can query history for "Which agent touched this configuration last?" at any time.
 
 ## Users stay in control
 
 Agents can draft changes, but humans stay in the loop with lightweight review tools.
 
-- [Change proposals](./change-proposals) bundle the diff, discussion, and approval state. Accept the good ideas, reject the hallucinations.
-- Start review conversations with stakeholders or other agents using comments and mentions from [conversations](./conversations).
+- [Change proposals](/docs/change-proposals) bundle the diff, discussion, and approval state. Accept the good ideas, reject the hallucinations.
+- Start review conversations with stakeholders or other agents using comments and mentions from [conversations](/docs/conversations).
 - Merge once the proposal is ready, or request another revision—the entire workflow maps to familiar pull-request style collaboration.
 
 ## Sandboxed state for AI agents
 
-[Versions](./versions.mdx) let you spin up isolated environments so agents can explore ideas without touching production data.
+[Versions](/docs/versions) let you spin up isolated environments so agents can explore ideas without touching production data.
 
 - Run multiple agents in parallel, each in their own version.
 - Compare their diffs, merge the best outcome, or discard a version entirely.
-- If something slips through, use [restore](./restore.mdx) to jump back to a known-good state in seconds.
+- If something slips through, use [restore](/docs/restore) to jump back to a known-good state in seconds.
 
 ## Typical workflow
 
@@ -37,12 +37,12 @@ Agents can draft changes, but humans stay in the loop with lightweight review to
 ## Coming soon: automated guardrails
 
 > [!NOTE]
-> [Validation rules](./validation-rules) are an upcoming feature. They will let you define automated checks that agents can use to self-correct before a human ever sees the proposal. Follow the issue for progress and demos.
+> [Validation rules](/docs/validation-rules) are an upcoming feature. They will let you define automated checks that agents can use to self-correct before a human ever sees the proposal. Follow the issue for progress and demos.
 
 ![Validation rules for AI agents](/validation-rules-agent.svg)
 
 ## Next steps
 
-- Walk through the [Getting Started guide](./getting-started.mdx) to wire Lix into your agent pipeline.
-- Learn how to diff, merge, and experiment with [versions](./versions.mdx).
+- Walk through the [Getting Started guide](/docs/getting-started) to wire Lix into your agent pipeline.
+- Learn how to diff, merge, and experiment with [versions](/docs/versions).
 - See change proposals in action in the [live example](https://prosemirror-example.onrender.com/).
