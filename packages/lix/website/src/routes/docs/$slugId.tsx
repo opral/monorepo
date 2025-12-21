@@ -143,6 +143,7 @@ function DocsPage() {
     >
       <MarkdownPage
         html={html}
+        markdown={doc.content}
         imports={(frontmatter.imports as string[] | undefined) ?? undefined}
       />
     </DocsLayout>

@@ -33,7 +33,7 @@ export type PageTocItem = {
  *   activeRelativePath="./what-is-lix.md"
  *   pageToc={[{ id: "intro", label: "Intro", level: 2 }]}
  * >
- *   <MarkdownPage title="Hello" html="<h1>Hello</h1>" />
+ *   <MarkdownPage html="<h1>Hello</h1>" markdown="# Hello" />
  * </DocsLayout>
  */
 export function DocsLayout({
