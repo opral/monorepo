@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Toc } from "../lib/build-doc-map";
 import { Header, MenuIcon } from "./header";
 
@@ -10,6 +10,12 @@ export type SidebarSection = {
     href: string;
     relativePath: string;
   }>;
+};
+
+export type PageTocItem = {
+  id: string;
+  label: string;
+  level: number;
 };
 
 /**
@@ -25,6 +31,7 @@ export type SidebarSection = {
  *     { label: "Overview", items: [{ label: "Hello", href: "/docs/hello", relativePath: "./hello.md" }] },
  *   ]}
  *   activeRelativePath="./hello.md"
+ *   pageToc={[{ id: "intro", label: "Intro", level: 2 }]}
  * >
  *   <MarkdownPage title="Hello" html="<h1>Hello</h1>" />
  * </DocsLayout>
@@ -33,14 +40,54 @@ export function DocsLayout({
   toc,
   sidebarSections,
   activeRelativePath,
+  pageToc,
   children,
 }: {
   toc: Toc;
   sidebarSections: SidebarSection[];
   activeRelativePath?: string;
+  pageToc?: PageTocItem[];
   children: React.ReactNode;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const hasPageToc = Boolean(pageToc && pageToc.length > 0);
+  const [activeTocId, setActiveTocId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pageToc || pageToc.length === 0) return;
+
+    const headings = pageToc
+      .map((item) => document.getElementById(item.id))
+      .filter((node): node is HTMLElement => Boolean(node));
+
+    if (headings.length === 0) return;
+
+    setActiveTocId(headings[0].id);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible[0]?.target instanceof HTMLElement) {
+          setActiveTocId(visible[0].target.id);
+        }
+      },
+      {
+        rootMargin: "0px 0px -70% 0px",
+        threshold: [0, 1],
+      },
+    );
+
+    for (const heading of headings) {
+      observer.observe(heading);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [pageToc]);
 
   const SidebarContent = () => (
     <nav
@@ -143,6 +190,46 @@ export function DocsLayout({
               <div className="mx-auto w-full max-w-3xl">{children}</div>
             </div>
           </main>
+
+          {hasPageToc && (
+            <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-64 shrink-0 xl:block">
+              <nav
+                aria-label="On this page"
+                className="px-6 py-8 text-sm text-slate-600"
+              >
+                <div className="text-sm font-semibold text-slate-900">
+                  On this page
+                </div>
+                <ul className="mt-3 space-y-2 border-l border-slate-200 pl-4">
+                  {pageToc?.map((item) => {
+                    const isActive = item.id === activeTocId;
+                    return (
+                      <li key={item.id} className="relative">
+                        {isActive && (
+                          <span
+                            className="absolute -left-4 top-1/2 h-5 w-0.5 -translate-y-1/2 bg-[#0891B2]"
+                            aria-hidden="true"
+                          />
+                        )}
+                        <a
+                          href={`#${item.id}`}
+                          className={[
+                            "block transition-colors",
+                            item.level > 2 ? "pl-3" : "",
+                            isActive
+                              ? "font-medium text-[#0891B2]"
+                              : "text-slate-600 hover:text-slate-900",
+                          ].join(" ")}
+                        >
+                          {item.label}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </aside>
+          )}
         </div>
       </div>
     </div>

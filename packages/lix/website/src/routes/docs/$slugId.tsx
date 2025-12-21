@@ -1,5 +1,9 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { DocsLayout, type SidebarSection } from "../../components/docs-layout";
+import {
+  DocsLayout,
+  type PageTocItem,
+  type SidebarSection,
+} from "../../components/docs-layout";
 import { MarkdownPage } from "../../components/markdown-page";
 import tableOfContents from "../../../content/docs/table_of_contents.json";
 import {
@@ -23,6 +27,52 @@ const docsByRelativePath = Object.values(docsBySlug).reduce((acc, doc) => {
   acc[doc.relativePath] = doc;
   return acc;
 }, {} as Record<string, (typeof docsBySlug)[string]>);
+
+/**
+ * Builds a list of heading links from rendered HTML for the "On this page" TOC.
+ *
+ * @example
+ * buildPageToc('<h2 id="intro">Intro</h2>') // [{ id: "intro", label: "Intro", level: 2 }]
+ */
+function buildPageToc(html: string): PageTocItem[] {
+  const headings: PageTocItem[] = [];
+  const regex = /<h2\b[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(html)) !== null) {
+    const id = match[1];
+    const label = decodeHtmlEntities(stripHtml(match[2])).trim();
+    if (!id || !label) continue;
+    headings.push({ id, label, level: 2 });
+  }
+
+  return headings;
+}
+
+/**
+ * Removes HTML tags from a string.
+ *
+ * @example
+ * stripHtml("<strong>Title</strong>") // "Title"
+ */
+function stripHtml(input: string): string {
+  return input.replace(/<[^>]*>/g, "");
+}
+
+/**
+ * Decodes a minimal set of HTML entities for heading labels.
+ *
+ * @example
+ * decodeHtmlEntities("Foo &amp; Bar") // "Foo & Bar"
+ */
+function decodeHtmlEntities(input: string): string {
+  return input
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
 
 function buildSidebarSections(toc: Toc): SidebarSection[] {
   return toc.sidebar
@@ -66,6 +116,7 @@ export const Route = createFileRoute("/docs/$slugId")({
 
     const tocEntry = tocMap.get(doc.relativePath);
     const parsedMarkdown = await parse(doc.content, { externalLinks: true });
+    const pageToc = buildPageToc(parsedMarkdown.html);
 
     return {
       doc,
@@ -73,19 +124,22 @@ export const Route = createFileRoute("/docs/$slugId")({
       sidebarSections: buildSidebarSections(tableOfContents as Toc),
       html: parsedMarkdown.html,
       frontmatter: parsedMarkdown.frontmatter,
+      pageToc,
     };
   },
   component: DocsPage,
 });
 
 function DocsPage() {
-  const { doc, sidebarSections, html, frontmatter } = Route.useLoaderData();
+  const { doc, sidebarSections, html, frontmatter, pageToc } =
+    Route.useLoaderData();
 
   return (
     <DocsLayout
       toc={tableOfContents as Toc}
       sidebarSections={sidebarSections}
       activeRelativePath={doc.relativePath}
+      pageToc={pageToc}
     >
       <MarkdownPage
         html={html}
