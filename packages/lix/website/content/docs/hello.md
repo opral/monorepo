@@ -1,5 +1,4 @@
 ---
-id: 490j9s
 title: Hello
 description: A quick introduction to the new markdown-powered docs.
 ---

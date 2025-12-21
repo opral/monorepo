@@ -1,3 +1,5 @@
+import "./doc-code-snippet-element";
+
 const COPY_BUTTON_ATTR = "data-mwc-copy-button";
 
 function ensureCopyButtons(root = document) {
@@ -45,4 +47,3 @@ function initCopyButtons() {
 if (typeof window !== "undefined") {
   initCopyButtons();
 }
-

@@ -36,7 +36,7 @@ function buildSidebarSections(toc: Toc): SidebarSection[] {
 
           return {
             label: item.label,
-            href: `/docs/${doc.slugBase}`,
+            href: `/docs/${doc.slug}`,
             relativePath,
           };
         })

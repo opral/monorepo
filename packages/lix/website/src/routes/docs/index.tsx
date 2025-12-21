@@ -34,8 +34,7 @@ export const Route = createFileRoute("/docs/")({
     }
 
     throw redirect({
-      to: `/docs/${firstDoc.slugBase}`,
+      to: `/docs/${firstDoc.slug}`,
     });
   },
 });
-

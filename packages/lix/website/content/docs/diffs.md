@@ -27,21 +27,13 @@ Both return rows with `status` ('added', 'modified', 'removed', 'unchanged'), `b
 
 Compare entities between two versions:
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["version-diff"]}
-/>
+<doc-code-snippet example="diffs" sections='["version-diff"]'></doc-code-snippet>
 
 ### Custom Diff Queries
 
 The real power is composing any diff query you need. Both `selectVersionDiff` and `selectWorkingDiff` return Kysely query builders, so you can filter, join, and transform results:
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["custom-diff"]}
-/>
+<doc-code-snippet example="diffs" sections='["custom-diff"]'></doc-code-snippet>
 
 ## Rendering Diffs
 

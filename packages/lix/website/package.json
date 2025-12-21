@@ -9,6 +9,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@lix-js/plugin-json": "workspace:*",
+    "@lix-js/sdk": "workspace:*",
     "@cloudflare/vite-plugin": "^1.13.8",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-router": "^1.132.0",
@@ -18,6 +20,7 @@
     "lucide-react": "^0.544.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "shiki": "^3.2.2",
     "tailwindcss": "^4.0.6",
     "vite-tsconfig-paths": "^5.1.4"
   },

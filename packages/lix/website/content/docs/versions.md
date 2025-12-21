@@ -94,11 +94,7 @@ Version B (feature-x) ──► commit (sh4) ↗
 
 Versions let you work with different states of your data in isolation. Here's a simple example showing how to update product prices in a separate version:
 
-<CodeSnippet
-module={versionsExample}
-srcCode={versionsExampleSrcCode}
-sections={["getting-started-versions"]}
-/>
+<doc-code-snippet example="versions" sections='["getting-started-versions"]'></doc-code-snippet>
 
 ## API reference quick-links
 

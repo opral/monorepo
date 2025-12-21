@@ -11,7 +11,7 @@ export type Toc = {
 };
 
 export type DocRecord = {
-  slugBase: string;
+  slug: string;
   /**
    * Raw markdown including frontmatter.
    */
@@ -39,7 +39,7 @@ export function buildTocMap(toc: Toc): Map<string, TocItem> {
 }
 
 /**
- * Builds doc lookup maps keyed by slug base.
+ * Builds doc lookup maps keyed by slug.
  *
  * @example
  * buildDocMaps({ "/content/docs/hello.md": rawMarkdown });
@@ -48,24 +48,28 @@ export function buildDocMaps(entries: Record<string, string>) {
   return Object.entries(entries).reduce(
     (acc, [filePath, raw]) => {
       const relativePath = normalizeRelativePath(filePath);
-      const slugBase = slugifyRelativePath(relativePath);
+      const frontmatter = extractFrontmatter(raw);
+      const frontmatterSlug = frontmatter?.slug?.trim() ?? "";
+      const normalizedSlug = frontmatterSlug
+        ? slugifyValue(frontmatterSlug)
+        : "";
+      const slug = normalizedSlug || slugifyFileName(relativePath);
 
       const record: DocRecord = {
-        slugBase,
+        slug,
         content: raw,
         relativePath,
       };
 
-      acc.bySlug[slugBase] = record;
+      acc.bySlug[slug] = record;
 
       return acc;
     },
     {
       bySlug: {} as Record<string, DocRecord>,
-    }
+    },
   );
 }
-
 
 /**
  * Normalizes a doc file path to a relative form rooted at content/docs.
@@ -88,6 +92,31 @@ export function slugifyRelativePath(relativePath: string) {
   return withoutExt
     .replace(/^\.\//, "")
     .replace(/[\/\\]+/g, "-")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Produces a URL-safe slug from a single filename.
+ *
+ * @example
+ * slugifyFileName("./guide/hello-world.md") // "hello-world"
+ */
+export function slugifyFileName(relativePath: string) {
+  const fileName = relativePath.split(/[\\/]/).pop() ?? relativePath;
+  const withoutExt = fileName.replace(/\.md$/, "");
+  return slugifyValue(withoutExt);
+}
+
+/**
+ * Produces a URL-safe slug from a string value.
+ *
+ * @example
+ * slugifyValue("Hello World") // "hello-world"
+ */
+export function slugifyValue(value: string) {
+  return value
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/^-+|-+$/g, "");

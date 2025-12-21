@@ -8,16 +8,8 @@ Restore enables applications to revert to a previous state using any change set 
 
 ### Restore to the last change set
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["restore-last-changeset"]}
-/>
+<doc-code-snippet example="restore" sections='["restore-last-changeset"]'></doc-code-snippet>
 
 ### Create and use a checkpoint
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["checkpoint-restore"]}
-/>
+<doc-code-snippet example="restore" sections='["checkpoint-restore"]'></doc-code-snippet>

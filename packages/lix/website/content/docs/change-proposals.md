@@ -35,11 +35,7 @@ Change proposals are simple - they just track the relationship between versions:
 
 ### Create a change proposal
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["create-proposal"]}
-/>
+<doc-code-snippet example="change-proposals" sections='["create-proposal"]'></doc-code-snippet>
 
 **What happens:**
 
@@ -50,21 +46,13 @@ sections={["create-proposal"]}
 
 ### Query proposals
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["query-proposals"]}
-/>
+<doc-code-snippet example="change-proposals" sections='["query-proposals"]'></doc-code-snippet>
 
 Query proposals by status, target version, or any other criteria using standard SQL.
 
 ### Accept a proposal
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["accept-proposal"]}
-/>
+<doc-code-snippet example="change-proposals" sections='["accept-proposal"]'></doc-code-snippet>
 
 **What happens:**
 
@@ -74,11 +62,7 @@ sections={["accept-proposal"]}
 
 ### Reject a proposal
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["reject-proposal"]}
-/>
+<doc-code-snippet example="change-proposals" sections='["reject-proposal"]'></doc-code-snippet>
 
 **What happens:**
 

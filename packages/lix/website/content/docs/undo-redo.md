@@ -8,8 +8,4 @@ This makes it easy to implement reliable undo/redo functionality in your applica
 
 ## Examples
 
-<CodeSnippet
-module={example}
-srcCode={exampleSrcCode}
-sections={["basic-undo-redo"]}
-/>
+<doc-code-snippet example="undo-redo" sections='["basic-undo-redo"]'></doc-code-snippet>
