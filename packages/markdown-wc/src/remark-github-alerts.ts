@@ -72,7 +72,7 @@ export const remarkGithubAlerts: Plugin<[], any> = () => (tree: any) => {
 			splitIndex === -1 ? "" : afterMarker.slice(splitIndex + 1);
 
 		// Update the marker text node to remove marker and keep title line.
-		firstTextNode.value = titleLine.trimEnd();
+		firstTextNode.value = titleLine;
 
 		// Inject marker span at start of first paragraph via raw HTML.
 		firstParagraph.children = [

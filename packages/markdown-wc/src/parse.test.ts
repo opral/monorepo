@@ -140,6 +140,14 @@ test("preserves inline markdown in alert paragraphs", async () => {
 	expect(html).toContain("code</code>")
 })
 
+test("preserves spacing before links in alert paragraphs", async () => {
+	const markdown = `> [!NOTE]
+> This page is mirrored from [packages/lix/react-utils](https://github.com/opral/monorepo/tree/main/packages/lix/react-utils).`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain("mirrored from <a")
+})
+
 test("parses GitHub alerts with title and body without blank line", async () => {
 	const markdown = `> [!TIP] Vue as Peer Dependency
 > If you intend to perform customization that uses Vue components or APIs, you should also explicitly install \`vue\` as a dependency.`
