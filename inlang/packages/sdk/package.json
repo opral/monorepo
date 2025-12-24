@@ -1,12 +1,12 @@
 {
 	"name": "@inlang/sdk",
-	"version": "2.4.9",
+	"version": "2.4.10",
 	"type": "module",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public"
 	},
-	"homepage": "https://inlang.com/documentation/sdk",
+	"homepage": "https://github.com/opral/inlang-sdk",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/opral/inlang-sdk"

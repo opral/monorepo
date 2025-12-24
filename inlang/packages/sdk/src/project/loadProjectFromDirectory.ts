@@ -679,12 +679,17 @@ async function importLocalPlugins(args: {
 			if (args.preprocessPluginBeforeImport) {
 				moduleAsText = await args.preprocessPluginBeforeImport(moduleAsText);
 			}
-			const moduleWithMimeType =
-				"data:application/javascript," + encodeURIComponent(moduleAsText);
-			const { default: plugin } = await import(
-				/* @vite-ignore */ moduleWithMimeType
-			);
+
+			// In bun we need to do dynamic imports differently
+			const pluginAsUrl = process.versions.bun
+				? URL.createObjectURL(
+						new Blob([moduleAsText], { type: "text/javascript" })
+					)
+				: "data:application/javascript," + encodeURIComponent(moduleAsText);
+
+			const { default: plugin } = await import(/* @vite-ignore */ pluginAsUrl);
 			locallyImportedPlugins.push(plugin);
+			if (process.versions.bun) URL.revokeObjectURL(pluginAsUrl);
 		} catch (e) {
 			errors.push(new PluginImportError({ plugin: module, cause: e as Error }));
 			continue;

@@ -2732,6 +2732,8 @@ importers:
         specifier: ^6
         version: 6.3.3(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.1)
 
+  packages/lix/sdk/src/engine/wasm/bundled: {}
+
   packages/lix/server-protocol-schema:
     devDependencies:
       '@opral/tsconfig':

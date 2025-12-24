@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 2.4.10
+
+### Patch Changes
+
+- Dynamic import path support for Bun https://github.com/opral/monorepo/pull/3787. 
+
 ## 2.4.9
 
 ### Patch Changes
