@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.7.1
+
+### Patch Changes
+
+- update `@inlang/sdk` to `2.4.10` which contains a fix for dynamically loading plugins in bun https://github.com/opral/monorepo/pull/3787. 
+
 ## 2.7.0
 
 ### Minor Changes
