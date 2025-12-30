@@ -28,6 +28,8 @@ export const Route = createFileRoute("/plugins/")({
     ],
   }),
   loader: async () => {
+    console.log("[plugins/index] markdown keys:", Object.keys(pluginIndexMarkdownFiles));
+    console.log("[plugins/index] selected markdown present:", Boolean(pluginIndexMarkdown));
     const parsed = await parse(pluginIndexMarkdown, { externalLinks: true });
     return {
       html: parsed.html,
