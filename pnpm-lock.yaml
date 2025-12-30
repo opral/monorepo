@@ -134,8 +134,8 @@ importers:
   inlang/packages/paraglide/paraglide-js:
     dependencies:
       '@inlang/recommend-sherlock':
-        specifier: workspace:*
-        version: link:../../recommendations/recommend-sherlock
+        specifier: ^0.2.1
+        version: 0.2.1
       '@inlang/sdk':
         specifier: 2.4.10
         version: 2.4.10(babel-plugin-macros@3.1.0)
@@ -156,11 +156,8 @@ importers:
         version: 10.1.0
     devDependencies:
       '@inlang/plugin-message-format':
-        specifier: workspace:*
-        version: link:../../plugins/inlang-message-format
-      '@opral/tsconfig':
-        specifier: workspace:*
-        version: link:../../../../packages/tsconfig
+        specifier: ^4.0.0
+        version: 4.0.0
       '@rollup/plugin-virtual':
         specifier: 3.0.2
         version: 3.0.2(rollup@4.53.2)
@@ -5357,6 +5354,9 @@ packages:
   '@inlang/plugin-message-format@2.2.0':
     resolution: {integrity: sha512-6MJLExr3OLqbR8gCP4UEgNMgdaJFFCug2GLmFwid7Ana4kObnbCA33YN3m3eN8p+lmnv7zpfW7oeyTZXZLoptg==}
 
+  '@inlang/plugin-message-format@4.0.0':
+    resolution: {integrity: sha512-zNpLxLTt+bDd3JLXj1ONzo+Q6AOzz2MfcgGo8XB6/bweGhFIndK3GU/q0iU4o7VI4KS1+OHNLpKwFcrAifwERQ==}
+
   '@inlang/plugin@2.4.14':
     resolution: {integrity: sha512-HFI1t1tKs6jXqwKVl59vvt7kvMgg2Po7xA3IFijfJTZCt0tTI8txqeXCUV9jhUop29Hqj6a5zQd32BYv33Dulw==}
     deprecated: use the inlang sdk directly https://www.npmjs.com/package/@inlang/sdk
@@ -5374,6 +5374,9 @@ packages:
 
   '@inlang/recommend-sherlock@0.1.1':
     resolution: {integrity: sha512-8qZ8FJ/QqVh6YqKmHo3SxI4ENM0O80TCzETm+hxeQ2JzPKPFYucFINpLvUygiLFp/hJwhoI5TjRz6jNI2QdfMQ==}
+
+  '@inlang/recommend-sherlock@0.2.1':
+    resolution: {integrity: sha512-ckv8HvHy/iTqaVAEKrr+gnl+p3XFNwe5D2+6w6wJk2ORV2XkcRkKOJ/XsTUJbPSiyi4PI+p+T3bqbmNx/rDUlg==}
 
   '@inlang/result@1.1.0':
     resolution: {integrity: sha512-zLGroi9EUiHuOjUOaglUVTFO7EWdo2OARMJLBO1Q5Ga/xJmSQb6XS1lhqEXBFAjgFarfEMX5YEJWWALogYV3wA==}
@@ -22191,6 +22194,10 @@ snapshots:
 
   '@inlang/plugin-message-format@2.2.0': {}
 
+  '@inlang/plugin-message-format@4.0.0':
+    dependencies:
+      flat: 6.0.1
+
   '@inlang/plugin@2.4.14(@sinclair/typebox@0.31.28)':
     dependencies:
       '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
@@ -22227,6 +22234,10 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
+
+  '@inlang/recommend-sherlock@0.2.1':
+    dependencies:
+      comment-json: 4.2.5
 
   '@inlang/result@1.1.0': {}
 
