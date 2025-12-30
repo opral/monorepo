@@ -7,15 +7,19 @@ import pluginRegistry from "./plugin.registry.json";
 import { buildPluginSidebarSections } from "../../lib/plugin-sidebar";
 
 const pluginIndexMarkdownFiles = import.meta.glob<string>(
-  "/content/plugins/index.md",
+  "../../../content/plugins/index.md",
   {
     eager: true,
     import: "default",
     query: "?raw",
   }
 );
+const pluginIndexMarkdownKey =
+  Object.keys(pluginIndexMarkdownFiles).find((key) =>
+    key.endsWith("/content/plugins/index.md")
+  ) ?? "../../../content/plugins/index.md";
 const pluginIndexMarkdown =
-  pluginIndexMarkdownFiles["/content/plugins/index.md"] ??
+  pluginIndexMarkdownFiles[pluginIndexMarkdownKey] ??
   Object.values(pluginIndexMarkdownFiles)[0];
 
 export const Route = createFileRoute("/plugins/")({
@@ -28,8 +32,6 @@ export const Route = createFileRoute("/plugins/")({
     ],
   }),
   loader: async () => {
-    console.log("[plugins/index] markdown keys:", Object.keys(pluginIndexMarkdownFiles));
-    console.log("[plugins/index] selected markdown present:", Boolean(pluginIndexMarkdown));
     const parsed = await parse(pluginIndexMarkdown, { externalLinks: true });
     return {
       html: parsed.html,
