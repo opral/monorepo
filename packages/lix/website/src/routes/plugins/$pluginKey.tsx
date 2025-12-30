@@ -36,7 +36,16 @@ function findPluginEntry(pluginKey: string): PluginEntry | undefined {
  * loadPluginMarkdown("plugin_md")
  */
 function loadPluginMarkdown(pluginKey: string): string | undefined {
-  return pluginMarkdown[`/content/plugins/${pluginKey}.md`];
+  const directMatch = pluginMarkdown[`/content/plugins/${pluginKey}.md`];
+  if (directMatch) {
+    return directMatch;
+  }
+
+  const suffix = `/content/plugins/${pluginKey}.md`;
+  const fallbackKey = Object.keys(pluginMarkdown).find((key) =>
+    key.endsWith(suffix),
+  );
+  return fallbackKey ? pluginMarkdown[fallbackKey] : undefined;
 }
 
 export const Route = createFileRoute("/plugins/$pluginKey")({

@@ -6,14 +6,17 @@ import markdownPageCss from "../../components/markdown-page.style.css?url";
 import pluginRegistry from "./plugin.registry.json";
 import { buildPluginSidebarSections } from "../../lib/plugin-sidebar";
 
-const pluginIndexMarkdown = import.meta.glob<string>(
+const pluginIndexMarkdownFiles = import.meta.glob<string>(
   "/content/plugins/index.md",
   {
     eager: true,
     import: "default",
     query: "?raw",
-  },
-)["/content/plugins/index.md"];
+  }
+);
+const pluginIndexMarkdown =
+  pluginIndexMarkdownFiles["/content/plugins/index.md"] ??
+  Object.values(pluginIndexMarkdownFiles)[0];
 
 export const Route = createFileRoute("/plugins/")({
   head: () => ({
