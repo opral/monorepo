@@ -1,0 +1,3 @@
+[submodule "inlang/packages/paraglide/paraglide-js"]
+	path = inlang/packages/paraglide/paraglide-js
+	url = https://github.com/opral/inlang-paraglide-js.git

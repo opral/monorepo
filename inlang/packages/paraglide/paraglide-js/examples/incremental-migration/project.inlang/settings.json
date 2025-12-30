@@ -1,9 +1,0 @@
-{
-	"$schema": "https://inlang.com/schema/project-settings",
-	"baseLocale": "en",
-	"locales": ["en", "de"],
-	"modules": ["../../../../plugins/i18next/dist/index.js"],
-	"plugin.inlang.i18next": {
-		"pathPattern": "./locales/{locale}.json"
-	}
-}
