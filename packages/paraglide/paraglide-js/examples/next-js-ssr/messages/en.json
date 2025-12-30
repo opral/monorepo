@@ -1,9 +1,0 @@
-{
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"example_message": "Hello world {username}",
-	"navigate_to_en": "Navigate to 'en'",
-	"navigate_to_de": "Navigate to 'de'",
-	"static_anchor_tags_info": "The links below use static anchor tags to route that work in React Server Components with 0kb JavaScript.",
-	"programmatic_locale_switching_info": "Programmatic locale switching is possible via `setLocale` in client side components",
-	"subpage": "This is the subpage."
-}

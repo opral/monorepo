@@ -1,8 +1,0 @@
-{
-  "$schema": "https://inlang.com/schema/inlang-message-format",
-  "example_message": "Guten Tag {username}",
-  "navigate_to_en": "Navigieren zu 'en'",
-  "navigate_to_de": "Navigieren zu 'de'",
-  "static_anchor_tags_info": "Die unten stehenden Links verwenden statische Ankertags, um in React Server Components mit 0kb JavaScript zu arbeiten.",
-  "programmatic_locale_switching_info": "Programmgesteuertes Umschalten der Sprache ist über `setLocale` in clientseitigen Komponenten möglich"
-}
