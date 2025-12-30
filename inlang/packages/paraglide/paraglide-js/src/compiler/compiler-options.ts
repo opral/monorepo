@@ -5,6 +5,7 @@ export const defaultCompilerOptions = {
 	emitGitIgnore: true,
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
+	emitTsDeclarations: false,
 	cleanOutdir: true,
 	disableAsyncLocalStorage: false,
 	experimentalMiddlewareLocaleSplitting: false,
@@ -166,6 +167,29 @@ export type CompilerOptions = {
 	 * @default true
 	 */
 	emitPrettierIgnore?: boolean;
+	/**
+	 * Emit `.d.ts` files for the generated output using the TypeScript compiler.
+	 *
+	 * Useful when `allowJs: true` cannot be set in your `tsconfig.json`
+	 * (e.g., due to project constraints or conflicting compiler options).
+	 *
+	 * Requires `typescript` to be resolvable in your toolchain.
+	 *
+	 * **Note:** Enabling this option reduces compiler speed because TypeScript
+	 * needs to generate declaration files for all output modules.
+	 *
+	 * @example
+	 * ```ts
+	 * await compile({
+	 *   project: "./project.inlang",
+	 *   outdir: "./src/paraglide",
+	 *   emitTsDeclarations: true,
+	 * });
+	 * ```
+	 *
+	 * @default false
+	 */
+	emitTsDeclarations?: boolean;
 	/**
 	 * https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url
 	 */

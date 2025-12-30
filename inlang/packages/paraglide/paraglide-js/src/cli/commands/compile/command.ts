@@ -31,12 +31,18 @@ export const compileCommand = new Command()
 		].join("\n")
 	)
 	.requiredOption("--silent", "Only log errors to the console", false)
+	.option(
+		"--emit-ts-declarations",
+		"Emit .d.ts files for the generated output (requires the typescript package)",
+		defaultCompilerOptions.emitTsDeclarations
+	)
 	.action(
 		async (options: {
 			silent: boolean;
 			project: string;
 			outdir: string;
 			strategy?: CompilerOptions["strategy"];
+			emitTsDeclarations?: CompilerOptions["emitTsDeclarations"];
 		}) => {
 			const logger = new Logger({ silent: options.silent, prefix: true });
 			const path = resolve(process.cwd(), options.project);
@@ -48,6 +54,9 @@ export const compileCommand = new Command()
 					project: path,
 					outdir: options.outdir,
 					strategy: options.strategy ?? defaultCompilerOptions.strategy,
+					emitTsDeclarations:
+						options.emitTsDeclarations ??
+						defaultCompilerOptions.emitTsDeclarations,
 				});
 			} catch (e) {
 				logger.error("Error while compiling inlang project.");

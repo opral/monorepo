@@ -87,6 +87,20 @@ test("emitPrettierIgnore", async () => {
 	expect(_false).not.toHaveProperty(".prettierignore");
 });
 
+test("emitTsDeclarations generates declaration files", async () => {
+	const output = await compileProject({
+		project,
+		compilerOptions: {
+			emitTsDeclarations: true,
+			outputStructure: "locale-modules",
+		},
+	});
+
+	expect(output).toHaveProperty("messages/_index.d.ts");
+	expect(output).toHaveProperty("messages.d.ts");
+	expect(output["messages/_index.d.ts"]).toContain("sad_penguin_bundle");
+});
+
 test("handles message bundles with a : in the id", async () => {
 	const project = await loadProjectInMemory({
 		blob: await newProject({
@@ -98,7 +112,7 @@ test("handles message bundles with a : in the id", async () => {
 	});
 
 	await insertBundleNested(
-		project,
+		project.db,
 		createBundleNested({
 			id: "hello:world",
 			messages: [
@@ -137,7 +151,7 @@ test("can emit message bundles with more than 255 characters", async () => {
 	});
 
 	await insertBundleNested(
-		project,
+		project.db,
 		createBundleNested({
 			// 300 characters long id
 			id: "a".repeat(300),
@@ -270,7 +284,7 @@ describe.each([
 			});
 
 			await insertBundleNested(
-				project,
+				project.db,
 				createBundleNested({
 					id: "plural_test",
 					declarations: [
@@ -459,7 +473,7 @@ describe.each([
 				});
 
 				await insertBundleNested(
-					project,
+					project.db,
 					createBundleNested({
 						id: "missingInGerman",
 						messages: [
@@ -500,7 +514,7 @@ describe.each([
 
 				// Add test messages
 				await insertBundleNested(
-					project,
+					project.db,
 					createBundleNested({
 						id: "greeting",
 						messages: [
@@ -521,7 +535,7 @@ describe.each([
 				);
 
 				await insertBundleNested(
-					project,
+					project.db,
 					createBundleNested({
 						id: "farewell",
 						messages: [
@@ -659,7 +673,7 @@ describe.each([
 				});
 
 				await insertBundleNested(
-					project,
+					project.db,
 					createBundleNested({
 						id: "$502.23-hello_world",
 						messages: [
@@ -696,7 +710,7 @@ describe.each([
 				});
 
 				await insertBundleNested(
-					project,
+					project.db,
 					createBundleNested({
 						id: "exists_in_both",
 						messages: [
@@ -724,7 +738,7 @@ describe.each([
 				);
 
 				await insertBundleNested(
-					project,
+					project.db,
 					createBundleNested({
 						id: "missing_in_en_US",
 						messages: [
@@ -765,7 +779,7 @@ describe.each([
 				});
 
 				await insertBundleNested(
-					project,
+					project.db,
 					createBundleNested({
 						id: "happy🍌",
 						messages: [
@@ -802,7 +816,7 @@ describe.each([
 
 			// Create two bundles with the same name but different case
 			await insertBundleNested(
-				project,
+				project.db,
 				createBundleNested({
 					id: "Helloworld",
 					messages: [
@@ -821,7 +835,7 @@ describe.each([
 			);
 
 			await insertBundleNested(
-				project,
+				project.db,
 				createBundleNested({
 					id: "helloworld",
 					messages: [
@@ -1148,7 +1162,7 @@ const mockBundles: BundleNested[] = [
 ];
 
 for (const bundle of mockBundles) {
-	await insertBundleNested(project, bundle);
+	await insertBundleNested(project.db, bundle);
 }
 
 function createBundleNested(args: {
