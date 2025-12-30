@@ -6,14 +6,11 @@ import markdownPageCss from "../../components/markdown-page.style.css?url";
 import pluginRegistry from "./plugin.registry.json";
 import { buildPluginSidebarSections } from "../../lib/plugin-sidebar";
 
-const pluginMarkdown = import.meta.glob<string>(
-  "../../../content/plugins/*.md",
-  {
+const pluginMarkdown = import.meta.glob<string>("/content/plugins/*.md", {
   eager: true,
   import: "default",
   query: "?raw",
-  },
-);
+});
 
 type PluginEntry = {
   key: string;
@@ -39,17 +36,7 @@ function findPluginEntry(pluginKey: string): PluginEntry | undefined {
  * loadPluginMarkdown("plugin_md")
  */
 function loadPluginMarkdown(pluginKey: string): string | undefined {
-  const directMatch =
-    pluginMarkdown[`../../../content/plugins/${pluginKey}.md`];
-  if (directMatch) {
-    return directMatch;
-  }
-
-  const suffix = `/content/plugins/${pluginKey}.md`;
-  const fallbackKey = Object.keys(pluginMarkdown).find((key) =>
-    key.endsWith(suffix),
-  );
-  return fallbackKey ? pluginMarkdown[fallbackKey] : undefined;
+  return pluginMarkdown[`/content/plugins/${pluginKey}.md`];
 }
 
 export const Route = createFileRoute("/plugins/$pluginKey")({

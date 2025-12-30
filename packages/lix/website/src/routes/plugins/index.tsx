@@ -7,20 +7,15 @@ import pluginRegistry from "./plugin.registry.json";
 import { buildPluginSidebarSections } from "../../lib/plugin-sidebar";
 
 const pluginIndexMarkdownFiles = import.meta.glob<string>(
-  "../../../content/plugins/index.md",
+  "/content/plugins/index.md",
   {
     eager: true,
     import: "default",
     query: "?raw",
   }
 );
-const pluginIndexMarkdownKey =
-  Object.keys(pluginIndexMarkdownFiles).find((key) =>
-    key.endsWith("/content/plugins/index.md")
-  ) ?? "../../../content/plugins/index.md";
 const pluginIndexMarkdown =
-  pluginIndexMarkdownFiles[pluginIndexMarkdownKey] ??
-  Object.values(pluginIndexMarkdownFiles)[0];
+  pluginIndexMarkdownFiles["/content/plugins/index.md"];
 
 export const Route = createFileRoute("/plugins/")({
   head: () => ({
