@@ -1,0 +1,48 @@
+{
+  "sidebar": [
+    {
+      "label": "Overview",
+      "items": [
+        { "file": "./what-is-lix.md", "label": "What is Lix?" },
+        { "file": "./getting-started.md", "label": "Getting Started" },
+        { "file": "./comparison-to-git.md", "label": "Comparison to Git" },
+        { "file": "./lix-for-ai-agents.md", "label": "Lix for AI Agents" }
+      ]
+    },
+    {
+      "label": "Essentials",
+      "items": [
+        { "file": "./filesystem.md", "label": "Filesystem" },
+        { "file": "./sql-interface.md", "label": "SQL Interface" },
+        { "file": "./schemas.md", "label": "Schemas" },
+        { "file": "./plugins.md", "label": "Plugins" },
+        { "file": "./persistence.md", "label": "Persistence" }
+      ]
+    },
+    {
+      "label": "Guides",
+      "items": [
+        { "file": "./versions.md", "label": "Versions (Branching)" },
+        { "file": "./history.md", "label": "History" },
+        { "file": "./diffs.md", "label": "Diffs" },
+        { "file": "./attribution.md", "label": "Attribution (Blame)" },
+        { "file": "./change-proposals.md", "label": "Change Proposals" },
+        { "file": "./validation-rules.md", "label": "Validation Rules" },
+        { "file": "./undo-redo.md", "label": "Undo/Redo" },
+        { "file": "./restore.md", "label": "Restore" },
+        { "file": "./conversations.md", "label": "Conversations" },
+        { "file": "./labels.md", "label": "Labels" },
+        { "file": "./key-value.md", "label": "Key-Value Store" },
+        { "file": "./environment-api.md", "label": "Environment API" },
+        { "file": "./testing.md", "label": "Testing" },
+        { "file": "./react-integration.md", "label": "React Integration" },
+        { "file": "./logging.md", "label": "Logging & Debugging" },
+        { "file": "./deterministic-mode.md", "label": "Deterministic Mode" },
+        { "file": "./metadata.md", "label": "Metadata" },
+        { "file": "./writer-key.md", "label": "Writer Key" },
+        { "file": "./architecture.md", "label": "Architecture" },
+        { "file": "./lix-as-file-format.md", "label": "Lix as File Format" }
+      ]
+    }
+  ]
+}

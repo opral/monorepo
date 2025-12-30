@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "plugins": [
+    {
+      "key": "plugin_json",
+      "name": "JSON Plugin",
+      "package": "@lix-js/plugin-json",
+      "description": "Tracks JSON files with JSON Pointer entities",
+      "file_types": ["*.json"],
+      "readme": "https://raw.githubusercontent.com/opral/monorepo/main/packages/lix/plugin-json/README.md",
+      "links": {
+        "npm": "https://www.npmjs.com/package/@lix-js/plugin-json",
+        "github": "https://github.com/opral/monorepo/tree/main/packages/lix/plugin-json",
+        "docs": "/plugins/plugin_json"
+      }
+    },
+    {
+      "key": "lix_plugin_csv",
+      "name": "CSV Plugin",
+      "package": "@lix-js/plugin-csv",
+      "description": "Tracks CSV files with row-level entities",
+      "file_types": ["*.csv"],
+      "readme": "https://raw.githubusercontent.com/opral/monorepo/main/packages/lix/plugin-csv/README.md",
+      "links": {
+        "npm": "https://www.npmjs.com/package/@lix-js/plugin-csv",
+        "github": "https://github.com/opral/monorepo/tree/main/packages/lix/plugin-csv",
+        "docs": "/plugins/lix_plugin_csv"
+      }
+    },
+    {
+      "key": "plugin_md",
+      "name": "Markdown Plugin",
+      "package": "@lix-js/plugin-md",
+      "description": "Tracks Markdown files using markdown-wc AST",
+      "file_types": ["*.md"],
+      "readme": "https://raw.githubusercontent.com/opral/monorepo/main/packages/lix/plugin-md/README.md",
+      "links": {
+        "npm": "https://www.npmjs.com/package/@lix-js/plugin-md",
+        "github": "https://github.com/opral/monorepo/tree/main/packages/lix/plugin-md",
+        "docs": "/plugins/plugin_md"
+      }
+    },
+    {
+      "key": "plugin_prosemirror",
+      "name": "ProseMirror Plugin",
+      "package": "@lix-js/plugin-prosemirror",
+      "description": "Tracks rich text edits in ProseMirror documents",
+      "file_types": ["/prosemirror.json"],
+      "readme": "https://raw.githubusercontent.com/opral/monorepo/main/packages/lix/plugin-prosemirror/README.md",
+      "links": {
+        "npm": "https://www.npmjs.com/package/@lix-js/plugin-prosemirror",
+        "github": "https://github.com/opral/monorepo/tree/main/packages/lix/plugin-prosemirror",
+        "docs": "/plugins/plugin_prosemirror",
+        "example": "https://prosemirror-example.onrender.com/"
+      }
+    }
+  ]
+}

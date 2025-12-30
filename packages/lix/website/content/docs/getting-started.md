@@ -1,0 +1,181 @@
+# Getting Started
+
+## Install
+
+```bash
+npm install @lix-js/sdk @lix-js/plugin-json
+```
+
+> [!NOTE]
+> Lix is currently **JavaScript/TypeScript only**. Upvote [Python](https://github.com/opral/lix-sdk/issues/370), [Rust](https://github.com/opral/lix-sdk/issues/371), or [Go](https://github.com/opral/lix-sdk/issues/373) to prioritize other languages.
+
+## Step 1: Open a Lix with plugins
+
+Plugins (`.json`, `.xlsx`, etc.) make Lix file-format aware. The environment can be swapped for [persistence](/docs/persistence).
+
+```ts
+import { openLix, selectWorkingDiff, InMemoryEnvironment } from "@lix-js/sdk";
+import { plugin as json } from "@lix-js/plugin-json";
+
+const lix = await openLix({
+  environment: new InMemoryEnvironment(),
+  providePlugins: [json],
+});
+```
+
+## Step 2: Write a file
+
+Lix is powered by SQL under the hood. Writing a file, querying diffs, etc. happens all via SQL.
+
+```ts
+await lix.db
+  .insertInto("file")
+  .values({
+    path: "/config.json",
+    data: new TextEncoder().encode(JSON.stringify({ theme: "light" })),
+  })
+  .execute();
+```
+
+## Step 3: Query changes
+
+Lix tracks changes on the entity level. You can query the history of a specific entity, or the diff between two versions.
+
+```ts
+const diff = await selectWorkingDiff({ lix }).execute();
+console.log(diff);
+```
+
+---
+
+## JSON file example
+
+A more detailed example showing Lix tracking property-level changes in a JSON config file.
+
+### The config file
+
+We'll track changes in this config file:
+
+```json
+{
+  "theme": "light",
+  "notifications": true,
+  "language": "en"
+}
+```
+
+When the config changes, Lix detects exactly which property changed:
+
+```diff
+  {
+-   "theme": "light",
++   "theme": "dark",
+    "notifications": true,
+    "language": "en"
+  }
+```
+
+### 1. Create a Lix
+
+Open a Lix with the [JSON plugin](/docs/plugins). Plugins teach Lix what a "meaningful change" is for each file format.
+
+```ts
+import { openLix, InMemoryEnvironment } from "@lix-js/sdk";
+import { plugin as json } from "@lix-js/plugin-json";
+
+const lix = await openLix({
+  environment: new InMemoryEnvironment(),
+  providePlugins: [json],
+});
+```
+
+### 2. Write the config file
+
+The JavaScript SDK uses [Kysely](https://kysely.dev/) for type-safe query building. Insert the config file into the `file` table. Files are stored as binary (`Uint8Array`), making Lix format-agnostic.
+
+```ts
+await lix.db
+  .insertInto("file")
+  .values({
+    path: "/config.json",
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        theme: "light",
+        notifications: true,
+        language: "en",
+      })
+    ),
+  })
+  .execute();
+```
+
+### 3. Update the file
+
+Update the config by changing `theme` from `"light"` to `"dark"`:
+
+```ts
+await lix.db
+  .updateTable("file")
+  .set({
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        theme: "dark",
+        notifications: true,
+        language: "en",
+      })
+    ),
+  })
+  .where("path", "=", "/config.json")
+  .execute();
+```
+
+Lix detects that `theme` changed, not just "the file changed":
+
+```diff
+  {
+-   "theme": "light",
++   "theme": "dark",
+    "notifications": true,
+    "language": "en"
+  }
+```
+
+### 4. Query history
+
+Query the file's history using the `file_history` view. The `lixcol_root_commit_id` specifies the starting point. Here we use the active version's commit to get history from the current state. The `lixcol_depth` indicates how far back (0 = current, 1 = previous, etc.):
+
+```ts
+const activeVersion = await lix.db
+  .selectFrom("version")
+  .where("is_active", "=", true)
+  .select("commit_id")
+  .executeTakeFirstOrThrow();
+
+const history = await lix.db
+  .selectFrom("file_history")
+  .where("path", "=", "/config.json")
+  .where("lixcol_root_commit_id", "=", activeVersion.commit_id)
+  .orderBy("lixcol_depth", "asc")
+  .select(["lixcol_depth", "data"])
+  .execute();
+
+for (const entry of history) {
+  const content = JSON.parse(new TextDecoder().decode(entry.data));
+  console.log(`Depth ${entry.lixcol_depth}:`, content);
+}
+```
+
+```js
+// Output:
+// Depth 0: { path: '/config.json', data: { theme: 'dark', notifications: true, language: 'en' } }
+// Depth 1: { path: '/config.json', data: { theme: 'light', notifications: true, language: 'en' } }
+```
+
+---
+
+## Next steps
+
+- [Versions](/docs/versions) – Create isolated versions (branches) for parallel work
+- [Diffs](/docs/diffs) – Query exactly what changed between any two points
+- [Change Proposals](/docs/change-proposals) – Review changes before merging
+- [Plugins](/docs/plugins) – Track CSV, Markdown, or create your own

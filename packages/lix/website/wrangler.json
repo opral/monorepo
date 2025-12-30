@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+  "name": "lix-website",
+  "compatibility_date": "2025-11-23",
+  "assets": {
+    "directory": "./dist/client"
+  }
+}

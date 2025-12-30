@@ -15,6 +15,7 @@
 		".": "./dist/index.js",
 		"./tiptap": "./dist/tiptap/index.js",
 		"./html": "./dist/html/index.js",
+		"./default.css": "./src/default.css",
 		"./dist/markdown-wc-embed.js": "./dist/markdown-wc-embed.js"
 	},
 	"scripts": {

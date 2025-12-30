@@ -2,6 +2,12 @@ import { unified, type Plugin } from "unified"
 import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
 import { visit } from "unist-util-visit"
+import { remarkGithubAlerts } from "../remark-github-alerts.js"
+import { rehypeCodeBlocks } from "./rehype-codeblocks.js"
+import {
+	remarkExternalLinks,
+	type ExternalLinksOptions,
+} from "../remark-external-links.js"
 
 export type SerializeToHtmlOptions = {
 	/**
@@ -12,6 +18,15 @@ export type SerializeToHtmlOptions = {
 	 * @default false.
 	 */
 	diffHints?: boolean
+	/**
+	 * When enabled, external links open in a new tab and get a safe rel.
+	 *
+	 * `true` applies defaults to all absolute http(s) links (treated as external).
+	 * Mirrors the `parse()` option.
+	 *
+	 * @default false
+	 */
+	externalLinks?: boolean | ExternalLinksOptions
 }
 
 // Public API: serialize Ast (mdast-shaped) to HTML string
@@ -19,6 +34,11 @@ export async function serializeToHtml(
 	ast: any,
 	options: SerializeToHtmlOptions = {}
 ): Promise<string> {
+	const withDefaults: SerializeToHtmlOptions = {
+		diffHints: false,
+		externalLinks: false,
+		...options,
+	}
 	// Single-pass remark plugin to serialize mdast data.* to HTML data-* and loosen lists
 	// - Make lists "loose" so list items render paragraphs inside <li>
 	// - Promote node.data.* to hProperties data-* attributes
@@ -28,7 +48,7 @@ export async function serializeToHtml(
 			// loose lists
 			if (node.type === "list" || node.type === "listItem") (node as any).spread = true
 			// diff hints: set diff attributes when requested (non-destructive: don't override if present)
-			if (options.diffHints) {
+			if (withDefaults.diffHints) {
 				const diffData = ((node as any).data ||= {}) as Record<string, any>
 				const parentIsListItem = parent?.type === "listItem"
 				if (node.type === "listItem" && diffData["diff-mode"] == null) {
@@ -60,12 +80,22 @@ export async function serializeToHtml(
 		})
 	}
 	// mdast -> hast
-	const hast = await unified()
-		.use(remarkSerializeDataAttributes as any)
+	const processor = unified().use(remarkSerializeDataAttributes as any)
+	if (withDefaults.externalLinks) {
+		if (typeof withDefaults.externalLinks === "object") {
+			processor.use(remarkExternalLinks as any, withDefaults.externalLinks)
+		} else {
+			processor.use(remarkExternalLinks as any)
+		}
+	}
+	processor.use(remarkGithubAlerts as any)
+
+	const hast = await processor
 		.use(remarkRehype as any, { allowDangerousHtml: true })
+		.use(rehypeCodeBlocks as any)
 		.run(ast)
 
-	if (options.diffHints) {
+	if (withDefaults.diffHints) {
 		addWrapperIdsToTables(hast)
 	}
 	// hast -> html

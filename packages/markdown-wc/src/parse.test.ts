@@ -105,3 +105,81 @@ A --> B
 		"https://cdn.jsdelivr.net/npm/@opral/markdown-wc/dist/markdown-wc-mermaid.js",
 	])
 })
+
+test("renders GitHub-style markdown alerts as markdown-alert divs", async () => {
+	const markdown = `> [!NOTE]
+> Highlights information that users should take into account.`
+
+	const html = (await parse(markdown)).html
+
+	expect(html).toContain('data-mwc-alert="note"')
+	expect(html).toContain("data-mwc-alert-marker")
+	expect(html).toContain("Highlights information")
+})
+
+test("supports custom alert titles", async () => {
+	const markdown = `> [!TIP] Try this
+>
+> Use pnpm.`
+
+	const html = (await parse(markdown)).html
+
+	expect(html).toContain('data-mwc-alert="tip"')
+	expect(html).toContain("Try this")
+})
+
+test("preserves inline markdown in alert paragraphs", async () => {
+	const markdown = `
+> [!NOTE]
+> This is \`code\`
+`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain('data-mwc-alert="note"')
+	expect(html).toContain("<code")
+	expect(html).toContain("code</code>")
+})
+
+test("preserves spacing before links in alert paragraphs", async () => {
+	const markdown = `> [!NOTE]
+> This page is mirrored from [packages/lix/react-utils](https://github.com/opral/monorepo/tree/main/packages/lix/react-utils).`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain("mirrored from <a")
+})
+
+test("parses GitHub alerts with title and body without blank line", async () => {
+	const markdown = `> [!TIP] Vue as Peer Dependency
+> If you intend to perform customization that uses Vue components or APIs, you should also explicitly install \`vue\` as a dependency.`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain('data-mwc-alert="tip"')
+	expect(html).toContain("Vue as Peer Dependency")
+	expect(html).toContain("<code")
+	expect(html).toContain("vue</code>")
+})
+
+test("externalLinks option adds target and rel to external links only", async () => {
+	const markdown = `
+[internal](/docs/hello)
+[external](https://example.com)
+`
+
+	const html = (await parse(markdown, { externalLinks: true })).html
+	expect(html).toContain('href="/docs/hello"')
+	expect(html).toContain('href="https://example.com"')
+	expect(html).toContain('target="_blank"')
+	expect(html).toContain('rel="noopener noreferrer"')
+})
+
+test("adds data-mwc-codeblock to pre elements", async () => {
+	const markdown = `
+\`\`\`js
+const a = 1
+\`\`\`
+`
+
+	const html = (await parse(markdown)).html
+	expect(html).toContain("<pre")
+	expect(html).toContain("data-mwc-codeblock")
+})

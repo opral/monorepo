@@ -10,26 +10,31 @@ import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import { preprocess } from "./preprocess.js"
 import yaml from "yaml"
-import { defaultInlineStyles, rehypeInlineStyles } from "./inline-styles.js"
 import remarkFrontmatter from "remark-frontmatter"
 import { visit } from "unist-util-visit"
+import { remarkGithubAlerts } from "./remark-github-alerts.js"
+import { rehypeCodeBlocks } from "./html/rehype-codeblocks.js"
+import {
+	remarkExternalLinks,
+	type ExternalLinksOptions,
+} from "./remark-external-links.js"
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function parse(
 	markdown: string,
 	options?: {
 		/**
-		 * Inline styles to be applied to the HTML elements
+		 * When enabled, external links open in a new tab and get a safe rel.
+		 *
+		 * `true` applies defaults to all absolute http(s) links (treated as external).
+		 * You can pass an object to customize detection and attributes.
+		 *
+		 * @default false
 		 *
 		 * @example
-		 *   const inlineStyles = {
-		 *     h1: {
-		 *      font-weight: "600",
-		 *      line-height: "1.625",
-		 *     }
-		 *   }
+		 * parse(markdown, { externalLinks: true })
 		 */
-		inlineStyles?: Record<string, Record<string, string>>
+		externalLinks?: boolean | ExternalLinksOptions
 	}
 ): Promise<{
 	frontmatter: Record<string, any> & { imports?: string[] }
@@ -37,16 +42,27 @@ export async function parse(
 	html: string
 }> {
 	const withDefaults = {
-		inlineStyles: defaultInlineStyles,
+		externalLinks: false,
 		...options,
 	}
 
-	const content = await unified()
+	const processor = unified()
 		// @ts-ignore
 		.use(remarkParse)
 		// @ts-ignore
 		.use(remarkGfm)
 		.use(remarkFrontmatter, ["yaml"])
+		.use(remarkGithubAlerts as any)
+
+	if (withDefaults.externalLinks) {
+		if (typeof withDefaults.externalLinks === "object") {
+			processor.use(remarkExternalLinks as any, withDefaults.externalLinks)
+		} else {
+			processor.use(remarkExternalLinks as any)
+		}
+	}
+
+	processor
 		.use(() => (tree, file) => {
 			// @ts-ignore
 			const yamlNode = tree.children.find((node: any) => node.type === "yaml")
@@ -76,12 +92,15 @@ export async function parse(
 		// })
 		.use(rehypeHighlight)
 		.use(rehypeSlug)
-		.use(rehypeInlineStyles(withDefaults.inlineStyles))
+		.use(rehypeCodeBlocks as any)
+
+	processor
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
 		})
 		.use(rehypeStringify)
-		.process(preprocess(markdown))
+
+	const content = await processor.process(preprocess(markdown))
 
 	let html = String(content)
 

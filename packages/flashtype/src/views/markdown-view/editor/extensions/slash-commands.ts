@@ -13,7 +13,7 @@ declare module "@tiptap/core" {
 }
 
 export const slashCommandsPluginKey = new PluginKey<SlashCommandState>(
-	"slashCommands"
+	"slashCommands",
 );
 
 export type SlashCommandState = {
@@ -90,7 +90,7 @@ export const SlashCommandsExtension = Extension.create<SlashCommandsOptions>({
 							0,
 							$from.parentOffset,
 							undefined,
-							"\ufffc"
+							"\ufffc",
 						);
 
 						// Find the last "/" in the text before cursor
@@ -164,7 +164,9 @@ export const SlashCommandsExtension = Extension.create<SlashCommandsOptions>({
 				if (state?.active) {
 					// Close the menu
 					this.editor.view.dispatch(
-						this.editor.state.tr.setMeta(slashCommandsPluginKey, { close: true })
+						this.editor.state.tr.setMeta(slashCommandsPluginKey, {
+							close: true,
+						}),
 					);
 					return true;
 				}
@@ -194,7 +196,7 @@ export const SlashCommandsExtension = Extension.create<SlashCommandsOptions>({
 						dispatch(
 							tr
 								.delete(pluginState.range.from, pluginState.range.to)
-								.setMeta(slashCommandsPluginKey, { close: true })
+								.setMeta(slashCommandsPluginKey, { close: true }),
 						);
 					}
 					return true;
