@@ -1,5 +1,15 @@
 # @opral/markdown-wc
 
+## 1.0.0
+
+### Major Changes
+
+- 87b5dd6: Stop injecting default inline styles into rendered HTML and remove the `inlineStyles` option. The previous default look is now provided as a separate stylesheet at `@opral/markdown-wc/default.css`, which apps can import if they want the old styling.
+
+### Minor Changes
+
+- b5e780c: Add support for GitHub-style alert blockquotes (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`). Alerts render as standard `<blockquote>` elements annotated with `data-mwc-alert`, and include a hideable `[data-mwc-alert-marker]` span for site-specific styling (e.g. `blockquote[data-mwc-alert="note"] { ... }` and `blockquote[data-mwc-alert] [data-mwc-alert-marker]{display:none}`). Add an opt-in `externalLinks` option to open absolute http(s) links in a new tab with `rel="noopener noreferrer"`. Code blocks are annotated with `data-mwc-codeblock` for consumer styling and hydration.
+
 ## 0.5.0
 
 ### Minor Changes

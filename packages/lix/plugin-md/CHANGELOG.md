@@ -1,5 +1,13 @@
 # @lix-js/plugin-md
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [b5e780c]
+- Updated dependencies [87b5dd6]
+  - @opral/markdown-wc@1.0.0
+
 ## 0.2.1
 
 ### Patch Changes
