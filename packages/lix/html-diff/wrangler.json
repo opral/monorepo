@@ -6,6 +6,6 @@
     "directory": "./docs_build"
   },
   "build": {
-    "command": "pnpm --filter @lix-js/html-diff... build"
+    "command": "pnpm --filter @lix-js/html-diff... build && pnpm --filter @lix-js/html-diff docs:build"
   }
 }
