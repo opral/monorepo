@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@inlang/sdk": "workspace:*",
-    "@opral/tsconfig": "workspace:*",
+    "@inlang/tsconfig": "workspace:*",
     "@sinclair/typebox": "^0.31.17",
     "typescript": "^5.5.2",
     "prettier": "3.3.3",

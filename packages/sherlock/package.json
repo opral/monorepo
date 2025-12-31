@@ -293,7 +293,7 @@
 		"vitest": "^3.2.4"
 	},
 	"devDependencies": {
-		"@opral/tsconfig": "workspace:*",
+		"@inlang/tsconfig": "workspace:*",
 		"@sentry/node": "^7.99.0",
 		"@types/fs-extra": "^11.0.2",
 		"@types/glob": "^8.1.0",

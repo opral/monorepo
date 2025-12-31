@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - Updated dependencies [16cf0e1]
-  - @opral/tsconfig@1.1.0
+  - @inlang/tsconfig@1.1.0
   - @inlang/marketplace-manifest@1.4.2
 
 ## 2.0.0

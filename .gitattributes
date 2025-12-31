@@ -1,0 +1,4 @@
+pnpm-lock.yaml merge=ours
+# automatically normalize line endings in text files to be line feed 
+# https://github.com/opral/monorepo/pull/3340#issue-2782271138
+* text=auto eol=lf

@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    // Module 16 ensures standard module resolution that works anywhere.
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    // Target ES2022 by default to avoid unnecessary old JS code like 'use strict' at the top of the file.
+    // and easier debugging of dist files
+    "target": "ES2022",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": false,
+    "declaration": true,
+    "strict": true,
+    // live safer option because some OSes are case-insensitive.
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "checkJs": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "declarationMap": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "allowUnreachableCode": false
+  }
+}

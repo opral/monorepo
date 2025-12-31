@@ -22,7 +22,7 @@
 		"prettier": "^3.3.3"
 	},
 	"devDependencies": {
-		"@opral/tsconfig": "workspace:*",
+		"@inlang/tsconfig": "workspace:*",
 		"@vitest/coverage-v8": "0.34.3",
 		"prettier": "^3.3.3",
 		"tailwindcss": "^3.3.3",

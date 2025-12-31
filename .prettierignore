@@ -1,0 +1,11 @@
+## adding the copied sources from the markdown plugin to be able to see changes since copy..
+packages/md-app/src/components/editor/plugins/markdown-plate-fork/**
+packages/md-app/src/components/editor/plugins/*.tsx
+packages/md-app/src/components/editor/plugins/*.ts
+# also exclude ui
+packages/md-app/src/components/plate-ui/*.tsx
+packages/md-app/src/components/plate-ui/*.ts
+
+
+
+packages/md-app/src/components/editor/plugins/markdown/fixtures/*.md

@@ -38,13 +38,13 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@lix-js/sdk": "workspace:*",
+		"@lix-js/sdk": "0.5.1",
 		"@sinclair/typebox": "^0.31.17",
 		"kysely": "^0.27.4"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",
-		"@opral/tsconfig": "workspace:*",
+		"@inlang/tsconfig": "workspace:*",
 		"@types/node": "^22.5.1",
 		"@vitest/coverage-v8": "^3.2.4",
 		"eslint": "^9.12.0",

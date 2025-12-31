@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "tui": {
+    "autoExit": true
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "publicEnv": [
+      {
+        "runtime": "env |   grep ^PUBLIC_"
+      }
+    ],
+    "nodeVersion": [
+      {
+        "runtime": "node --version"
+      }
+    ],
+    "platform": [
+      {
+        "runtime": " node -e 'console.log(process.platform)'"
+      }
+    ]
+  },
+  "targetDefaults": {
+    "production": {
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"],
+      "cache": true
+    },
+    "dev": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build", "publicEnv", "nodeVersion", "platform"],
+      "cache": true
+    },
+    "lint": {
+      "dependsOn": ["format"],
+      "cache": true
+    },
+    "format": {
+      "cache": true
+    }
+  },
+  "useDaemonProcess": false,
+  "__commentToken": "The token is supposed to be public",
+  "nxCloudAccessToken": "ZjA2NzJhZGQtMTQ0NS00ODVlLTlmNzktYmQ5MWYwYTZmODhlfHJlYWQtd3JpdGU="
+}

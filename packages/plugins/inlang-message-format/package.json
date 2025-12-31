@@ -23,7 +23,7 @@
 	},
 	"devDependencies": {
 		"@inlang/sdk": "workspace:*",
-		"@opral/tsconfig": "workspace:*",
+		"@inlang/tsconfig": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"esbuild": "^0.24.2",
 		"memfs": "4.6.0",

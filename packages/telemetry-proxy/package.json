@@ -14,7 +14,7 @@
 		"tsx": "3.12.7"
 	},
 	"devDependencies": {
-		"@opral/tsconfig": "workspace:*",
+		"@inlang/tsconfig": "workspace:*",
 		"@types/express": "^4.17.17",
 		"typescript": "^5.5.2"
 	},

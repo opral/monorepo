@@ -1,0 +1,15 @@
+{
+  "name": "@inlang/tsconfig",
+  "version": "1.1.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "tsconfig.default.json"
+  ],
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./default": "./tsconfig.default.json"
+  }
+}

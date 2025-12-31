@@ -1,5 +1,5 @@
 {
-	"extends": "@opral/tsconfig/default",
+	"extends": "@inlang/tsconfig/default",
 	"include": ["src/*.ts"],
 	"compilerOptions": {
 		// DOM because of fetch. TODO: extract fetch from this package and

@@ -2,7 +2,7 @@
 	"name": "@inlang/marketplace-manifest",
 	"type": "module",
 	"version": "1.4.2",
-  "types": "./dist/index.d.ts",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -22,7 +22,7 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"@opral/tsconfig": "workspace:*",
+		"@inlang/tsconfig": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"typescript": "^5.5.2",
 		"vitest": "0.34.3"

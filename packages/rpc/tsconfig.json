@@ -1,5 +1,5 @@
 {
-	"extends": "@opral/tsconfig/default",
+	"extends": "@inlang/tsconfig/default",
 	"include": ["src/**/*.ts", "src/services/env-variables/index.js"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
