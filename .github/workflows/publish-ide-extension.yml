@@ -1,0 +1,61 @@
+name: Publish Sherlock (VS Code extension)
+
+on:
+  workflow_dispatch:
+
+  push:
+    paths:
+      - "inlang/packages/sherlock/package.json"
+    branches:
+      - main
+
+jobs:
+  vs-code-marketplace:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    environment: vscode-marketplace
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Doppler CLI for env variables
+        uses: dopplerhq/cli-action@v2
+
+      - name: Build
+        run: doppler run -- pnpm --filter vs-code-extension... build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Test
+        run: doppler run -- pnpm test
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Build Visual Studio Code extension (Sherlock) package
+        run: doppler run -- pnpm --filter vs-code-extension package
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Publish to Visual Studio Code Marketplace
+        run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
+        working-directory: ./inlang/packages/sherlock
+        env:
+          VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
+
+      - name: Publish to Open VSX Registry
+        run: pnpm --filter vs-code-extension run publish:open-vsx
+        working-directory: ./inlang/packages/sherlock
+        env:
+          OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}

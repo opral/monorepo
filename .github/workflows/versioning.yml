@@ -1,0 +1,61 @@
+# see https://github.com/changesets/action#without-publishing
+
+name: versioning
+
+on:
+  # trigger this workflow when the CI workflow is completed
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    branches: [main]
+    types:
+      - completed
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  versioning:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: versioning
+    environment: production
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Doppler CLI for env (public) variables
+        uses: dopplerhq/cli-action@v2
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          # https://github.com/npm/cli/issues/6184#issuecomment-1544496444
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Create Release Pull Request
+        uses: changesets/action@v1
+        with:
+          title: Version Packages [skip preview]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current branch
+        id: get_branch
+        run: echo "CURRENT_BRANCH=$(git branch --show-current)" >> $GITHUB_ENV
+
+      - name: Update lock file
+        if: env.CURRENT_BRANCH == 'changeset-release/main'
+        run: pnpm install --lockfile-only
+
+      - name: Commit lock file
+        if: env.CURRENT_BRANCH == 'changeset-release/main'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update lock file"
+          branch: changeset-release/main

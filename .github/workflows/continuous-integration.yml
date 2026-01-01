@@ -1,0 +1,44 @@
+name: Continuous Integration
+
+env:
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  ci:
+    strategy:
+      matrix:
+        os: [blacksmith-8vcpu-ubuntu-2404]
+        version: [22]
+    runs-on: ${{ matrix.os }}
+    environment: staging
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Install Doppler CLI for env (public) variables
+        uses: dopplerhq/cli-action@v3
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.version }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - run: pnpm run ci
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
