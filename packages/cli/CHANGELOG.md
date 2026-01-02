@@ -130,7 +130,7 @@ Fix @inlang/rpc is a bundled dependency that is not published on npm
 
 ### Patch Changes
 
-- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/monorepo/pull/2792 for more details
+- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/inlang/pull/2792 for more details
 - Updated dependencies [d27a983]
 - Updated dependencies [a27b7a4]
   - @inlang/sdk@0.34.10
@@ -418,13 +418,13 @@ Fix @inlang/rpc is a bundled dependency that is not published on npm
 
 ### Minor Changes
 
-- 112e9c1c3: interim fix: bumb machine translate timeout to 8s (https://github.com/opral/monorepo/issues/1968)
+- 112e9c1c3: interim fix: bumb machine translate timeout to 8s (https://github.com/opral/inlang/issues/1968)
 
 ## 2.3.0
 
 ### Minor Changes
 
-- 25d9cb7f1: fix: https://github.com/opral/monorepo/issues/1884
+- 25d9cb7f1: fix: https://github.com/opral/inlang/issues/1884
 
 ## 2.2.0
 
@@ -436,7 +436,7 @@ Fix @inlang/rpc is a bundled dependency that is not published on npm
 
 ### Minor Changes
 
-- f75a7a551: improve: `inlang machine translate` now shows a progress bar (closes https://github.com/opral/monorepo/issues/1845)
+- f75a7a551: improve: `inlang machine translate` now shows a progress bar (closes https://github.com/opral/inlang/issues/1845)
 - 950173b4c: fix: machine translate command not exiting
 - 2cca8242a: improve: machine translation are conducted in parallel now, massively speeding up machine translations. see this loom https://www.loom.com/share/6467a97082224b31a6dd665c833a6cda?sid=65ec6913-b822-45b5-a111-0c9f303cceba
 
@@ -444,7 +444,7 @@ Fix @inlang/rpc is a bundled dependency that is not published on npm
 
 ### Major Changes
 
-- 2cafaf56c: BREAKING: `inlang project validate` is now only `inlang validate` see https://github.com/opral/monorepo/issues/1777
+- 2cafaf56c: BREAKING: `inlang project validate` is now only `inlang validate` see https://github.com/opral/inlang/issues/1777
 - 34f1944a9: REFACTOR: --project paths now need to end with .inlang
 
   ```diff

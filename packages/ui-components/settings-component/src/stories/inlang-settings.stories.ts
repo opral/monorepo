@@ -10,12 +10,12 @@ const meta: Meta = {
 		settings: {
 			control: { type: "object" },
 			description:
-				"Type ProjectSettings (https://github.com/opral/monorepo/blob/main/inlang/packages/versioned-interfaces/project-settings/src/interface.ts)",
+				"Type ProjectSettings (https://github.com/opral/inlang/blob/main/packages/versioned-interfaces/project-settings/src/interface.ts)",
 		},
 		installedPlugins: {
 			control: { type: "object" },
 			description:
-				"Type InstalledPlugin[] (https://github.com/opral/monorepo/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/packages/sdk/src/api.ts#L14)",
+				"Type InstalledPlugin[] (https://github.com/opral/inlang/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/packages/sdk/src/api.ts#L14)",
 		},
 	},
 };

@@ -70,7 +70,7 @@ const Hero = () => {
 							</button>
 							<Link
 								class="flex gap-2 items-center"
-								href="https://github.com/opral/monorepo/tree/main/inlang"
+								href="https://github.com/opral/inlang/tree/main/inlang"
 								target="_blank"
 							>
 								<IconGithub class="text-background" />

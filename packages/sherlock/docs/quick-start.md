@@ -1,6 +1,6 @@
 # Quick start
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-start.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/sherlock-start.png"/>
 
 Install the extension and click `Getting Started` in the `Sherlock Tab`.
 
@@ -51,4 +51,4 @@ Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix
 
 Hover over the message to see the tooltip with the translation.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
+If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/inlang/issues/new/choose). We are happy to help!

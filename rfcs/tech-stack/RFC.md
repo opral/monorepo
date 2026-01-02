@@ -5,7 +5,7 @@ href: /blog/rfc-tech-stack
 description: This RFC describes the tech stack of inlang.
 ---
 
-### 💡 Discuss the RFC [here](https://github.com/opral/monorepo/pull/128).
+### 💡 Discuss the RFC [here](https://github.com/opral/inlang/pull/128).
 
 # RFC 002: Tech Stack and Architecture of the editor + website
 
@@ -63,14 +63,14 @@ Reasons against embeddability include runtime-dependent features like networking
 | Embeddable | -                 | o                  | +                   |
 
 {% Figure
-src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-separated-legend.png"
+src="https://cdn.jsdelivr.net/gh/opral/inlang/rfcs/tech-stack/assets/002-embedded-separated-legend.png"
 
     alt="Legend"
 
 /%}
 
 {% Figure
-src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-monolith-architecture.png"
+src="https://cdn.jsdelivr.net/gh/opral/inlang/rfcs/tech-stack/assets/002-monolith-architecture.png"
 
     alt="Monolith architecture"
 
@@ -79,7 +79,7 @@ src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/00
 /%}
 
 {% Figure
-src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-separated-architecture.png"
+src="https://cdn.jsdelivr.net/gh/opral/inlang/rfcs/tech-stack/assets/002-separated-architecture.png"
 
     alt="Separated architecture"
 
@@ -88,7 +88,7 @@ src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/00
 /%}
 
 {% Figure
-src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/tech-stack/assets/002-embedded-architecture.png"
+src="https://cdn.jsdelivr.net/gh/opral/inlang/rfcs/tech-stack/assets/002-embedded-architecture.png"
 
     alt="Embedded architecture"
 

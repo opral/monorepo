@@ -10,7 +10,7 @@ export const getExtensionApi = async (): Promise<IdeExtensionConfig | undefined>
 /**
  *
  * @deprecated
- * Not needed anymore but left in to reduce refactoring https://github.com/opral/monorepo/pull/3137
+ * Not needed anymore but left in to reduce refactoring https://github.com/opral/inlang/pull/3137
  */
 export const getSelectedBundleByBundleIdOrAlias = async (bundleIdOrAlias: string) => {
 	const activeProject = safeState()?.project

@@ -1,6 +1,6 @@
 # Refactoring Inlang
 
-![architecture inlang new](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/architecture.jpg)
+![architecture inlang new](https://cdn.jsdelivr.net/gh/opral/inlang/documentation/sdk/assets/architecture.jpg)
 
 ## Architecture
 
@@ -34,7 +34,7 @@
 
 ## Marketplace
 
-![inlang marketplace](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/marketplace.jpg)
+![inlang marketplace](https://cdn.jsdelivr.net/gh/opral/inlang/documentation/sdk/assets/marketplace.jpg)
 
 - Find apps, libraries and modules for your project
 - Have the opportunity to distribute your own inlang-based product

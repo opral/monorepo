@@ -115,7 +115,7 @@ export default function Page(props: {
 					title: "Remix - i18n Tooling",
 					description:
 						"Recommend internationalization tooling for your Remix app.",
-					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
+					icon: "https://cdn.jsdelivr.net/gh/opral/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
 					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <RemixHeader />,
 				};
@@ -123,7 +123,7 @@ export default function Page(props: {
 				return {
 					title: m.marketplace_header_solid_title(),
 					description: m.marketplace_header_solid_description(),
-					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-solidstart/assets/icon.png",
+					icon: "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/paraglide/paraglide-solidstart/assets/icon.png",
 					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <GenericHeader />,
 				};
@@ -185,12 +185,12 @@ export default function Page(props: {
 			/>
 			<Meta
 				name="og:image"
-				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
 			/>
 			<Meta name="twitter:card" content="summary_large_image" />
 			<Meta
 				name="twitter:image"
-				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
 			/>
 			<Meta
 				name="twitter:image:alt"

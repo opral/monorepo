@@ -167,7 +167,7 @@
 ### Minor Changes
 
 - 3016bfab8: improve: use new `settingsSchema` property for plugins to provide a shorter feedback loop when the settings are invalid.
-- 1d0d7fa05: fix: https://github.com/opral/monorepo/issues/1530
+- 1d0d7fa05: fix: https://github.com/opral/inlang/issues/1530
 
 ## 1.2.0
 

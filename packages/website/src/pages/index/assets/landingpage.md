@@ -14,7 +14,7 @@ Inlang is an *open file format* for internationalization *i18n* that provides an
 - 📦 Import/Export: Import and export messages in different file formats.
 - 🎛️ [Lix change control](https://lix.opral.com/): Collaboration, change proposals, reviews, and automation.
 
-![fileformat benefits](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/src/pages/index/assets/fileformatbenefits.png)
+![fileformat benefits](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/src/pages/index/assets/fileformatbenefits.png)
 
 ### SDK to build i18n apps & solutions
 
@@ -22,7 +22,7 @@ The inlang SDK is the official specification and parser for `.inlang` files.
 
 The SDK allows creating, reading, and querying inlang files programmatically. Go to the [SDK docs](https://github.com/opral/inlang-sdk) for more information.
 
-![Inlang SDK](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sdk/assets/open-file.svg)
+![Inlang SDK](https://cdn.jsdelivr.net/gh/opral/inlang/packages/sdk/assets/open-file.svg)
 
 ## Stack agnostic
 
@@ -32,7 +32,7 @@ The only thing that is needed are import/export plugins for the translation file
 
 🧩 [Explore available plugins](https://inlang.com/c/plugins)
 
-![stack agnostic](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/src/pages/index/assets/tech-stack-icon.svg)
+![stack agnostic](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/src/pages/index/assets/tech-stack-icon.svg)
 
 ## Ecosystem
 

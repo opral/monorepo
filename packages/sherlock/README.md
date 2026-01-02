@@ -5,9 +5,9 @@
 <a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/d/inlang.vs-code-extension?color=32CD32" alt="Visual Studio Marketplace Downloads" /></a>
 <a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/i/inlang.vs-code-extension?color=3CB371" alt="Visual Studio Marketplace Installs" /></a>
 <br/>
-<a href="https://github.com/opral/monorepo" target="__blank"><img src="https://img.shields.io/github/last-commit/opral/monorepo?color=9370DB" alt="GitHub last commit" /></a>
+<a href="https://github.com/opral/inlang" target="__blank"><img src="https://img.shields.io/github/last-commit/opral/inlang?color=9370DB" alt="GitHub last commit" /></a>
 <a href="https://github.com/opral/inlang-sherlock/issues" target="__blank"><img src="https://img.shields.io/github/issues/opral/inlang-sherlock?color=20B2AA" alt="GitHub issues" /></a>
-<a href="https://github.com/opral/monorepo" target="__blank"><img alt="GitHub stars" src="https://img.shields.io/github/stars/opral/monorepo?style=social"></a>
+<a href="https://github.com/opral/inlang" target="__blank"><img alt="GitHub stars" src="https://img.shields.io/github/stars/opral/inlang?style=social"></a>
 </p>
 
 Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
@@ -26,7 +26,7 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 	<br />
 </div>
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-cover-small.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/sherlock-cover-small.png"/>
 
 <br>
 <br>
@@ -41,7 +41,7 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 
 # Quick start
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-start.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/sherlock-start.png"/>
 
 Install the extension and click `Getting Started` in the `Sherlock Tab`.
 
@@ -99,7 +99,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/ide-inline.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/ide-inline.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">🔎 Inline Annotations</p>
@@ -113,7 +113,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/ide-extract.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/ide-extract.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">✂️ Extract Messages (translations)</p>
@@ -127,7 +127,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/ide-lint.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/ide-lint.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">❌ Message Linting</p>
@@ -143,7 +143,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-monorepo.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/sherlock-monorepo.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">📦 Monorepo support</p>
@@ -157,7 +157,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-update.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/sherlock-update.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">🔁 Update Translations</p>
@@ -171,7 +171,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/sherlock-errors.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/sherlock-errors.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">⚠ Transparent Errors</p>
@@ -247,11 +247,11 @@ You can disable the automatic generation of human IDs by setting the following p
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
 
-<img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sherlock/assets/hide-badge.png"/>
+<img width="25%" src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sherlock/assets/hide-badge.png"/>
 
 ## Support: Join our Discord / Open an issue on GitHub!
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](<[https](https://github.com/opral/inlang/issues/new/choose)>). We are happy to help!
 
 <style>
 .flex-container {

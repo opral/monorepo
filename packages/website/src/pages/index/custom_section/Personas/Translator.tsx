@@ -10,14 +10,14 @@ const TranslatorSlide = () => {
 			title: m.home_personas_translator_cards_fink_title(),
 			description: m.home_personas_translator_cards_fink_description(),
 			href: "/m/tdozzpar",
-			logo: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/editor/assets/new-fink-logo.png",
+			logo: "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/editor/assets/new-fink-logo.png",
 			cover: "/images/fink-cover-landingpage.png",
 		},
 		{
 			title: m.home_personas_translator_cards_badge_title(),
 			description: m.home_personas_translator_cards_badge_description(),
 			href: "/m/zu942ln6",
-			logo: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/badge/assets/images/badge-icon.jpg",
+			logo: "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/badge/assets/images/badge-icon.jpg",
 			cover: "/images/badge-cover-landingpage.png",
 		},
 	];

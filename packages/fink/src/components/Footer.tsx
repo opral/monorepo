@@ -10,7 +10,7 @@ const Footer = () => {
 		},
 		{
 			name: "GitHub",
-			href: "https://github.com/opral/monorepo",
+			href: "https://github.com/opral/inlang",
 			Icon: IconGitHub,
 			screenreader: "GitHub Repository",
 		},

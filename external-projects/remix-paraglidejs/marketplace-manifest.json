@@ -2,7 +2,7 @@
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "library.brikev.remix-paraglidejs",
   "slug": "paraglide-remix-i18n",
-  "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
+  "icon": "https://cdn.jsdelivr.net/gh/opral/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
   "displayName": {
     "en": "Remix-ParaglideJS"
   },

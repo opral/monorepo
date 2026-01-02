@@ -10,7 +10,7 @@ Here is a 19:59 minute loom https://www.loom.com/share/8ff46ee202374e52b376d4d02
 
 Inlang core, and thereby inlang itself, is architected "resource-first". Among things, "resource-first" leads to:
 
-- Design flaws in inlang core [https://github.com/opral/monorepo/issues/1096, https://github.com/opral/monorepo/issues/945].
+- Design flaws in inlang core [https://github.com/opral/inlang/issues/1096, https://github.com/opral/inlang/issues/945].
 - Complicated application logic because apps care about messages, not resources.
 - Potentially, technical debt when extending inlang (core) beyong messages to other types of content (e.g. markdown, images, etc.).
 
@@ -26,7 +26,7 @@ No inlang application does anything with resources. However, plugins do. The der
 
 Turned out to be false. Plugins re-construct resources from Messages, not from a resource AST.
 
-Resources are almost always key-value data structures with a parsing and serialization spec. Precise knowledge how a resource file is "construcuted" e.g. message id "5" starts on line 3 column 5 is not required. As a matter of fact, the AST approach for resources doesn't even work because CRUD operations, by nature, do not contain information like message id "5" starts on line 3 column 5. CRUD operations not providing AST information lead to the [removal of `metadata`](https://github.com/opral/monorepo/issues/945).
+Resources are almost always key-value data structures with a parsing and serialization spec. Precise knowledge how a resource file is "construcuted" e.g. message id "5" starts on line 3 column 5 is not required. As a matter of fact, the AST approach for resources doesn't even work because CRUD operations, by nature, do not contain information like message id "5" starts on line 3 column 5. CRUD operations not providing AST information lead to the [removal of `metadata`](https://github.com/opral/inlang/issues/945).
 
 ## Proposal
 
