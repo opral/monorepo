@@ -8,9 +8,10 @@
 - Incrementally match old website features, starting with a reduced scope.
 
 ## Feature checklist
-- [ ] Landing page (`/`)
-- [ ] Marketplace item page (`/m/:id/:slug`)
-- [ ] Apps overview (`/c/apps`)
-- [ ] Plugins overview (`/c/plugins`)
+
+- [x] Landing page (`/`)
+- [x] Marketplace item page (`/m/:id/:slug`)
+- [x] Apps overview (`/c/apps`)
+- [x] Plugins overview (`/c/plugins`)
 - [ ] 404 / not-found
 - [ ] Global redirects (old URL mappings)

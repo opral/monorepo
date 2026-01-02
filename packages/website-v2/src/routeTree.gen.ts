@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CPluginsRouteImport } from './routes/c/plugins'
+import { Route as CAppsRouteImport } from './routes/c/apps'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CPluginsRoute = CPluginsRouteImport.update({
+  id: '/c/plugins',
+  path: '/c/plugins',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CAppsRoute = CAppsRouteImport.update({
+  id: '/c/apps',
+  path: '/c/apps',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/c/apps': typeof CAppsRoute
+  '/c/plugins': typeof CPluginsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/c/apps': typeof CAppsRoute
+  '/c/plugins': typeof CPluginsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/c/apps': typeof CAppsRoute
+  '/c/plugins': typeof CPluginsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/c/apps' | '/c/plugins'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/c/apps' | '/c/plugins'
+  id: '__root__' | '/' | '/c/apps' | '/c/plugins'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CAppsRoute: typeof CAppsRoute
+  CPluginsRoute: typeof CPluginsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/c/plugins': {
+      id: '/c/plugins'
+      path: '/c/plugins'
+      fullPath: '/c/plugins'
+      preLoaderRoute: typeof CPluginsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/c/apps': {
+      id: '/c/apps'
+      path: '/c/apps'
+      fullPath: '/c/apps'
+      preLoaderRoute: typeof CAppsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CAppsRoute: CAppsRoute,
+  CPluginsRoute: CPluginsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

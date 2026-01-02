@@ -1,9 +1,9 @@
-import { Link } from '@tanstack/react-router'
+import { Link } from "@tanstack/react-router";
 
 const socialMediaLinks = [
   {
-    name: 'X',
-    href: 'https://x.com/inlangHQ',
+    name: "X",
+    href: "https://x.com/inlangHQ",
     icon: (
       <svg
         width="18"
@@ -21,8 +21,8 @@ const socialMediaLinks = [
     ),
   },
   {
-    name: 'GitHub',
-    href: 'https://github.com/opral/inlang',
+    name: "GitHub",
+    href: "https://github.com/opral/inlang",
     icon: (
       <svg
         width="20"
@@ -37,8 +37,8 @@ const socialMediaLinks = [
     ),
   },
   {
-    name: 'Discord',
-    href: 'https://discord.gg/gdMPPWy57R',
+    name: "Discord",
+    href: "https://discord.gg/gdMPPWy57R",
     icon: (
       <svg
         width="20"
@@ -52,27 +52,28 @@ const socialMediaLinks = [
       </svg>
     ),
   },
-]
+];
 
-const resourceLinks = [
-  { name: 'Documentation', href: '/documentation' },
-]
+const resourceLinks = [{ name: "Documentation", href: "/documentation" }];
 
 const categoriesLinks = [
-  { name: 'Apps', href: '/c/apps' },
-  { name: 'Plugins', href: '/c/plugins' },
-  { name: 'Lint Rules', href: '/c/lint-rules' },
-]
+  { name: "Apps", href: "/c/apps" },
+  { name: "Plugins", href: "/c/plugins" },
+  { name: "Lint Rules", href: "/c/lint-rules" },
+];
 
 const contactLinks = [
-  { name: 'Get in Touch', href: 'mailto:hello@inlang.com' },
-  { name: 'Join the Team', href: 'https://github.com/opral/inlang/tree/main/careers' },
+  { name: "Get in Touch", href: "mailto:hello@inlang.com" },
   {
-    name: 'Feedback',
-    href: 'https://github.com/opral/inlang/discussions/categories/feedback',
+    name: "Join the Team",
+    href: "https://github.com/opral/inlang/tree/main/careers",
   },
-  { name: 'Blog', href: 'https://opral.substack.com/t/inlang' },
-]
+  {
+    name: "Feedback",
+    href: "https://github.com/opral/inlang/discussions/categories/feedback",
+  },
+  { name: "Blog", href: "https://opral.substack.com/t/inlang" },
+];
 
 export default function Footer() {
   return (
@@ -91,7 +92,7 @@ export default function Footer() {
             </span>
           </Link>
           <p className="pt-0.5 text-sm text-slate-600">
-            The ecosystem to go global
+            The open file format for localization (i18n).
           </p>
           <div className="flex flex-wrap gap-6 pt-1">
             {socialMediaLinks.map((link) => (
@@ -146,8 +147,8 @@ export default function Footer() {
             <div key={link.name} className="w-fit opacity-80">
               <a
                 href={link.href}
-                target={link.href.startsWith('/') ? undefined : '_blank'}
-                rel={link.href.startsWith('/') ? undefined : 'noreferrer'}
+                target={link.href.startsWith("/") ? undefined : "_blank"}
+                rel={link.href.startsWith("/") ? undefined : "noreferrer"}
                 className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
               >
                 {link.name}
@@ -164,6 +165,5 @@ export default function Footer() {
         </p>
       </div>
     </footer>
-  )
+  );
 }
-
