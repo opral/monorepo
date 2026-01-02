@@ -4,7 +4,7 @@
 
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sdk/assets/open-file.svg" alt="Inlang SDK opens .inlang files">
+  <img src="https://cdn.jsdelivr.net/gh/opral/inlang/packages/sdk/assets/open-file.svg" alt="Inlang SDK opens .inlang files">
 </p>
 
 ## Outline
@@ -27,7 +27,7 @@ The inlang SDK is the official specification and parser for `.inlang` files.
 - 🖊️ **CRUD API**: Query messages with SQL.
 - 🧩 **Plugin System**: Extend the capabilities with plugins.
 - 📦 **Import/Export**: Import and export messages in different file formats.
-- [<img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon">**Change control**](https://lix.opral.com/): Collaboration, change proposals, reviews, and automation. 
+- [<img src="https://raw.githubusercontent.com/opral/inlang/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon">**Change control**](https://lix.opral.com/): Collaboration, change proposals, reviews, and automation. 
 
 
 
@@ -76,7 +76,7 @@ Find available plugins on https://inlang.com/c/plugins.
 
 Implement the `InlangPlugin` type. 
 
-Examples can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/plugins). Particulary the [message format plugin](https://github.com/opral/monorepo/tree/main/inlang/packages/plugins/inlang-message-format) is a good starting point.
+Examples can be found [here](https://github.com/opral/inlang/tree/main/packages/plugins). Particulary the [message format plugin](https://github.com/opral/inlang/tree/main/packages/plugins/inlang-message-format) is a good starting point.
 
 ```typescript
 const myPlugin: InlangPlugin = {
@@ -237,6 +237,6 @@ await saveProjectToDirectory({
 
 ## Listing on inlang.com
 
-To list your app/plugin on inlang.com, please open a pull request to the [registry.json file](https://github.com/opral/monorepo/blob/main/inlang/packages/marketplace-registry/registry.json). 
+To list your app/plugin on inlang.com, please open a pull request to the [registry.json file](https://github.com/opral/inlang/blob/main/packages/marketplace-registry/registry.json). 
 
-Make sure that the link you are contributing points to a `marketplace-manifest.json` file. An example of can be found [here](https://github.com/opral/monorepo/blob/main/inlang/packages/fink/marketplace-manifest.json)
+Make sure that the link you are contributing points to a `marketplace-manifest.json` file. An example of can be found [here](https://github.com/opral/inlang/blob/main/packages/fink/marketplace-manifest.json)

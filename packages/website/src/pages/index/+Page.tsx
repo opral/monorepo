@@ -16,12 +16,12 @@ export default function Page() {
 			<Meta name="description" content={m.inlang_global_description()} />
 			<Meta
 				name="og:image"
-				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
 			/>
 			<Meta name="twitter:card" content="summary_large_image" />
 			<Meta
 				name="twitter:image"
-				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
 			/>
 			<Meta name="twitter:image:alt" content={m.inlang_twitter_title()} />
 			<Meta name="twitter:title" content={m.inlang_global_title()} />

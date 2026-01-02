@@ -38,7 +38,7 @@ export default async function onRenderHtml(
 	// ! important: renderToString is used instead of
 	// ! renderToStringAsync some async resources should
 	// ! not be loaded on the server (the editor for example).
-	// ! see https://github.com/opral/monorepo/issues/247
+	// ! see https://github.com/opral/inlang/issues/247
 
 	// from solidjs meta
 	// mutated during render so you can include in server-rendered template later

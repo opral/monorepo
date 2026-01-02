@@ -78,7 +78,7 @@ export default function Page(props: PageProps) {
 			) : (
 				<Meta
 					name="og:image"
-					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
+					content="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
 				/>
 			)}
 			<Meta name="twitter:card" content="summary_large_image" />
@@ -89,7 +89,7 @@ export default function Page(props: PageProps) {
 			) : (
 				<Meta
 					name="twitter:image"
-					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
+					content="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
 				/>
 			)}
 			<Meta

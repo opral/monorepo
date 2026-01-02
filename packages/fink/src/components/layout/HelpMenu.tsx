@@ -25,7 +25,7 @@ const HelpMenu = () => {
 			},
 			{
 				name: "Feature Request",
-				href: "https://github.com/opral/monorepo/discussions/categories/-fink-general",
+				href: "https://github.com/opral/inlang/discussions/categories/-fink-general",
 			},
 			{
 				name: "Submit Feedback",

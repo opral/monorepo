@@ -19,8 +19,8 @@ Replacing the sdk1 with the new one (in memory short living lix like sherlock) 2
 
     -> migration?
         -> do we load and save messages in v1 format (no migration needed)
-          -> Load https://github.com/opral/monorepo/blob/798dc07e2254015c7921debdf4dc5930bb2dc2a1/inlang/packages/parrot-figma/src/lib/message/store/InlangMessageStoreFigmaRoot.ts#L164-L165
-          -> Save https://github.com/opral/monorepo/blob/798dc07e2254015c7921debdf4dc5930bb2dc2a1/inlang/packages/parrot-figma/src/lib/message/store/InlangMessageStoreFigmaRoot.ts#L134
+          -> Load https://github.com/opral/inlang/blob/798dc07e2254015c7921debdf4dc5930bb2dc2a1/inlang/packages/parrot-figma/src/lib/message/store/InlangMessageStoreFigmaRoot.ts#L164-L165
+          -> Save https://github.com/opral/inlang/blob/798dc07e2254015c7921debdf4dc5930bb2dc2a1/inlang/packages/parrot-figma/src/lib/message/store/InlangMessageStoreFigmaRoot.ts#L134
         -> we don't support variants until controls touched (no new features of v2 needed)
     
     -> Export 

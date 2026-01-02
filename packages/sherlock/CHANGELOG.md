@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- 170472c: https://github.com/opral/monorepo/pull/3674
+- 170472c: https://github.com/opral/inlang/pull/3674
 
   adds a new sherlock.extract.generator config key, and deprecates sherlock.extract.autoHumanId.enabled
 
@@ -442,7 +442,7 @@
 
 ### Patch Changes
 
-- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/monorepo/pull/2792 for more details
+- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/inlang/pull/2792 for more details
 - Updated dependencies [d27a983]
 - Updated dependencies [a27b7a4]
   - @inlang/sdk@0.34.10
@@ -919,7 +919,7 @@
 ### Minor Changes
 
 - 7037bc8b3: remove outdated "configure replacement options" prompt.
-  - https://github.com/opral/monorepo/discussions/2159#discussioncomment-8325600
+  - https://github.com/opral/inlang/discussions/2159#discussioncomment-8325600
 
 ## 1.29.4
 
@@ -1294,7 +1294,7 @@
 
 ### Patch Changes
 
-- 66519584: Fixes https://github.com/opral/monorepo/issues/927
+- 66519584: Fixes https://github.com/opral/inlang/issues/927
 
 ## 0.7.4
 
@@ -1341,7 +1341,7 @@
 
 ### Patch Changes
 
-- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/opral/monorepo/issues/856.
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/opral/inlang/issues/856.
 - Updated dependencies [04f5ac93]
   - @inlang/core@0.9.0
 

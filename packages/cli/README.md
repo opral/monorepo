@@ -1,8 +1,8 @@
-![inlang CLI header image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/cli/assets/cli-header.jpg)
+![inlang CLI header image](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/cli-header.jpg)
 
 # Automate (i18n) localization tasks with the CLI
 
-[@inlang/cli](https://github.com/opral/monorepo/tree/main/inlang/packages/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
+[@inlang/cli](https://github.com/opral/inlang/tree/main/packages/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
 
 Get started with the CLI by using the following npx command:
 
@@ -15,9 +15,9 @@ See all available commands [here](#commands).
 # Core features
 
 <doc-features>
-  <doc-feature text-color="#fff" color="#000" title="Automation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/cli/assets/automation.jpg"></doc-feature>
-  <doc-feature text-color="#fff" color="#000" title="Machine Translation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/cli/assets/machine-translation.jpg"></doc-feature>
-  <doc-feature text-color="#fff" color="#000" title="Validation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/cli/assets/lint.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Automation" image="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/automation.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Machine Translation" image="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/machine-translation.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Validation" image="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/lint.jpg"></doc-feature>
 </doc-features>
 
 <br />
@@ -43,7 +43,7 @@ The CLI allows you to machine translate your resources. This is useful if you wa
 
 The CLI allows you to validate your inlang project. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
 
-![Example of a dev doing translation automation](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/cli/assets/why.jpg)
+![Example of a dev doing translation automation](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/why.jpg)
 
 # Installation
 
@@ -210,4 +210,4 @@ See how there is also a `--watch` flag, which enables a watch mode to monitor fo
 If something isn't working as expected or you are getting errors, make sure to run on the latest version of the CLI.
 You can always get the latest version by executing `npx @inlang/cli@latest`.
 
-If the error persists, [please create an issue](https://github.com/opral/monorepo/issues/new/choose) – we're happy to help.
+If the error persists, [please create an issue](https://github.com/opral/inlang/issues/new/choose) – we're happy to help.

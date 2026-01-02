@@ -63,7 +63,7 @@ export default function Page(props: {
 			<Meta name="description" content="Search globalization products." />
 			<Meta
 				name="og:image"
-				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/website/public/opengraph/inlang-social-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
 			/>
 			<Link
 				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}

@@ -4,7 +4,7 @@
 
 This RFC evaluates two architectures on building a git backend that serves current and foreseen needs of inlang.
 
-The inlang editor currently uses the git JS implementation. The JS implementation lacks git features that are required to build out the editor. The lack of git features triggered the exploration of switching the underlying git implementation, see [https://github.com/opral/monorepo/issues/278](https://github.com/opral/monorepo/issues/278).
+The inlang editor currently uses the git JS implementation. The JS implementation lacks git features that are required to build out the editor. The lack of git features triggered the exploration of switching the underlying git implementation, see [https://github.com/opral/inlang/issues/278](https://github.com/opral/inlang/issues/278).
 
 ### Glossary
 
@@ -56,7 +56,7 @@ Oftentimes only a subset of files in git repositories are required. Only cloning
 
 // does not clone the entire repository.
 // only metadata that enable other git commands to run
-await clone("https://github.com/opral/monorepo", fs);
+await clone("https://github.com/opral/inlang", fs);
 
 // lazy fetches the file and git commit history of README.md
 const commitHistory = await history("/README.md", fs);
@@ -107,7 +107,7 @@ openPullRequest();
 
 ### (Future) File-based auth [High Confidence | Server-related ]
 
-Supporting features like file-based auth will require a custom git server. Translators are not supposed to have access to the entire source code if they only use a few resource (translation) files. Discussion is ongoing in [https://github.com/opral/monorepo/discussions/153](https:github.com/opral/monorepo/discussions/153).
+Supporting features like file-based auth will require a custom git server. Translators are not supposed to have access to the entire source code if they only use a few resource (translation) files. Discussion is ongoing in [https://github.com/opral/inlang/discussions/153](https:github.com/opral/inlang/discussions/153).
 
 File-based auth seems to go hand-in-hand with “lazy cloning”. The server would only allow to clone files that the actor has access to.
 
@@ -125,7 +125,7 @@ The git-sdk would need something like Git Large File Storage [https://git-lfs.co
 
 ### (Future) Plugin system to support different files [Medium Confidence]
 
-A plugin system could enable storing files like SQLite, Jupyter Notebooks, or binary files natively in git. If an SQLite file could be stored in git, inlang and other apps might not require dedicated servers to host data. See [https://github.com/opral/monorepo/discussions/355](https:github.com/opral/monorepo/discussions/355).
+A plugin system could enable storing files like SQLite, Jupyter Notebooks, or binary files natively in git. If an SQLite file could be stored in git, inlang and other apps might not require dedicated servers to host data. See [https://github.com/opral/inlang/discussions/355](https:github.com/opral/inlang/discussions/355).
 
 Storing certain files in git is problematic because git uses a diffing algorithm that is suited for text files (code) but unsuited for other file formats. Having a plugin system where plugins can define the diffing algorithm for different file formats like `.ipynb` or `.sqlite` could enable a variety of new use cases.
 

@@ -47,8 +47,8 @@ export const convertLinkToGithub = (link: string) => {
 
 		return `https://github.com/${user}/${repo}/edit/${branch}/${path}`;
 	} else if (!link.includes("http")) {
-		return `https://github.com/opral/monorepo/edit/main/${link.replace("./", "")}`;
+		return `https://github.com/opral/inlang/edit/main/${link.replace("./", "")}`;
 	} else {
-		return "https://github.com/opral/monorepo";
+		return "https://github.com/opral/inlang";
 	}
 };

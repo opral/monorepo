@@ -19,7 +19,7 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 		},
 		{
 			name: "GitHub",
-			href: "https://github.com/opral/monorepo",
+			href: "https://github.com/opral/inlang",
 			Icon: IconGithub,
 			screenreader: "GitHub Repository",
 		},
@@ -36,7 +36,7 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 			<Show when={languageTag() !== "en" && languageTag() !== "de"}>
 				<Banner
 					text="This language is community translated. Contribute to the translation here."
-					href="https://fink.inlang.com/github.com/opral/monorepo"
+					href="https://fink.inlang.com/github.com/opral/inlang"
 				/>
 			</Show>
 			<header

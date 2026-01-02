@@ -42,7 +42,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		if (baseLocale === undefined || extensionApi.messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
-			// https://github.com/opral/monorepo/issues/927
+			// https://github.com/opral/inlang/issues/927
 			return
 		}
 

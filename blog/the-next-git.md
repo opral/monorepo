@@ -2,7 +2,7 @@
 
 **Inlang might bring version control to domains outside of software engineering.**
 
-<display-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/what-if-1000-artists.jpeg" alt="What if 1000s of artists are able to create a song together?" caption="What if 1000s of artists are able to create a song together?"
+<display-figure src="https://cdn.jsdelivr.net/gh/opral/inlang/documentation/sdk/assets/what-if-1000-artists.jpeg" alt="What if 1000s of artists are able to create a song together?" caption="What if 1000s of artists are able to create a song together?"
     caption="A slide from one of the first presentations about inlang being built on git, and the possibilities version control might open. The image has been taken from the iconic iPod campaign."></display-figure>
 
 Inlang is git-based localization infrastructure and, simultaneously, a case study for version control-based applications. Git provides unprecedented (async) collaboration, automation, and simple review flows out of the box. Wouldn't version control be benefitial to domains outside of software engineering? What if artists could collaborate on a song in the way software engineers collaborate on open source software? What if open source mechanical engineering would be as common as open source software? What if... version control enables new workflows and apps with built-in version control are better than their counterparts?

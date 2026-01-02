@@ -9,7 +9,7 @@ pnpm --filter @inlang/settings-component run storybook
 ```
 
 ### Read more
-https://github.com/opral/monorepo/issues/2251
-https://github.com/opral/monorepo/issues/2026
-https://github.com/opral/monorepo/issues/2250
-https://github.com/opral/monorepo/issues/2249
+https://github.com/opral/inlang/issues/2251
+https://github.com/opral/inlang/issues/2026
+https://github.com/opral/inlang/issues/2250
+https://github.com/opral/inlang/issues/2249

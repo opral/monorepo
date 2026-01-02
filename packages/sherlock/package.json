@@ -7,7 +7,7 @@
 	"publisher": "inlang",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/opral/monorepo.git"
+		"url": "https://github.com/opral/inlang.git"
 	},
 	"icon": "assets/sherlock-logo.png",
 	"version": "2.1.0",

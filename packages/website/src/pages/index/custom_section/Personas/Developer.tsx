@@ -78,7 +78,7 @@ const DeveloperSlide = () => {
 			title: m.home_personas_developer_cards_ide_title(),
 			description: m.home_personas_developer_cards_ide_description(),
 			href: "/m/r7kp499g",
-			logo: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/ide-extension/assets/sherlock-logo.png",
+			logo: "https://cdn.jsdelivr.net/gh/opral/inlang@main/packages/ide-extension/assets/sherlock-logo.png",
 			cover: "/images/ide-extension-cover-landingpage.png",
 		},
 	];

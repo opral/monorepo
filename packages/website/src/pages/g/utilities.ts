@@ -47,6 +47,6 @@ export const convertLinkToGithub = (link: string) => {
 			.replace("raw.githubusercontent.com", "github.com")
 			.replace("refs/heads", "blob");
 	} else {
-		return "https://github.com/opral/monorepo";
+		return "https://github.com/opral/inlang";
 	}
 };
