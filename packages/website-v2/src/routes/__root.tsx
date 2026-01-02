@@ -1,5 +1,6 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -35,9 +36,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <Header />
-        {children}
+        <main className="flex-1">{children}</main>
+        <Footer />
         <Scripts />
       </body>
     </html>
