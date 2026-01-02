@@ -1,0 +1,32 @@
+previewsEnabled: false
+
+# cost control for preview deployments.
+# if no activity for 3 days, the preview deployment will be deleted.
+previewsExpireAfterDays: 3
+
+services:
+  - name: inlang-website
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: standard
+    branch: main
+    # corepack has some key matching issues. disable the checks for now.
+    buildCommand: npm i pnpm@10 -g --force && pnpm install && pnpm run --filter @inlang/server... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 3000 # @inlang/server
+      - fromGroup: production
+    buildFilter:
+      paths:
+        - inlang/packages/server/**
+        - inlang/packages/website/**
+        - inlang/packages/marketplace-registry/**
+        - inlang/packages/**/marketplace-manifest.json
+        - "**/*.md"
+      ignoredPaths:
+        - "**/CHANGELOG.md"
+    domains:
+      - inlang.com
