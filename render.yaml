@@ -21,10 +21,10 @@ services:
       - fromGroup: production
     buildFilter:
       paths:
-        - inlang/packages/server/**
-        - inlang/packages/website/**
-        - inlang/packages/marketplace-registry/**
-        - inlang/packages/**/marketplace-manifest.json
+        - packages/server/**
+        - packages/website/**
+        - packages/marketplace-registry/**
+        - packages/**/marketplace-manifest.json
         - "**/*.md"
       ignoredPaths:
         - "**/CHANGELOG.md"
