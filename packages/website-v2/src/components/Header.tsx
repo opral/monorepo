@@ -43,7 +43,7 @@ export default function Header() {
         </nav>
       </div>
 
-      <div className="border-t border-slate-200">
+      <div>
         <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-3 text-sm text-slate-600">
           <span className="font-medium text-slate-500">Ecosystem:</span>
           <div className="flex flex-wrap items-center gap-4">
