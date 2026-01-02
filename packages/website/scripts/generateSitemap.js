@@ -17,10 +17,6 @@ const routes = [
 // Hardcoded categories for the marketplace
 const categories = ["apps", "plugins", "lint-rules", "guides"];
 
-const repositoryRoot = import.meta.url.slice(
-	0,
-	import.meta.url.lastIndexOf("inlang/packages")
-);
 
 // Formats a page for the sitemap
 function formatPage(name, published) {
@@ -135,10 +131,7 @@ async function generateSitemap() {
 	}
 
 	content = `${content}\n</urlset>`;
-	await fs.writeFile(
-		new URL("./inlang/packages/website/public/sitemap.xml", repositoryRoot),
-		content
-	);
+	await fs.writeFile(new URL("../public/sitemap.xml", import.meta.url), content);
 
 	console.info("Sitemap successfully generated");
 }
