@@ -10,7 +10,7 @@
 ## Feature checklist
 
 - [x] Landing page (`/`)
-- [x] Marketplace item page (`/m/:id/:slug`)
+- [ ] Marketplace item page (`/m/:id/:slug`)
 - [x] Apps overview (`/c/apps`)
 - [x] Plugins overview (`/c/plugins`)
 - [ ] 404 / not-found
