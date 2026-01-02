@@ -1,4 +1,5 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import Header from '../components/Header'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -16,6 +17,8 @@ export const Route = createRootRoute({
       },
     ],
     links: [
+      { rel: 'preconnect', href: 'https://rsms.me/' },
+      { rel: 'stylesheet', href: 'https://rsms.me/inter/inter.css' },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -33,6 +36,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <Header />
         {children}
         <Scripts />
       </body>
