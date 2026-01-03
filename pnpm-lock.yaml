@@ -1567,8 +1567,6 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
 
-  packages/website/dist/server: {}
-
   packages/website/tailwind-color-plugin:
     dependencies:
       '@ctrl/tinycolor':
@@ -16200,6 +16198,12 @@ snapshots:
       - typescript
       - verdaccio
 
+  '@nrwl/devkit@18.3.5(nx@18.3.5)':
+    dependencies:
+      '@nx/devkit': 18.3.5(nx@18.3.5)
+    transitivePeerDependencies:
+      - nx
+
   '@nrwl/devkit@18.3.5(nx@21.4.1)':
     dependencies:
       '@nx/devkit': 18.3.5(nx@21.4.1)
@@ -16341,7 +16345,7 @@ snapshots:
 
   '@nx/devkit@18.3.5(nx@18.3.5)':
     dependencies:
-      '@nrwl/devkit': 18.3.5(nx@21.4.1)
+      '@nrwl/devkit': 18.3.5(nx@18.3.5)
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.2
