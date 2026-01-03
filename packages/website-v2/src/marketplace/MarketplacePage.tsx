@@ -39,20 +39,21 @@ export default function MarketplacePage({
   }, [data.markdown])
 
   return (
-    <div className="bg-white">
+    <>
       <ProductHeader manifest={data.manifest} />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex gap-6">
-          <aside className="sticky top-[152px] hidden h-[calc(100vh-152px)] w-56 flex-shrink-0 lg:block">
-            <div className="h-full overflow-y-auto pb-8 pr-2">
+          <aside className="sticky top-[154px] hidden h-[calc(100vh-154px)] w-56 flex-shrink-0 lg:block">
+            <div className="h-full overflow-y-auto pb-8 pr-2 pt-4">
               <DocNav manifest={data.manifest} currentRoute={data.pagePath} />
             </div>
           </aside>
 
-          <section className="min-w-0 flex-1 py-10">
+          <section className="min-w-0 flex-1">
             <div
               ref={articleRef}
-              className="marketplace-markdown"
+              className="marketplace-markdown pt-0 pb-2.5"
               onMouseDown={(event) => {
                 const anchor = (event.target as HTMLElement).closest("a")
                 if (anchor?.getAttribute("href")?.startsWith("#")) {
@@ -93,8 +94,8 @@ export default function MarketplacePage({
             ) : null}
           </section>
 
-          <aside className="sticky top-[152px] hidden h-[calc(100vh-152px)] w-56 flex-shrink-0 xl:block">
-            <div className="h-full overflow-y-auto pb-8 pl-2">
+          <aside className="sticky top-[154px] hidden h-[calc(100vh-154px)] w-56 flex-shrink-0 xl:block">
+            <div className="h-full overflow-y-auto pb-8 pl-2 pt-4">
               <DocMeta
                 manifest={data.manifest}
                 headings={headings}
@@ -103,8 +104,9 @@ export default function MarketplacePage({
             </div>
           </aside>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -118,7 +120,7 @@ function ProductHeader({ manifest }: { manifest: MarketplaceManifest }) {
   const badge = typeOfIdToTitle(manifest.id)
 
   return (
-    <div className="sticky top-[112px] z-40 border-b border-t border-slate-200 bg-slate-50">
+    <div className="sticky top-[96px] z-40 border-b border-slate-200 bg-slate-50">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
           {manifest.icon ? (
@@ -163,73 +165,86 @@ function DocNav({
   const basePath = manifest.slug
     ? `/m/${manifest.uniqueID}/${manifest.slug}`
     : `/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
+
+  // Normalize pages structure: convert flat structure to sectioned structure
+  const normalizedSections: Array<{
+    title: string
+    pages: Array<{ route: string; path: string; isExternal: boolean }>
+  }> = []
+
   const entries = Object.entries(manifest.pages)
+  const flatPages: Array<{ route: string; path: string; isExternal: boolean }> = []
+
+  for (const [key, value] of entries) {
+    if (typeof value === "string") {
+      // Flat structure - collect into overview section
+      flatPages.push({
+        route: key,
+        path: value,
+        isExternal: !value.endsWith(".md") && !value.endsWith(".html"),
+      })
+    } else {
+      // Nested structure - use key as section title (empty string becomes "Overview")
+      const sectionTitle = key || "Overview"
+      normalizedSections.push({
+        title: sectionTitle,
+        pages: Object.entries(value).map(([route, path]) => ({
+          route,
+          path: path as string,
+          isExternal:
+            !(path as string).endsWith(".md") &&
+            !(path as string).endsWith(".html"),
+        })),
+      })
+    }
+  }
+
+  // If we collected flat pages, add them as the first "Overview" section
+  if (flatPages.length > 0) {
+    normalizedSections.unshift({ title: "Overview", pages: flatPages })
+  }
 
   return (
-    <div className="pt-8">
+    <div>
       <div className="flex flex-col gap-1 text-sm text-slate-700">
-        {entries.map(([key, value]) => {
-          if (typeof value === "string") {
-            const route = key
-            const navTitle = route.split("/").pop() || "Introduction"
-            const isActive = currentRoute === route
-            return (
-              <Link
-                key={route}
-                to={basePath + route}
-                className={`rounded-md px-3 py-2 capitalize transition-colors ${
-                  isActive
-                    ? "bg-slate-200 font-semibold text-slate-900"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                {navTitle.replaceAll("-", " ")}
-              </Link>
-            )
-          }
+        {normalizedSections.map((section, index) => (
+          <div key={section.title} className={index === 0 ? "" : "pt-4"}>
+            <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              {section.title}
+            </p>
+            <div className="flex flex-col gap-1">
+              {section.pages.map(({ route, path, isExternal }) => {
+                const navTitle = route.split("/").pop() || "Introduction"
+                const href = isExternal ? path : basePath + route
+                const isActive = currentRoute === route
 
-          return (
-            <div key={key} className="pt-4">
-              <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {key}
-              </p>
-              <div className="flex flex-col gap-1">
-                {Object.entries(value).map(([route, path]) => {
-                  const navTitle = route.split("/").pop() || "Introduction"
-                  const isLink =
-                    !(path as string).endsWith(".md") &&
-                    !(path as string).endsWith(".html")
-                  const href = isLink ? (path as string) : basePath + route
-                  const isActive = currentRoute === route
-
-                  return isLink ? (
-                    <a
-                      key={route}
-                      href={href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                    >
-                      {navTitle.replaceAll("-", " ")}
-                    </a>
-                  ) : (
-                    <Link
-                      key={route}
-                      to={href}
-                      className={`rounded-md px-3 py-2 text-sm transition-colors ${
-                        isActive
-                          ? "bg-slate-200 font-semibold text-slate-900"
-                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                      }`}
-                    >
-                      {navTitle.replaceAll("-", " ")}
-                    </Link>
-                  )
-                })}
-              </div>
+                return isExternal ? (
+                  <a
+                    key={route}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-md px-3 py-2 text-sm capitalize text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  >
+                    {navTitle.replaceAll("-", " ")}
+                  </a>
+                ) : (
+                  <Link
+                    key={route}
+                    to={href}
+                    className={`rounded-md px-3 py-2 text-sm capitalize transition-colors ${
+                      isActive
+                        ? "bg-slate-200 font-semibold text-slate-900"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                  >
+                    {navTitle.replaceAll("-", " ")}
+                  </Link>
+                )
+              })}
             </div>
-          )
-        })}
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -268,7 +283,7 @@ function DocMeta({
   )
 
   return (
-    <div className="pt-8 text-sm text-slate-700">
+    <div className="text-sm text-slate-700">
       <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Author
       </p>
