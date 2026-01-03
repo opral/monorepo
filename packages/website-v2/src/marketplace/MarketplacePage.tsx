@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import type { MarketplacePageData } from "./marketplaceData"
+import "../components/markdown-interactive"
 
 type Heading = { id: string; text: string; level: number }
 

@@ -1,0 +1,713 @@
+/**
+ * VitePress-style markdown content styles
+ * Based on VitePress's vp-doc styling
+ */
+
+/* CSS Custom Properties matching VitePress */
+:root {
+  --vp-c-brand-1: #3451b2;
+  --vp-c-brand-2: #3a5ccc;
+  --vp-c-brand-soft: rgba(100, 108, 255, 0.14);
+  --vp-c-text-1: rgba(60, 60, 67);
+  --vp-c-text-2: rgba(60, 60, 67, 0.78);
+  --vp-c-text-3: rgba(60, 60, 67, 0.56);
+  --vp-c-divider: rgba(60, 60, 67, 0.12);
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f6f6f7;
+  --vp-c-bg-alt: #f6f6f7;
+  --vp-c-border: rgba(60, 60, 67, 0.12);
+  --vp-c-gutter: rgba(60, 60, 67, 0.05);
+
+  /* Tip colors - Green */
+  --vp-c-tip-1: #059669;
+  --vp-c-tip-2: rgba(5, 150, 105, 0.16);
+  --vp-c-tip-3: rgba(5, 150, 105, 0.08);
+
+  /* Warning colors - Orange */
+  --vp-c-warning-1: #ea580c;
+  --vp-c-warning-2: rgba(234, 88, 12, 0.16);
+  --vp-c-warning-3: rgba(234, 88, 12, 0.08);
+
+  /* Danger colors */
+  --vp-c-danger-1: #b8272c;
+  --vp-c-danger-2: rgba(244, 63, 94, 0.16);
+  --vp-c-danger-3: rgba(244, 63, 94, 0.08);
+
+  /* Note/Info colors */
+  --vp-c-note-1: #3451b2;
+  --vp-c-note-2: rgba(100, 108, 255, 0.16);
+  --vp-c-note-3: rgba(100, 108, 255, 0.08);
+
+  /* Important colors */
+  --vp-c-important-1: #8250df;
+  --vp-c-important-2: rgba(130, 80, 223, 0.16);
+  --vp-c-important-3: rgba(130, 80, 223, 0.08);
+
+  /* Caution colors */
+  --vp-c-caution-1: #b8272c;
+  --vp-c-caution-2: rgba(244, 63, 94, 0.16);
+  --vp-c-caution-3: rgba(244, 63, 94, 0.08);
+
+  --vp-code-font-size: 0.9375em;
+  --vp-code-line-height: 1.6;
+}
+
+/* Base markdown body styles */
+.marketplace-markdown {
+  color: var(--vp-c-text-1);
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* Headings */
+.marketplace-markdown h1,
+.marketplace-markdown h2,
+.marketplace-markdown h3,
+.marketplace-markdown h4,
+.marketplace-markdown h5,
+.marketplace-markdown h6 {
+  position: relative;
+  font-weight: 600;
+  outline: none;
+  color: var(--vp-c-text-1);
+}
+
+.marketplace-markdown h1 {
+  letter-spacing: -0.02em;
+  line-height: 40px;
+  font-size: 28px;
+  margin: 0;
+}
+
+.marketplace-markdown h2 {
+  margin: 48px 0 16px;
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 24px;
+  letter-spacing: -0.02em;
+  line-height: 32px;
+  font-size: 24px;
+}
+
+.marketplace-markdown h3 {
+  margin: 32px 0 0;
+  letter-spacing: -0.01em;
+  line-height: 28px;
+  font-size: 20px;
+}
+
+.marketplace-markdown h4 {
+  margin: 24px 0 0;
+  letter-spacing: -0.01em;
+  line-height: 24px;
+  font-size: 18px;
+}
+
+/* Anchor scroll offset so hash links don't stick to viewport top */
+.marketplace-markdown h2[id],
+.marketplace-markdown h3[id],
+.marketplace-markdown h4[id],
+.marketplace-markdown h5[id],
+.marketplace-markdown h6[id] {
+  scroll-margin-top: 180px;
+}
+
+/* Heading anchor hash on hover (VitePress-style) */
+.marketplace-markdown h2:has(> a),
+.marketplace-markdown h3:has(> a),
+.marketplace-markdown h4:has(> a),
+.marketplace-markdown h5:has(> a),
+.marketplace-markdown h6:has(> a) {
+  position: relative;
+}
+
+.marketplace-markdown h2:has(> a)::before,
+.marketplace-markdown h3:has(> a)::before,
+.marketplace-markdown h4:has(> a)::before,
+.marketplace-markdown h5:has(> a)::before,
+.marketplace-markdown h6:has(> a)::before {
+  content: "#";
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateX(-1.1em);
+  color: var(--vp-c-brand-1);
+  opacity: 0;
+  font-weight: 600;
+  line-height: inherit;
+  transition: opacity 0.25s;
+}
+
+/* h2 has extra padding-top for the divider; align hash with text */
+.marketplace-markdown h2:has(> a)::before {
+  top: 24px;
+}
+
+/* First h2 after h1 has no divider/padding */
+.marketplace-markdown h1 + h2:has(> a)::before {
+  top: 0;
+}
+
+.marketplace-markdown h2:has(> a):hover::before,
+.marketplace-markdown h3:has(> a):hover::before,
+.marketplace-markdown h4:has(> a):hover::before,
+.marketplace-markdown h5:has(> a):hover::before,
+.marketplace-markdown h6:has(> a):hover::before,
+.marketplace-markdown h2:has(> a):focus-within::before,
+.marketplace-markdown h3:has(> a):focus-within::before,
+.marketplace-markdown h4:has(> a):focus-within::before,
+.marketplace-markdown h5:has(> a):focus-within::before,
+.marketplace-markdown h6:has(> a):focus-within::before {
+  opacity: 1;
+}
+
+/* First h2 should not have border-top */
+.marketplace-markdown h1 + h2 {
+  margin-top: 24px;
+  border-top: none;
+  padding-top: 0;
+}
+
+/* Paragraphs */
+.marketplace-markdown p {
+  margin: 16px 0;
+  line-height: 28px;
+}
+
+/* First paragraph after heading */
+.marketplace-markdown h1 + p,
+.marketplace-markdown h2 + p,
+.marketplace-markdown h3 + p,
+.marketplace-markdown h4 + p {
+  margin-top: 8px;
+}
+
+/* Links */
+.marketplace-markdown a {
+  font-weight: 500;
+  color: var(--vp-c-brand-1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.25s, opacity 0.25s;
+}
+
+.marketplace-markdown a:hover {
+  color: var(--vp-c-brand-2);
+}
+
+/* Links inside headings should inherit heading styles */
+.marketplace-markdown h1 a,
+.marketplace-markdown h2 a,
+.marketplace-markdown h3 a,
+.marketplace-markdown h4 a,
+.marketplace-markdown h5 a,
+.marketplace-markdown h6 a {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.marketplace-markdown h1 a:hover,
+.marketplace-markdown h2 a:hover,
+.marketplace-markdown h3 a:hover,
+.marketplace-markdown h4 a:hover,
+.marketplace-markdown h5 a:hover,
+.marketplace-markdown h6 a:hover {
+  color: inherit;
+}
+
+/* Lists */
+.marketplace-markdown ul,
+.marketplace-markdown ol {
+  padding-left: 1.25rem;
+  margin: 16px 0;
+}
+
+.marketplace-markdown ul {
+  list-style: disc;
+}
+
+.marketplace-markdown ol {
+  list-style: decimal;
+}
+
+.marketplace-markdown li + li {
+  margin-top: 8px;
+}
+
+.marketplace-markdown li > ol,
+.marketplace-markdown li > ul {
+  margin: 8px 0 0;
+}
+
+/* Inline code */
+.marketplace-markdown :not(pre) > code {
+  font-size: var(--vp-code-font-size);
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-weight: 500;
+  transition: color 0.25s, background-color 0.5s;
+}
+
+/* Ensure code inside pre doesn't have nested background */
+.marketplace-markdown pre code {
+  background: transparent !important;
+}
+
+/* Syntax highlighting color overrides for better contrast */
+.marketplace-markdown pre .hljs {
+  color: var(--vp-c-text-1);
+}
+
+/* Keywords (export, default, const, etc.) */
+.marketplace-markdown pre .hljs-keyword,
+.marketplace-markdown pre .hljs-selector-tag,
+.marketplace-markdown pre .hljs-built_in {
+  color: #d73a49;
+}
+
+/* Strings */
+.marketplace-markdown pre .hljs-string,
+.marketplace-markdown pre .hljs-attr {
+  color: #032f62;
+}
+
+/* Object property names / attributes */
+.marketplace-markdown pre .hljs-attr {
+  color: #005cc5;
+}
+
+/* Comments */
+.marketplace-markdown pre .hljs-comment,
+.marketplace-markdown pre .hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+/* Numbers */
+.marketplace-markdown pre .hljs-number {
+  color: #005cc5;
+}
+
+/* Functions */
+.marketplace-markdown pre .hljs-title,
+.marketplace-markdown pre .hljs-title.function_ {
+  color: #6f42c1;
+}
+
+/* Types */
+.marketplace-markdown pre .hljs-type,
+.marketplace-markdown pre .hljs-class {
+  color: #d73a49;
+}
+
+/* Diff styling for code blocks */
+.marketplace-markdown pre code .hljs-deletion {
+  background-color: #ffebee;
+  color: #b71c1c;
+  padding: 0 2px;
+}
+
+.marketplace-markdown pre code .hljs-addition {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+  padding: 0 2px;
+}
+
+.marketplace-markdown pre code .hljs-deletion * {
+  color: #b71c1c !important;
+}
+
+.marketplace-markdown pre code .hljs-addition * {
+  color: #1b5e20 !important;
+}
+
+.marketplace-markdown pre code .hljs-meta {
+  color: inherit;
+  font-weight: 600;
+}
+
+.marketplace-markdown a > code {
+  color: var(--vp-c-brand-1);
+}
+
+/* Code blocks */
+.marketplace-markdown pre {
+  margin: 16px 0;
+  padding: 8px 12px;
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 8px;
+  overflow-x: auto;
+  position: relative;
+}
+
+/* Copy button for code blocks */
+.marketplace-markdown pre {
+  position: relative;
+}
+
+.marketplace-markdown pre > button.mwc-copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-2);
+  border: 1px solid var(--vp-c-divider);
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.2s, color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.marketplace-markdown pre:hover > button.mwc-copy-button {
+  opacity: 1;
+}
+
+.marketplace-markdown pre > button.mwc-copy-button:hover {
+  color: var(--vp-c-text-1);
+  border-color: var(--vp-c-border);
+  background: var(--vp-c-bg-soft);
+}
+
+.marketplace-markdown pre code {
+  display: block;
+  padding: 0;
+  width: fit-content;
+  min-width: 100%;
+  line-height: var(--vp-code-line-height);
+  font-size: var(--vp-code-font-size);
+  color: var(--vp-c-text-1);
+  background: transparent;
+  border-radius: 0;
+  font-weight: 400;
+  transition: color 0.25s;
+}
+
+/* Blockquotes */
+.marketplace-markdown blockquote {
+  margin: 16px 0;
+  border-left: 2px solid var(--vp-c-divider);
+  padding-left: 16px;
+  color: var(--vp-c-text-2);
+  transition: border-color 0.5s, color 0.5s;
+}
+
+.marketplace-markdown blockquote > p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 28px;
+}
+
+.marketplace-markdown blockquote[data-mwc-alert] > p {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+/* GitHub-style alerts/callouts */
+.marketplace-markdown blockquote[data-mwc-alert] {
+  border-left: none;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  color: var(--vp-c-text-1);
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+.marketplace-markdown blockquote[data-mwc-alert] [data-mwc-alert-marker] {
+  display: none;
+}
+
+.marketplace-markdown blockquote[data-mwc-alert]::before {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.marketplace-markdown blockquote[data-mwc-alert="note"] {
+  background-color: var(--vp-c-note-3);
+  border: 1px solid var(--vp-c-note-2);
+}
+.marketplace-markdown blockquote[data-mwc-alert="note"]::before {
+  content: "Note";
+  color: var(--vp-c-note-1);
+}
+
+.marketplace-markdown blockquote[data-mwc-alert="tip"] {
+  background-color: var(--vp-c-tip-3);
+  border: 1px solid var(--vp-c-tip-2);
+}
+.marketplace-markdown blockquote[data-mwc-alert="tip"]::before {
+  content: "Tip";
+  color: var(--vp-c-tip-1);
+}
+
+.marketplace-markdown blockquote[data-mwc-alert="important"] {
+  background-color: var(--vp-c-important-3);
+  border: 1px solid var(--vp-c-important-2);
+}
+.marketplace-markdown blockquote[data-mwc-alert="important"]::before {
+  content: "Important";
+  color: var(--vp-c-important-1);
+}
+
+.marketplace-markdown blockquote[data-mwc-alert="warning"] {
+  background-color: var(--vp-c-warning-3);
+  border: 1px solid var(--vp-c-warning-2);
+}
+.marketplace-markdown blockquote[data-mwc-alert="warning"]::before {
+  content: "Warning";
+  color: var(--vp-c-warning-1);
+}
+
+.marketplace-markdown blockquote[data-mwc-alert="caution"] {
+  background-color: var(--vp-c-caution-3);
+  border: 1px solid var(--vp-c-caution-2);
+}
+.marketplace-markdown blockquote[data-mwc-alert="caution"]::before {
+  content: "Caution";
+  color: var(--vp-c-caution-1);
+}
+
+/* Custom callout styling */
+.marketplace-markdown .callout,
+.marketplace-markdown .custom-block {
+  margin: 16px 0;
+  border-radius: 8px;
+  padding: 16px 16px 8px;
+  line-height: 24px;
+  font-size: 14px;
+  color: var(--vp-c-text-1);
+}
+
+.marketplace-markdown .callout p,
+.marketplace-markdown .custom-block p {
+  margin: 8px 0;
+  line-height: 24px;
+}
+
+.marketplace-markdown .callout-title,
+.marketplace-markdown .custom-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* TIP callout */
+.marketplace-markdown .callout.tip,
+.marketplace-markdown .custom-block.tip {
+  background-color: var(--vp-c-tip-3);
+  border: 1px solid var(--vp-c-tip-2);
+}
+
+.marketplace-markdown .callout.tip .callout-title,
+.marketplace-markdown .custom-block.tip .custom-block-title {
+  color: var(--vp-c-tip-1);
+}
+
+/* NOTE/INFO callout */
+.marketplace-markdown .callout.note,
+.marketplace-markdown .callout.info,
+.marketplace-markdown .custom-block.info {
+  background-color: var(--vp-c-note-3);
+  border: 1px solid var(--vp-c-note-2);
+}
+
+.marketplace-markdown .callout.note .callout-title,
+.marketplace-markdown .callout.info .callout-title,
+.marketplace-markdown .custom-block.info .custom-block-title {
+  color: var(--vp-c-note-1);
+}
+
+/* WARNING callout */
+.marketplace-markdown .callout.warning,
+.marketplace-markdown .custom-block.warning {
+  background-color: var(--vp-c-warning-3);
+  border: 1px solid var(--vp-c-warning-2);
+}
+
+.marketplace-markdown .callout.warning .callout-title,
+.marketplace-markdown .custom-block.warning .custom-block-title {
+  color: var(--vp-c-warning-1);
+}
+
+/* DANGER/CAUTION callout */
+.marketplace-markdown .callout.danger,
+.marketplace-markdown .callout.caution,
+.marketplace-markdown .custom-block.danger {
+  background-color: var(--vp-c-danger-3);
+  border: 1px solid var(--vp-c-danger-2);
+}
+
+.marketplace-markdown .callout.danger .callout-title,
+.marketplace-markdown .callout.caution .callout-title,
+.marketplace-markdown .custom-block.danger .custom-block-title {
+  color: var(--vp-c-danger-1);
+}
+
+/* IMPORTANT callout */
+.marketplace-markdown .callout.important {
+  background-color: var(--vp-c-important-3);
+  border: 1px solid var(--vp-c-important-2);
+}
+
+.marketplace-markdown .callout.important .callout-title {
+  color: var(--vp-c-important-1);
+}
+
+/* Tables */
+.marketplace-markdown table {
+  display: block;
+  border-collapse: collapse;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+.marketplace-markdown tr {
+  background-color: var(--vp-c-bg);
+  border-top: 1px solid var(--vp-c-divider);
+  transition: background-color 0.5s;
+}
+
+.marketplace-markdown tr:nth-child(2n) {
+  background-color: var(--vp-c-bg-soft);
+}
+
+.marketplace-markdown th,
+.marketplace-markdown td {
+  border: 1px solid var(--vp-c-divider);
+  padding: 8px 16px;
+}
+
+.marketplace-markdown th {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
+}
+
+.marketplace-markdown td {
+  font-size: 14px;
+}
+
+/* Horizontal rule */
+.marketplace-markdown hr {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+/* Images - General */
+.marketplace-markdown img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+/* Respect explicit height/width attributes on images */
+.marketplace-markdown img[height] {
+  height: attr(height px);
+}
+
+.marketplace-markdown img[width] {
+  width: attr(width px);
+}
+
+/* Fallback for browsers that don't support attr() for height/width */
+.marketplace-markdown img[height="14"] { height: 14px; }
+.marketplace-markdown img[height="18"] { height: 18px; }
+.marketplace-markdown img[height="20"] { height: 20px; }
+.marketplace-markdown img[height="24"] { height: 24px; }
+.marketplace-markdown img[height="32"] { height: 32px; }
+.marketplace-markdown img[width="18"] { width: 18px; }
+.marketplace-markdown img[width="20"] { width: 20px; }
+.marketplace-markdown img[width="24"] { width: 24px; }
+.marketplace-markdown img[width="32"] { width: 32px; }
+
+/* Images - Standalone content images */
+.marketplace-markdown p > img:only-child {
+  display: block;
+  margin: 16px auto;
+}
+
+/* Images inside links - Always inline (badges, logos, icons) */
+.marketplace-markdown a > img {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+  border: none;
+  border-radius: 3px;
+  background-color: transparent;
+}
+
+/* Links containing images - inline with spacing */
+.marketplace-markdown a:has(> img) {
+  display: inline-block;
+  text-decoration: none;
+}
+
+/* Badge-only paragraphs (no br, sub, or other block content) - flex layout */
+.marketplace-markdown p:has(a > img):not(:has(br)):not(:has(sub)):not(:has(sup)) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Paragraphs with mixed content (br, sub, etc.) - keep normal flow */
+.marketplace-markdown p:has(a > img):has(br),
+.marketplace-markdown p:has(a > img):has(sub) {
+  display: block;
+}
+
+.marketplace-markdown p:has(a > img):has(br) a:has(> img),
+.marketplace-markdown p:has(a > img):has(sub) a:has(> img) {
+  margin-right: 8px;
+}
+
+/* Centered content via align attribute */
+.marketplace-markdown [align="center"],
+.marketplace-markdown p[align="center"],
+.marketplace-markdown div[align="center"] {
+  text-align: center;
+}
+
+/* Badge-only centered paragraphs need justify-content */
+.marketplace-markdown p[align="center"]:has(a > img):not(:has(br)):not(:has(sub)):not(:has(sup)) {
+  justify-content: center;
+}
+
+/* Strong/Bold */
+.marketplace-markdown strong {
+  font-weight: 600;
+}
+
+/* Definition lists */
+.marketplace-markdown dt {
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.marketplace-markdown dd {
+  margin-left: 1.25rem;
+  margin-top: 4px;
+}
+
+/* Keyboard shortcuts */
+.marketplace-markdown kbd {
+  display: inline-block;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
