@@ -13,6 +13,7 @@ export default function MarketplacePage({
 }) {
   const articleRef = useRef<HTMLDivElement>(null)
   const [headings, setHeadings] = useState<Heading[]>([])
+  const [activeId, setActiveId] = useState<string>("")
 
   useEffect(() => {
     if (!data.imports || data.imports.length === 0) return
@@ -38,6 +39,58 @@ export default function MarketplacePage({
     })
     setHeadings(newHeadings)
   }, [data.markdown])
+
+  // Scroll spy: track which heading is currently visible
+  useEffect(() => {
+    if (headings.length === 0) return
+
+    const handleScroll = () => {
+      const headingElements = headings
+        .map((h) => ({ id: h.id, el: document.getElementById(h.id) }))
+        .filter((h) => h.el !== null) as { id: string; el: HTMLElement }[]
+
+      if (headingElements.length === 0) return
+
+      // Find the heading that's closest to the top of the viewport (but above center)
+      const scrollTop = window.scrollY
+      const viewportHeight = window.innerHeight
+      const offset = 100 // Account for sticky header
+
+      let currentId = headingElements[0].id
+
+      for (const { id, el } of headingElements) {
+        const rect = el.getBoundingClientRect()
+        const elementTop = rect.top
+
+        // If the heading is above the middle of the viewport, it's the current section
+        if (elementTop <= offset + viewportHeight * 0.3) {
+          currentId = id
+        } else {
+          break
+        }
+      }
+
+      setActiveId(currentId)
+    }
+
+    // Initial call
+    handleScroll()
+
+    // Throttle scroll handler for performance
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll()
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [headings])
 
   return (
     <>
@@ -101,6 +154,7 @@ export default function MarketplacePage({
                 manifest={data.manifest}
                 headings={headings}
                 pagePath={data.pagePath}
+                activeId={activeId}
               />
             </div>
           </aside>
@@ -255,10 +309,12 @@ function DocMeta({
   manifest,
   headings,
   pagePath,
+  activeId,
 }: {
   manifest: MarketplaceManifest & { uniqueID: string }
   headings: Heading[]
   pagePath: string
+  activeId: string
 }) {
   const githubLink = getGithubLink(manifest, pagePath)
   const displayName =
@@ -285,6 +341,37 @@ function DocMeta({
 
   return (
     <div className="text-sm text-slate-700">
+      {/* ON THIS PAGE - Primary navigation, always at top */}
+      {headings.length > 0 ? (
+        <>
+          <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            On this page
+          </p>
+          <div className="flex flex-col">
+            {headings.map((heading) => {
+              const isActive = heading.id === activeId
+              const indent = heading.level === 3 ? "pl-3" : heading.level === 2 ? "pl-1" : ""
+              return (
+                <button
+                  key={heading.id}
+                  type="button"
+                  className={`text-left text-sm py-1 border-l-2 pl-3 transition-colors ${indent} ${
+                    isActive
+                      ? "border-blue-500 text-slate-900 font-medium"
+                      : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
+                  }`}
+                  onClick={() => scrollToAnchor(heading.id)}
+                >
+                  {heading.text}
+                </button>
+              )
+            })}
+          </div>
+          <div className="my-4 h-px w-full bg-slate-200" />
+        </>
+      ) : null}
+
+      {/* AUTHOR */}
       <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Author
       </p>
@@ -305,6 +392,7 @@ function DocMeta({
 
       <div className="my-4 h-px w-full bg-slate-200" />
 
+      {/* META INFORMATION */}
       <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Meta information
       </p>
@@ -319,6 +407,7 @@ function DocMeta({
         </div>
       ) : null}
 
+      {/* KEYWORDS */}
       {manifest.keywords && manifest.keywords.length > 0 ? (
         <>
           <div className="my-4 h-px w-full bg-slate-200" />
@@ -339,38 +428,18 @@ function DocMeta({
         </>
       ) : null}
 
-      <div className="my-4 h-px w-full bg-slate-200" />
+      {/* EDIT ON GITHUB */}
       {githubLink ? (
-        <a
-          href={githubLink}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
-        >
-          Edit this page on GitHub
-        </a>
-      ) : null}
-
-      {headings.length > 0 ? (
         <>
           <div className="my-4 h-px w-full bg-slate-200" />
-          <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-            On this page
-          </p>
-          <div className="flex flex-col gap-2">
-            {headings.map((heading) => (
-              <button
-                key={heading.id}
-                type="button"
-                className={`text-left text-sm text-slate-600 hover:text-slate-900 ${
-                  heading.level === 3 ? "pl-3" : heading.level === 2 ? "pl-2" : ""
-                }`}
-                onClick={() => scrollToAnchor(heading.id)}
-              >
-                {heading.text}
-              </button>
-            ))}
-          </div>
+          <a
+            href={githubLink}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
+          >
+            Edit this page on GitHub
+          </a>
         </>
       ) : null}
     </div>
