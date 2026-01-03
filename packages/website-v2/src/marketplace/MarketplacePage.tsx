@@ -54,7 +54,7 @@ export default function MarketplacePage({
           <section className="min-w-0 flex-1">
             <div
               ref={articleRef}
-              className="marketplace-markdown pt-0 pb-2.5"
+              className="marketplace-markdown pt-4 pb-2.5"
               onMouseDown={(event) => {
                 const anchor = (event.target as HTMLElement).closest("a")
                 if (anchor?.getAttribute("href")?.startsWith("#")) {
