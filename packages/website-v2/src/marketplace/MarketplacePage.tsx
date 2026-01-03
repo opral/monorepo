@@ -51,7 +51,7 @@ export default function MarketplacePage({
             </div>
           </aside>
 
-          <section className="min-w-0 flex-1">
+          <section className="min-w-0 flex-1 pb-16 min-h-[calc(100vh-154px)]">
             <div
               ref={articleRef}
               className="marketplace-markdown pt-4 pb-2.5"
