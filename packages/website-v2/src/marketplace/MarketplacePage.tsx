@@ -305,6 +305,46 @@ function DocNav({
   )
 }
 
+function CollapsibleSection({
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  title: string
+  defaultOpen?: boolean
+  children: React.ReactNode
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 hover:text-slate-600"
+      >
+        {title}
+        <svg
+          className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {/* Always render children for SEO, use CSS to hide */}
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
 function DocMeta({
   manifest,
   headings,
@@ -407,24 +447,23 @@ function DocMeta({
         </div>
       ) : null}
 
-      {/* KEYWORDS */}
+      {/* KEYWORDS - Collapsible */}
       {manifest.keywords && manifest.keywords.length > 0 ? (
         <>
           <div className="my-4 h-px w-full bg-slate-200" />
-          <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Keywords
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {manifest.keywords.map((keyword) => (
-              <Link
-                key={keyword}
-                to={`/search?q=${encodeURIComponent(keyword)}`}
-                className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
-              >
-                {keyword}
-              </Link>
-            ))}
-          </div>
+          <CollapsibleSection title="Keywords">
+            <div className="flex flex-wrap gap-2">
+              {manifest.keywords.map((keyword) => (
+                <Link
+                  key={keyword}
+                  to={`/search?q=${encodeURIComponent(keyword)}`}
+                  className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
+                >
+                  {keyword}
+                </Link>
+              ))}
+            </div>
+          </CollapsibleSection>
         </>
       ) : null}
 
