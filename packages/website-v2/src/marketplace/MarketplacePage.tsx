@@ -98,13 +98,13 @@ export default function MarketplacePage({
       <div className="bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex gap-6">
-          <aside className="sticky top-[154px] hidden h-[calc(100vh-154px)] w-56 flex-shrink-0 lg:block">
+          <aside className="sticky top-[153px] hidden h-[calc(100vh-153px)] w-56 flex-shrink-0 lg:block">
             <div className="h-full overflow-y-auto pb-8 pr-2 pt-4">
               <DocNav manifest={data.manifest} currentRoute={data.pagePath} />
             </div>
           </aside>
 
-          <section className="min-w-0 flex-1 pb-16 min-h-[calc(100vh-154px)]">
+          <section className="min-w-0 flex-1 pb-16 min-h-[calc(100vh-153px)]">
             <div
               ref={articleRef}
               className="marketplace-markdown pt-4 pb-2.5"
@@ -148,7 +148,7 @@ export default function MarketplacePage({
             ) : null}
           </section>
 
-          <aside className="sticky top-[154px] hidden h-[calc(100vh-154px)] w-56 flex-shrink-0 xl:block">
+          <aside className="sticky top-[153px] hidden h-[calc(100vh-153px)] w-56 flex-shrink-0 xl:block">
             <div className="h-full overflow-y-auto pb-8 pl-2 pt-4">
               <DocMeta
                 manifest={data.manifest}
@@ -172,12 +172,25 @@ function ProductHeader({ manifest }: { manifest: MarketplaceManifest }) {
       : manifest.displayName
   const isInstallable =
     manifest.id.includes("plugin.") || manifest.id.includes("messageLintRule.")
-  const badge = typeOfIdToTitle(manifest.id)
+
+  // Determine category badge based on product type
+  const getCategoryBadge = () => {
+    if (manifest.id.includes("plugin.")) {
+      return "Plugin"
+    }
+    if (manifest.id.includes("messageLintRule.")) {
+      return "Validation Rule"
+    }
+    // Libraries and apps both show as "App"
+    return "App"
+  }
+  const badge = getCategoryBadge()
 
   return (
-    <div className="sticky top-[96px] z-40 border-b border-slate-200 bg-slate-50">
+    <div className="sticky top-[97px] z-40 border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
+          {/* Product icon */}
           {manifest.icon ? (
             <img
               src={manifest.icon}
@@ -189,10 +202,12 @@ function ProductHeader({ manifest }: { manifest: MarketplaceManifest }) {
               {displayName[0]}
             </div>
           )}
+          {/* Product name */}
           <h2 className="text-sm font-semibold text-slate-900">
             {displayName}
           </h2>
-          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
+          {/* Category badge */}
+          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">
             {badge}
           </span>
         </div>
