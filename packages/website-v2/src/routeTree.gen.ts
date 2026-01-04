@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CPluginsRouteImport } from './routes/c/plugins'
 import { Route as CAppsRouteImport } from './routes/c/apps'
+import { Route as MUidIndexRouteImport } from './routes/m/$uid/index'
 import { Route as MUidSlugIndexRouteImport } from './routes/m/$uid/$slug/index'
 import { Route as MUidSlugSplatRouteImport } from './routes/m/$uid/$slug/$'
 
@@ -30,6 +31,11 @@ const CAppsRoute = CAppsRouteImport.update({
   path: '/c/apps',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MUidIndexRoute = MUidIndexRouteImport.update({
+  id: '/m/$uid/',
+  path: '/m/$uid/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MUidSlugIndexRoute = MUidSlugIndexRouteImport.update({
   id: '/m/$uid/$slug/',
   path: '/m/$uid/$slug/',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/c/apps': typeof CAppsRoute
   '/c/plugins': typeof CPluginsRoute
+  '/m/$uid': typeof MUidIndexRoute
   '/m/$uid/$slug/$': typeof MUidSlugSplatRoute
   '/m/$uid/$slug': typeof MUidSlugIndexRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/c/apps': typeof CAppsRoute
   '/c/plugins': typeof CPluginsRoute
+  '/m/$uid': typeof MUidIndexRoute
   '/m/$uid/$slug/$': typeof MUidSlugSplatRoute
   '/m/$uid/$slug': typeof MUidSlugIndexRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/c/apps': typeof CAppsRoute
   '/c/plugins': typeof CPluginsRoute
+  '/m/$uid/': typeof MUidIndexRoute
   '/m/$uid/$slug/$': typeof MUidSlugSplatRoute
   '/m/$uid/$slug/': typeof MUidSlugIndexRoute
 }
@@ -69,15 +78,23 @@ export interface FileRouteTypes {
     | '/'
     | '/c/apps'
     | '/c/plugins'
+    | '/m/$uid'
     | '/m/$uid/$slug/$'
     | '/m/$uid/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/c/apps' | '/c/plugins' | '/m/$uid/$slug/$' | '/m/$uid/$slug'
+  to:
+    | '/'
+    | '/c/apps'
+    | '/c/plugins'
+    | '/m/$uid'
+    | '/m/$uid/$slug/$'
+    | '/m/$uid/$slug'
   id:
     | '__root__'
     | '/'
     | '/c/apps'
     | '/c/plugins'
+    | '/m/$uid/'
     | '/m/$uid/$slug/$'
     | '/m/$uid/$slug/'
   fileRoutesById: FileRoutesById
@@ -86,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CAppsRoute: typeof CAppsRoute
   CPluginsRoute: typeof CPluginsRoute
+  MUidIndexRoute: typeof MUidIndexRoute
   MUidSlugSplatRoute: typeof MUidSlugSplatRoute
   MUidSlugIndexRoute: typeof MUidSlugIndexRoute
 }
@@ -113,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CAppsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/m/$uid/': {
+      id: '/m/$uid/'
+      path: '/m/$uid'
+      fullPath: '/m/$uid'
+      preLoaderRoute: typeof MUidIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/m/$uid/$slug/': {
       id: '/m/$uid/$slug/'
       path: '/m/$uid/$slug'
@@ -134,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CAppsRoute: CAppsRoute,
   CPluginsRoute: CPluginsRoute,
+  MUidIndexRoute: MUidIndexRoute,
   MUidSlugSplatRoute: MUidSlugSplatRoute,
   MUidSlugIndexRoute: MUidSlugIndexRoute,
 }
