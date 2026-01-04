@@ -31,7 +31,9 @@ export default function MarketplacePage({
   useEffect(() => {
     if (!data.imports || data.imports.length === 0) return;
     data.imports.forEach((url) => {
-      import(/* @vite-ignore */ url);
+      import(/* @vite-ignore */ url).catch((err) => {
+        console.error(`Failed to load web component from ${url}:`, err);
+      });
     });
   }, [data.imports]);
 
