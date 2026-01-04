@@ -11,6 +11,7 @@ const repositoryRoot = import.meta.url.slice(
 
 export type MarketplacePageData = {
   markdown: string
+  rawMarkdown: string
   pageData?: Record<string, unknown>
   pagePath: string
   manifest: MarketplaceManifest & { uniqueID: string }
@@ -60,6 +61,7 @@ export async function loadMarketplacePage({
 
   const flatPages = item.pages ? flattenPages(item.pages) : undefined
   let renderedMarkdown: string | undefined
+  let rawMarkdownContent: string | undefined
   let pageData: Record<string, unknown> | undefined
   let imports: string[] | undefined
 
@@ -81,6 +83,7 @@ export async function loadMarketplacePage({
     }
 
     const content = await getContentString(page)
+    rawMarkdownContent = content
     const markdown = await parse(content)
     renderedMarkdown = markdown.html
     pageData = markdown.frontmatter
@@ -90,7 +93,9 @@ export async function loadMarketplacePage({
       typeof item.readme === "object" ? item.readme.en : item.readme
 
     try {
-      const markdown = await parse(await getContentString(readme))
+      const content = await getContentString(readme)
+      rawMarkdownContent = content
+      const markdown = await parse(content)
       renderedMarkdown = markdown.html
       pageData = markdown.frontmatter
       imports = markdown.imports
@@ -116,6 +121,7 @@ export async function loadMarketplacePage({
 
   return {
     markdown: renderedMarkdown,
+    rawMarkdown: rawMarkdownContent || "",
     pageData,
     pagePath,
     manifest: item,

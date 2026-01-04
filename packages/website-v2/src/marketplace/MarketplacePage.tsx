@@ -16,6 +16,17 @@ export default function MarketplacePage({
   const [activeId, setActiveId] = useState<string>("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileOnThisPageOpen, setMobileOnThisPageOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyMarkdown = async () => {
+    try {
+      await navigator.clipboard.writeText(data.rawMarkdown);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy markdown:", err);
+    }
+  };
 
   useEffect(() => {
     if (!data.imports || data.imports.length === 0) return;
@@ -182,17 +193,100 @@ export default function MarketplacePage({
             </aside>
 
             <section className="min-w-0 flex-1 pb-16 min-h-[calc(100vh-153px)]">
-              <div
-                ref={articleRef}
-                className="marketplace-markdown pt-4 pb-2.5"
-                onMouseDown={(event) => {
-                  const anchor = (event.target as HTMLElement).closest("a");
-                  if (anchor?.getAttribute("href")?.startsWith("#")) {
-                    event.preventDefault();
-                  }
-                }}
-                dangerouslySetInnerHTML={{ __html: data.markdown }}
-              />
+              {(() => {
+                // Check if markdown starts with an h1
+                const hasH1 = /^<h1[\s>]/i.test(data.markdown.trim());
+
+                const copyButton = (
+                  <button
+                    type="button"
+                    onClick={copyMarkdown}
+                    className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    {copied ? (
+                      <>
+                        <svg
+                          className="h-4 w-4 text-green-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                        Copy markdown
+                      </>
+                    )}
+                  </button>
+                );
+
+                if (hasH1) {
+                  // H1 exists: use absolute positioning to align with h1
+                  return (
+                    <div className="relative">
+                      <div className="absolute right-0 top-4 z-10">
+                        {copyButton}
+                      </div>
+                      <div
+                        ref={articleRef}
+                        className="marketplace-markdown pt-4 pb-2.5"
+                        onMouseDown={(event) => {
+                          const anchor = (event.target as HTMLElement).closest(
+                            "a"
+                          );
+                          if (anchor?.getAttribute("href")?.startsWith("#")) {
+                            event.preventDefault();
+                          }
+                        }}
+                        dangerouslySetInnerHTML={{ __html: data.markdown }}
+                      />
+                    </div>
+                  );
+                } else {
+                  // No H1: render button in a separate row above content
+                  return (
+                    <>
+                      <div className="flex justify-end pt-4 pb-2">
+                        {copyButton}
+                      </div>
+                      <div
+                        ref={articleRef}
+                        className="marketplace-markdown pb-2.5"
+                        onMouseDown={(event) => {
+                          const anchor = (event.target as HTMLElement).closest(
+                            "a"
+                          );
+                          if (anchor?.getAttribute("href")?.startsWith("#")) {
+                            event.preventDefault();
+                          }
+                        }}
+                        dangerouslySetInnerHTML={{ __html: data.markdown }}
+                      />
+                    </>
+                  );
+                }
+              })()}
 
               <div className="mt-16 rounded-xl border border-slate-200 bg-slate-50 px-6 py-6">
                 <p className="text-lg font-semibold text-slate-900">
