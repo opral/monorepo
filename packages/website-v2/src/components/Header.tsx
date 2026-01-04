@@ -54,7 +54,7 @@ export default function Header() {
             <span className="text-lg font-semibold text-slate-900">inlang</span>
           </Link>
 
-          {/* Right side: Blog + SDK Docs */}
+          {/* Right side: Blog + Documentation */}
           <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 sm:flex">
             <a
               href="https://opral.substack.com/t/inlang"
@@ -70,7 +70,7 @@ export default function Header() {
               rel="noreferrer"
               className="hover:text-slate-900"
             >
-              SDK Docs
+              Documentation
             </a>
           </nav>
 
@@ -203,7 +203,7 @@ export default function Header() {
               className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
               onClick={() => setMobileMenuOpen(false)}
             >
-              SDK Docs
+              Documentation
             </a>
           </nav>
         </div>

@@ -26,7 +26,8 @@ const MarketplaceManifestBase = Type.Object({
 	deprecatedMessage: Type.Optional(
 		Translatable(
 			Type.String({
-				description: "A message explaining why the item is deprecated and what to use instead.",
+				description:
+					"A message explaining why the item is deprecated and what to use instead.",
 			})
 		)
 	),
@@ -130,12 +131,20 @@ const MarketplaceManifestBase = Type.Object({
 	),
 	pricing: Type.Optional(Type.String()),
 	keywords: Type.Array(Type.String()),
-	license: Type.String({
-		description: "The license of the item (e.g. Apache-2.0).",
-	}),
+	license: Type.Optional(
+		Type.String({
+			description: "The license of the item (e.g. Apache-2.0).",
+		})
+	),
 	website: Type.Optional(
 		Type.String({
 			description: "An optional link to the website of the item.",
+		})
+	),
+	repository: Type.Optional(
+		Type.String({
+			description:
+				"The GitHub repository URL (e.g. https://github.com/opral/paraglide-js).",
 		})
 	),
 });
