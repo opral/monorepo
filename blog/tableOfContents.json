@@ -1,26 +1,17 @@
 [
   {
-    "path": "./inlang-refactor.md",
+    "path": "./inlang-refactor/index.md",
     "slug": "inlang-refactor",
-    "title": "Refactoring Inlang",
-    "description": "Inlang got a major refactor which brings new capabilities to the ecosystem."
+    "date": "2023-09-15"
   },
   {
-    "path": "./the-next-git.md",
-    "slug": "the-next-git",
-    "title": "The next git",
-    "description": "Git, or more generalized version control, seems to be an appropriate backend for content heavy apps."
-  },
-  {
-    "path": "./git-as-sdk.md",
+    "path": "./git-as-sdk/index.md",
     "slug": "git-as-sdk",
-    "title": "What if a Git SDK to build apps exists?",
-    "description": "Git as a backend and content database might be superior to database driven solutions for apps like Figma, Google Docs, & Co."
+    "date": "2023-03-10"
   },
   {
-    "path": "./notes-on-git-based-architecture.md",
+    "path": "./notes-on-git-based-architecture/index.md",
     "slug": "notes-on-git-based-architecture",
-    "title": "March 2022: Does a git-based architecture make sense?",
-    "description": "Internal notes from March 2022 on why a git-based architecture for localization and beyond seems to make sense."
+    "date": "2022-03-01"
   }
 ]

@@ -1,6 +1,11 @@
+---
+og:title: "March 2022: Does a git-based architecture make sense?"
+og:description: "Internal notes from March 2022 on why a git-based architecture for localization and beyond seems to make sense."
+---
+
 # March 2022: Does a git-based architecture make sense?
 
-This document has been written by me, [@samuelstroschein](https://twitter.com/samuelstroschein), as a note to myself on why a git-based architecture makes sense.
+This document has been written by me, [@samuelstroschein](https://twitter.com/samuelstroschei), as a note to myself on why a git-based architecture makes sense.
 
 ## How exactly does inlang’s architecture work?
 

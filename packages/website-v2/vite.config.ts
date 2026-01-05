@@ -4,6 +4,9 @@ import viteReact from "@vitejs/plugin-react";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { registry } from "@inlang/marketplace-registry";
+import path from "node:path";
+import fs from "node:fs/promises";
+import { watch } from "node:fs";
 
 const config = defineConfig({
   plugins: [
@@ -31,6 +34,7 @@ const config = defineConfig({
       pages: getMarketplaceStaticPages(),
     }),
     viteReact(),
+    blogAssetsPlugin(),
   ],
 });
 
@@ -78,4 +82,32 @@ function flattenPages(
 
 function isMarkdownPath(path: string) {
   return path.endsWith(".md") || path.endsWith(".html");
+}
+
+function blogAssetsPlugin() {
+  const repoRoot = path.resolve(__dirname, "../..");
+  const blogDir = path.join(repoRoot, "blog");
+  const publicBlogDir = path.join(__dirname, "public", "blog");
+
+  async function copyBlogAssets() {
+    await fs.rm(publicBlogDir, { recursive: true, force: true });
+    await fs.cp(blogDir, publicBlogDir, { recursive: true });
+  }
+
+  return {
+    name: "inlang:blog-assets",
+    async buildStart() {
+      await copyBlogAssets();
+    },
+    async configureServer(server: any) {
+      await copyBlogAssets();
+      const watcher = watch(blogDir, { recursive: true }, async () => {
+        await copyBlogAssets();
+        server.ws.send({ type: "full-reload" });
+      });
+      server.httpServer?.once("close", () => {
+        watcher.close();
+      });
+    },
+  };
 }

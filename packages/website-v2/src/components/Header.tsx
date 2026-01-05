@@ -108,14 +108,9 @@ export default function Header() {
 
           {/* Right side: Blog + Documentation | X Discord | GitHub Stars */}
           <nav className="hidden items-center gap-4 text-sm font-medium text-slate-600 sm:flex">
-            <a
-              href="https://opral.substack.com/t/inlang"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-900"
-            >
+            <Link to="/blog" className="hover:text-slate-900">
               Blog
-            </a>
+            </Link>
             <a
               href="https://github.com/opral/inlang"
               target="_blank"
@@ -333,15 +328,13 @@ export default function Header() {
 
             <div className="my-2 h-px bg-slate-200" />
 
-            <a
-              href="https://opral.substack.com/t/inlang"
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              to="/blog"
               className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
               onClick={() => setMobileMenuOpen(false)}
             >
               Blog
-            </a>
+            </Link>
             <a
               href="https://github.com/opral/inlang-sdk"
               target="_blank"

@@ -224,6 +224,7 @@ export function extractMarkdownDescription(markdown: string) {
       continue;
     }
     if (trimmed.startsWith("#")) continue;
+    if (trimmed.startsWith("![")) continue;
     if (
       trimmed.startsWith("- ") ||
       trimmed.startsWith("* ") ||

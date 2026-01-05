@@ -1,6 +1,11 @@
-# Refactoring Inlang
+---
+og:title: "Inlang’s Refactor: New Project Format, SDK, and Marketplace"
+og:description: "Inlang got a major refactor which brings new capabilities to the ecosystem."
+---
 
-![architecture inlang new](https://cdn.jsdelivr.net/gh/opral/inlang/documentation/sdk/assets/architecture.jpg)
+# Inlang’s Refactor: New Project Format, SDK, and Marketplace
+
+![architecture inlang new](./assets/architecture.jpg)
 
 ## Architecture
 
@@ -34,7 +39,7 @@
 
 ## Marketplace
 
-![inlang marketplace](https://cdn.jsdelivr.net/gh/opral/inlang/documentation/sdk/assets/marketplace.jpg)
+![inlang marketplace](./assets/marketplace.jpg)
 
 - Find apps, libraries and modules for your project
 - Have the opportunity to distribute your own inlang-based product

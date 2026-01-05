@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 22
+          node-version: 24
           # https://github.com/npm/cli/issues/6184#issuecomment-1544496444
           registry-url: "https://registry.npmjs.org"
           cache: "pnpm"

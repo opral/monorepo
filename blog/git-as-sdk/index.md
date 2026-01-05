@@ -1,3 +1,8 @@
+---
+og:title: What if a Git SDK to build apps exists?
+og:description: Git as a backend and content database might be superior to database driven solutions for apps like Figma, Google Docs, & Co.
+---
+
 # What if a Git SDK to build apps exists?
 
 While exploring how to design a developer-first localization solution (also known as i18n, aka offering software in different human languages), I realized that git as a backend might be superior to database driven solutions for applications like Figma, Google Docs, & Co. I refer to a cloud-based backend as a backend where users operate on documents that are stored in a database, opposed to documents in the form of files.
