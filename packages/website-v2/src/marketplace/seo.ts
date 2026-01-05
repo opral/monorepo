@@ -103,6 +103,101 @@ export function buildMarketplaceBreadcrumbJsonLd(input: BreadcrumbInput) {
   };
 }
 
+type ArticleJsonLdInput = {
+  headline: string;
+  description: string;
+  canonicalUrl: string;
+  image?: string;
+};
+
+export function buildMarketplaceArticleJsonLd(input: ArticleJsonLdInput) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: input.headline,
+    description: input.description,
+    url: input.canonicalUrl,
+    ...(input.image ? { image: input.image } : {}),
+  };
+}
+
+type SoftwareJsonLdInput = {
+  id: string;
+  displayName: string;
+  description: string;
+  canonicalUrl: string;
+  image?: string;
+  publisherName: string;
+  publisherLink?: string;
+  publisherIcon?: string;
+  license?: string;
+  repository?: string;
+  website?: string;
+  frontmatter?: Record<string, unknown>;
+};
+
+export function buildMarketplaceSoftwareJsonLd(input: SoftwareJsonLdInput) {
+  const isApp = input.id.startsWith("app.");
+  const hasRepository = Boolean(input.repository);
+  const publisher: Record<string, unknown> = {
+    "@type": "Organization",
+    name: input.publisherName,
+  };
+
+  if (input.publisherLink) {
+    publisher.url = input.publisherLink;
+  }
+  if (input.publisherIcon) {
+    publisher.logo = input.publisherIcon;
+  }
+
+  const sameAs = [input.website, input.repository].filter(
+    (value): value is string => Boolean(value)
+  );
+
+  const base = {
+    "@context": "https://schema.org",
+    name: input.displayName,
+    description: input.description,
+    url: input.canonicalUrl,
+    publisher,
+    ...(input.image ? { image: input.image } : {}),
+    ...(input.license ? { license: input.license } : {}),
+    ...(sameAs.length > 0 ? { sameAs } : {}),
+  };
+
+  if (isApp) {
+    return {
+      ...base,
+      "@type": "SoftwareApplication",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Web",
+      ...(input.frontmatter?.softwareVersion
+        ? { softwareVersion: input.frontmatter.softwareVersion }
+        : {}),
+      ...(input.frontmatter?.downloadUrl
+        ? { downloadUrl: input.frontmatter.downloadUrl }
+        : {}),
+    };
+  }
+
+  if (hasRepository) {
+    return {
+      ...base,
+      "@type": "SoftwareSourceCode",
+      codeRepository: input.repository,
+      ...(input.frontmatter?.softwareVersion
+        ? { softwareVersion: input.frontmatter.softwareVersion }
+        : {}),
+      ...(input.frontmatter?.downloadUrl
+        ? { downloadUrl: input.frontmatter.downloadUrl }
+        : {}),
+    };
+  }
+
+  return undefined;
+}
+
 export function extractMarkdownH1(markdown: string) {
   if (!markdown) return undefined;
   const sanitized = stripFrontmatter(markdown);

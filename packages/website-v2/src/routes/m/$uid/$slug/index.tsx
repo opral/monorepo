@@ -5,6 +5,7 @@ import {
   buildMarketplaceTitle,
   buildMarketplaceJsonLd,
   buildMarketplaceBreadcrumbJsonLd,
+  buildMarketplaceSoftwareJsonLd,
   extractOgMeta,
   extractTwitterMeta,
   getMarketplaceSubpageTitle,
@@ -78,6 +79,20 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     canonicalBaseUrl: baseCanonicalUrl,
     subpageTitle,
   })
+  const softwareJsonLd = buildMarketplaceSoftwareJsonLd({
+    id: data.manifest.id,
+    displayName,
+    description: metaDescription,
+    canonicalUrl,
+    image,
+    publisherName: data.manifest.publisherName,
+    publisherLink: data.manifest.publisherLink,
+    publisherIcon: data.manifest.publisherIcon,
+    license: data.manifest.license,
+    repository: data.manifest.repository,
+    website: data.manifest.website,
+    frontmatter: data.frontmatter,
+  })
 
   return {
     links: [{ rel: "canonical", href: canonicalUrl }],
@@ -90,6 +105,14 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
         type: "application/ld+json",
         children: JSON.stringify(breadcrumbJsonLd),
       },
+      ...(softwareJsonLd
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify(softwareJsonLd),
+            },
+          ]
+        : []),
     ],
     meta: [
       { title: pageTitle },

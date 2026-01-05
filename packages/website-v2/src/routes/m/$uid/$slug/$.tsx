@@ -9,6 +9,8 @@ import {
   buildMarketplaceBreadcrumbJsonLd,
   getMarketplaceSubpageTitle,
   extractMarkdownDescription,
+  buildMarketplaceSoftwareJsonLd,
+  buildMarketplaceArticleJsonLd,
 } from "../../../../marketplace/seo"
 
 export const Route = createFileRoute("/m/$uid/$slug/$")({
@@ -76,6 +78,28 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     canonicalBaseUrl: baseCanonicalUrl,
     subpageTitle,
   })
+  const articleJsonLd =
+    subpageTitle &&
+    buildMarketplaceArticleJsonLd({
+      headline: subpageTitle,
+      description: metaDescription,
+      canonicalUrl,
+      image,
+    })
+  const softwareJsonLd = buildMarketplaceSoftwareJsonLd({
+    id: data.manifest.id,
+    displayName,
+    description: metaDescription,
+    canonicalUrl,
+    image,
+    publisherName: data.manifest.publisherName,
+    publisherLink: data.manifest.publisherLink,
+    publisherIcon: data.manifest.publisherIcon,
+    license: data.manifest.license,
+    repository: data.manifest.repository,
+    website: data.manifest.website,
+    frontmatter: data.frontmatter,
+  })
 
   return {
     links: [{ rel: "canonical", href: canonicalUrl }],
@@ -88,6 +112,22 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
         type: "application/ld+json",
         children: JSON.stringify(breadcrumbJsonLd),
       },
+      ...(articleJsonLd
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify(articleJsonLd),
+            },
+          ]
+        : []),
+      ...(softwareJsonLd
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify(softwareJsonLd),
+            },
+          ]
+        : []),
     ],
     meta: [
       { title: pageTitle },

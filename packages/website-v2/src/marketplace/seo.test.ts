@@ -9,6 +9,8 @@ import {
   getMarketplaceSubpageTitle,
   buildMarketplaceJsonLd,
   buildMarketplaceBreadcrumbJsonLd,
+  buildMarketplaceSoftwareJsonLd,
+  buildMarketplaceArticleJsonLd,
 } from "./seo";
 
 describe("marketplace seo helpers", () => {
@@ -215,6 +217,96 @@ Markdown paragraph.
             "https://inlang.com/m/gerre34r/library-inlang-paraglideJs/react-router",
         },
       ],
+    });
+  });
+
+  it("builds SoftwareApplication JSON-LD for apps", () => {
+    const jsonLd = buildMarketplaceSoftwareJsonLd({
+      id: "app.inlang.editor",
+      displayName: "Editor",
+      description: "Inlang editor",
+      canonicalUrl: "https://inlang.com/m/app",
+      image: "https://example.com/og.png",
+      publisherName: "inlang",
+      publisherLink: "https://inlang.com",
+      publisherIcon: "https://example.com/icon.png",
+      license: "Apache-2.0",
+      repository: "https://github.com/opral/inlang",
+      website: "https://inlang.com",
+    });
+
+    expect(jsonLd).toEqual({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "Editor",
+      description: "Inlang editor",
+      url: "https://inlang.com/m/app",
+      publisher: {
+        "@type": "Organization",
+        name: "inlang",
+        url: "https://inlang.com",
+        logo: "https://example.com/icon.png",
+      },
+      image: "https://example.com/og.png",
+      license: "Apache-2.0",
+      sameAs: ["https://inlang.com", "https://github.com/opral/inlang"],
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Web",
+    });
+  });
+
+  it("builds SoftwareSourceCode JSON-LD when repository exists", () => {
+    const jsonLd = buildMarketplaceSoftwareJsonLd({
+      id: "library.inlang.paraglideJs",
+      displayName: "Paraglide JS",
+      description: "i18n runtime",
+      canonicalUrl: "https://inlang.com/m/paraglide",
+      publisherName: "inlang",
+      repository: "https://github.com/opral/paraglide-js",
+    });
+
+    expect(jsonLd).toEqual({
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      name: "Paraglide JS",
+      description: "i18n runtime",
+      url: "https://inlang.com/m/paraglide",
+      publisher: {
+        "@type": "Organization",
+        name: "inlang",
+      },
+      codeRepository: "https://github.com/opral/paraglide-js",
+      sameAs: ["https://github.com/opral/paraglide-js"],
+    });
+  });
+
+  it("returns undefined when no software metadata is available", () => {
+    const jsonLd = buildMarketplaceSoftwareJsonLd({
+      id: "guide.inlang.docs",
+      displayName: "Guide",
+      description: "Guide",
+      canonicalUrl: "https://inlang.com/m/guide",
+      publisherName: "inlang",
+    });
+
+    expect(jsonLd).toBeUndefined();
+  });
+
+  it("builds Article JSON-LD", () => {
+    const jsonLd = buildMarketplaceArticleJsonLd({
+      headline: "React Router",
+      description: "How to use Paraglide with React Router.",
+      canonicalUrl: "https://inlang.com/m/paraglide/react-router",
+      image: "https://example.com/og.png",
+    });
+
+    expect(jsonLd).toEqual({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: "React Router",
+      description: "How to use Paraglide with React Router.",
+      url: "https://inlang.com/m/paraglide/react-router",
+      image: "https://example.com/og.png",
     });
   });
 });
