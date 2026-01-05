@@ -115,6 +115,35 @@ export function extractMarkdownH1(markdown: string) {
   return undefined;
 }
 
+export function extractMarkdownDescription(markdown: string) {
+  if (!markdown) return undefined;
+  const sanitized = stripFrontmatter(markdown);
+  const lines = sanitized.split(/\r?\n/);
+  let collecting = false;
+  const paragraph: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (collecting) break;
+      continue;
+    }
+    if (trimmed.startsWith("#")) continue;
+    if (
+      trimmed.startsWith("- ") ||
+      trimmed.startsWith("* ") ||
+      /^\d+\.\s/.test(trimmed)
+    ) {
+      continue;
+    }
+    collecting = true;
+    paragraph.push(trimmed);
+  }
+
+  if (!paragraph.length) return undefined;
+  return paragraph.join(" ");
+}
+
 function stripFrontmatter(markdown: string) {
   if (!markdown.startsWith("---")) return markdown;
   const end = markdown.indexOf("\n---", 3);

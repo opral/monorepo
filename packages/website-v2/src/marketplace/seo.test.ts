@@ -5,6 +5,7 @@ import {
   extractOgMeta,
   extractTwitterMeta,
   extractMarkdownH1,
+  extractMarkdownDescription,
   getMarketplaceSubpageTitle,
   buildMarketplaceJsonLd,
   buildMarketplaceBreadcrumbJsonLd,
@@ -79,6 +80,66 @@ title: Hello
   it("derives title from path segments", () => {
     expect(deriveTitleFromPath("/next-js")).toBe("Next Js");
     expect(deriveTitleFromPath("/docs/react-router")).toBe("React Router");
+  });
+
+  it("extracts first paragraph as description", () => {
+    const description = extractMarkdownDescription(`# Title
+
+First paragraph line one.
+Second line of the same paragraph.
+
+## Next
+Later content.
+`);
+
+    expect(description).toBe(
+      "First paragraph line one. Second line of the same paragraph."
+    );
+  });
+
+  it("prefers frontmatter description over markdown and fallback", () => {
+    const frontmatterDescription = "Frontmatter description";
+    const markdownDescription = extractMarkdownDescription(`# Title
+
+Markdown paragraph.
+`);
+    const manifestDescription = "Manifest description";
+    const resolved =
+      frontmatterDescription ||
+      markdownDescription ||
+      manifestDescription;
+
+    expect(resolved).toBe("Frontmatter description");
+  });
+
+  it("falls back to markdown description when frontmatter is missing", () => {
+    const frontmatterDescription = undefined;
+    const markdownDescription = extractMarkdownDescription(`# Title
+
+Markdown paragraph.
+`);
+    const manifestDescription = "Manifest description";
+    const resolved =
+      frontmatterDescription ||
+      markdownDescription ||
+      manifestDescription;
+
+    expect(resolved).toBe("Markdown paragraph.");
+  });
+
+  it("falls back to manifest description when markdown is missing", () => {
+    const frontmatterDescription = undefined;
+    const markdownDescription = extractMarkdownDescription(`# Title
+
+## Only headings
+`);
+    const manifestDescription = "Manifest description";
+    const resolved =
+      frontmatterDescription ||
+      markdownDescription ||
+      manifestDescription;
+
+    expect(resolved).toBe("Manifest description");
   });
 
   it("extracts og meta entries from frontmatter", () => {

@@ -8,6 +8,7 @@ import {
   extractOgMeta,
   extractTwitterMeta,
   getMarketplaceSubpageTitle,
+  extractMarkdownDescription,
 } from "../../../../marketplace/seo"
 
 export const Route = createFileRoute("/m/$uid/$slug/")({
@@ -45,7 +46,9 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
         })
       : undefined
   const metaDescription =
-    (data.frontmatter?.description as string | undefined) || description
+    (data.frontmatter?.description as string | undefined) ||
+    extractMarkdownDescription(data.rawMarkdown) ||
+    description
   const ogMeta = extractOgMeta(data.frontmatter)
   const twitterMeta = extractTwitterMeta(data.frontmatter)
   const image =
