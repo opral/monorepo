@@ -2,16 +2,19 @@
   {
     "path": "./inlang-refactor/index.md",
     "slug": "inlang-refactor",
-    "date": "2023-09-15"
+    "date": "2023-09-15",
+    "authors": ["samuelstroschein"]
   },
   {
     "path": "./git-as-sdk/index.md",
     "slug": "git-as-sdk",
-    "date": "2023-03-10"
+    "date": "2023-03-10",
+    "authors": ["samuelstroschein"]
   },
   {
     "path": "./notes-on-git-based-architecture/index.md",
     "slug": "notes-on-git-based-architecture",
-    "date": "2022-03-01"
+    "date": "2022-03-01",
+    "authors": ["samuelstroschein"]
   }
 ]

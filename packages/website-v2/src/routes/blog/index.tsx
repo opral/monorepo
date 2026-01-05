@@ -3,6 +3,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { parse } from "@opral/markdown-wc";
 import { getBlogDescription, getBlogTitle } from "../../blog/blogMetadata";
 
+type Author = {
+  name: string;
+  avatar?: string | null;
+};
+
 const ogImage =
   "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
@@ -13,12 +18,23 @@ const loadBlogIndex = createServerFn({ method: "GET" }).handler(async () => {
     import.meta.url.lastIndexOf("inlang/packages")
   );
   const blogDir = repositoryRoot + "inlang/blog/";
+
+  // Load authors
+  const authorsPath = blogDir + "authors.json";
+  const authorsContent = await fs.readFile(new URL(authorsPath), "utf-8");
+  const authorsMap = JSON.parse(authorsContent) as Record<
+    string,
+    { name: string; avatar?: string | null }
+  >;
+
+  // Load table of contents
   const tocPath = blogDir + "tableOfContents.json";
   const tocContent = await fs.readFile(new URL(tocPath), "utf-8");
   const toc = JSON.parse(tocContent) as Array<{
     path: string;
     slug: string;
     date?: string;
+    authors?: string[];
   }>;
 
   const posts = await Promise.all(
@@ -38,11 +54,17 @@ const loadBlogIndex = createServerFn({ method: "GET" }).handler(async () => {
         frontmatter: parsed.frontmatter,
       });
 
+      // Resolve author IDs to author objects
+      const authors = item.authors
+        ?.map((authorId) => authorsMap[authorId])
+        .filter(Boolean) as Author[] | undefined;
+
       return {
         slug: item.slug,
         title,
         description,
         date: item.date,
+        authors,
       };
     })
   );
@@ -105,18 +127,38 @@ function BlogIndexPage() {
           {posts.map((post) => (
             <Link
               key={post.slug}
-              to={`/blog/${post.slug}`}
+              to="/blog/$slug"
+              params={{ slug: post.slug }}
               className="group block rounded-xl p-6 -mx-6 hover:bg-slate-50 transition-colors"
             >
               <article>
                 <h2 className="text-xl font-semibold text-slate-900 group-hover:text-slate-700 transition-colors">
                   {post.title ?? post.slug}
                 </h2>
-                {post.date && (
-                  <time className="mt-3 block text-sm text-slate-400">
-                    {formatDate(post.date)}
-                  </time>
-                )}
+                <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                  {post.authors && post.authors.length > 0 && (
+                    <>
+                      {post.authors.map((author, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          {author.avatar ? (
+                            <img
+                              src={author.avatar}
+                              alt={author.name}
+                              className="w-5 h-5 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full bg-slate-300 flex items-center justify-center text-xs text-slate-600 font-medium">
+                              {author.name.charAt(0)}
+                            </div>
+                          )}
+                          <span>{author.name}</span>
+                        </div>
+                      ))}
+                      {post.date && <span className="text-slate-300">·</span>}
+                    </>
+                  )}
+                  {post.date && <time>{formatDate(post.date)}</time>}
+                </div>
               </article>
             </Link>
           ))}
