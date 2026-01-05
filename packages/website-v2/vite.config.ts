@@ -24,6 +24,10 @@ const config = defineConfig({
         maxRedirects: 5,
         failOnError: true,
       },
+      sitemap: {
+        enabled: true,
+        host: "https://inlang.com",
+      },
       pages: getMarketplaceStaticPages(),
     }),
     viteReact(),
