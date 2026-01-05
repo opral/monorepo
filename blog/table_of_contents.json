@@ -12,9 +12,15 @@
     "authors": ["samuelstroschein"]
   },
   {
+    "path": "./dont-lazy-load/index.md",
+    "slug": "dont-lazy-load",
+    "date": "2024-04-19",
+    "authors": ["lorissigrist"]
+  },
+  {
     "path": "./inlang-v0-2/index.md",
     "slug": "inlang-v0-2",
-    "date": "2022-02-15",
+    "date": "2022-02-14",
     "authors": ["samuelstroschein"]
   },
   {
