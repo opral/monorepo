@@ -28,7 +28,7 @@ const loadBlogIndex = createServerFn({ method: "GET" }).handler(async () => {
   >;
 
   // Load table of contents
-  const tocPath = blogDir + "tableOfContents.json";
+  const tocPath = blogDir + "table_of_contents.json";
   const tocContent = await fs.readFile(new URL(tocPath), "utf-8");
   const toc = JSON.parse(tocContent) as Array<{
     path: string;

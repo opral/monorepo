@@ -6,15 +6,21 @@
     "authors": ["samuelstroschein"]
   },
   {
-    "path": "./git-as-sdk/index.md",
-    "slug": "git-as-sdk",
-    "date": "2023-03-10",
-    "authors": ["samuelstroschein"]
-  },
-  {
     "path": "./notes-on-git-based-architecture/index.md",
     "slug": "notes-on-git-based-architecture",
     "date": "2022-03-01",
+    "authors": ["samuelstroschein"]
+  },
+  {
+    "path": "./inlang-v0-2/index.md",
+    "slug": "inlang-v0-2",
+    "date": "2022-02-15",
+    "authors": ["samuelstroschein"]
+  },
+  {
+    "path": "./pre-v0-2-history/index.md",
+    "slug": "pre-v0-2-history",
+    "date": "2022-02-14",
     "authors": ["samuelstroschein"]
   }
 ]

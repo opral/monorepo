@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { parse } from "@opral/markdown-wc";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../../components/markdown-interactive";
 import markdownCss from "../../markdown.css?url";
 import { getBlogDescription, getBlogTitle } from "../../blog/blogMetadata";
@@ -45,7 +45,7 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
   const authorsMap = JSON.parse(authorsContent) as Record<string, Author>;
 
   // Load table of contents
-  const tocPath = blogDir + "tableOfContents.json";
+  const tocPath = blogDir + "table_of_contents.json";
   const tocContent = await fs.readFile(new URL(tocPath), "utf-8");
   const toc = JSON.parse(tocContent) as Array<{
     path: string;
@@ -91,6 +91,8 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
 
   const readingTime = calculateReadingTime(rawMarkdown);
 
+  const imports = parsed.frontmatter?.imports as string[] | undefined;
+
   return {
     post: {
       slug: entry.slug,
@@ -101,6 +103,7 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
       readingTime,
       ogImage: ogImageOverride ?? ogImage,
       ogImageAlt,
+      imports,
     },
     html: parsed.html,
     rawMarkdown,
@@ -243,6 +246,15 @@ export const Route = createFileRoute("/blog/$slug")({
 function BlogPostPage() {
   const { post, html } = Route.useLoaderData();
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!post.imports || post.imports.length === 0) return;
+    post.imports.forEach((url) => {
+      import(/* @vite-ignore */ url).catch((err) => {
+        console.error(`Failed to load web component from ${url}:`, err);
+      });
+    });
+  }, [post.imports]);
 
   const copyUrl = async () => {
     try {
