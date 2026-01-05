@@ -180,7 +180,7 @@ export default function Header() {
               </svg>
               GitHub
               {githubStars !== null && (
-                <span className="inline-flex items-center gap-0.5">
+                <span className="inline-flex items-center gap-1">
                   <span className="relative h-3.5 w-3.5">
                     {/* Outlined star - visible by default, hidden on hover */}
                     <svg
@@ -372,7 +372,7 @@ export default function Header() {
                 </svg>
                 GitHub
                 {githubStars !== null && (
-                  <span className="inline-flex items-center gap-0.5 text-slate-500">
+                  <span className="inline-flex items-center gap-0.5 pr-1 text-slate-500">
                     <svg
                       className="h-3 w-3 text-yellow-500"
                       viewBox="0 0 16 16"
