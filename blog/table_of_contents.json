@@ -6,6 +6,12 @@
     "authors": ["samuelstroschein"]
   },
   {
+    "path": "./update-on-inlang-v2/index.md",
+    "slug": "update-on-inlang-v2",
+    "date": "2024-07-08",
+    "authors": ["samuelstroschein"]
+  },
+  {
     "path": "./version-control-features-in-fink/index.md",
     "slug": "version-control-features-in-fink",
     "date": "2024-07-08",
