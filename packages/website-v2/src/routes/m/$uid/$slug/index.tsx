@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import MarketplacePage from "../../../../marketplace/MarketplacePage"
 import { loadMarketplacePage } from "../../../../marketplace/marketplaceData"
-import { buildMarketplaceTitle, extractOgMeta } from "../../../../marketplace/seo"
+import {
+  buildMarketplaceTitle,
+  extractOgMeta,
+  extractTwitterMeta,
+} from "../../../../marketplace/seo"
 
 export const Route = createFileRoute("/m/$uid/$slug/")({
   loader: async ({ params }) =>
@@ -31,6 +35,7 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
   const metaDescription =
     (data.frontmatter?.description as string | undefined) || description
   const ogMeta = extractOgMeta(data.frontmatter)
+  const twitterMeta = extractTwitterMeta(data.frontmatter)
   const image =
     data.manifest.gallery && data.manifest.gallery.length > 0
       ? data.manifest.gallery[0]
@@ -54,6 +59,7 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
       { name: "twitter:site", content: "@inlanghq" },
       { name: "twitter:creator", content: "@inlanghq" },
       ...ogMeta,
+      ...twitterMeta,
     ],
   }
 }

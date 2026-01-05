@@ -3,6 +3,7 @@ import {
   buildMarketplaceTitle,
   deriveTitleFromPath,
   extractOgMeta,
+  extractTwitterMeta,
   extractMarkdownH1,
   getMarketplaceSubpageTitle,
 } from "./seo";
@@ -88,6 +89,19 @@ title: Hello
     expect(og).toEqual([
       { name: "og:title", content: "OG Title" },
       { name: "og:image", content: "https://example.com/og.png" },
+    ]);
+  });
+
+  it("extracts twitter meta entries from frontmatter", () => {
+    const twitter = extractTwitterMeta({
+      "twitter:title": "Twitter Title",
+      "twitter:image": "https://example.com/twitter.png",
+      title: "Ignored",
+    });
+
+    expect(twitter).toEqual([
+      { name: "twitter:title", content: "Twitter Title" },
+      { name: "twitter:image", content: "https://example.com/twitter.png" },
     ]);
   });
 });

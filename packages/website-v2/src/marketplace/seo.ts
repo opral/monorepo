@@ -23,6 +23,19 @@ export function extractOgMeta(frontmatter?: Record<string, unknown>) {
     }));
 }
 
+export function extractTwitterMeta(frontmatter?: Record<string, unknown>) {
+  if (!frontmatter) return [];
+  return Object.entries(frontmatter)
+    .filter(
+      ([key, value]) =>
+        key.startsWith("twitter:") && typeof value === "string"
+    )
+    .map(([key, value]) => ({
+      name: key,
+      content: value as string,
+    }));
+}
+
 export function getMarketplaceSubpageTitle(input: MarketplaceHeadInput) {
   const ogTitle =
     typeof input.frontmatter?.["og:title"] === "string"
