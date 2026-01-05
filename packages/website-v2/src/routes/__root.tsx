@@ -20,6 +20,10 @@ export const Route = createRootRoute({
         name: 'theme-color',
         content: '#ffffff',
       },
+      {
+        name: 'robots',
+        content: 'index, follow',
+      },
     ],
     links: [
       { rel: 'preconnect', href: 'https://rsms.me/' },

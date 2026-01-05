@@ -491,6 +491,7 @@ function DocNav({
             <div className="flex flex-col gap-1">
               {section.pages.map(({ route, path, isExternal }) => {
                 const navTitle = route.split("/").pop() || "Introduction";
+                const displayTitle = formatNavTitle(navTitle);
                 const href = isExternal ? path : basePath + route;
                 const isActive = currentRoute === route;
 
@@ -500,21 +501,21 @@ function DocNav({
                     href={href}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md px-3 py-2 text-sm capitalize text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    className="rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   >
-                    {navTitle.replaceAll("-", " ")}
+                    {displayTitle}
                   </a>
                 ) : (
                   <Link
                     key={route}
                     to={href}
-                    className={`rounded-md px-3 py-2 text-sm capitalize transition-colors ${
+                    className={`rounded-md px-3 py-2 text-sm transition-colors ${
                       isActive
                         ? "bg-slate-200 font-semibold text-slate-900"
                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
                   >
-                    {navTitle.replaceAll("-", " ")}
+                    {displayTitle}
                   </Link>
                 );
               })}
@@ -524,6 +525,25 @@ function DocNav({
       </div>
     </div>
   );
+}
+
+function formatNavTitle(slug: string) {
+  const normalized = slug.toLowerCase();
+  const directMap: Record<string, string> = {
+    sveltekit: "SvelteKit",
+    "react-router": "React Router",
+    "next-js": "Next.js",
+  };
+
+  if (directMap[normalized]) {
+    return directMap[normalized];
+  }
+
+  return normalized
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word[0]?.toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 function CollapsibleSection({

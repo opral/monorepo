@@ -96,6 +96,8 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
       { property: "og:description", content: metaDescription },
       { property: "og:url", content: canonicalUrl },
       { property: "og:type", content: "article" },
+      { property: "og:site_name", content: "inlang" },
+      { property: "og:locale", content: "en_US" },
       { property: "og:image", content: image },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: image },
