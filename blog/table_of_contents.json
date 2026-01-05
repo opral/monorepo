@@ -6,6 +6,12 @@
     "authors": ["samuelstroschein"]
   },
   {
+    "path": "./version-control-features-in-fink/index.md",
+    "slug": "version-control-features-in-fink",
+    "date": "2024-07-08",
+    "authors": ["niklasbuchfink"]
+  },
+  {
     "path": "./notes-on-git-based-architecture/index.md",
     "slug": "notes-on-git-based-architecture",
     "date": "2022-03-01",

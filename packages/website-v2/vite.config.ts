@@ -88,10 +88,22 @@ function blogAssetsPlugin() {
   const repoRoot = path.resolve(__dirname, "../..");
   const blogDir = path.join(repoRoot, "blog");
   const publicBlogDir = path.join(__dirname, "public", "blog");
+  let isCopying = false;
+  let needsCopy = false;
 
   async function copyBlogAssets() {
+    if (isCopying) {
+      needsCopy = true;
+      return;
+    }
+    isCopying = true;
     await fs.rm(publicBlogDir, { recursive: true, force: true });
     await fs.cp(blogDir, publicBlogDir, { recursive: true });
+    isCopying = false;
+    if (needsCopy) {
+      needsCopy = false;
+      await copyBlogAssets();
+    }
   }
 
   return {
