@@ -3,6 +3,7 @@ import { registry } from "@inlang/marketplace-registry";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import { redirect } from "@tanstack/react-router";
 import fs from "node:fs/promises";
+import { getLegacyRedirect } from "./legacyRedirects";
 
 const repositoryRoot = import.meta.url.slice(
   0,
@@ -28,6 +29,13 @@ export async function loadMarketplacePage({
   slug: string;
   splat?: string;
 }): Promise<MarketplacePageData> {
+  const legacyRedirect = getLegacyRedirect(uid);
+  if (legacyRedirect) {
+    throw redirect({
+      to: legacyRedirect.to,
+      statusCode: legacyRedirect.statusCode,
+    });
+  }
   const item = registry.find((entry: any) => entry.uniqueID === uid) as
     | (MarketplaceManifest & { uniqueID: string })
     | undefined;

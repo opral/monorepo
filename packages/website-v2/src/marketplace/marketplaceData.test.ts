@@ -40,6 +40,42 @@ describe("loadMarketplacePage redirects", () => {
     });
   });
 
+  it("redirects legacy uid to new paraglide sveltekit page", async () => {
+    await expect(
+      loadMarketplacePage({
+        uid: "dxnzrydw",
+        slug: "anything",
+        splat: "legacy/path",
+      })
+    ).rejects.toMatchObject({
+      to: "/m/gerre34r/library-inlang-paraglideJs/sveltekit",
+    });
+  });
+
+  it("redirects osslbuzt to paraglide next-js page", async () => {
+    await expect(
+      loadMarketplacePage({
+        uid: "osslbuzt",
+        slug: "anything",
+        splat: "legacy/path",
+      })
+    ).rejects.toMatchObject({
+      to: "/m/gerre34r/library-inlang-paraglideJs/next-js",
+    });
+  });
+
+  it("redirects iljlwzfs to paraglide astro page", async () => {
+    await expect(
+      loadMarketplacePage({
+        uid: "iljlwzfs",
+        slug: "anything",
+        splat: "legacy/path",
+      })
+    ).rejects.toMatchObject({
+      to: "/m/gerre34r/library-inlang-paraglideJs/astro",
+    });
+  });
+
   it("applies pageRedirects for nested docs", async () => {
     mockRegistry.push({
       uniqueID: "u1",
