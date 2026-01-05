@@ -54,10 +54,48 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
     authors?: string[]; // Author IDs
   }>;
 
-  const entry = toc.find((item) => item.slug === slug);
+  // Sort posts by date (newest first) to determine prev/next
+  const sortedToc = [...toc].sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
+  const currentIndex = sortedToc.findIndex((item) => item.slug === slug);
+  const entry = sortedToc[currentIndex];
   if (!entry) {
     throw new Error(`Blog post not found: ${slug}`);
   }
+
+  // Get prev/next posts (prev = newer, next = older in chronological order)
+  const prevEntry = currentIndex > 0 ? sortedToc[currentIndex - 1] : null;
+  const nextEntry =
+    currentIndex < sortedToc.length - 1 ? sortedToc[currentIndex + 1] : null;
+
+  // Helper to get title for a post entry
+  const getTitleForEntry = async (
+    postEntry: (typeof toc)[0]
+  ): Promise<string> => {
+    const relPath = postEntry.path.startsWith("./")
+      ? postEntry.path.slice(2)
+      : postEntry.path;
+    const mdPath = blogDir + relPath;
+    const md = await fs.readFile(new URL(mdPath), "utf-8");
+    const parsedMd = await parse(md);
+    return (
+      getBlogTitle({ rawMarkdown: md, frontmatter: parsedMd.frontmatter }) ??
+      postEntry.slug
+    );
+  };
+
+  // Get titles for prev/next posts
+  const prevPost = prevEntry
+    ? { slug: prevEntry.slug, title: await getTitleForEntry(prevEntry) }
+    : null;
+  const nextPost = nextEntry
+    ? { slug: nextEntry.slug, title: await getTitleForEntry(nextEntry) }
+    : null;
 
   // Resolve author IDs to full author objects
   const authors = entry.authors
@@ -107,6 +145,8 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
     },
     html: parsed.html,
     rawMarkdown,
+    prevPost,
+    nextPost,
   };
 });
 
@@ -244,7 +284,7 @@ export const Route = createFileRoute("/blog/$slug")({
 });
 
 function BlogPostPage() {
-  const { post, html } = Route.useLoaderData();
+  const { post, html, prevPost, nextPost } = Route.useLoaderData();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -410,6 +450,43 @@ function BlogPostPage() {
           className="marketplace-markdown [&>h1:first-child]:hidden"
           dangerouslySetInnerHTML={{ __html: html }}
         />
+
+        {/* Previous / Next navigation */}
+        {(prevPost || nextPost) && (
+          <nav className="mt-16 grid grid-cols-2 gap-4 border-t border-slate-200 pt-8">
+            {/* Previous post (newer) */}
+            <div>
+              {prevPost && (
+                <Link
+                  to="/blog/$slug"
+                  params={{ slug: prevPost.slug }}
+                  className="group block rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors"
+                >
+                  <span className="text-sm text-slate-400">Previous post</span>
+                  <span className="mt-1 block font-medium text-[#3451b2] group-hover:text-[#3a5ccc]">
+                    {prevPost.title}
+                  </span>
+                </Link>
+              )}
+            </div>
+
+            {/* Next post (older) */}
+            <div>
+              {nextPost && (
+                <Link
+                  to="/blog/$slug"
+                  params={{ slug: nextPost.slug }}
+                  className="group block rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors text-right"
+                >
+                  <span className="text-sm text-slate-400">Next post</span>
+                  <span className="mt-1 block font-medium text-[#3451b2] group-hover:text-[#3a5ccc]">
+                    {nextPost.title}
+                  </span>
+                </Link>
+              )}
+            </div>
+          </nav>
+        )}
       </div>
     </main>
   );

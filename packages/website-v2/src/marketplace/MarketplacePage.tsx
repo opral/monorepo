@@ -290,27 +290,12 @@ export default function MarketplacePage({
                 }
               })()}
 
-              <div className="mt-16 rounded-xl border border-slate-200 bg-slate-50 px-6 py-6">
-                <p className="text-lg font-semibold text-slate-900">
-                  Do you have questions?
-                </p>
-                <p className="mt-2 text-sm text-slate-600">
-                  Join the community on Discord and we will help you out.
-                </p>
-                <a
-                  href="https://discord.gg/gdMPPWy57R"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  Join Discord
-                </a>
-              </div>
-
-              {data.recommends && data.recommends.length > 0 ? (
+              {data.pagePath === "/" &&
+              data.recommends &&
+              data.recommends.length > 0 ? (
                 <div className="mt-16">
                   <h3 className="text-lg font-semibold text-slate-900">
-                    Recommended
+                    Recommended complementary solutions
                   </h3>
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     {data.recommends.map((item) => (
@@ -325,7 +310,7 @@ export default function MarketplacePage({
                 const githubLink = getGithubLink(data.manifest, data.pagePath);
                 if (!githubLink) return null;
                 return (
-                  <div className="mt-12 border-t border-slate-200 pt-6">
+                  <div className="mt-12">
                     <a
                       href={githubLink}
                       target="_blank"
@@ -350,6 +335,12 @@ export default function MarketplacePage({
                   </div>
                 );
               })()}
+
+              {/* Previous / Next page navigation */}
+              <PageNavigation
+                manifest={data.manifest}
+                currentRoute={data.pagePath}
+              />
             </section>
 
             <aside className="sticky top-[153px] hidden h-[calc(100vh-153px)] w-56 flex-shrink-0 xl:block">
@@ -984,10 +975,101 @@ function flattenPages(
     if (typeof value === "string") {
       flatPages[key] = value;
     } else {
-      for (const [subKey, subValue] of Object.entries(value)) {
+      for (const [subKey, subValue] of Object.entries(
+        value as Record<string, string>
+      )) {
         flatPages[subKey] = subValue;
       }
     }
   }
   return flatPages;
+}
+
+function PageNavigation({
+  manifest,
+  currentRoute,
+}: {
+  manifest: MarketplaceManifest & { uniqueID: string };
+  currentRoute: string;
+}) {
+  if (!manifest.pages) return null;
+
+  const basePath = manifest.slug
+    ? `/m/${manifest.uniqueID}/${manifest.slug}`
+    : `/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`;
+
+  // Get all pages in order
+  const allPages: Array<{ route: string; title: string; isExternal: boolean }> =
+    [];
+  const entries = Object.entries(manifest.pages);
+
+  for (const [key, value] of entries) {
+    if (typeof value === "string") {
+      const isExternal = !value.endsWith(".md") && !value.endsWith(".html");
+      if (!isExternal) {
+        allPages.push({
+          route: key,
+          title: formatNavTitle(key.split("/").pop() || "Introduction"),
+          isExternal,
+        });
+      }
+    } else {
+      for (const [route, path] of Object.entries(
+        value as Record<string, string>
+      )) {
+        const isExternal = !path.endsWith(".md") && !path.endsWith(".html");
+        if (!isExternal) {
+          allPages.push({
+            route,
+            title: formatNavTitle(route.split("/").pop() || "Introduction"),
+            isExternal,
+          });
+        }
+      }
+    }
+  }
+
+  // Find current page index
+  const currentIndex = allPages.findIndex((p) => p.route === currentRoute);
+  if (currentIndex === -1 || allPages.length <= 1) return null;
+
+  const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
+  const nextPage =
+    currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
+
+  if (!prevPage && !nextPage) return null;
+
+  return (
+    <nav className="mt-8 grid grid-cols-2 gap-4 border-t border-slate-200 pt-8">
+      {/* Previous page */}
+      <div>
+        {prevPage && (
+          <Link
+            to={basePath + prevPage.route}
+            className="group block rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors"
+          >
+            <span className="text-sm text-slate-400">Previous</span>
+            <span className="mt-1 block font-medium text-[#3451b2] group-hover:text-[#3a5ccc]">
+              {prevPage.title}
+            </span>
+          </Link>
+        )}
+      </div>
+
+      {/* Next page */}
+      <div>
+        {nextPage && (
+          <Link
+            to={basePath + nextPage.route}
+            className="group block rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors text-right"
+          >
+            <span className="text-sm text-slate-400">Next</span>
+            <span className="mt-1 block font-medium text-[#3451b2] group-hover:text-[#3a5ccc]">
+              {nextPage.title}
+            </span>
+          </Link>
+        )}
+      </div>
+    </nav>
+  );
 }
