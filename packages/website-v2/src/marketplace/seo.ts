@@ -53,6 +53,56 @@ export function getMarketplaceSubpageTitle(input: MarketplaceHeadInput) {
   return deriveTitleFromPath(input.pagePath);
 }
 
+type JsonLdInput = MarketplaceHeadInput & {
+  description: string;
+  canonicalUrl: string;
+  image?: string;
+};
+
+export function buildMarketplaceJsonLd(input: JsonLdInput) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: buildMarketplaceTitle(input),
+    description: input.description,
+    url: input.canonicalUrl,
+    ...(input.image ? { image: input.image } : {}),
+  };
+}
+
+type BreadcrumbInput = {
+  displayName: string;
+  canonicalUrl: string;
+  canonicalBaseUrl: string;
+  subpageTitle?: string;
+};
+
+export function buildMarketplaceBreadcrumbJsonLd(input: BreadcrumbInput) {
+  const items: Array<Record<string, unknown>> = [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: input.displayName,
+      item: input.canonicalBaseUrl,
+    },
+  ];
+
+  if (input.subpageTitle) {
+    items.push({
+      "@type": "ListItem",
+      position: 2,
+      name: input.subpageTitle,
+      item: input.canonicalUrl,
+    });
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items,
+  };
+}
+
 export function extractMarkdownH1(markdown: string) {
   if (!markdown) return undefined;
   const sanitized = stripFrontmatter(markdown);

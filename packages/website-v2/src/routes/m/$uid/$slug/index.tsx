@@ -3,8 +3,11 @@ import MarketplacePage from "../../../../marketplace/MarketplacePage"
 import { loadMarketplacePage } from "../../../../marketplace/marketplaceData"
 import {
   buildMarketplaceTitle,
+  buildMarketplaceJsonLd,
+  buildMarketplaceBreadcrumbJsonLd,
   extractOgMeta,
   extractTwitterMeta,
+  getMarketplaceSubpageTitle,
 } from "../../../../marketplace/seo"
 
 export const Route = createFileRoute("/m/$uid/$slug/")({
@@ -32,6 +35,15 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     pagePath: data.pagePath,
     rawMarkdown: data.rawMarkdown,
   })
+  const subpageTitle =
+    data.pagePath !== "/"
+      ? getMarketplaceSubpageTitle({
+          displayName,
+          frontmatter: data.frontmatter,
+          pagePath: data.pagePath,
+          rawMarkdown: data.rawMarkdown,
+        })
+      : undefined
   const metaDescription =
     (data.frontmatter?.description as string | undefined) || description
   const ogMeta = extractOgMeta(data.frontmatter)
@@ -47,9 +59,35 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
   const canonicalPath =
     data.pagePath === "/" ? itemPath : `${itemPath}${data.pagePath}`
   const canonicalUrl = `https://inlang.com${canonicalPath}`
+  const baseCanonicalUrl = `https://inlang.com${itemPath}`
+  const jsonLd = buildMarketplaceJsonLd({
+    displayName,
+    description: metaDescription,
+    canonicalUrl,
+    image,
+    frontmatter: data.frontmatter,
+    pagePath: data.pagePath,
+    rawMarkdown: data.rawMarkdown,
+  })
+  const breadcrumbJsonLd = buildMarketplaceBreadcrumbJsonLd({
+    displayName,
+    canonicalUrl,
+    canonicalBaseUrl: baseCanonicalUrl,
+    subpageTitle,
+  })
 
   return {
     links: [{ rel: "canonical", href: canonicalUrl }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(jsonLd),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(breadcrumbJsonLd),
+      },
+    ],
     meta: [
       { title: pageTitle },
       { name: "description", content: metaDescription },

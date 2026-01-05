@@ -6,6 +6,8 @@ import {
   extractTwitterMeta,
   extractMarkdownH1,
   getMarketplaceSubpageTitle,
+  buildMarketplaceJsonLd,
+  buildMarketplaceBreadcrumbJsonLd,
 } from "./seo";
 
 describe("marketplace seo helpers", () => {
@@ -103,5 +105,55 @@ title: Hello
       { name: "twitter:title", content: "Twitter Title" },
       { name: "twitter:image", content: "https://example.com/twitter.png" },
     ]);
+  });
+
+  it("builds WebPage JSON-LD", () => {
+    const jsonLd = buildMarketplaceJsonLd({
+      displayName: "Paraglide JS",
+      description: "Fast i18n for the web",
+      canonicalUrl: "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
+      image: "https://example.com/og.png",
+      pagePath: "/",
+      rawMarkdown: "",
+    });
+
+    expect(jsonLd).toEqual({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Paraglide JS | inlang",
+      description: "Fast i18n for the web",
+      url: "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
+      image: "https://example.com/og.png",
+    });
+  });
+
+  it("builds BreadcrumbList JSON-LD", () => {
+    const jsonLd = buildMarketplaceBreadcrumbJsonLd({
+      displayName: "Paraglide JS",
+      canonicalBaseUrl: "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
+      canonicalUrl:
+        "https://inlang.com/m/gerre34r/library-inlang-paraglideJs/react-router",
+      subpageTitle: "React Router",
+    });
+
+    expect(jsonLd).toEqual({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Paraglide JS",
+          item: "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "React Router",
+          item:
+            "https://inlang.com/m/gerre34r/library-inlang-paraglideJs/react-router",
+        },
+      ],
+    });
   });
 });
