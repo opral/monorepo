@@ -5,7 +5,8 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
-		"./router": "./dist/router.js"
+		"./router": "./dist/router.js",
+		"./handler": "./dist/handler.js"
 	},
 	"scripts": {
 		"build": "npm run env-variables && tsc --build",

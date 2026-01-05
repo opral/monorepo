@@ -1499,6 +1499,9 @@ importers:
       '@inlang/marketplace-registry':
         specifier: workspace:*
         version: link:../marketplace-registry
+      '@inlang/rpc':
+        specifier: workspace:*
+        version: link:../rpc
       '@opral/markdown-wc':
         specifier: 0.6.0
         version: 0.6.0
