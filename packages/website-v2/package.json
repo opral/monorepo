@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
+    "@inlang/plugin-message-format": "workspace:*",
     "@inlang/rpc": "workspace:*",
+    "@inlang/sdk": "workspace:*",
     "@inlang/marketplace-manifest": "workspace:*",
     "@inlang/marketplace-registry": "workspace:*",
     "@opral/markdown-wc": "0.6.0",
