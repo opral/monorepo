@@ -41,14 +41,24 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     data.manifest.gallery && data.manifest.gallery.length > 0
       ? data.manifest.gallery[0]
       : "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
+  const canonicalSlug = data.manifest.slug
+    ? data.manifest.slug.replaceAll(".", "-")
+    : data.manifest.id.replaceAll(".", "-")
+  const itemPath = `/m/${data.manifest.uniqueID}/${canonicalSlug}`
+  const canonicalPath =
+    data.pagePath === "/" ? itemPath : `${itemPath}${data.pagePath}`
+  const canonicalUrl = `https://inlang.com${canonicalPath}`
 
   return {
+    links: [{ rel: "canonical", href: canonicalUrl }],
     meta: [
       { title: pageTitle },
       { name: "description", content: metaDescription },
-      { name: "og:title", content: pageTitle },
-      { name: "og:description", content: metaDescription },
-      { name: "og:image", content: image },
+      { property: "og:title", content: pageTitle },
+      { property: "og:description", content: metaDescription },
+      { property: "og:url", content: canonicalUrl },
+      { property: "og:type", content: "article" },
+      { property: "og:image", content: image },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: image },
       {

@@ -87,8 +87,8 @@ title: Hello
     });
 
     expect(og).toEqual([
-      { name: "og:title", content: "OG Title" },
-      { name: "og:image", content: "https://example.com/og.png" },
+      { property: "og:title", content: "OG Title" },
+      { property: "og:image", content: "https://example.com/og.png" },
     ]);
   });
 

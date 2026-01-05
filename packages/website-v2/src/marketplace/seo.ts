@@ -18,7 +18,7 @@ export function extractOgMeta(frontmatter?: Record<string, unknown>) {
   return Object.entries(frontmatter)
     .filter(([key, value]) => key.startsWith("og:") && typeof value === "string")
     .map(([key, value]) => ({
-      name: key,
+      property: key,
       content: value as string,
     }));
 }
