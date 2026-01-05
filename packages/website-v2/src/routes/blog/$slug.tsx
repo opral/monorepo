@@ -6,6 +6,11 @@ import "../../components/markdown-interactive";
 import markdownCss from "../../markdown.css?url";
 import { getBlogDescription, getBlogTitle } from "../../blog/blogMetadata";
 
+const ogImage =
+  "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
+const ogImageWidth = 1200;
+const ogImageHeight = 630;
+
 type Author = {
   name: string;
   role?: string;
@@ -75,6 +80,14 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
     rawMarkdown,
     frontmatter: parsed.frontmatter,
   });
+  const ogImageOverride =
+    typeof parsed.frontmatter?.["og:image"] === "string"
+      ? parsed.frontmatter["og:image"]
+      : undefined;
+  const ogImageAlt =
+    typeof parsed.frontmatter?.["og:image:alt"] === "string"
+      ? parsed.frontmatter["og:image:alt"]
+      : undefined;
 
   const readingTime = calculateReadingTime(rawMarkdown);
 
@@ -86,6 +99,8 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
       date: entry.date,
       authors,
       readingTime,
+      ogImage: ogImageOverride ?? ogImage,
+      ogImageAlt,
     },
     html: parsed.html,
     rawMarkdown,
@@ -104,30 +119,122 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ loaderData }) => {
     const title = loaderData?.post.title;
     const description = loaderData?.post.description;
-    const meta: Array<{ title: string } | { name: string; content: string }> = [
+    const slug = loaderData?.post.slug;
+    const ogImageUrl = loaderData?.post.ogImage ?? ogImage;
+    const ogImageAlt =
+      loaderData?.post.ogImageAlt ??
+      (title ? `${title} cover` : "inlang blog post");
+    const canonicalUrl = slug
+      ? `https://inlang.com/blog/${slug}`
+      : "https://inlang.com/blog";
+    const meta: Array<
+      | { title: string }
+      | { name: string; content: string }
+      | { property: string; content: string }
+    > = [
       { title: title ? `${title} | inlang Blog` : "Blog | inlang" },
+      { property: "og:url", content: canonicalUrl },
+      { property: "og:type", content: "article" },
+      { property: "og:site_name", content: "inlang" },
+      { property: "og:locale", content: "en_US" },
+      { property: "og:image", content: ogImageUrl },
+      { property: "og:image:width", content: String(ogImageWidth) },
+      { property: "og:image:height", content: String(ogImageHeight) },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ogImageUrl },
+      { name: "twitter:image:alt", content: ogImageAlt },
+      { name: "twitter:site", content: "@inlanghq" },
     ];
 
     if (description) {
       meta.push(
         { name: "description", content: description },
-        { name: "og:description", content: description },
+        { property: "og:description", content: description },
         { name: "twitter:description", content: description }
       );
     }
 
     if (title) {
       meta.push(
-        { name: "og:title", content: `${title} | inlang Blog` },
+        { property: "og:title", content: `${title} | inlang Blog` },
         { name: "twitter:title", content: `${title} | inlang Blog` }
       );
     }
 
-    meta.push({ name: "twitter:card", content: "summary_large_image" });
+    if (loaderData?.post.date) {
+      meta.push({
+        property: "article:published_time",
+        content: loaderData.post.date,
+      });
+    }
+
+    if (loaderData?.post.authors) {
+      loaderData.post.authors.forEach((author) => {
+        meta.push({
+          property: "article:author",
+          content: author.name,
+        });
+      });
+    }
 
     return {
       meta,
-      links: [{ rel: "stylesheet", href: markdownCss }],
+      links: [
+        { rel: "stylesheet", href: markdownCss },
+        { rel: "canonical", href: canonicalUrl },
+      ],
+      scripts: slug
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BlogPosting",
+                headline: title ?? slug,
+                description,
+                url: canonicalUrl,
+                image: ogImageUrl,
+                ...(loaderData?.post.date
+                  ? { datePublished: loaderData.post.date }
+                  : {}),
+                ...(loaderData?.post.authors
+                  ? {
+                      author: loaderData.post.authors.map((author) => ({
+                        "@type": "Person",
+                        name: author.name,
+                        ...(author.avatar ? { image: author.avatar } : {}),
+                        ...(author.twitter || author.github
+                          ? {
+                              sameAs: [author.twitter, author.github].filter(
+                                (value): value is string => Boolean(value)
+                              ),
+                            }
+                          : {}),
+                      })),
+                    }
+                  : {}),
+              }),
+            },
+            ...(loaderData?.post.authors
+              ? loaderData.post.authors.map((author) => ({
+                  type: "application/ld+json",
+                  children: JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "Person",
+                    name: author.name,
+                    ...(author.avatar ? { image: author.avatar } : {}),
+                    ...(author.twitter || author.github
+                      ? {
+                          sameAs: [author.twitter, author.github].filter(
+                            (value): value is string => Boolean(value)
+                          ),
+                        }
+                      : {}),
+                  }),
+                }))
+              : []),
+          ]
+        : [],
     };
   },
   component: BlogPostPage,

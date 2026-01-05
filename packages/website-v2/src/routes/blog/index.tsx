@@ -84,28 +84,50 @@ export const Route = createFileRoute("/blog/")({
     return await loadBlogIndex();
   },
   head: () => ({
+    links: [{ rel: "canonical", href: "https://inlang.com/blog" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          name: "Blog | inlang",
+          description:
+            "Insights on localization (i18n) and building the inlang ecosystem.",
+          url: "https://inlang.com/blog",
+        }),
+      },
+    ],
     meta: [
       { title: "Blog | inlang" },
       {
         name: "description",
         content:
-          "Thoughts on i18n, git-based architecture, and building developer tools for globalization.",
+          "Insights on localization (i18n) and building the inlang ecosystem.",
       },
-      { name: "og:title", content: "Blog | inlang" },
+      { property: "og:title", content: "Blog | inlang" },
       {
-        name: "og:description",
+        property: "og:description",
         content:
-          "Thoughts on i18n, git-based architecture, and building developer tools for globalization.",
+          "Insights on localization (i18n) and building the inlang ecosystem.",
       },
-      { name: "og:image", content: ogImage },
+      { property: "og:url", content: "https://inlang.com/blog" },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "inlang" },
+      { property: "og:locale", content: "en_US" },
+      { property: "og:image", content: ogImage },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: ogImage },
+      { name: "twitter:image:alt", content: "inlang blog" },
       { name: "twitter:title", content: "Blog | inlang" },
       {
         name: "twitter:description",
         content:
-          "Thoughts on i18n, git-based architecture, and building developer tools for globalization.",
+          "Insights on localization (i18n) and building the inlang ecosystem.",
       },
+      { name: "twitter:site", content: "@inlanghq" },
     ],
   }),
   component: BlogIndexPage,
