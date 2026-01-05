@@ -41,7 +41,7 @@ export default function MarketplacePage({
     const container = articleRef.current;
     if (!container) return;
     const elements = Array.from(
-      container.querySelectorAll("h1, h2, h3")
+      container.querySelectorAll("h1, h2")
     ) as HTMLElement[];
     const newHeadings = elements.map((element) => {
       const id = slugifyHeading(element.textContent || "");
