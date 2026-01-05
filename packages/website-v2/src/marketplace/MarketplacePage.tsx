@@ -757,13 +757,12 @@ function DocMeta({
           <CollapsibleSection title="Keywords">
             <div className="flex flex-wrap gap-2">
               {manifest.keywords.map((keyword) => (
-                <Link
+                <span
                   key={keyword}
-                  to={`/search?q=${encodeURIComponent(keyword)}`}
                   className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
                 >
                   {keyword}
-                </Link>
+                </span>
               ))}
             </div>
           </CollapsibleSection>

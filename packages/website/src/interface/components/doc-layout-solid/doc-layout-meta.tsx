@@ -242,12 +242,7 @@ const InlangDocMeta = (props: {
 				<div class="flex flex-wrap gap-2 items-center">
 					<For each={props?.manifest?.keywords}>
 						{(keyword) => (
-							<Link
-								class="transition-opacity hover:opacity-80 cursor-pointer"
-								href={"/search?q=" + keyword}
-							>
-								<Chip text={keyword} color={"#475569"} />
-							</Link>
+							<Chip text={keyword} color={"#475569"} />
 						)}
 					</For>
 				</div>

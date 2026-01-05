@@ -171,15 +171,10 @@ export default function Page(props: PageProps) {
 									<div class="flex flex-wrap gap-2 items-center">
 										<For each={props?.manifest?.keywords}>
 											{(keyword) => (
-												<Link
-													class="transition-opacity hover:opacity-80 cursor-pointer"
-													href={"/search?q=" + keyword}
-												>
-													<Chip
-														text={keyword}
-														color={colorForTypeOf(props.manifest.id)}
-													/>
-												</Link>
+												<Chip
+													text={keyword}
+													color={colorForTypeOf(props.manifest.id)}
+												/>
 											)}
 										</For>
 									</div>
