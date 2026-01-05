@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import MarketplacePage from "../../../../marketplace/MarketplacePage"
 import { loadMarketplacePage } from "../../../../marketplace/marketplaceData"
+import { buildMarketplaceTitle, extractOgMeta } from "../../../../marketplace/seo"
 
 export const Route = createFileRoute("/m/$uid/$slug/")({
   loader: async ({ params }) =>
@@ -21,9 +22,15 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     typeof data.manifest.description === "object"
       ? data.manifest.description.en
       : data.manifest.description
-  const pageTitle = `${displayName} | inlang`
+  const pageTitle = buildMarketplaceTitle({
+    displayName,
+    frontmatter: data.frontmatter,
+    pagePath: data.pagePath,
+    rawMarkdown: data.rawMarkdown,
+  })
   const metaDescription =
-    (data.pageData?.description as string | undefined) || description
+    (data.frontmatter?.description as string | undefined) || description
+  const ogMeta = extractOgMeta(data.frontmatter)
   const image =
     data.manifest.gallery && data.manifest.gallery.length > 0
       ? data.manifest.gallery[0]
@@ -33,6 +40,8 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     meta: [
       { title: pageTitle },
       { name: "description", content: metaDescription },
+      { name: "og:title", content: pageTitle },
+      { name: "og:description", content: metaDescription },
       { name: "og:image", content: image },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: image },
@@ -44,6 +53,7 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
       { name: "twitter:description", content: metaDescription },
       { name: "twitter:site", content: "@inlanghq" },
       { name: "twitter:creator", content: "@inlanghq" },
+      ...ogMeta,
     ],
   }
 }

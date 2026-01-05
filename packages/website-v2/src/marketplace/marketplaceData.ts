@@ -13,7 +13,7 @@ const repositoryRoot = import.meta.url.slice(
 export type MarketplacePageData = {
   markdown: string;
   rawMarkdown: string;
-  pageData?: Record<string, unknown>;
+  frontmatter?: Record<string, unknown>;
   pagePath: string;
   manifest: MarketplaceManifest & { uniqueID: string };
   recommends?: MarketplaceManifest[];
@@ -70,7 +70,7 @@ export async function loadMarketplacePage({
   const flatPages = item.pages ? flattenPages(item.pages) : undefined;
   let renderedMarkdown: string | undefined;
   let rawMarkdownContent: string | undefined;
-  let pageData: Record<string, unknown> | undefined;
+  let frontmatter: Record<string, unknown> | undefined;
   let imports: string[] | undefined;
 
   if (flatPages) {
@@ -94,7 +94,7 @@ export async function loadMarketplacePage({
     rawMarkdownContent = content;
     const markdown = await parse(content);
     renderedMarkdown = markdown.html;
-    pageData = markdown.frontmatter;
+    frontmatter = markdown.frontmatter;
     imports = markdown.frontmatter?.imports as string[] | undefined;
   } else if (item.readme) {
     const readme =
@@ -105,7 +105,7 @@ export async function loadMarketplacePage({
       rawMarkdownContent = content;
       const markdown = await parse(content);
       renderedMarkdown = markdown.html;
-      pageData = markdown.frontmatter;
+      frontmatter = markdown.frontmatter;
       imports = markdown.frontmatter?.imports as string[] | undefined;
     } catch (error) {
       throw redirect({ to: "/not-found" });
@@ -130,7 +130,7 @@ export async function loadMarketplacePage({
   return {
     markdown: renderedMarkdown,
     rawMarkdown: rawMarkdownContent || "",
-    pageData,
+    frontmatter,
     pagePath,
     manifest: item,
     recommends,
