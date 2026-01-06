@@ -11,25 +11,26 @@ type Author = {
 const ogImage =
   "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
-const loadBlogIndex = createServerFn({ method: "GET" }).handler(async () => {
-  const fs = await import("node:fs/promises");
-  const repositoryRoot = import.meta.url.slice(
-    0,
-    import.meta.url.lastIndexOf("inlang/packages")
-  );
-  const blogDir = repositoryRoot + "inlang/blog/";
+const blogMarkdownFiles = import.meta.glob("../../../../../blog/**/*.md", {
+  query: "?raw",
+  import: "default",
+});
+const blogJsonFiles = import.meta.glob("../../../../../blog/*.json", {
+  query: "?raw",
+  import: "default",
+});
+const blogRootPrefix = "../../../../../blog/";
 
+const loadBlogIndex = createServerFn({ method: "GET" }).handler(async () => {
   // Load authors
-  const authorsPath = blogDir + "authors.json";
-  const authorsContent = await fs.readFile(new URL(authorsPath), "utf-8");
+  const authorsContent = await getBlogJson("authors.json");
   const authorsMap = JSON.parse(authorsContent) as Record<
     string,
     { name: string; avatar?: string | null }
   >;
 
   // Load table of contents
-  const tocPath = blogDir + "table_of_contents.json";
-  const tocContent = await fs.readFile(new URL(tocPath), "utf-8");
+  const tocContent = await getBlogJson("table_of_contents.json");
   const toc = JSON.parse(tocContent) as Array<{
     path: string;
     slug: string;
@@ -42,8 +43,7 @@ const loadBlogIndex = createServerFn({ method: "GET" }).handler(async () => {
       const relativePath = item.path.startsWith("./")
         ? item.path.slice(2)
         : item.path;
-      const markdownPath = blogDir + relativePath;
-      const rawMarkdown = await fs.readFile(new URL(markdownPath), "utf-8");
+      const rawMarkdown = await getBlogMarkdown(relativePath);
       const parsed = await parse(rawMarkdown);
       const title = getBlogTitle({
         rawMarkdown,
@@ -201,4 +201,21 @@ function formatDate(dateString: string): string {
   } catch {
     return dateString;
   }
+}
+
+function getBlogJson(filename: string): Promise<string> {
+  const loader = blogJsonFiles[`${blogRootPrefix}${filename}`];
+  if (!loader) {
+    throw new Error(`Missing blog file: ${filename}`);
+  }
+  return loader();
+}
+
+function getBlogMarkdown(relativePath: string): Promise<string> {
+  const normalized = relativePath.replace(/^[./]+/, "");
+  const loader = blogMarkdownFiles[`${blogRootPrefix}${normalized}`];
+  if (!loader) {
+    throw new Error(`Missing blog markdown: ${relativePath}`);
+  }
+  return loader();
 }

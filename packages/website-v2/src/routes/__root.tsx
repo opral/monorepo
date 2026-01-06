@@ -59,6 +59,7 @@ export const Route = createRootRoute({
   }),
 
   shellComponent: RootDocument,
+  notFoundComponent: NotFoundPage,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -74,5 +75,24 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  )
+}
+
+function NotFoundPage() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center px-6">
+      <div className="text-center">
+        <p className="text-6xl font-semibold tracking-tight text-slate-900">
+          404
+        </p>
+        <p className="mt-3 text-xl text-slate-600">Not found</p>
+        <a
+          className="mt-4 inline-block text-sm font-medium text-[#3451b2] transition-colors hover:text-[#3a5ccc]"
+          href="/"
+        >
+          &lt;- Back to homepage
+        </a>
+      </div>
+    </div>
   )
 }

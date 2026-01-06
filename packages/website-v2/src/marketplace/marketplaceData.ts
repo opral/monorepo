@@ -2,13 +2,16 @@ import { parse } from "@opral/markdown-wc";
 import { registry } from "@inlang/marketplace-registry";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import { redirect } from "@tanstack/react-router";
-import fs from "node:fs/promises";
 import { getLegacyRedirect } from "./legacyRedirects";
 
-const repositoryRoot = import.meta.url.slice(
-  0,
-  import.meta.url.lastIndexOf("inlang/packages")
+const localMarketplaceFiles = import.meta.glob(
+  "../../../../packages/**/*.{md,html}",
+  {
+    query: "?raw",
+    import: "default",
+  }
 );
+const marketplaceRootPrefix = "../../../../";
 
 export type MarketplacePageData = {
   markdown: string;
@@ -165,7 +168,7 @@ function getRedirectPath(path: string, from: string, to: string) {
 const getContentString = (path: string) =>
   path.includes("http")
     ? fetch(path).then((res) => res.text())
-    : fs.readFile(new URL(path, repositoryRoot)).then((res) => res.toString());
+    : loadLocalMarketplaceFile(path);
 
 async function fileExists(path: string): Promise<boolean> {
   try {
@@ -173,9 +176,22 @@ async function fileExists(path: string): Promise<boolean> {
       const response = await fetch(path, { method: "HEAD" });
       return response.ok;
     }
-    await fs.access(new URL(path, repositoryRoot));
-    return true;
+    return Boolean(getMarketplaceFileLoader(path));
   } catch (error) {
     return false;
   }
+}
+
+function getMarketplaceFileLoader(path: string) {
+  const normalized = path.replace(/^[./]+/, "");
+  const key = `${marketplaceRootPrefix}${normalized}`;
+  return localMarketplaceFiles[key];
+}
+
+async function loadLocalMarketplaceFile(path: string): Promise<string> {
+  const loader = getMarketplaceFileLoader(path);
+  if (!loader) {
+    throw new Error(`Missing marketplace file: ${path}`);
+  }
+  return await loader();
 }

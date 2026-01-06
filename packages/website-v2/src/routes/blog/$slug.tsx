@@ -11,6 +11,16 @@ const ogImage =
 const ogImageWidth = 1200;
 const ogImageHeight = 630;
 
+const blogMarkdownFiles = import.meta.glob("../../../../../blog/**/*.md", {
+  query: "?raw",
+  import: "default",
+});
+const blogJsonFiles = import.meta.glob("../../../../../blog/*.json", {
+  query: "?raw",
+  import: "default",
+});
+const blogRootPrefix = "../../../../../blog/";
+
 type Author = {
   name: string;
   role?: string;
@@ -32,21 +42,12 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
     throw new Error("Missing blog slug");
   }
 
-  const fs = await import("node:fs/promises");
-  const repositoryRoot = import.meta.url.slice(
-    0,
-    import.meta.url.lastIndexOf("inlang/packages")
-  );
-  const blogDir = repositoryRoot + "inlang/blog/";
-
   // Load authors
-  const authorsPath = blogDir + "authors.json";
-  const authorsContent = await fs.readFile(new URL(authorsPath), "utf-8");
+  const authorsContent = await getBlogJson("authors.json");
   const authorsMap = JSON.parse(authorsContent) as Record<string, Author>;
 
   // Load table of contents
-  const tocPath = blogDir + "table_of_contents.json";
-  const tocContent = await fs.readFile(new URL(tocPath), "utf-8");
+  const tocContent = await getBlogJson("table_of_contents.json");
   const toc = JSON.parse(tocContent) as Array<{
     path: string;
     slug: string;
@@ -80,8 +81,7 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
     const relPath = postEntry.path.startsWith("./")
       ? postEntry.path.slice(2)
       : postEntry.path;
-    const mdPath = blogDir + relPath;
-    const md = await fs.readFile(new URL(mdPath), "utf-8");
+    const md = await getBlogMarkdown(relPath);
     const parsedMd = await parse(md);
     return (
       getBlogTitle({ rawMarkdown: md, frontmatter: parsedMd.frontmatter }) ??
@@ -105,8 +105,7 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
   const relativePath = entry.path.startsWith("./")
     ? entry.path.slice(2)
     : entry.path;
-  const markdownPath = blogDir + relativePath;
-  const rawMarkdown = await fs.readFile(new URL(markdownPath), "utf-8");
+  const rawMarkdown = await getBlogMarkdown(relativePath);
   const parsed = await parse(rawMarkdown, {
     assetBaseUrl: `/blog/${slug}/`,
   });
@@ -490,6 +489,23 @@ function BlogPostPage() {
       </div>
     </main>
   );
+}
+
+function getBlogJson(filename: string): Promise<string> {
+  const loader = blogJsonFiles[`${blogRootPrefix}${filename}`];
+  if (!loader) {
+    throw new Error(`Missing blog file: ${filename}`);
+  }
+  return loader();
+}
+
+function getBlogMarkdown(relativePath: string): Promise<string> {
+  const normalized = relativePath.replace(/^[./]+/, "");
+  const loader = blogMarkdownFiles[`${blogRootPrefix}${normalized}`];
+  if (!loader) {
+    throw new Error(`Missing blog markdown: ${relativePath}`);
+  }
+  return loader();
 }
 
 function formatDate(dateString: string): string {
