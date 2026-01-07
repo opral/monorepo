@@ -67,7 +67,6 @@ export default function MarketplacePage({
       if (headingElements.length === 0) return;
 
       // Find the heading that's closest to the top of the viewport (but above center)
-      const scrollTop = window.scrollY;
       const viewportHeight = window.innerHeight;
       const offset = 100; // Account for sticky header
 
@@ -867,14 +866,6 @@ function RecommendationCard({
   );
 }
 
-function typeOfIdToTitle(id: string) {
-  if (id.includes("plugin.")) return "Plugin";
-  if (id.includes("messageLintRule.")) return "Lint Rule";
-  if (id.includes("library.")) return "Library";
-  if (id.includes("app.")) return "App";
-  return "Product";
-}
-
 function slugifyHeading(value: string) {
   return value
     .toLowerCase()
@@ -965,24 +956,6 @@ function getGithubLink(
     "./",
     ""
   )}`;
-}
-
-function flattenPages(
-  pages: Record<string, string> | Record<string, Record<string, string>>
-) {
-  const flatPages: Record<string, string> = {};
-  for (const [key, value] of Object.entries(pages)) {
-    if (typeof value === "string") {
-      flatPages[key] = value;
-    } else {
-      for (const [subKey, subValue] of Object.entries(
-        value as Record<string, string>
-      )) {
-        flatPages[subKey] = subValue;
-      }
-    }
-  }
-  return flatPages;
 }
 
 function PageNavigation({

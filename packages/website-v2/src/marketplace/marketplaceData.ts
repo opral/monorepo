@@ -4,7 +4,7 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import { redirect } from "@tanstack/react-router";
 import { getLegacyRedirect } from "./legacyRedirects";
 
-const localMarketplaceFiles = import.meta.glob(
+const localMarketplaceFiles = import.meta.glob<string>(
   "../../../../packages/**/*.{md,html}",
   {
     query: "?raw",
@@ -16,7 +16,7 @@ const marketplaceRootPrefix = "../../../../";
 export type MarketplacePageData = {
   markdown: string;
   rawMarkdown: string;
-  frontmatter?: Record<string, unknown>;
+  frontmatter?: Record<string, {}>;
   pagePath: string;
   manifest: MarketplaceManifest & { uniqueID: string };
   recommends?: MarketplaceManifest[];
@@ -73,7 +73,7 @@ export async function loadMarketplacePage({
   const flatPages = item.pages ? flattenPages(item.pages) : undefined;
   let renderedMarkdown: string | undefined;
   let rawMarkdownContent: string | undefined;
-  let frontmatter: Record<string, unknown> | undefined;
+  let frontmatter: Record<string, {}> | undefined;
   let imports: string[] | undefined;
 
   if (flatPages) {
@@ -97,7 +97,7 @@ export async function loadMarketplacePage({
     rawMarkdownContent = content;
     const markdown = await parse(content);
     renderedMarkdown = markdown.html;
-    frontmatter = markdown.frontmatter;
+    frontmatter = markdown.frontmatter as Record<string, {}> | undefined;
     imports = markdown.frontmatter?.imports as string[] | undefined;
   } else if (item.readme) {
     const readme =
@@ -108,9 +108,9 @@ export async function loadMarketplacePage({
       rawMarkdownContent = content;
       const markdown = await parse(content);
       renderedMarkdown = markdown.html;
-      frontmatter = markdown.frontmatter;
+      frontmatter = markdown.frontmatter as Record<string, {}> | undefined;
       imports = markdown.frontmatter?.imports as string[] | undefined;
-    } catch (error) {
+    } catch {
       throw redirect({ to: "/not-found" });
     }
   } else {
@@ -145,11 +145,15 @@ function flattenPages(
   pages: Record<string, string> | Record<string, Record<string, string>>
 ) {
   const flatPages: Record<string, string> = {};
-  for (const [key, value] of Object.entries(pages)) {
+  for (const [key, value] of Object.entries(pages) as Array<
+    [string, string | Record<string, string>]
+  >) {
     if (typeof value === "string") {
       flatPages[key] = value;
     } else {
-      for (const [subKey, subValue] of Object.entries(value)) {
+      for (const [subKey, subValue] of Object.entries(value) as Array<
+        [string, string]
+      >) {
         flatPages[subKey] = subValue;
       }
     }
@@ -165,7 +169,7 @@ function getRedirectPath(path: string, from: string, to: string) {
   return undefined;
 }
 
-const getContentString = (path: string) =>
+const getContentString = (path: string): Promise<string> =>
   path.includes("http")
     ? fetch(path).then((res) => res.text())
     : loadLocalMarketplaceFile(path);
@@ -177,12 +181,14 @@ async function fileExists(path: string): Promise<boolean> {
       return response.ok;
     }
     return Boolean(getMarketplaceFileLoader(path));
-  } catch (error) {
+  } catch {
     return false;
   }
 }
 
-function getMarketplaceFileLoader(path: string) {
+function getMarketplaceFileLoader(
+  path: string
+): (() => Promise<string>) | undefined {
   const normalized = path.replace(/^[./]+/, "");
   const key = `${marketplaceRootPrefix}${normalized}`;
   return localMarketplaceFiles[key];

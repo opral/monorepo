@@ -55,7 +55,9 @@ function getMarketplaceStaticPages() {
     if (!entry.pages) continue;
     const flatPages = flattenPages(entry.pages);
 
-    for (const [route, path] of Object.entries(flatPages)) {
+    for (const [route, path] of Object.entries(flatPages) as Array<
+      [string, string]
+    >) {
       if (!path || !isMarkdownPath(path)) continue;
       const normalized = route.startsWith("/") ? route : `/${route}`;
       const fullPath = `${basePath}${normalized === "/" ? "" : normalized}`;
@@ -70,11 +72,15 @@ function flattenPages(
   pages: Record<string, string> | Record<string, Record<string, string>>
 ) {
   const flatPages: Record<string, string> = {};
-  for (const [key, value] of Object.entries(pages)) {
+  for (const [key, value] of Object.entries(pages) as Array<
+    [string, string | Record<string, string>]
+  >) {
     if (typeof value === "string") {
       flatPages[key] = value;
     } else {
-      for (const [subKey, subValue] of Object.entries(value)) {
+      for (const [subKey, subValue] of Object.entries(value) as Array<
+        [string, string]
+      >) {
         flatPages[subKey] = subValue;
       }
     }

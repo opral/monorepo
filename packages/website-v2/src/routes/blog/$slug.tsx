@@ -11,11 +11,14 @@ const ogImage =
 const ogImageWidth = 1200;
 const ogImageHeight = 630;
 
-const blogMarkdownFiles = import.meta.glob("../../../../../blog/**/*.md", {
-  query: "?raw",
-  import: "default",
-});
-const blogJsonFiles = import.meta.glob("../../../../../blog/*.json", {
+const blogMarkdownFiles = import.meta.glob<string>(
+  "../../../../../blog/**/*.md",
+  {
+    query: "?raw",
+    import: "default",
+  }
+);
+const blogJsonFiles = import.meta.glob<string>("../../../../../blog/*.json", {
   query: "?raw",
   import: "default",
 });

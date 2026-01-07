@@ -26,6 +26,9 @@ export const Route = createFileRoute("/m/$uid/")({
       : item.id.replaceAll(".", "-")
 
     // Redirect to the full URL with the slug
-    throw redirect({ to: `/m/${item.uniqueID}/${canonicalSlug}` })
+    throw redirect({
+      to: "/m/$uid/$slug",
+      params: { uid: item.uniqueID, slug: canonicalSlug },
+    })
   },
 })

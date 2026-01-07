@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import type { ComponentType, ReactNode } from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { type Components } from 'react-markdown'
 import { registry } from '@inlang/marketplace-registry'
 import landingMarkdown from '../content/landingpage.md?raw'
 
@@ -123,7 +122,8 @@ function App() {
               return (
                 <Link
                   key={manifest.id}
-                  to={`/m/${manifest.uniqueID}/${slug}`}
+                  to="/m/$uid/$slug"
+                  params={{ uid: manifest.uniqueID, slug }}
                   className="border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all bg-white"
                 >
                   <div className="flex items-start gap-3">
@@ -170,27 +170,27 @@ function App() {
   )
 }
 
-const markdownComponents = {
-  h2: ({ children }: { children: ReactNode }) => (
+const markdownComponents: Components = {
+  h2: ({ children }) => (
     <h2 className="text-2xl font-semibold tracking-tight mt-10 mb-4">
       {children}
     </h2>
   ),
-  h3: ({ children }: { children: ReactNode }) => (
+  h3: ({ children }) => (
     <h3 className="text-xl font-semibold tracking-tight mt-8 mb-3">
       {children}
     </h3>
   ),
-  p: ({ children }: { children: ReactNode }) => (
+  p: ({ children }) => (
     <p className="text-slate-700 leading-relaxed mb-4">{children}</p>
   ),
-  ul: ({ children }: { children: ReactNode }) => (
+  ul: ({ children }) => (
     <ul className="list-disc pl-6 text-slate-700 mb-4">{children}</ul>
   ),
-  li: ({ children }: { children: ReactNode }) => (
+  li: ({ children }) => (
     <li className="mb-2">{children}</li>
   ),
-  a: ({ children, href }: { children: ReactNode; href?: string }) => (
+  a: ({ children, href }) => (
     <a
       href={href}
       className="text-slate-900 underline underline-offset-2 hover:text-slate-700"
@@ -198,11 +198,11 @@ const markdownComponents = {
       {children}
     </a>
   ),
-  img: ({ alt, src }: { alt?: string; src?: string }) => (
+  img: ({ alt, src }) => (
     <img
       src={src}
       alt={alt || ''}
       className="w-full rounded-xl border border-slate-200 my-6"
     />
   ),
-} satisfies Record<string, ComponentType<any>>
+}

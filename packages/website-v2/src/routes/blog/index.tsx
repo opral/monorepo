@@ -11,11 +11,14 @@ type Author = {
 const ogImage =
   "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
-const blogMarkdownFiles = import.meta.glob("../../../../../blog/**/*.md", {
-  query: "?raw",
-  import: "default",
-});
-const blogJsonFiles = import.meta.glob("../../../../../blog/*.json", {
+const blogMarkdownFiles = import.meta.glob<string>(
+  "../../../../../blog/**/*.md",
+  {
+    query: "?raw",
+    import: "default",
+  }
+);
+const blogJsonFiles = import.meta.glob<string>("../../../../../blog/*.json", {
   query: "?raw",
   import: "default",
 });

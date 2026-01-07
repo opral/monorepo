@@ -111,14 +111,14 @@ function AppCard({ item }: { item: (typeof registry)[number] }) {
       ? item.description.en
       : item.description
   const slug = item.id.replaceAll('.', '-')
-  const itemType = item.id.split('.')[0]
   const isExternal = item.keywords
     ?.map((k) => k.toLowerCase())
     .includes('external')
 
   return (
     <Link
-      to={`/m/${item.uniqueID}/${slug}`}
+      to="/m/$uid/$slug"
+      params={{ uid: item.uniqueID, slug }}
       className="group flex flex-col rounded-xl border border-slate-200 bg-white transition-all hover:border-slate-300 hover:shadow-md"
     >
       {/* Icon */}
@@ -206,4 +206,3 @@ function BuildYourOwnCard() {
     </a>
   )
 }
-

@@ -18,8 +18,13 @@ export const Route = createFileRoute("/m/$uid/$slug/")({
       uid: params.uid,
       slug: params.slug,
     }),
-  head: ({ loaderData }) => buildMarketplaceHead(loaderData),
-  component: () => <MarketplacePage data={Route.useLoaderData()} />,
+  head: ({ loaderData }) =>
+    loaderData ? buildMarketplaceHead(loaderData) : {},
+  component: () => {
+    const data = Route.useLoaderData();
+    if (!data) return null;
+    return <MarketplacePage data={data} />;
+  },
 })
 
 function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePage>>) {

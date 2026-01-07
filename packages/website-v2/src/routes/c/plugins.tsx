@@ -115,7 +115,8 @@ function PluginCard({ item }: { item: (typeof registry)[number] }) {
 
   return (
     <Link
-      to={`/m/${item.uniqueID}/${slug}`}
+      to="/m/$uid/$slug"
+      params={{ uid: item.uniqueID, slug }}
       className="group flex flex-col rounded-xl border border-slate-200 bg-white transition-all hover:border-slate-300 hover:shadow-md"
     >
       {/* Icon */}
@@ -196,4 +197,3 @@ function BuildYourOwnCard() {
     </a>
   )
 }
-
