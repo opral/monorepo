@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-
-// GitHub stars - the inlang repo
-const GITHUB_REPO = "opral/inlang";
+import { getGithubStars } from "../github-stars-cache";
 
 const ecosystemLinks = [
   {
@@ -64,25 +62,7 @@ const ecosystemLinks = [
 export default function Header() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [githubStars, setGithubStars] = useState<number | null>(null);
-
-  useEffect(() => {
-    // Fetch GitHub stars for the main monorepo
-    const fetchStars = async () => {
-      try {
-        const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.stargazers_count) {
-            setGithubStars(data.stargazers_count);
-          }
-        }
-      } catch {
-        // Silently fail - stars just won't show
-      }
-    };
-    fetchStars();
-  }, []);
+  const githubStars = getGithubStars("opral/inlang");
 
   const formatStars = (count: number) => {
     if (count >= 1000) {

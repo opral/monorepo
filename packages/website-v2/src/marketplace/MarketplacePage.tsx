@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import type { MarketplacePageData } from "./marketplaceData";
 import "../components/markdown-interactive";
+import { getGithubStars } from "../github-stars-cache";
 
 type Heading = { id: string; text: string; level: number };
 
@@ -597,27 +598,8 @@ function DocMeta({
       ? manifest.displayName.en
       : manifest.displayName;
 
-  // GitHub stars state
-  const [starCount, setStarCount] = useState<number | null>(null);
   const repository = (manifest as { repository?: string }).repository;
-
-  // Fetch star count from GitHub API
-  useEffect(() => {
-    if (!repository) return;
-    const match = repository.match(/github\.com\/([^/]+)\/([^/]+)/);
-    if (!match) return;
-    const owner = match[1];
-    const repo = match[2].replace(/\.git$/, "");
-
-    fetch(`https://api.github.com/repos/${owner}/${repo}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.stargazers_count) {
-          setStarCount(data.stargazers_count);
-        }
-      })
-      .catch(() => {});
-  }, [repository]);
+  const starCount = repository ? getGithubStars(repository) : null;
 
   // Format star count (e.g., 1234 -> "1.2k")
   const formatStars = (count: number) => {
