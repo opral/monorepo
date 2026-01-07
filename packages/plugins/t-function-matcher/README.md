@@ -1,32 +1,50 @@
-### Introduction
+---
+title: t Function Matcher - i18n Integration for Sherlock
+description: Enable inline translation previews and linting for t() function calls in VS Code with Sherlock. Works with i18next, react-i18next, and most i18n libraries.
+og:image: https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/assets/sherlock-preview.svg
+---
 
-This plugin provides the integration of `t-functions` into the inlang Visual Studio Code extension (Sherlock). It allows you to extract messages from your code, view them inline in the text editor and get lints for your messages.
+# t Function Matcher for Sherlock
 
-Match examples:
-```ts
-t('name')
-```
-```ts
-t('start-page:title')
-```
+This plugin enables [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) (VS Code extension) to recognize `t("key")` function calls used by most i18n libraries.
 
-### Usage
+![Sherlock inline preview](https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/assets/sherlock-preview.svg)
 
-The plugin will automatically extract messages from your code and show them inline in the editor. You can then click on the message to open the web editor and translate the message.
+## What it does
 
-1. Install the [Visual Studio Code extension (Sherlock)](https://inlang.com/m/r7kp499g)
-2. Install this plugin
-3. ✨ See your messages appear inline in the editor
+- **Inline previews**: See translations directly in your code editor
+- **Message extraction**: Extract hardcoded strings into messages
+- **Linting**: Get warnings for missing or invalid message references
 
-> There might be a delay before the messages appear in the editor. This is because the plugin needs to be downloaded first. If you want to make sure that everything is setup correctly, reload your workspace.
+## Supported file types
 
-### Manual installation
+- TypeScript (`.ts`, `.tsx`)
+- JavaScript (`.js`, `.jsx`)
+- Svelte (`.svelte`)
+- Vue (`.vue`)
+- Astro (`.astro`)
 
-```diff
-// project.inlang/settings.json
+## Installation
+
+Add the plugin to your `project.inlang/settings.json`:
+
+```json
 {
-  "modules" : [
-+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/dist/index.js"
+  "modules": [
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/dist/index.js"
   ]
 }
 ```
+
+Then install [Sherlock](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) from the VS Code marketplace.
+
+## Matched patterns
+
+The plugin recognizes these patterns:
+
+| Pattern | Example |
+|---------|---------|
+| Simple call | `t("welcome")` |
+| With variables | `t("greeting", { name: "World" })` |
+| With namespace | `t("common:button")` |
+| In JSX | `{t("label")}` |

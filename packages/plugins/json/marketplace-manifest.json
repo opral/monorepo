@@ -3,10 +3,14 @@
 	"id": "plugin.inlang.json",
 	"icon": "./assets/icon.png",
 	"displayName": {
-		"en": "JSON translation files"
+		"en": "JSON translation files (Deprecated)"
 	},
 	"description": {
-		"en": "This plugin enables using JSON files for messages. It is not library specific and can be used with any framework."
+		"en": "Deprecated: Use the inlang message format plugin instead. This plugin enables using JSON files for messages."
+	},
+	"deprecated": {
+		"reason": "Use the inlang message format plugin instead.",
+		"replacement": "plugin.inlang.messageFormat"
 	},
 	"pages": {
 		"/": "./README.md",
