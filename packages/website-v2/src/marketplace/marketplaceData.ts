@@ -134,6 +134,10 @@ export async function loadMarketplacePage({
     extractHeadingsAndInjectIds(renderedMarkdown);
   const { prevRoute, nextRoute } = getMarketplacePageNeighbors(item, pagePath);
   const basePath = itemPath;
+  const buildNeighborPath = (route?: string) => {
+    if (!route) return undefined;
+    return route === "/" ? basePath : `${basePath}${route}`;
+  };
 
   const recommends = item.recommends
     ? registry.filter((entry: any) =>
@@ -153,8 +157,8 @@ export async function loadMarketplacePage({
     recommends,
     imports,
     headings,
-    prevPagePath: prevRoute ? `${basePath}${prevRoute}` : undefined,
-    nextPagePath: nextRoute ? `${basePath}${nextRoute}` : undefined,
+    prevPagePath: buildNeighborPath(prevRoute),
+    nextPagePath: buildNeighborPath(nextRoute),
   };
 }
 
