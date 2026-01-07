@@ -4,7 +4,6 @@ import {
 	ValueListNode,
 	ValueNode,
 	ValuesNode,
-	ParseJSONResultsPlugin,
 	type KyselyPlugin,
 	type PluginTransformQueryArgs,
 	type PluginTransformResultArgs,
@@ -17,7 +16,6 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export class JsonbPlugin implements KyselyPlugin {
 	#serializeJsonTransformer = new SerializeJsonbTransformer();
-	#parseJsonPlugin = new ParseJSONResultsPlugin();
 	#database: SqliteWasmDatabase;
 
 	constructor(args: { database: SqliteWasmDatabase }) {
@@ -49,27 +47,94 @@ export class JsonbPlugin implements KyselyPlugin {
 	): Promise<QueryResult<UnknownRow>> {
 		for (const row of args.result.rows) {
 			for (const key in row) {
-				if (
-					row[key] instanceof ArrayBuffer ||
-					// uint8array, etc
-					ArrayBuffer.isView(row[key])
-				) {
+				const value = row[key];
+				// Always try to decode JSONB binary payloads.
+				if (value instanceof ArrayBuffer || ArrayBuffer.isView(value)) {
 					try {
 						const res = this.#database.exec(`SELECT json(?)`, {
 							returnValue: "resultRows",
-							bind: [row[key] as any],
+							bind: [value as any],
 						});
 
 						row[key] = JSON.parse(res[0] as any);
 					} catch {
 						// it's not a json binary
 					}
+					continue;
+				}
+
+				// Only parse JSON text for known JSON columns to avoid
+				// coercing nested string values that look like JSON.
+				if (JSON_COLUMNS.has(key) && typeof value === "string") {
+					try {
+						row[key] = JSON.parse(value);
+					} catch {
+						// leave as-is if parsing fails
+					}
+				}
+
+				if (key === "messages" && Array.isArray(row[key])) {
+					row[key] = normalizeMessages(row[key]);
+				} else if (key === "variants" && Array.isArray(row[key])) {
+					row[key] = normalizeVariants(row[key]);
 				}
 			}
 		}
-		// in case it's a regular (text) json, run it through kyseley's json parser
-		return this.#parseJsonPlugin.transformResult(args);
+		return args.result;
 	}
+}
+
+const JSON_COLUMNS = new Set([
+	"declarations",
+	"selectors",
+	"matches",
+	"pattern",
+	// jsonArrayFrom results in nested bundle queries
+	"messages",
+	"variants",
+]);
+
+function parseJsonIfString<T>(value: T): T | unknown {
+	if (typeof value !== "string") {
+		return value;
+	}
+	try {
+		return JSON.parse(value);
+	} catch {
+		return value;
+	}
+}
+
+function normalizeVariants(variants: any[]) {
+	return variants.map((variant) => {
+		if (variant && typeof variant === "object") {
+			return {
+				...variant,
+				matches: parseJsonIfString(variant.matches),
+				pattern: parseJsonIfString(variant.pattern),
+			};
+		}
+		return variant;
+	});
+}
+
+function normalizeMessages(messages: any[]) {
+	return messages.map((message) => {
+		if (message && typeof message === "object") {
+			const rawVariants = Array.isArray(message.variants)
+				? message.variants
+				: parseJsonIfString(message.variants);
+			const normalizedVariants = Array.isArray(rawVariants)
+				? normalizeVariants(rawVariants)
+				: rawVariants;
+			return {
+				...message,
+				selectors: parseJsonIfString(message.selectors),
+				variants: normalizedVariants,
+			};
+		}
+		return message;
+	});
 }
 
 class SerializeJsonbTransformer extends OperationNodeTransformer {
