@@ -1,4 +1,8 @@
-![inlang CLI terminal showing machine translate and validate commands](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/cli-banner.svg)
+---
+title: inlang CLI - Localization Automation for CI/CD
+description: Automate translation workflows with machine translation, validation, and CI/CD integration. Supports JSON, i18next, next-intl, and more.
+og:image: https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/cli-banner.svg
+---
 
 # @inlang/cli
 
@@ -7,6 +11,8 @@ Automate localization tasks in your CI/CD pipeline.
 ```bash
 npx @inlang/cli [command]
 ```
+
+![inlang CLI terminal showing machine translate and validate commands](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/cli-banner.svg)
 
 ## Features
 
@@ -154,34 +160,7 @@ The machine command is used to automate localization processes.
 
 The translate command machine translates all resources.
 
-Before running the command, export your Google Cloud translation token as
-`INLANG_GOOGLE_TRANSLATE_API_KEY`:
-
-```sh
-export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
-```
-
-Set it in your shell profile or CI secret store so every run can reuse it.
-
-To create the API key, follow the [Cloud Translation setup guide](https://cloud.google.com/translate/docs/setup)
-and choose the **Cloud Translation Basic** edition (the CLI uses the v2 REST API).
-High-level steps:
-
-1. Create or select a Google Cloud project.
-2. Enable the **Cloud Translation API (Basic)** for the project.
-3. Generate a credential of type **API key** under _APIs & Services → Credentials_.
-4. Copy the key and expose it as `INLANG_GOOGLE_TRANSLATE_API_KEY` env variable.
-
-**Migration**
-
-```sh
-# Before
-npx @inlang/cli machine translate --project ./project.inlang
-
-# After
-export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
-npx @inlang/cli machine translate --project ./project.inlang
-```
+By default, the CLI uses inlang's free translation service. For higher reliability and control, you can [bring your own Google Translate API key](https://inlang.com/m/2qj2w8pu/app-inlang-cli/byok).
 
 To initiate machine translation, run the following command:
 

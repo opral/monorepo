@@ -2,20 +2,16 @@
   "$schema": "https://inlang.com/schema/marketplace-manifest",
   "id": "app.inlang.cli",
   "icon": "./assets/cli-icon.png",
-  "gallery": [
-    "./assets/marketplace/cli-marketplace-cover.jpg",
-    "./assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
-    "./assets/marketplace/cli-gallery/cli-gallery-image-2.jpg",
-    "./assets/marketplace/cli-gallery/cli-gallery-image-3.jpg"
-  ],
+  "gallery": ["./assets/cli-banner.svg"],
   "displayName": {
-    "en": "CLI - Translation Automation"
+    "en": "inlang CLI"
   },
   "description": {
-    "en": "Command line interface for inlang projects. Many commands and the possibility to do translation automation."
+    "en": "Automate localization tasks in CI/CD pipelines with machine translation, validation, and plugin support for JSON, i18next, next-intl, and more."
   },
   "pages": {
     "/": "./README.md",
+    "/byok": "./docs/byok.md",
     "/changelog": "./CHANGELOG.md"
   },
   "keywords": [

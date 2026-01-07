@@ -84,6 +84,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
         [
           "Using inlang's free machine translate service.",
           "Provide your own INLANG_GOOGLE_TRANSLATE_API_KEY for higher reliability and control.",
+          "See https://inlang.com/m/2qj2w8pu/app-inlang-cli/byok",
         ].join("\n")
       );
     }
