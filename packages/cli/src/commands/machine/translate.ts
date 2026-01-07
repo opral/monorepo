@@ -74,11 +74,10 @@ export async function translateCommandAction(args: { project: InlangProject }) {
     const useRpcFallback = !googleApiKey;
 
     if (useRpcFallback) {
-      log.warn(
+      log.info(
         [
-          "No INLANG_GOOGLE_TRANSLATE_API_KEY detected.",
-          "Falling back to the inlang RPC translation service.",
-          "BYOK will soon be required. The machine translate command can fail at any time without your own API key.",
+          "Using inlang's free machine translate service.",
+          "Provide your own INLANG_GOOGLE_TRANSLATE_API_KEY for higher reliability and control.",
         ].join("\n")
       );
     }
@@ -119,7 +118,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
         errors.push(bundle.error);
         continue;
       } else if (bundle.data) {
-        await upsertBundleNested(args.project, bundle.data);
+        await upsertBundleNested(args.project.db, bundle.data);
       }
     }
     bar?.stop();

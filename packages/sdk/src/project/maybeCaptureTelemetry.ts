@@ -30,7 +30,7 @@ export async function maybeCaptureLoadedProject(args: {
 	try {
 		const activeAccount = await args.lix.db
 			.selectFrom("active_account")
-			.select("account_id")
+			.select("id")
 			.executeTakeFirstOrThrow();
 
 		const bundles = await args.db
@@ -49,7 +49,7 @@ export async function maybeCaptureLoadedProject(args: {
 		await capture("SDK loaded project", {
 			projectId: args.id,
 			settings: args.settings,
-			accountId: activeAccount.account_id,
+			accountId: activeAccount.id,
 			properties: {
 				// Insight: Which app is used by the SDK
 				appId: args.appId,

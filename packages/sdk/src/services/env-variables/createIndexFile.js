@@ -31,8 +31,6 @@ export const ENV_VARIABLES = {
 `
 );
 
-console.log("✅ Created env variable index file.");
-
 function ifDefined(value) {
 	return value ? `"${value}"` : undefined;
 }

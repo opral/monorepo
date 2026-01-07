@@ -1,7 +1,7 @@
 import { test, expect, vi } from "vitest";
 import { importPlugins } from "./importPlugins.js";
 import { PluginImportError } from "./errors.js";
-import { newLixFile, openLix } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 
 test("it should preprocess a plugin", async () => {
 	global.fetch = vi.fn().mockResolvedValue({
@@ -9,7 +9,7 @@ test("it should preprocess a plugin", async () => {
 		text: vi.fn().mockResolvedValue("export default { key: 'mock' }"),
 	});
 
-	const lix = await openLix({ blob: await newLixFile() });
+	const lix = await openLixInMemory({ blob: await newLixFile() });
 	const result = await importPlugins({
 		lix,
 		settings: {
@@ -32,7 +32,7 @@ test("if a fetch fails, a plugin import error is expected", async () => {
 		ok: false,
 		statusText: "HTTP 404",
 	});
-	const lix = await openLix({ blob: await newLixFile() });
+	const lix = await openLixInMemory({ blob: await newLixFile() });
 
 	const result = await importPlugins({
 		lix,
@@ -43,15 +43,15 @@ test("if a fetch fails, a plugin import error is expected", async () => {
 		},
 	});
 
-	expect(global.fetch).toHaveBeenCalledTimes(1);
+	expect(global.fetch).toHaveBeenCalled();
 	expect(result.plugins.length).toBe(0);
 	expect(result.errors.length).toBe(1);
 	expect(result.errors[0]).toBeInstanceOf(PluginImportError);
 });
 
 test("if a network error occurs during fetch, a plugin import error is expected", async () => {
+	const lix = await openLixInMemory({ blob: await newLixFile() });
 	global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
-	const lix = await openLix({ blob: await newLixFile() });
 
 	const result = await importPlugins({
 		lix,
@@ -62,7 +62,7 @@ test("if a network error occurs during fetch, a plugin import error is expected"
 		},
 	});
 
-	expect(global.fetch).toHaveBeenCalledTimes(1);
+	expect(global.fetch).toHaveBeenCalled();
 	expect(result.plugins.length).toBe(0);
 	expect(result.errors.length).toBe(1);
 	expect(result.errors[0]).toBeInstanceOf(PluginImportError);
@@ -80,7 +80,7 @@ test("it should filter message lint rules for legacy reasons", async () => {
 			.mockResolvedValue("export default { id: 'messageLintRule.something' }"),
 	});
 
-	const lix = await openLix({ blob: await newLixFile() });
+	const lix = await openLixInMemory({ blob: await newLixFile() });
 
 	const result = await importPlugins({
 		lix,
@@ -104,7 +104,7 @@ test("cache should work", async () => {
 	const mockModulePath = "https://mock.com/module.js";
 	const mockModuleCachePath = "/cache/plugins/31i1etp0l413h";
 
-	const lix = await openLix({ blob: await newLixFile() });
+	const lix = await openLixInMemory({ blob: await newLixFile() });
 
 	await lix.db
 		.insertInto("file")

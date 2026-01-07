@@ -1,9 +1,10 @@
-import { newLixFile, openLix } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory, toBlob } from "@lix-js/sdk";
 import type { ProjectSettings } from "../json-schema/settings.js";
+import {
+	contentFromDatabase,
+	createInMemoryDatabase,
+} from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
-import { InlangBundleSchema } from "../schema-definitions/bundle.js";
-import { InlangMessageSchema } from "../schema-definitions/message.js";
-import { InlangVariantSchema } from "../schema-definitions/variant.js";
 
 /**
  * Creates a new inlang project.
@@ -14,30 +15,20 @@ import { InlangVariantSchema } from "../schema-definitions/variant.js";
 export async function newProject(args?: {
 	settings?: ProjectSettings;
 }): Promise<Blob> {
-	const lix = await openLix({
-		blob: await newLixFile({
-			keyValues: [
-				{
-					key: "lix_telemetry",
-					value: args?.settings?.telemetry ?? "on",
-					lixcol_version_id: "global",
-					lixcol_untracked: true,
-				},
-			],
-		}),
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
 	});
-
-	initDb(lix);
+	initDb({ sqlite });
 
 	try {
-		await lix.db
-			.insertInto("stored_schema_by_version")
-			.values([
-				{ value: InlangBundleSchema, lixcol_version_id: "global" },
-				{ value: InlangMessageSchema, lixcol_version_id: "global" },
-				{ value: InlangVariantSchema, lixcol_version_id: "global" },
-			])
-			.execute();
+		const inlangDbContent = contentFromDatabase(sqlite);
+
+		const lix = await openLixInMemory({
+			blob: await newLixFile(),
+			keyValues: [
+				{ key: "lix_telemetry", value: args?.settings?.telemetry ?? "on" },
+			],
+		});
 
 		const { value: lixId } = await lix.db
 			.selectFrom("key_value")
@@ -49,6 +40,10 @@ export async function newProject(args?: {
 		await lix.db
 			.insertInto("file")
 			.values([
+				{
+					path: "/db.sqlite",
+					data: inlangDbContent,
+				},
 				{
 					path: "/settings.json",
 					data: new TextEncoder().encode(
@@ -65,8 +60,8 @@ export async function newProject(args?: {
 				},
 			])
 			.execute();
-		const blob = await lix.toBlob();
-		await lix.close();
+		const blob = toBlob({ lix });
+		lix.sqlite.close();
 		return blob;
 	} catch (e) {
 		const error = new Error(`Failed to create new inlang project: ${e}`, {
@@ -74,7 +69,7 @@ export async function newProject(args?: {
 		});
 		throw error;
 	} finally {
-		lix.close();
+		sqlite.close();
 	}
 }
 
