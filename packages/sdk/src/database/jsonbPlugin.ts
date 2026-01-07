@@ -121,9 +121,12 @@ function normalizeVariants(variants: any[]) {
 function normalizeMessages(messages: any[]) {
 	return messages.map((message) => {
 		if (message && typeof message === "object") {
-			const normalizedVariants = Array.isArray(message.variants)
-				? normalizeVariants(message.variants)
+			const rawVariants = Array.isArray(message.variants)
+				? message.variants
 				: parseJsonIfString(message.variants);
+			const normalizedVariants = Array.isArray(rawVariants)
+				? normalizeVariants(rawVariants)
+				: rawVariants;
 			return {
 				...message,
 				selectors: parseJsonIfString(message.selectors),

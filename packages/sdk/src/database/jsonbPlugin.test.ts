@@ -152,3 +152,62 @@ test("storing json as text is supposed to fail to avoid heuristics if the json s
 		`[SQLite3Error: SQLITE_CONSTRAINT_DATATYPE: sqlite3 result code 3091: cannot store BLOB value in TEXT column foo.data]`
 	);
 });
+
+test("normalizes variants when messages is a JSON string", async () => {
+	type MockSchema = {
+		foo: {
+			id: string;
+			messages: string | any[];
+		};
+	};
+	const database = await createInMemoryDatabase({
+		readOnly: false,
+	});
+
+	database.exec(`
+    CREATE TABLE foo (
+      id TEXT PRIMARY KEY,
+      messages TEXT NOT NULL
+    ) strict;
+  `);
+
+	const db = new Kysely<MockSchema>({
+		dialect: createDialect({
+			database,
+		}),
+		plugins: [new JsonbPlugin({ database })],
+	});
+
+	const rawMessages = JSON.stringify([
+		{
+			selectors: "[]",
+			variants: JSON.stringify([
+				{
+					matches: "[]",
+					pattern: '[{\"type\":\"text\",\"value\":\"x\"}]',
+				},
+			]),
+		},
+	]);
+
+	const foo = await db
+		.insertInto("foo")
+		.values({
+			id: "mock",
+			messages: rawMessages,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(foo.messages).toEqual([
+		{
+			selectors: [],
+			variants: [
+				{
+					matches: [],
+					pattern: [{ type: "text", value: "x" }],
+				},
+			],
+		},
+	]);
+});
