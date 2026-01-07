@@ -32,6 +32,20 @@ test("it handles single variants without expressions", async () => {
 	]);
 });
 
+// https://github.com/opral/paraglide-js/issues/571
+test("it preserves json strings as plain text", async () => {
+	const imported = await runImportFiles({
+		example_msg: '["a","b","c"]',
+	});
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		example_msg: '["a","b","c"]',
+	});
+
+	expect(imported.variants[0]?.pattern).toStrictEqual([
+		{ type: "text", value: '["a","b","c"]' },
+	]);
+});
+
 test("it handles variable expressions in patterns", async () => {
 	const imported = await runImportFiles({
 		some_happy_cat:

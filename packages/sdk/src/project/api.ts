@@ -3,9 +3,17 @@ import type { InlangDatabaseSchema } from "../database/schema.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { Lix } from "@lix-js/sdk";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export type InlangProject = {
 	db: Kysely<InlangDatabaseSchema>;
+	/**
+	 * @deprecated Don't use this. Only an internal hack to unblock
+	 * fink v2.
+	 *
+	 * TODO remove this
+	 */
+	_sqlite: SqliteWasmDatabase;
 	id: {
 		get: () => Promise<string>;
 	};

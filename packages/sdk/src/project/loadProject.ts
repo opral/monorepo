@@ -1,6 +1,10 @@
-import { type Account, type Lix } from "@lix-js/sdk";
+import { toBlob, type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
+import {
+	contentFromDatabase,
+	type SqliteWasmDatabase,
+} from "sqlite-wasm-kysely";
 import { initDb } from "../database/initDb.js";
 import {
 	importPlugins,
@@ -8,7 +12,7 @@ import {
 } from "../plugin/importPlugins.js";
 import type { InlangProject } from "./api.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
-import { uuidV7 } from "@lix-js/sdk";
+import { v4 } from "uuid";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { importFiles } from "../import-export/importFiles.js";
 import { exportFiles } from "../import-export/exportFiles.js";
@@ -17,6 +21,7 @@ import { exportFiles } from "../import-export/exportFiles.js";
  * Common load project logic.
  */
 export async function loadProject(args: {
+	sqlite: SqliteWasmDatabase;
 	lix: Lix;
 	/**
 	 * The account that loaded the project.
@@ -59,14 +64,7 @@ export async function loadProject(args: {
 	 */
 	appId?: string;
 }): Promise<InlangProject> {
-	const engine = args.lix.engine;
-	if (!engine) {
-		throw new Error(
-			"loadProject requires a Lix engine. Did you initialize the project with openLix?"
-		);
-	}
-
-	const db = initDb(args.lix);
+	const db = initDb({ sqlite: args.sqlite });
 
 	await maybeMigrateFirstProjectId({ lix: args.lix });
 
@@ -169,12 +167,12 @@ export async function loadProject(args: {
 			) as ProjectSettings;
 
 			return await importFiles({
-				project: { db, lix: args.lix },
 				files,
 				pluginKey,
 				settings,
 				// TODO don't use global state, might be stale
 				plugins,
+				db,
 			});
 		},
 		exportFiles: async ({ pluginKey }) => {
@@ -199,14 +197,29 @@ export async function loadProject(args: {
 			).map((output) => ({ ...output, pluginKey }));
 		},
 		close: async () => {
+			await saveDbToLix({ sqlite: args.sqlite, lix: args.lix });
 			await db.destroy();
 			await args.lix.db.destroy();
 		},
+		_sqlite: args.sqlite,
 		toBlob: async () => {
-			return await args.lix.toBlob();
+			await saveDbToLix({ sqlite: args.sqlite, lix: args.lix });
+			return await toBlob({ lix: args.lix });
 		},
 		lix: args.lix,
 	};
+}
+
+async function saveDbToLix(args: {
+	sqlite: SqliteWasmDatabase;
+	lix: Lix;
+}): Promise<void> {
+	const data = contentFromDatabase(args.sqlite);
+	await args.lix.db
+		.updateTable("file")
+		.set("data", data)
+		.where("path", "=", "/db.sqlite")
+		.execute();
 }
 
 /**
@@ -226,7 +239,7 @@ async function maybeMigrateFirstProjectId(args: { lix: Lix }): Promise<void> {
 			.insertInto("file")
 			.values({
 				path: "/project_id",
-				data: new TextEncoder().encode(await uuidV7({ lix: args.lix })),
+				data: new TextEncoder().encode(v4()),
 			})
 			.execute();
 	}

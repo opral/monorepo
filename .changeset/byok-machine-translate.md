@@ -2,11 +2,11 @@
 "@inlang/cli": minor
 ---
 
-Require the `INLANG_GOOGLE_TRANSLATE_API_KEY` environment variable for machine translations.
+Prefer the `INLANG_GOOGLE_TRANSLATE_API_KEY` environment variable for machine translations, with an RPC fallback.
 
 We previously subsidized machine translation costs. As projects become larger, our bill is no longer sustainable.
 
-To ensure that machine translations remain available, we are switching to a Bring Your Own Key (BYOK) model.
+To ensure that machine translations remain available, we are moving toward a Bring Your Own Key (BYOK) model while keeping an RPC fallback for now.
 
 **Before**
 
@@ -20,3 +20,5 @@ npx @inlang/cli machine translate --project ./project.inlang
 export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
 npx @inlang/cli machine translate --project ./project.inlang
 ```
+
+If the API key is not set, the CLI will warn and fall back to the inlang RPC translation service.

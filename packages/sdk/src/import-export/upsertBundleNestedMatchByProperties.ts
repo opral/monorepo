@@ -1,58 +1,29 @@
-import type { InlangProject } from "../project/api.js";
-import { uuidV7 } from "@lix-js/sdk";
-import type { NewBundleNested } from "../database/schema.js";
-
-const isUniqueConstraintError = (error: unknown): boolean => {
-	const resultCode = (error as any)?.resultCode;
-	if (resultCode === 1555 || resultCode === 2067) {
-		return true;
-	}
-	const maybeMessage = (error as any)?.message;
-	const message = typeof maybeMessage === "string" ? maybeMessage : "";
-	return (
-		message.includes("Primary key constraint violation") ||
-		message.includes("Unique constraint violation") ||
-		message.includes("unique constraint failed")
-	);
-};
+import type { Kysely } from "kysely";
+import type {
+	InlangDatabaseSchema,
+	NewBundleNested,
+} from "../database/schema.js";
 
 export const upsertBundleNestedMatchByProperties = async (
-	context: Pick<InlangProject, "db" | "lix">,
+	db: Kysely<InlangDatabaseSchema>,
 	bundle: NewBundleNested
 ): Promise<void> => {
 	if (bundle.id === undefined) {
 		throw new Error("upsert expets a bundle id for matching");
 	}
-	const bundleId = bundle.id;
-	const bundleToInsert = {
-		id: bundleId,
-		declarations: bundle.declarations ?? [],
-	};
-	const bundleUpdate = {
-		declarations: bundle.declarations ?? [],
-	};
-
-	const db = context.db;
-	const generateUuid = () => uuidV7({ lix: context.lix });
+	const bundleToInsert = { ...bundle, messages: undefined };
 
 	await db.transaction().execute(async (trx) => {
-		try {
-			await trx.insertInto("bundle").values(bundleToInsert).execute();
-		} catch (error) {
-			if (isUniqueConstraintError(error)) {
-				await trx
-					.updateTable("bundle")
-					.set(bundleUpdate)
-					.where("id", "=", bundleId)
-					.execute();
-			} else {
-				throw error;
-			}
-		}
+		const insertedBundle = await trx
+			.insertInto("bundle")
+			.values(bundleToInsert)
+			.onConflict((oc) => oc.column("id").doUpdateSet(bundleToInsert))
+			.returning("id")
+			.executeTakeFirstOrThrow();
 
 		const existingMessages = await trx
 			.selectFrom("message")
-			.where("bundleId", "=", bundleId)
+			.where("bundleId", "=", insertedBundle.id)
 			.selectAll()
 			.execute();
 
@@ -62,44 +33,22 @@ export const upsertBundleNestedMatchByProperties = async (
 				(m) => m.locale === message.locale
 			);
 
-			const messageId =
-				existingMessage?.id ?? message.id ?? (await generateUuid());
 			const messageToInsert = {
-				id: messageId,
-				bundleId,
-				locale: message.locale,
-				selectors: message.selectors ?? [],
+				...message,
+				id: existingMessage?.id,
+				bundleId: insertedBundle.id,
+				variants: undefined,
 			};
-			const messageUpdate = {
-				bundleId,
-				locale: message.locale,
-				selectors: message.selectors ?? [],
-			};
-			try {
-				await trx.insertInto("message").values(messageToInsert).execute();
-			} catch (error) {
-				if (isUniqueConstraintError(error)) {
-					await trx
-						.updateTable("message")
-						.set(messageUpdate)
-						.where("id", "=", messageId)
-						.execute();
-				} else {
-					throw error;
-				}
-			}
-			if (existingMessage === undefined) {
-				existingMessages.push({
-					id: messageId,
-					bundleId,
-					locale: message.locale,
-					selectors: message.selectors ?? [],
-				});
-			}
+			const insertedMessage = await trx
+				.insertInto("message")
+				.values(messageToInsert)
+				.onConflict((oc) => oc.column("id").doUpdateSet(messageToInsert))
+				.returning("id")
+				.executeTakeFirstOrThrow();
 
 			const existingVariants = await trx
 				.selectFrom("variant")
-				.where("messageId", "=", messageId)
+				.where("messageId", "=", insertedMessage.id)
 				.selectAll()
 				.execute();
 
@@ -109,40 +58,16 @@ export const upsertBundleNestedMatchByProperties = async (
 					(v) => JSON.stringify(v.matches) === JSON.stringify(variant.matches)
 				);
 
-				const variantId =
-					existingVariant?.id ?? variant.id ?? (await generateUuid());
 				const variantToInsert = {
-					id: variantId,
-					messageId,
-					matches: variant.matches ?? [],
-					pattern: variant.pattern ?? [],
+					...variant,
+					id: existingVariant?.id,
+					messageId: insertedMessage.id,
 				};
-				const variantUpdate = {
-					messageId,
-					matches: variant.matches ?? [],
-					pattern: variant.pattern ?? [],
-				};
-				try {
-					await trx.insertInto("variant").values(variantToInsert).execute();
-				} catch (error) {
-					if (isUniqueConstraintError(error)) {
-						await trx
-							.updateTable("variant")
-							.set(variantUpdate)
-							.where("id", "=", variantId)
-							.execute();
-					} else {
-						throw error;
-					}
-				}
-				if (existingVariant === undefined) {
-					existingVariants.push({
-						id: variantId,
-						messageId,
-						matches: variant.matches ?? [],
-						pattern: variant.pattern ?? [],
-					});
-				}
+				await trx
+					.insertInto("variant")
+					.values(variantToInsert)
+					.onConflict((oc) => oc.column("id").doUpdateSet(variantToInsert))
+					.execute();
 			}
 		}
 	});

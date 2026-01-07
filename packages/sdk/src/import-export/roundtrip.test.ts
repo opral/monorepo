@@ -22,11 +22,11 @@ test("the file should be identical after a roundtrip if no modifications occured
 	});
 
 	await importFiles({
-		project,
 		files: [{ content: new TextEncoder().encode(enResource), locale: "en" }],
 		pluginKey: "mock",
 		plugins: [mockPluginSimple],
 		settings: await project.settings.get(),
+		db: project.db,
 	});
 
 	const importedBundles = await project.db
@@ -113,7 +113,7 @@ test("a variant with an existing match should update the existing variant and no
 		pluginKey: "mock",
 		plugins: [mockPluginAst],
 		settings: await project.settings.get(),
-		project: project,
+		db: project.db,
 	});
 
 	const bundles = await project.db.selectFrom("bundle").selectAll().execute();
@@ -156,11 +156,11 @@ test("if a message for the bundle id and locale already exists, update it. don't
 	const enResource = new TextEncoder().encode(JSON.stringify(updated));
 
 	await importFiles({
-		project,
 		files: [{ content: enResource, locale: "en" }],
 		pluginKey: "mock",
 		plugins: [mockPluginAst],
 		settings: await project.settings.get(),
+		db: project.db,
 	});
 
 	const bundles = await project.db.selectFrom("bundle").selectAll().execute();
@@ -189,17 +189,14 @@ test("keys should be ordered alphabetically for .json to minimize git diffs", as
 	});
 
 	await importFiles({
-		project,
 		files: [{ content: new TextEncoder().encode(enResource), locale: "en" }],
 		pluginKey: "mock",
 		plugins: [mockPluginSimple],
 		settings: await project.settings.get(),
+		db: project.db,
 	});
 
-	await project.db
-		.insertInto("bundle")
-		.values({ id: "c", declarations: [] })
-		.execute();
+	await project.db.insertInto("bundle").values({ id: "c" }).execute();
 	await project.db
 		.insertInto("message")
 		.values({ id: "c-en", bundleId: "c", locale: "en" })
