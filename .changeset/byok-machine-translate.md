@@ -4,9 +4,7 @@
 
 Prefer the `INLANG_GOOGLE_TRANSLATE_API_KEY` environment variable for machine translations, with an RPC fallback.
 
-We previously subsidized machine translation costs. As projects become larger, our bill is no longer sustainable.
-
-To ensure that machine translations remain available, we are moving toward a Bring Your Own Key (BYOK) model while keeping an RPC fallback for now.
+We are moving toward a Bring Your Own Key (BYOK) model while keeping an RPC fallback for now.
 
 **Before**
 
