@@ -9,35 +9,39 @@ import fs from "node:fs/promises";
 import { watch } from "node:fs";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
-const config = defineConfig({
-  plugins: [
-    cloudflare({ viteEnvironment: { name: "ssr" } }),
-    // this is the plugin that enables path aliases
-    viteTsConfigPaths({
-      projects: ["./tsconfig.json"],
-    }),
-    tailwindcss(),
-    tanstackStart({
-      prerender: {
-        enabled: true,
-        autoSubfolderIndex: true,
-        autoStaticPathsDiscovery: true,
-        crawlLinks: true,
-        concurrency: 8,
-        retryCount: 2,
-        retryDelay: 1000,
-        maxRedirects: 5,
-        failOnError: true,
-      },
-      sitemap: {
-        enabled: true,
-        host: "https://inlang.com",
-      },
-      pages: getMarketplaceStaticPages(),
-    }),
-    viteReact(),
-    blogAssetsPlugin(),
-  ],
+const config = defineConfig(({ mode }) => {
+  const isTest = process.env.VITEST === "true" || mode === "test";
+
+  return {
+    plugins: [
+      !isTest && cloudflare({ viteEnvironment: { name: "ssr" } }),
+      // this is the plugin that enables path aliases
+      viteTsConfigPaths({
+        projects: ["./tsconfig.json"],
+      }),
+      tailwindcss(),
+      tanstackStart({
+        prerender: {
+          enabled: true,
+          autoSubfolderIndex: true,
+          autoStaticPathsDiscovery: true,
+          crawlLinks: true,
+          concurrency: 8,
+          retryCount: 2,
+          retryDelay: 1000,
+          maxRedirects: 5,
+          failOnError: true,
+        },
+        sitemap: {
+          enabled: true,
+          host: "https://inlang.com",
+        },
+        pages: getMarketplaceStaticPages(),
+      }),
+      viteReact(),
+      !isTest && blogAssetsPlugin(),
+    ].filter(Boolean),
+  };
 });
 
 export default config;
