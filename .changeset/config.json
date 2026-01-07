@@ -9,8 +9,6 @@
     "@inlang/cli-example",
     "@inlang/plugin-icu1",
     "@inlang/template-plugin",
-    "@inlang/website-v2",
-    "vs-code-extension",
-    "sherlock-editor-app"
+    "@inlang/website-v2"
   ]
 }
