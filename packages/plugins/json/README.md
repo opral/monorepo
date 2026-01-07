@@ -1,10 +1,12 @@
-# What does this plugin do?
+# JSON Plugin for Inlang
+
+> **Deprecated:** This plugin is deprecated in favor of the [inlang message format plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat), which provides a simpler, more robust solution.
 
 This plugin is a general purpose plugin to read and write messages of json files.
 
 > The plugin uses the inlang SDK v1 API but can be used in V2 projects.
 >
-> A slight difference is that `languageTag` is called `locale` in v2 projects. Use `languageTag` for this plugin.   
+> A slight difference is that `languageTag` is called `locale` in v2 projects. Use `languageTag` for this plugin.
 
 ## Manual Installation
 
@@ -121,18 +123,6 @@ An array of strings that are used to ignore certain files. The strings are match
 
 The message IDs are sorted in the order in which they appear in the sourceLanguage file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
 
-# Supercharge your i18n workflow by installing the Inlang Visual Studio Code extension (Sherlock)
-
-The plugin can be used with [Sherlock - VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract keys from your code, display inline annotations, have quality checks with [lint rules](https://inlang.com/c/lint-rules) & more. There are only 2 steps to get started:
-
-1. Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
-2. Add the correct syntax matcher:
-   - [m function matcher](https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher) or
-   - [t function matcher](https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher)
-3. Optional: Add lint rules: https://inlang.com/c/lint-rules
-4. 🎉 Done!
-
-
 # Contributing
 
 ## Getting started
@@ -143,15 +133,3 @@ Run the following commands in your terminal (node and npm must be installed):
 2. `npm run dev`
 
 `npm run dev` will start the development environment which automatically compiles the [src/index.ts](#getting-started) files to JavaScript ([dist/index.js](#getting-started)), runs tests defined in `*.test.ts` files and watches changes.
-
-## Publishing
-
-Run `npm run build` to generate a build.
-
-The [dist](./dist/) directory is used to distribute the plugin directly via CDN like [jsDelivr](https://www.jsdelivr.com/). Using a CDN works because the inlang config uses dynamic imports to import plugins.
-
-Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
-
----
-
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/gdMPPWy57R) or open a [Discussion](https://github.com/opral/inlang/discussions) or an [Issue](https://github.com/opral/inlang/issues) on [Github](https://github.com/opral/inlang)._
