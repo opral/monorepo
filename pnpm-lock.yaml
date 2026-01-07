@@ -1094,8 +1094,8 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@opral/markdown-wc':
-        specifier: ^0.7.0
-        version: 0.7.0
+        specifier: 0.8.0
+        version: 0.8.0
       '@tailwindcss/vite':
         specifier: ^4.0.6
         version: 4.1.17(vite@7.2.7(@types/node@22.15.33)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.5)(yaml@2.8.1))
@@ -3660,8 +3660,8 @@ packages:
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
 
-  '@opral/markdown-wc@0.7.0':
-    resolution: {integrity: sha512-HzjLinbacOftbSbBoFRFlayZjtCB7iSp34zTzB0PBYe+AEjFNd7PGtOtNIaeDaBpOYyVrl7iuVvOaKjrCFIUSw==}
+  '@opral/markdown-wc@0.8.0':
+    resolution: {integrity: sha512-V4Yglho5AmIEtUrlXQwMHN2od58F7C6Ndt6agyaEQ/awzcWiGg0jBL7hMynXJURXfVM/7b+/WK2ZIo7gh6M7YQ==}
     peerDependencies:
       '@tiptap/core': ^3.0.0
     peerDependenciesMeta:
@@ -14188,12 +14188,6 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nrwl/devkit@18.3.5(nx@18.3.5)':
-    dependencies:
-      '@nx/devkit': 18.3.5(nx@18.3.5)
-    transitivePeerDependencies:
-      - nx
-
   '@nrwl/devkit@18.3.5(nx@21.4.1)':
     dependencies:
       '@nx/devkit': 18.3.5(nx@21.4.1)
@@ -14335,7 +14329,7 @@ snapshots:
 
   '@nx/devkit@18.3.5(nx@18.3.5)':
     dependencies:
-      '@nrwl/devkit': 18.3.5(nx@18.3.5)
+      '@nrwl/devkit': 18.3.5(nx@21.4.1)
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.2
@@ -14790,7 +14784,7 @@ snapshots:
   '@open-draft/until@2.1.0':
     optional: true
 
-  '@opral/markdown-wc@0.7.0':
+  '@opral/markdown-wc@0.8.0':
     dependencies:
       mermaid: 11.12.1
       rehype-autolink-headings: 7.1.0
