@@ -295,6 +295,7 @@ dist
 
 # Generated data files
 *.gen.*
+!*.gen.d.ts
 .docusaurus
 
 # Serverless directories
