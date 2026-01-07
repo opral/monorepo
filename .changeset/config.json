@@ -10,6 +10,7 @@
     "@inlang/plugin-icu1",
     "@inlang/template-plugin",
     "@inlang/website-v2",
-    "@inlang/fink"
+    "@inlang/fink",
+    "@inlang/marketplace-registry"
   ]
 }
