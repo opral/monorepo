@@ -11,6 +11,9 @@ importers:
       '@changesets/cli':
         specifier: ^2.29.7
         version: 2.29.7(@types/node@24.10.2)
+      '@infisical/cli':
+        specifier: ^0.43.40
+        version: 0.43.40
       '@vitest/coverage-v8':
         specifier: ^3.1.1
         version: 3.2.4(@vitest/browser@3.2.4)(vitest@3.2.4)
@@ -3655,6 +3658,10 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
+
+  '@infisical/cli@0.43.40':
+    resolution: {integrity: sha512-f2BNsIp0j5z3TEtFwXuPAYTeoZc94kyOZ5OkBITe0RSgIet2V8B08xF+qiaubZ1hiN3nBtFjggyGtea7GEGxjg==}
+    hasBin: true
 
   '@inlang/detect-json-formatting@1.0.0':
     resolution: {integrity: sha512-o0jeI8U4TgNlsPwI0y92jld8/18Loh2KEgHCYCJ42rCOdxFrA8R60cydlEd2/6jkdHFn5DxKj8rOyiKv3z9uOw==}
@@ -16213,6 +16220,11 @@ snapshots:
 
   '@img/sharp-win32-x64@0.33.5':
     optional: true
+
+  '@infisical/cli@0.43.40':
+    dependencies:
+      tar: 6.2.1
+      yauzl: 3.2.0
 
   '@inlang/detect-json-formatting@1.0.0':
     dependencies:
