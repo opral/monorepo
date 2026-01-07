@@ -1,5 +1,5 @@
 ---
-og:title: "Update on inlang v2"
+og:title: "Postponing inlang v2 to rebuild on SQLite"
 og:description: "Accelerating both inlang and lix by prioritizing lix."
 ---
 

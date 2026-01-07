@@ -2,6 +2,9 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.tFunctionMatcher",
 	"icon": "./assets/t.png",
+	"gallery": [
+		"./assets/sherlock-preview.svg"
+	],
 	"displayName": {
 		"en": "t-function-matcher"
 	},

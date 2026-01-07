@@ -1,5 +1,8 @@
 import { Command } from "commander";
-import { getInlangProject } from "../../utilities/getInlangProject.js";
+import {
+  getInlangProject,
+  settleLastUsedProjectFileQueue,
+} from "../../utilities/getInlangProject.js";
 import { log } from "../../utilities/log.js";
 import { projectOption } from "../../utilities/globalFlags.js";
 
@@ -10,6 +13,7 @@ export const validate = new Command()
   .action(validateCommandAction);
 
 export async function validateCommandAction(args: { project: string }) {
+  let exitCode = 0;
   try {
     log.info("🔎 Validating the inlang project...");
     // if `getInlangProject` doesn't throw, the project is valid
@@ -19,13 +23,16 @@ export async function validateCommandAction(args: { project: string }) {
     if (errors.length > 0) {
       log.info("The project contains errors:");
       for (const error of errors) log.error(error);
-      process.exit(1);
+      exitCode = 1;
+      return;
     }
 
     log.success("The project is valid!");
-    process.exit(0);
   } catch (error) {
     log.error(error);
-    process.exit(1);
+    exitCode = 1;
+  } finally {
+    await settleLastUsedProjectFileQueue();
+    process.exit(exitCode);
   }
 }

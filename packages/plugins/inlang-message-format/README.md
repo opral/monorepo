@@ -3,14 +3,16 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/doc-callout.js
 ---
 
-# The easiest "storage" plugin for inlang
+# Inlang Message Format Plugin
 
-The Inlang Message Format is a simple storage plugin for the Inlang ecosystem. It allows you to store simple
-messages in a JSON file per language.
+![inlang message format](https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/assets/banner.svg)
+
+The Inlang Message Format is a storage plugin for inlang. It stores messages in a JSON file per language.
+It is designed after inlang's data models, which enables all features of inlang.
 
 The syntax is inspired by the upcoming [MessageFormat 2.0](https://messageformat.unicode.org/) draft to keep migration friction low as the standard matures.
 
-The message files contain key-value pairs of the message ID and the translation. You can add variables in your message by using curly braces.
+The message files contain key-value pairs of the message ID and the translation. You can add variables in your message by using curly braces. Nested objects are flattened using dot notation on import and unflattened on export.
 
 ```json
 //messages/en.json
@@ -21,11 +23,14 @@ The message files contain key-value pairs of the message ID and the translation.
 
 //messages/de.json
 {
-  //the $schema key is automatically ignored
+  "$schema": "https://inlang.com/schema/inlang-message-format",
   "hello_world": "Hallo Welt!",
   "greeting": "Guten Tag {name}!"
 }
 ```
+
+> [!NOTE]
+> The `$schema` property is optional and provides IDE autocompletion for message syntax. It is automatically added when exporting files and ignored on import. The schema is for editor support only and does not perform runtime validation.
 
 ## Installation
 
@@ -43,13 +48,24 @@ Install the plugin in your Inlang Project by adding it to your `"modules"` in `p
 }
 ```
 
+## Version Compatibility
+
+| Plugin Version | SDK Requirement | Breaking Changes |
+|----------------|-----------------|------------------|
+| v4.x | @inlang/sdk v2+ | Complex messages must be wrapped in an array. Nesting support added. |
+| v3.x | @inlang/sdk v2 (beta) | Upgraded to SDK v2 data model. |
+| v2.x | @inlang/sdk v1 | New human-readable format. Auto-migrates from v1 on first load. |
+
+> [!NOTE]
+> When upgrading the plugin, ensure your SDK version meets the minimum requirement. Mismatched versions may cause silent failures or import errors.
+
 ## Configuration
 
 Configuration happens in `project.inlang/settings.json` under the `"plugin.inlang.messageFormat"` key.
 
 ### `pathPattern`
 
-You can define a single `pathPattern` or provide an array of patterns to split your messages across multiple JSON files. Messages from **all matching files will be merged**, and if the same message key appears in multiple files, the **value from the last file in the array will override** earlier ones.
+You can define a single `pathPattern` or provide an array of patterns to split your messages across multiple JSON files. Messages from **all matching files will be merged**, and if the same message key appears in multiple files, the **value from the last file in the array will override** earlier ones. The placeholder should be `{locale}` (preferred) or `{languageTag}` (legacy, still supported).
 
 This allows for patterns like having a shared base file and extending or overriding it with domain- or customer-specific files.
 
@@ -109,6 +125,9 @@ The merged result for locale `en` will be:
 
 This lets you modularize and override translations while keeping a shared base.
 
+> [!WARNING]
+> When exporting, all messages are written to the **last** path pattern in the array. Messages are not split back across multiple files. This means multiple path patterns are a one-way merge — useful for importing from shared base files, but the original file structure is not preserved on export.
+
 ### `sort`
 
 Optionally sort keys when writing files to keep git diffs consistent.
@@ -129,9 +148,8 @@ You can organize your messages in a nested structure for better organization of 
 
 ### Simple Messages
 
-<doc-callout type="info">
-	Nesting is supported from v4 of the plugin and requires apps to use the inlang SDK v2 higher. 
-</doc-callout>
+> [!NOTE]
+> Nesting is supported from v4 of the plugin and requires apps to use the inlang SDK v2 higher.
 
 Simple messages are string values, either directly at the root level or nested within objects:
 
@@ -169,11 +187,10 @@ For complex messages with variants, wrap the message object in an array to diffe
 }
 ```
 
-When accessing this complex message, use dot notation: `navigation.items.count`
+When addressing nested messages, use dot notation (e.g. `navigation.items.count` for a nested `navigation.items.count` entry).
 
-<doc-callout type="info">
-The array wrapper is how we distinguish between a nested object containing more messages vs. a complex message object with variants.
-</doc-callout>
+> [!NOTE]
+> The array wrapper is how we distinguish between a nested object containing more messages vs. a complex message object with variants.
 
 ## Variants (pluralization, gendering, A/B testing)
 
@@ -223,9 +240,8 @@ The message below will match the following conditions:
 }
 ```
 
-<doc-callout type="tip">
-  Ordinal category names (`one`, `two`, `few`, `other`, etc.) follow <code>Intl.PluralRules</code> for the active locale.
-</doc-callout>
+> [!TIP]
+> Ordinal category names (`one`, `two`, `few`, `other`, etc.) follow `Intl.PluralRules` for the active locale.
 
 Pluralization is also supported. You can define a variable in your message and then use it in the selector.
 
@@ -234,9 +250,8 @@ Pluralization is also supported. You can define a variable in your message and t
 | count=1 | countPlural=one   | There is one cat.    |
 | count>1 | countPlural=other | There are many cats. |
 
-<doc-callout type="tip">
-Read the `local countPlural = count: plural` syntax as "create a local variable `countPlural` that equals `plural(count)`".
-</doc-callout>
+> [!TIP]
+> Read the `local countPlural = count: plural` syntax as "create a local variable `countPlural` that equals `plural(count)`".
 
 ```json
 {
@@ -250,5 +265,49 @@ Read the `local countPlural = count: plural` syntax as "create a local variable 
 			}
 		}
 	]
+}
+```
+
+## Troubleshooting
+
+### Messages not appearing
+
+- **File not found**: Missing translation files are silently ignored. Verify that your `pathPattern` matches the actual file paths and that the `{locale}` placeholder resolves correctly.
+- **Wrong locale**: Ensure the locale in the filename matches one of the configured `locales` in your `settings.json`.
+
+### JSON parse errors
+
+- **Trailing commas**: JSON does not allow trailing commas. Remove the comma after the last property in objects and arrays.
+- **Comments**: Standard JSON does not support comments. The examples in this README use `//` comments for illustration only — remove them in actual files.
+
+### "Multiple variants for language tag" error
+
+Each message can only have one variant per locale within a single match condition set. If you need multiple variants, use selectors to differentiate them:
+
+```json
+{
+  "message": [{
+    "selectors": ["platform"],
+    "match": {
+      "platform=ios": "iOS version",
+      "platform=android": "Android version"
+    }
+  }]
+}
+```
+
+### Nested messages not working
+
+- Nesting requires plugin v4+ and SDK v2+. Check the [Version Compatibility](#version-compatibility) table.
+- Maximum nesting depth is 5 levels. Flatten deeper structures using dot notation in the key name.
+
+### Complex messages not recognized
+
+Complex messages (with variants/pluralization) must be wrapped in an array:
+
+```json
+{
+  "wrong": { "match": { "count=one": "One" } },
+  "correct": [{ "match": { "count=one": "One" } }]
 }
 ```

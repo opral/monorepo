@@ -1,49 +1,88 @@
-![inlang CLI header image](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/cli-header.jpg)
+---
+title: inlang CLI - Localization Automation for CI/CD
+description: Automate translation workflows with machine translation, validation, and CI/CD integration. Supports JSON, i18next, next-intl, and more.
+og:image: https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/cli-banner.svg
+---
 
-# Automate (i18n) localization tasks with the CLI
+# @inlang/cli
 
-[@inlang/cli](https://github.com/opral/inlang/tree/main/packages/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
-
-Get started with the CLI by using the following npx command:
+Automate localization tasks in your CI/CD pipeline.
 
 ```bash
 npx @inlang/cli [command]
 ```
 
-See all available commands [here](#commands).
+![inlang CLI terminal showing machine translate and validate commands](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/cli-banner.svg)
 
-# Core features
+## Features
 
-<doc-features>
-  <doc-feature text-color="#fff" color="#000" title="Automation" image="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/automation.jpg"></doc-feature>
-  <doc-feature text-color="#fff" color="#000" title="Machine Translation" image="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/machine-translation.jpg"></doc-feature>
-  <doc-feature text-color="#fff" color="#000" title="Validation" image="https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/lint.jpg"></doc-feature>
-</doc-features>
+- **Machine Translation** — Translate missing messages automatically via Google Cloud Translation or the free inlang translation service
+- **Validation** — Verify your project config is correct before committing
+- **CI/CD Ready** — Run non-interactively with `--force` for pipelines
+- **Plugin System** — Supports JSON, i18next, next-intl, ICU message format, and more
 
-<br />
+# Getting Started
 
-<!-- ### Benefits
+The CLI requires an **inlang project** — a folder containing a `settings.json` that defines your locales and translation file paths.
 
-- ✨ **Automate** tedious localization tasks
-- ⚙️ Integrate localization into your **CI/CD** pipeline
-- 🔍 **Lint** your translations
-- 🤖 **Machine translate** your resources
-- 🖊️ Open the web editor right from the command line
-- ✅ Validate your inlang project -->
+```
+my-app/
+├── project.inlang/
+│   └── settings.json      # CLI reads this config
+├── messages/
+│   ├── en.json            # Source language
+│   └── de.json            # Translations
+└── src/
+```
 
-#### Automate
+## Setup in 2 minutes
 
-You can use the CLI to automate localization tasks like machine translation, linting, and more.
+**1. Create the project folder and settings file**
 
-#### Machine Translation
+```bash
+mkdir project.inlang
+```
 
-The CLI allows you to machine translate your resources. This is useful if you want to get a first draft of your translations and then have them reviewed by a human translator. Via machine translation, you can do translation automation e.g. in your CI/CD pipeline.
+Create `project.inlang/settings.json`:
 
-#### Validation
+```json
+{
+  "$schema": "https://inlang.com/schema/project-settings",
+  "baseLocale": "en",
+  "locales": ["en", "de", "fr"],
+  "modules": [
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js"
+  ],
+  "plugin.inlang.json": {
+    "pathPattern": "./messages/{locale}.json"
+  }
+}
+```
 
-The CLI allows you to validate your inlang project. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
+**2. Create your base translation file**
 
-![Example of a dev doing translation automation](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/cli/assets/why.jpg)
+Create `messages/en.json`:
+
+```json
+{
+  "greeting": "Hello {name}!",
+  "welcome": "Welcome to our app"
+}
+```
+
+**3. Machine translate to other languages**
+
+```bash
+npx @inlang/cli machine translate --project ./project.inlang
+```
+
+This creates `messages/de.json` and `messages/fr.json` with translations.
+
+**4. Validate your setup**
+
+```bash
+npx @inlang/cli validate --project ./project.inlang
+```
 
 # Installation
 
@@ -79,7 +118,7 @@ If one of the commands can't be found, you probably use an outdated CLI version.
 | --------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **CLI Version** | `npx @inlang/cli@latest [command]`            | Get the latest version of the inlang CLI.                                                                                                                           |
 | **Validate**    | `npx @inlang/cli validate [options]`          | Validate if the project is working correctly.                                                                                                                       |
-| **Machine**     | `npx @inlang/cli machine translate [options]` | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--locale <source>` and `--targetLocales <targets...>`           |
+| **Machine**     | `npx @inlang/cli machine translate [options]` | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--locale <source>` and `--targetLocales <targets...>`                           |
 | **Plugin**      | `npx @inlang/cli plugin [command]`            | Interact with Inlang plugins, including initialization and building. `build [options]` build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
 ---
@@ -121,34 +160,7 @@ The machine command is used to automate localization processes.
 
 The translate command machine translates all resources.
 
-Before running the command, export your Google Cloud translation token as
-`INLANG_GOOGLE_TRANSLATE_API_KEY`:
-
-```sh
-export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
-```
-
-Set it in your shell profile or CI secret store so every run can reuse it.
-
-To create the API key, follow the [Cloud Translation setup guide](https://cloud.google.com/translate/docs/setup)
-and choose the **Cloud Translation Basic** edition (the CLI uses the v2 REST API).
-High-level steps:
-
-1. Create or select a Google Cloud project.
-2. Enable the **Cloud Translation API (Basic)** for the project.
-3. Generate a credential of type **API key** under *APIs & Services → Credentials*.
-4. Copy the key and expose it as `INLANG_GOOGLE_TRANSLATE_API_KEY` env variable.
-
-**Migration**
-
-```sh
-# Before
-npx @inlang/cli machine translate --project ./project.inlang
-
-# After
-export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
-npx @inlang/cli machine translate --project ./project.inlang
-```
+By default, the CLI uses inlang's free translation service. For higher reliability and control, you can [bring your own Google Translate API key](https://inlang.com/m/2qj2w8pu/app-inlang-cli/byok).
 
 To initiate machine translation, run the following command:
 

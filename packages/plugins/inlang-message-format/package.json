@@ -8,7 +8,8 @@
 		"./file-schema": "./src/fileSchema.ts"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./assets"
 	],
 	"publishConfig": {
 		"access": "public"

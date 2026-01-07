@@ -7,7 +7,8 @@
 		".": "./dist/index.js"
 	},
 	"files": [
-		"./dist"
+		"./dist",
+		"./assets"
 	],
 	"publishConfig": {
 		"access": "public"

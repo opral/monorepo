@@ -1,32 +1,44 @@
-### Introduction
+# t Function Matcher for Sherlock
 
-This plugin provides the integration of `t-functions` into the inlang Visual Studio Code extension (Sherlock). It allows you to extract messages from your code, view them inline in the text editor and get lints for your messages.
+This plugin enables [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) (VS Code extension) to recognize `t("key")` function calls used by most i18n libraries.
 
-Match examples:
-```ts
-t('name')
-```
-```ts
-t('start-page:title')
-```
+![Sherlock inline preview](https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/assets/sherlock-preview.svg)
 
-### Usage
+## What it does
 
-The plugin will automatically extract messages from your code and show them inline in the editor. You can then click on the message to open the web editor and translate the message.
+- **Inline previews**: See translations directly in your code editor
+- **Message extraction**: Extract hardcoded strings into messages
+- **Linting**: Get warnings for missing or invalid message references
 
-1. Install the [Visual Studio Code extension (Sherlock)](https://inlang.com/m/r7kp499g)
-2. Install this plugin
-3. ✨ See your messages appear inline in the editor
+## Supported file types
 
-> There might be a delay before the messages appear in the editor. This is because the plugin needs to be downloaded first. If you want to make sure that everything is setup correctly, reload your workspace.
+- TypeScript (`.ts`, `.tsx`)
+- JavaScript (`.js`, `.jsx`)
+- Svelte (`.svelte`)
+- Vue (`.vue`)
+- Astro (`.astro`)
 
-### Manual installation
+## Installation
 
-```diff
-// project.inlang/settings.json
+Add the plugin to your `project.inlang/settings.json`:
+
+```json
 {
-  "modules" : [
-+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/dist/index.js"
+  "modules": [
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/dist/index.js"
   ]
 }
 ```
+
+Then install [Sherlock](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) from the VS Code marketplace.
+
+## Matched patterns
+
+The plugin recognizes these patterns:
+
+| Pattern | Example |
+|---------|---------|
+| Simple call | `t("welcome")` |
+| With variables | `t("greeting", { name: "World" })` |
+| With namespace | `t("common:button")` |
+| In JSX | `{t("label")}` |

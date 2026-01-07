@@ -2,11 +2,14 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.nextIntl",
 	"icon": "./assets/plugin-next-intl-logo.png",
+	"gallery": [
+		"./assets/banner.svg"
+	],
 	"displayName": {
 		"en": "next-intl plugin"
 	},
 	"description": {
-		"en": "A plugin to make next-intl ecosystem compatible with inlang"
+		"en": "A plugin for inlang projects that reads and writes next-intl translation files."
 	},
 	"pages": {
 		"/": "./README.md",
