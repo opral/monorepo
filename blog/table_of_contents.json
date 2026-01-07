@@ -1,0 +1,44 @@
+[
+  {
+    "path": "./inlang-refactor/index.md",
+    "slug": "inlang-refactor",
+    "date": "2023-09-15",
+    "authors": ["samuelstroschein"]
+  },
+  {
+    "path": "./update-on-inlang-v2/index.md",
+    "slug": "update-on-inlang-v2",
+    "date": "2024-07-08",
+    "authors": ["samuelstroschein"]
+  },
+  {
+    "path": "./version-control-features-in-fink/index.md",
+    "slug": "version-control-features-in-fink",
+    "date": "2024-07-08",
+    "authors": ["niklasbuchfink"]
+  },
+  {
+    "path": "./notes-on-git-based-architecture/index.md",
+    "slug": "notes-on-git-based-architecture",
+    "date": "2022-03-01",
+    "authors": ["samuelstroschein"]
+  },
+  {
+    "path": "./dont-lazy-load/index.md",
+    "slug": "dont-lazy-load",
+    "date": "2024-04-19",
+    "authors": ["lorissigrist"]
+  },
+  {
+    "path": "./inlang-v0-2/index.md",
+    "slug": "inlang-v0-2",
+    "date": "2022-02-14",
+    "authors": ["samuelstroschein"]
+  },
+  {
+    "path": "./pre-v0-2-history/index.md",
+    "slug": "pre-v0-2-history",
+    "date": "2022-02-14",
+    "authors": ["samuelstroschein"]
+  }
+]

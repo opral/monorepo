@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "./markdown.css";
+
+body {
+  @apply m-0;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  color: #1f2328;
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+}

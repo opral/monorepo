@@ -1,0 +1,47 @@
+{
+  "name": "@inlang/website-v2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 3000",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit && oxlint",
+    "lint:fix": "tsc --noEmit && oxlint --fix",
+    "format": "pnpm exec prettier . --write",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@inlang/marketplace-manifest": "workspace:*",
+    "@inlang/marketplace-registry": "workspace:*",
+    "@inlang/plugin-message-format": "workspace:*",
+    "@inlang/sdk": "workspace:*",
+    "@opral/markdown-wc": "^0.7.0",
+    "@tailwindcss/vite": "^4.0.6",
+    "@tanstack/react-router": "^1.132.0",
+    "@tanstack/react-router-ssr-query": "^1.131.7",
+    "@tanstack/react-start": "^1.132.0",
+    "@tanstack/router-plugin": "^1.132.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^9.0.1",
+    "tailwindcss": "^4.0.6",
+    "vite-tsconfig-paths": "^6.0.2"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.17.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.2.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "jsdom": "^27.0.0",
+    "oxlint": "^1.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.7",
+    "vitest": "^4.0.6",
+    "wrangler": "^4.54.0"
+  }
+}

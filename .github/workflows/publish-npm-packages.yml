@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 22
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
 

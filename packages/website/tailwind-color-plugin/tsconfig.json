@@ -1,9 +1,0 @@
-{
-	"extends": "@inlang/tsconfig/default",
-	"include": ["src/**/*"],
-	"compilerOptions": {
-		"lib": ["ESNext", "DOM"],
-		"outDir": "dist",
-		"verbatimModuleSyntax": false
-	}
-}

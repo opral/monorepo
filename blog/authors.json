@@ -1,0 +1,19 @@
+{
+  "samuelstroschein": {
+    "name": "Samuel Stroschein",
+    "role": "Founder",
+    "avatar": "https://avatars.githubusercontent.com/u/35429197?v=4",
+    "twitter": "https://x.com/samuelstroschei",
+    "github": "https://github.com/samuelstroschein"
+  },
+  "lorissigrist": {
+    "name": "Loris Sigrist",
+    "avatar": "https://avatars.githubusercontent.com/u/43482866?v=4",
+    "github": "https://github.com/LorisSigrist"
+  },
+  "niklasbuchfink": {
+    "name": "Niklas Buchfink",
+    "role": "Design Engineer",
+    "avatar": "https://substack-post-media.s3.amazonaws.com/public/images/c7c6a08f-bb73-4b43-a184-ec2fceeea674_2048x2048.jpeg"
+  }
+}
