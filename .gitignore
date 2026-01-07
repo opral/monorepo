@@ -292,6 +292,10 @@ dist
 .temp
 
 # Docusaurus cache and generated files
+
+# Generated data files
+*.gen.*
+!*.gen.d.ts
 .docusaurus
 
 # Serverless directories

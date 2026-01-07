@@ -16,7 +16,7 @@
     "@inlang/marketplace-registry": "workspace:*",
     "@inlang/plugin-message-format": "workspace:*",
     "@inlang/sdk": "workspace:*",
-    "@opral/markdown-wc": "^0.7.0",
+    "@opral/markdown-wc": "0.8.0",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-router": "^1.132.0",
     "@tanstack/react-router-ssr-query": "^1.131.7",

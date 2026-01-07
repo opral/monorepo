@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { parse } from "@opral/markdown-wc";
 import { useEffect, useState } from "react";
-import "../../components/markdown-interactive";
+import { initMarkdownInteractive } from "../../components/markdown-interactive";
 import markdownCss from "../../markdown.css?url";
 import { getBlogDescription, getBlogTitle } from "../../blog/blogMetadata";
 
@@ -222,12 +222,26 @@ export const Route = createFileRoute("/blog/$slug")({
       });
     }
 
+    const links = [
+      { rel: "stylesheet", href: markdownCss },
+      { rel: "canonical", href: canonicalUrl },
+    ];
+    if (loaderData?.prevPost?.slug) {
+      links.push({
+        rel: "prev",
+        href: `https://inlang.com/blog/${loaderData.prevPost.slug}`,
+      });
+    }
+    if (loaderData?.nextPost?.slug) {
+      links.push({
+        rel: "next",
+        href: `https://inlang.com/blog/${loaderData.nextPost.slug}`,
+      });
+    }
+
     return {
       meta,
-      links: [
-        { rel: "stylesheet", href: markdownCss },
-        { rel: "canonical", href: canonicalUrl },
-      ],
+      links,
       scripts: slug
         ? [
             {
@@ -297,6 +311,10 @@ function BlogPostPage() {
       });
     });
   }, [post.imports]);
+
+  useEffect(() => {
+    initMarkdownInteractive();
+  }, []);
 
   const copyUrl = async () => {
     try {

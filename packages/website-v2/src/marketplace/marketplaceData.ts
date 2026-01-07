@@ -13,6 +13,12 @@ const localMarketplaceFiles = import.meta.glob<string>(
 );
 const marketplaceRootPrefix = "../../../../";
 
+export type MarketplaceHeading = {
+  id: string;
+  text: string;
+  level: number;
+};
+
 export type MarketplacePageData = {
   markdown: string;
   rawMarkdown: string;
@@ -21,6 +27,9 @@ export type MarketplacePageData = {
   manifest: MarketplaceManifest & { uniqueID: string };
   recommends?: MarketplaceManifest[];
   imports?: string[];
+  headings: MarketplaceHeading[];
+  prevPagePath?: string;
+  nextPagePath?: string;
 };
 
 export async function loadMarketplacePage({
@@ -121,6 +130,15 @@ export async function loadMarketplacePage({
     throw redirect({ to: "/not-found" });
   }
 
+  const { html: markdownWithIds, headings } =
+    extractHeadingsAndInjectIds(renderedMarkdown);
+  const { prevRoute, nextRoute } = getMarketplacePageNeighbors(item, pagePath);
+  const basePath = itemPath;
+  const buildNeighborPath = (route?: string) => {
+    if (!route) return undefined;
+    return route === "/" ? basePath : `${basePath}${route}`;
+  };
+
   const recommends = item.recommends
     ? registry.filter((entry: any) =>
         item.recommends!.some((recommend) => {
@@ -131,13 +149,16 @@ export async function loadMarketplacePage({
     : undefined;
 
   return {
-    markdown: renderedMarkdown,
+    markdown: markdownWithIds,
     rawMarkdown: rawMarkdownContent || "",
     frontmatter,
     pagePath,
     manifest: item,
     recommends,
     imports,
+    headings,
+    prevPagePath: buildNeighborPath(prevRoute),
+    nextPagePath: buildNeighborPath(nextRoute),
   };
 }
 
@@ -200,4 +221,103 @@ async function loadLocalMarketplaceFile(path: string): Promise<string> {
     throw new Error(`Missing marketplace file: ${path}`);
   }
   return await loader();
+}
+
+function extractHeadingsAndInjectIds(html: string): {
+  html: string;
+  headings: MarketplaceHeading[];
+} {
+  const headings: MarketplaceHeading[] = [];
+  const headingRegex = /<h([1-2])([^>]*)>(.*?)<\/h\1>/gis;
+  const updatedHtml = html.replace(
+    headingRegex,
+    (_match, level, attrs, inner) => {
+      const text = decodeHtmlEntities(stripHtml(String(inner))).trim();
+      const id = slugifyHeading(text);
+      headings.push({ id, text, level: Number(level) });
+      const cleanAttrs = String(attrs).replace(/\s+id=(["']).*?\1/i, "");
+      return `<h${level}${cleanAttrs} id="${id}">${inner}</h${level}>`;
+    },
+  );
+  return { html: updatedHtml, headings };
+}
+
+function stripHtml(value: string) {
+  return value.replace(/<[^>]*>/g, "");
+}
+
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ");
+}
+
+function slugifyHeading(value: string) {
+  return value
+    .toLowerCase()
+    .replaceAll(" ", "-")
+    .replaceAll("/", "")
+    .replace("#", "")
+    .replaceAll("(", "")
+    .replaceAll(")", "")
+    .replaceAll("?", "")
+    .replaceAll(".", "")
+    .replaceAll("@", "")
+    .replaceAll(
+      /([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g,
+      "",
+    )
+    .replaceAll("✂", "")
+    .replaceAll(":", "")
+    .replaceAll("'", "");
+}
+
+function getMarketplacePageNeighbors(
+  manifest: MarketplaceManifest & { uniqueID: string },
+  currentRoute: string,
+) {
+  if (!manifest.pages) {
+    return { prevRoute: undefined, nextRoute: undefined };
+  }
+
+  const allPages: Array<{ route: string; isExternal: boolean }> = [];
+  const entries = Object.entries(manifest.pages);
+
+  for (const [key, value] of entries) {
+    if (typeof value === "string") {
+      const isExternal = !value.endsWith(".md") && !value.endsWith(".html");
+      if (!isExternal) {
+        allPages.push({ route: key, isExternal });
+      }
+    } else {
+      for (const [route, path] of Object.entries(
+        value as Record<string, string>,
+      )) {
+        const isExternal = !path.endsWith(".md") && !path.endsWith(".html");
+        if (!isExternal) {
+          allPages.push({ route, isExternal });
+        }
+      }
+    }
+  }
+
+  const currentIndex = allPages.findIndex((p) => p.route === currentRoute);
+  if (currentIndex === -1 || allPages.length <= 1) {
+    return { prevRoute: undefined, nextRoute: undefined };
+  }
+
+  const prevRoute = currentIndex > 0 ? allPages[currentIndex - 1].route : null;
+  const nextRoute =
+    currentIndex < allPages.length - 1
+      ? allPages[currentIndex + 1].route
+      : null;
+
+  return {
+    prevRoute: prevRoute || undefined,
+    nextRoute: nextRoute || undefined,
+  };
 }

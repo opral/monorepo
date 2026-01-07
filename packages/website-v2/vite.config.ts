@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import viteTsConfigPaths from "vite-tsconfig-paths";
@@ -8,9 +8,13 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { watch } from "node:fs";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import { githubStarsPlugin } from "./src/ssg/github-stars-plugin";
 
 const config = defineConfig(({ mode }) => {
   const isTest = process.env.VITEST === "true" || mode === "test";
+  const env = loadEnv(mode, process.cwd(), "");
+  const githubToken =
+    process.env.INLANG_WEBSITE_GITHUB_TOKEN ?? env.INLANG_WEBSITE_GITHUB_TOKEN;
 
   return {
     plugins: [
@@ -39,6 +43,7 @@ const config = defineConfig(({ mode }) => {
         pages: getMarketplaceStaticPages(),
       }),
       viteReact(),
+      !isTest && githubStarsPlugin({ token: githubToken }),
       !isTest && blogAssetsPlugin(),
     ].filter(Boolean),
   };

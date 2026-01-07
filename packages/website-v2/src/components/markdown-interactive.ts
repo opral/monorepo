@@ -57,8 +57,3 @@ export function initMarkdownInteractive() {
   const observer = new MutationObserver(() => ensureCopyButtons());
   observer.observe(document.body, { childList: true, subtree: true });
 }
-
-// Auto-initialize when imported
-if (typeof window !== "undefined") {
-  initMarkdownInteractive();
-}
