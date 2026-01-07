@@ -8,7 +8,6 @@
   "ignore": [
     "@inlang/cli-example",
     "@inlang/plugin-icu1",
-    "@inlang/server",
     "@inlang/template-plugin",
     "@inlang/website-v2",
     "vs-code-extension",
