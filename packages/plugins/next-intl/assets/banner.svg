@@ -1,0 +1,54 @@
+<svg width="800" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="100%" style="stop-color:#1E293B"/>
+    </linearGradient>
+    <linearGradient id="nextIntlGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6"/>
+      <stop offset="100%" style="stop-color:#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="pluginGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#A78BFA"/>
+      <stop offset="100%" style="stop-color:#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="inlangGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#34D399"/>
+      <stop offset="100%" style="stop-color:#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="200" rx="12" fill="url(#bgGradient)"/>
+
+  <!-- next-intl files box -->
+  <rect x="40" y="50" width="180" height="100" rx="8" fill="#0F172A" stroke="url(#nextIntlGradient)" stroke-width="2"/>
+  <text x="130" y="85" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#3B82F6" text-anchor="middle">next-intl files</text>
+  <text x="130" y="115" font-family="ui-monospace, monospace" font-size="12" fill="#94A3B8" text-anchor="middle">en.json</text>
+  <text x="130" y="132" font-family="ui-monospace, monospace" font-size="12" fill="#94A3B8" text-anchor="middle">de.json, fr.json</text>
+
+  <!-- Arrow 1 -->
+  <path d="M235 100 L275 100" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+  <path d="M270 95 L280 100 L270 105" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M245 100 L235 100" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+  <path d="M240 95 L230 100 L240 105" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Plugin box (center, highlighted) -->
+  <rect x="290" y="40" width="220" height="120" rx="8" fill="#1E1B4B" stroke="url(#pluginGradient)" stroke-width="2"/>
+  <rect x="290" y="40" width="220" height="120" rx="8" fill="url(#pluginGradient)" fill-opacity="0.1"/>
+  <text x="400" y="80" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#A78BFA" text-anchor="middle">next-intl plugin</text>
+  <text x="400" y="105" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#CBD5E1" text-anchor="middle">reads &amp; writes</text>
+  <text x="400" y="125" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#CBD5E1" text-anchor="middle">your translation files</text>
+
+  <!-- Arrow 2 -->
+  <path d="M525 100 L565 100" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+  <path d="M560 95 L570 100 L560 105" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M535 100 L525 100" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+  <path d="M530 95 L520 100 L530 105" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- inlang project box -->
+  <rect x="580" y="50" width="180" height="100" rx="8" fill="#0F172A" stroke="url(#inlangGradient)" stroke-width="2"/>
+  <text x="670" y="85" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#34D399" text-anchor="middle">inlang project</text>
+  <text x="670" y="115" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle">Fink · Sherlock</text>
+  <text x="670" y="132" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle">CLI · SDK</text>
+</svg>

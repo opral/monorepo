@@ -1,21 +1,50 @@
-# What does the next-intl plugin do?
+# next-intl Plugin for Inlang
 
-`next-intl` is agnostic but recommends the JSON format. It also determines how messages are accessed on the frontend. A plugin is required to provide the necessary information to ensure compatibility with the inlang ecosystem and other inlang apps.
+This plugin enables your inlang project to read and write [next-intl](https://next-intl-docs.vercel.app/) translation files.
 
-## Manual Installation
+![next-intl plugin for inlang](https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/assets/banner.svg)
 
-> We recommend using the install button, but if you want to do it manually:
+## Why use this plugin?
+
+If you're using next-intl for internationalization in Next.js, this plugin lets you:
+
+- **Manage translations** with [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) – a translation editor for collaborating with translators
+- **Get inline previews** with [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a VS Code extension that shows translations directly in your code
+- **Lint translations** with [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) – catch missing translations, unused keys, and other issues
+- **Automate workflows** with the inlang SDK – build custom tooling around your translations
+
+## How it works
+
+The plugin reads and writes next-intl JSON files, preserving your existing file structure (nested or flat keys). It also tells Sherlock how to detect `t()`, `useTranslations()`, and `getTranslations()` calls in your code.
+
+# Supported next-intl Features
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Basic key-value pairs | ✅ Supported | Fully working |
+| Nested keys | ✅ Supported | Auto-detects flat vs nested structure |
+| Variable interpolation | ✅ Supported | `{variable}` with customizable patterns |
+| Rich text | ⚠️ Partial | Tags are treated as text |
+| Plurals (ICU) | ❌ Not supported | ICU message format not parsed |
+| Select (ICU) | ❌ Not supported | ICU message format not parsed |
+
+## Version Compatibility
+
+- **next-intl v3.x**: Full support
+- **next-intl v2.x**: Full support
+
+## Installation
 
 - Add this to the modules in your `project.inlang/settings.json`
-- Change the `sourceLanguageTag` if needed 
-- Include existing languagetags in the `languageTags` array
+- Change the `sourceLanguageTag` if needed
+- Include existing language tags in the `languageTags` array
 
 ```json
 {
 	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de"], 
+	"languageTags": ["en", "de"],
 	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@1/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js"
   	],
 	"plugin.inlang.nextIntl": {
     	"pathPattern": "./messages/{languageTag}.json"
@@ -35,21 +64,6 @@ type PluginSettings = {
 }
 ```
 
-You can add this settings also in the `project.inlang/settings.json`:
-
-```json
-{
-	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de"], // add languageTags if needed
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@1/dist/index.js",
-  	],
-	"plugin.inlang.nextIntl": {
-    		// settings
-  	}
-}
-```
-
 ## `pathPattern`
 
 To use the plugin, you must provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
@@ -60,9 +74,7 @@ To use the plugin, you must provide a path to the directory where your language-
 
 ## `variableReferencePattern`
 
-Defines the pattern for variable references. For the default of `next-intl`, you can add this to your plugin settings.
-
-Example:
+Defines the pattern for variable references. The default matches next-intl's format.
 
 ```json
 "variableReferencePattern": ["{", "}"]
@@ -76,11 +88,9 @@ This setting is optional and should only be used if the file name of your `sourc
 "sourceLanguageFilePath": "./resources/main.json"
 ```
 
-# Install the Inlang Visual Studio Code extension (Sherlock) to supercharge your i18n workflow
+# In-code usage
 
-The plugin automatically informs [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) how to extract keys and namespaces from your code to display inline annotations. A quick run-through of the most important features can be found [here (loom)](https://www.loom.com/share/68bc13eceb454a8fa69a7cfec5569b8a). Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
-
-## In-code usage
+Basic usage:
 
 `t("key")`
 
@@ -88,21 +98,95 @@ With namespaces:
 
 ```ts
 import {useTranslations} from 'next-intl';
- 
+
 function About() {
   const t = useTranslations('About');
   return <h1>{t('title')}</h1>;
 }
 ```
 
-To learn about namespaces and how to use translation functions in your code, you can refer to [next-intl documentation](https://next-intl-docs.vercel.app/docs/usage/messages). The plugin can pars the code and provide the VS Code extension (Sherlock) with this information.
+Server components with `getTranslations`:
 
-Version `1.3` also supports `getTranslations`.
+```ts
+import {getTranslations} from 'next-intl/server';
+
+export default async function Page() {
+  const t = await getTranslations('About');
+  return <h1>{t('title')}</h1>;
+}
+```
+
+To learn about namespaces and how to use translation functions in your code, refer to the [next-intl documentation](https://next-intl-docs.vercel.app/docs/usage/messages).
 
 # Expected behavior
 
-The message IDs are sorted in the order in which they appear in the `sourceLanguage` file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
+## Structure and Ordering
 
+The **source language file determines the structure** for all other locale files:
+
+- **Key ordering**: Messages are sorted in the order they appear in the source language file
+- **Nesting vs flat**: Detected per-file from the source language. If your `en.json` uses nested keys, all other locales will use nested keys too
+- **New keys**: When you add translations for other locales, they follow the source file's structure
+
+### Example
+
+If your source language (`en.json`) looks like this:
+```json
+{
+  "About": {
+    "title": "About us",
+    "description": "Learn more about our company"
+  }
+}
+```
+
+Then your target language (`de.json`) will be written in the same nested structure:
+```json
+{
+  "About": {
+    "title": "Über uns",
+    "description": "Erfahren Sie mehr über unser Unternehmen"
+  }
+}
+```
+
+# Limitations
+
+The following next-intl features are **not supported** by this plugin:
+
+| Feature | Limitation |
+|---------|------------|
+| **ICU message format** | Plurals, select, and other ICU syntax are not parsed |
+| **Rich text formatting** | Tags like `<bold>text</bold>` are treated as plain text |
+| **Nested `t()` calls** | References like `{t('other.key')}` are not resolved |
+
+# Troubleshooting
+
+## Keys appear duplicated or out of order
+
+**Cause**: The source language file structure doesn't match what the plugin expects.
+
+**Solution**:
+1. Ensure your source language file (e.g., `en.json`) is valid JSON
+2. Check that the file structure is consistent (all nested or all flat)
+3. The source language file is the "source of truth" for key ordering
+
+## Sherlock not detecting translation keys
+
+**Cause**: Non-standard function names or unsupported file types.
+
+**Solution**:
+- Use standard function calls: `t("key")`, `useTranslations()`, or `getTranslations()`
+- Supported file types: `.ts`, `.tsx`, `.js`, `.jsx`
+
+## Changes not appearing in target language files
+
+**Cause**: Target files don't exist or path pattern is incorrect.
+
+**Solution**:
+1. Verify your `pathPattern` matches your file structure
+2. Check that the `{languageTag}` placeholder is in the correct position
+3. Directories are created automatically, but the language tag must be in your `languageTags` array
 
 # Contributing
 
@@ -114,15 +198,3 @@ Run the following commands in your terminal (node and npm must be installed):
 2. `npm run dev`
 
 `npm run dev` will start the development environment, which automatically compiles the [src/index.ts](#getting-started) files to JavaScript ([dist/index.js](#getting-started)), runs tests defined in `*.test.ts` files and watches changes.
-
-## Publishing
-
-Run `npm run build` to generate a build.
-
-The [dist](./dist/) directory is used to distribute the plugin directly via CDN like [jsDelivr](https://www.jsdelivr.com/). Using a CDN works because the inlang config uses dynamic imports to import plugins.
-
-Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
-
----
-
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/gdMPPWy57R) or open a [Discussion](https://github.com/opral/inlang/discussions) or an [Issue](https://github.com/opral/inlang/issues) on [Github](https://github.com/opral/inlang)._

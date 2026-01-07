@@ -258,7 +258,3 @@ Run the following commands in your terminal (node and npm must be installed):
 2. `npm run dev`
 
 `npm run dev` will start the development environment which automatically compiles the [src/index.ts](#getting-started) files to JavaScript ([dist/index.js](#getting-started)), runs tests defined in `*.test.ts` files and watches changes.
-
----
-
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/gdMPPWy57R) or open a [Discussion](https://github.com/opral/inlang/discussions) or an [Issue](https://github.com/opral/inlang/issues) on [Github](https://github.com/opral/inlang)._
