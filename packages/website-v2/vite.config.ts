@@ -69,7 +69,7 @@ function getMarketplaceStaticPages() {
 }
 
 function flattenPages(
-  pages: Record<string, string> | Record<string, Record<string, string>>
+  pages: Record<string, string> | Record<string, Record<string, string>>,
 ) {
   const flatPages: Record<string, string> = {};
   for (const [key, value] of Object.entries(pages) as Array<

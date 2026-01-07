@@ -9,7 +9,7 @@ const localMarketplaceFiles = import.meta.glob<string>(
   {
     query: "?raw",
     import: "default",
-  }
+  },
 );
 const marketplaceRootPrefix = "../../../../";
 
@@ -78,7 +78,7 @@ export async function loadMarketplacePage({
 
   if (flatPages) {
     const pageEntry = Object.entries(flatPages).find(
-      ([route]) => route === pagePath
+      ([route]) => route === pagePath,
     );
 
     if (!pageEntry) {
@@ -126,7 +126,7 @@ export async function loadMarketplacePage({
         item.recommends!.some((recommend) => {
           const normalized = recommend.replace(/^m\//, "").replace(/^g\//, "");
           return normalized === entry.uniqueID;
-        })
+        }),
       )
     : undefined;
 
@@ -142,7 +142,7 @@ export async function loadMarketplacePage({
 }
 
 function flattenPages(
-  pages: Record<string, string> | Record<string, Record<string, string>>
+  pages: Record<string, string> | Record<string, Record<string, string>>,
 ) {
   const flatPages: Record<string, string> = {};
   for (const [key, value] of Object.entries(pages) as Array<
@@ -187,7 +187,7 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 function getMarketplaceFileLoader(
-  path: string
+  path: string,
 ): (() => Promise<string>) | undefined {
   const normalized = path.replace(/^[./]+/, "");
   const key = `${marketplaceRootPrefix}${normalized}`;

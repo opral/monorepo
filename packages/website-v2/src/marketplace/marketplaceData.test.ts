@@ -34,7 +34,7 @@ describe("loadMarketplacePage redirects", () => {
         uid: "u1",
         slug: "wrong-slug",
         splat: "docs/intro",
-      })
+      }),
     ).rejects.toMatchObject({
       to: "/m/u1/my-app/docs/intro",
     });
@@ -46,7 +46,7 @@ describe("loadMarketplacePage redirects", () => {
         uid: "dxnzrydw",
         slug: "anything",
         splat: "legacy/path",
-      })
+      }),
     ).rejects.toMatchObject({
       to: "/m/gerre34r/library-inlang-paraglideJs/sveltekit",
     });
@@ -58,7 +58,7 @@ describe("loadMarketplacePage redirects", () => {
         uid: "osslbuzt",
         slug: "anything",
         splat: "legacy/path",
-      })
+      }),
     ).rejects.toMatchObject({
       to: "/m/gerre34r/library-inlang-paraglideJs/next-js",
     });
@@ -70,7 +70,7 @@ describe("loadMarketplacePage redirects", () => {
         uid: "iljlwzfs",
         slug: "anything",
         splat: "legacy/path",
-      })
+      }),
     ).rejects.toMatchObject({
       to: "/m/gerre34r/library-inlang-paraglideJs/astro",
     });
@@ -92,7 +92,7 @@ describe("loadMarketplacePage redirects", () => {
         uid: "u1",
         slug: "my-app",
         splat: "docs/old",
-      })
+      }),
     ).rejects.toMatchObject({
       to: "/m/u1/my-app/guides/old",
     });
@@ -109,7 +109,7 @@ describe("loadMarketplacePage redirects", () => {
       loadMarketplacePage({
         uid: "u2",
         slug: "wrong-slug",
-      })
+      }),
     ).rejects.toMatchObject({
       to: "/m/u2/app-inlang-cli/",
     });

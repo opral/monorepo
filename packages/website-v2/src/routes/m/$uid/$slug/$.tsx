@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router"
-import MarketplacePage from "../../../../marketplace/MarketplacePage"
-import { loadMarketplacePage } from "../../../../marketplace/marketplaceData"
+import { createFileRoute } from "@tanstack/react-router";
+import MarketplacePage from "../../../../marketplace/MarketplacePage";
+import { loadMarketplacePage } from "../../../../marketplace/marketplaceData";
 import {
   buildMarketplaceTitle,
   extractOgMeta,
@@ -11,7 +11,7 @@ import {
   extractMarkdownDescription,
   buildMarketplaceSoftwareJsonLd,
   buildMarketplaceArticleJsonLd,
-} from "../../../../marketplace/seo"
+} from "../../../../marketplace/seo";
 
 export const Route = createFileRoute("/m/$uid/$slug/$")({
   loader: async ({ params }) =>
@@ -27,47 +27,49 @@ export const Route = createFileRoute("/m/$uid/$slug/$")({
     if (!data) return null;
     return <MarketplacePage data={data} />;
   },
-})
+});
 
-function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePage>>) {
+function buildMarketplaceHead(
+  data: Awaited<ReturnType<typeof loadMarketplacePage>>,
+) {
   const displayName =
     typeof data.manifest.displayName === "object"
       ? data.manifest.displayName.en
-      : data.manifest.displayName
+      : data.manifest.displayName;
   const description =
     typeof data.manifest.description === "object"
       ? data.manifest.description.en
-      : data.manifest.description
+      : data.manifest.description;
   const pageTitle = buildMarketplaceTitle({
     displayName,
     frontmatter: data.frontmatter,
     pagePath: data.pagePath,
     rawMarkdown: data.rawMarkdown,
-  })
+  });
   const subpageTitle = getMarketplaceSubpageTitle({
     displayName,
     frontmatter: data.frontmatter,
     pagePath: data.pagePath,
     rawMarkdown: data.rawMarkdown,
-  })
+  });
   const metaDescription =
     (data.frontmatter?.description as string | undefined) ||
     extractMarkdownDescription(data.rawMarkdown) ||
-    description
-  const ogMeta = extractOgMeta(data.frontmatter)
-  const twitterMeta = extractTwitterMeta(data.frontmatter)
+    description;
+  const ogMeta = extractOgMeta(data.frontmatter);
+  const twitterMeta = extractTwitterMeta(data.frontmatter);
   const image =
     data.manifest.gallery && data.manifest.gallery.length > 0
       ? data.manifest.gallery[0]
-      : "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg"
+      : "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
   const canonicalSlug = data.manifest.slug
     ? data.manifest.slug.replaceAll(".", "-")
-    : data.manifest.id.replaceAll(".", "-")
-  const itemPath = `/m/${data.manifest.uniqueID}/${canonicalSlug}`
+    : data.manifest.id.replaceAll(".", "-");
+  const itemPath = `/m/${data.manifest.uniqueID}/${canonicalSlug}`;
   const canonicalPath =
-    data.pagePath === "/" ? itemPath : `${itemPath}${data.pagePath}`
-  const canonicalUrl = `https://inlang.com${canonicalPath}`
-  const baseCanonicalUrl = `https://inlang.com${itemPath}`
+    data.pagePath === "/" ? itemPath : `${itemPath}${data.pagePath}`;
+  const canonicalUrl = `https://inlang.com${canonicalPath}`;
+  const baseCanonicalUrl = `https://inlang.com${itemPath}`;
   const jsonLd = buildMarketplaceJsonLd({
     displayName,
     description: metaDescription,
@@ -76,13 +78,13 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     frontmatter: data.frontmatter,
     pagePath: data.pagePath,
     rawMarkdown: data.rawMarkdown,
-  })
+  });
   const breadcrumbJsonLd = buildMarketplaceBreadcrumbJsonLd({
     displayName,
     canonicalUrl,
     canonicalBaseUrl: baseCanonicalUrl,
     subpageTitle,
-  })
+  });
   const articleJsonLd =
     subpageTitle &&
     buildMarketplaceArticleJsonLd({
@@ -90,7 +92,7 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
       description: metaDescription,
       canonicalUrl,
       image,
-    })
+    });
   const softwareJsonLd = buildMarketplaceSoftwareJsonLd({
     id: data.manifest.id,
     displayName,
@@ -104,7 +106,7 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
     repository: data.manifest.repository,
     website: data.manifest.website,
     frontmatter: data.frontmatter,
-  })
+  });
 
   return {
     links: [{ rel: "canonical", href: canonicalUrl }],
@@ -157,5 +159,5 @@ function buildMarketplaceHead(data: Awaited<ReturnType<typeof loadMarketplacePag
       ...ogMeta,
       ...twitterMeta,
     ],
-  }
+  };
 }

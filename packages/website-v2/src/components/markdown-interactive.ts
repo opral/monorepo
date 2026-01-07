@@ -15,7 +15,7 @@ function ensureCopyButtons(root: Document | Element = document) {
     button.type = "button";
     button.className = COPY_BUTTON_CLASS;
     button.textContent = "Copy";
-    
+
     // Ensure pre has relative positioning for absolute button
     (pre as HTMLElement).style.position = "relative";
     pre.appendChild(button);
@@ -62,4 +62,3 @@ export function initMarkdownInteractive() {
 if (typeof window !== "undefined") {
   initMarkdownInteractive();
 }
-

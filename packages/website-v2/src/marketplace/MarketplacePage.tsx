@@ -41,7 +41,7 @@ export default function MarketplacePage({
     const container = articleRef.current;
     if (!container) return;
     const elements = Array.from(
-      container.querySelectorAll("h1, h2")
+      container.querySelectorAll("h1, h2"),
     ) as HTMLElement[];
     const newHeadings = elements.map((element) => {
       const id = slugifyHeading(element.textContent || "");
@@ -254,7 +254,7 @@ export default function MarketplacePage({
                         className="marketplace-markdown pt-4 pb-2.5"
                         onMouseDown={(event) => {
                           const anchor = (event.target as HTMLElement).closest(
-                            "a"
+                            "a",
                           );
                           if (anchor?.getAttribute("href")?.startsWith("#")) {
                             event.preventDefault();
@@ -276,7 +276,7 @@ export default function MarketplacePage({
                         className="marketplace-markdown pb-2.5"
                         onMouseDown={(event) => {
                           const anchor = (event.target as HTMLElement).closest(
-                            "a"
+                            "a",
                           );
                           if (anchor?.getAttribute("href")?.startsWith("#")) {
                             event.preventDefault();
@@ -659,8 +659,8 @@ function DocMeta({
                 heading.level === 3
                   ? "pl-3"
                   : heading.level === 2
-                  ? "pl-1"
-                  : "";
+                    ? "pl-1"
+                    : "";
               return (
                 <button
                   key={heading.id}
@@ -879,7 +879,7 @@ function slugifyHeading(value: string) {
     .replaceAll("@", "")
     .replaceAll(
       /([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g,
-      ""
+      "",
     )
     .replaceAll("✂", "")
     .replaceAll(":", "")
@@ -898,7 +898,7 @@ function scrollToAnchor(anchor: string) {
 
 function getGithubLink(
   manifest: MarketplaceManifest,
-  currentRoute: string
+  currentRoute: string,
 ): string | undefined {
   let link: string | undefined;
   if (manifest.pages) {
@@ -954,7 +954,7 @@ function getGithubLink(
   if (!link) return undefined;
   return `https://github.com/opral/monorepo/blob/main/${link.replace(
     "./",
-    ""
+    "",
   )}`;
 }
 
@@ -988,7 +988,7 @@ function PageNavigation({
       }
     } else {
       for (const [route, path] of Object.entries(
-        value as Record<string, string>
+        value as Record<string, string>,
       )) {
         const isExternal = !path.endsWith(".md") && !path.endsWith(".html");
         if (!isExternal) {

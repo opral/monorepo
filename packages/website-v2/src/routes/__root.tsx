@@ -1,66 +1,66 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
-import appCss from '../styles.css?url'
+import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       {
-        charSet: 'utf-8',
+        charSet: "utf-8",
       },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
       },
       {
-        title: 'inlang',
+        title: "inlang",
       },
       {
-        name: 'theme-color',
-        content: '#ffffff',
+        name: "theme-color",
+        content: "#ffffff",
       },
       {
-        name: 'robots',
-        content: 'index, follow',
+        name: "robots",
+        content: "index, follow",
       },
     ],
     links: [
-      { rel: 'preconnect', href: 'https://rsms.me/' },
-      { rel: 'stylesheet', href: 'https://rsms.me/inter/inter.css' },
+      { rel: "preconnect", href: "https://rsms.me/" },
+      { rel: "stylesheet", href: "https://rsms.me/inter/inter.css" },
       {
-        rel: 'stylesheet',
+        rel: "stylesheet",
         href: appCss,
       },
       {
-        rel: 'apple-touch-icon',
-        sizes: '180x180',
-        href: '/favicon/apple-touch-icon.png',
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/favicon/apple-touch-icon.png",
       },
       {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '32x32',
-        href: '/favicon/favicon-32x32.png',
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/favicon/favicon-32x32.png",
       },
       {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '16x16',
-        href: '/favicon/favicon-16x16.png',
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        href: "/favicon/favicon-16x16.png",
       },
-      { rel: 'manifest', href: '/favicon/site.webmanifest' },
+      { rel: "manifest", href: "/favicon/site.webmanifest" },
       {
-        rel: 'mask-icon',
-        href: '/favicon/safari-pinned-tab.svg',
-        color: '#5bbad5',
+        rel: "mask-icon",
+        href: "/favicon/safari-pinned-tab.svg",
+        color: "#5bbad5",
       },
     ],
   }),
 
   shellComponent: RootDocument,
   notFoundComponent: NotFoundPage,
-})
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -75,7 +75,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
 
 function NotFoundPage() {
@@ -94,5 +94,5 @@ function NotFoundPage() {
         </a>
       </div>
     </div>
-  )
+  );
 }

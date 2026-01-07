@@ -2,7 +2,7 @@
 
 ### Standard open file format for i18n
 
-Inlang is an *open file format* for internationalization *i18n* that provides an [SDK](https://github.com/opral/inlang-sdk) for building and integrating localization tools on top of that open file format.
+Inlang is an _open file format_ for internationalization _i18n_ that provides an [SDK](https://github.com/opral/inlang-sdk) for building and integrating localization tools on top of that open file format.
 
 `.inlang` files are designed to become the open standard for i18n and enable interoperability between i18n solutions. Such solutions involve apps like Fink, libraries like Paraglide JS, or plugins.
 
@@ -18,7 +18,7 @@ Inlang is an *open file format* for internationalization *i18n* that provides an
 
 ### SDK to build i18n apps & solutions
 
-The inlang SDK is the official specification and parser for `.inlang` files. 
+The inlang SDK is the official specification and parser for `.inlang` files.
 
 The SDK allows creating, reading, and querying inlang files programmatically. Go to the [SDK docs](https://github.com/opral/inlang-sdk) for more information.
 
@@ -26,7 +26,7 @@ The SDK allows creating, reading, and querying inlang files programmatically. Go
 
 ## Stack agnostic
 
-Inlang is a file format with no depedency on a tech stack. Hence, it can be used with any tech stack. 
+Inlang is a file format with no depedency on a tech stack. Hence, it can be used with any tech stack.
 
 The only thing that is needed are import/export plugins for the translation file format that is used by the tech stack. For iOS for example, the [XCode strings catalog](https://inlang.com/m/neh2d6w7/plugin-hechenbros-xcstrings) can be used. For Flutter a `.arb` plugin would be the right choice.
 
@@ -41,4 +41,3 @@ Adopting the Inlang format gives you access to an ecosystem of **[apps](https://
 - **[ParaglideJS 🪂](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)** – A lightweight i18n library optimized for developer experience.
 - **[Fink 🐦](https://fink2.onrender.com/)** – A powerful translation management tool for developers and translators.
 - **[Sherlock i18n 🕵️](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)** – A VS Code extension that provides real-time translation linting and suggestions.
-

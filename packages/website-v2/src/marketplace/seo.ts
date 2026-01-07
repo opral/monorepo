@@ -16,7 +16,9 @@ export function buildMarketplaceTitle(input: MarketplaceHeadInput) {
 export function extractOgMeta(frontmatter?: Record<string, unknown>) {
   if (!frontmatter) return [];
   return Object.entries(frontmatter)
-    .filter(([key, value]) => key.startsWith("og:") && typeof value === "string")
+    .filter(
+      ([key, value]) => key.startsWith("og:") && typeof value === "string",
+    )
     .map(([key, value]) => ({
       property: key,
       content: value as string,
@@ -27,8 +29,7 @@ export function extractTwitterMeta(frontmatter?: Record<string, unknown>) {
   if (!frontmatter) return [];
   return Object.entries(frontmatter)
     .filter(
-      ([key, value]) =>
-        key.startsWith("twitter:") && typeof value === "string"
+      ([key, value]) => key.startsWith("twitter:") && typeof value === "string",
     )
     .map(([key, value]) => ({
       name: key,
@@ -152,7 +153,7 @@ export function buildMarketplaceSoftwareJsonLd(input: SoftwareJsonLdInput) {
   }
 
   const sameAs = [input.website, input.repository].filter(
-    (value): value is string => Boolean(value)
+    (value): value is string => Boolean(value),
   );
 
   const base = {

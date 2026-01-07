@@ -1,43 +1,43 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import ReactMarkdown, { type Components } from 'react-markdown'
-import { registry } from '@inlang/marketplace-registry'
-import landingMarkdown from '../content/landingpage.md?raw'
+import { createFileRoute, Link } from "@tanstack/react-router";
+import ReactMarkdown, { type Components } from "react-markdown";
+import { registry } from "@inlang/marketplace-registry";
+import landingMarkdown from "../content/landingpage.md?raw";
 
 const ogImage =
-  'https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg'
+  "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: 'inlang' },
+      { title: "inlang" },
       {
-        name: 'description',
+        name: "description",
         content:
-          'Inlang is an open lix file format for globalizing/localizing software (i18n). One file format, multiple apps, all interoperable.',
+          "Inlang is an open lix file format for globalizing/localizing software (i18n). One file format, multiple apps, all interoperable.",
       },
-      { name: 'og:image', content: ogImage },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:image', content: ogImage },
-      { name: 'twitter:image:alt', content: 'inlang' },
-      { name: 'twitter:title', content: 'inlang' },
+      { name: "og:image", content: ogImage },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ogImage },
+      { name: "twitter:image:alt", content: "inlang" },
+      { name: "twitter:title", content: "inlang" },
       {
-        name: 'twitter:description',
+        name: "twitter:description",
         content:
-          'Inlang is an open lix file format for globalizing/localizing software (i18n). One file format, multiple apps, all interoperable.',
+          "Inlang is an open lix file format for globalizing/localizing software (i18n). One file format, multiple apps, all interoperable.",
       },
-      { name: 'twitter:site', content: '@inlanghq' },
-      { name: 'twitter:creator', content: '@inlanghq' },
+      { name: "twitter:site", content: "@inlanghq" },
+      { name: "twitter:creator", content: "@inlanghq" },
     ],
   }),
   component: App,
-})
+});
 
 const featuredIds = [
-  'library.inlang.paraglideJs',
-  'app.inlang.finkLocalizationEditor',
-  'app.inlang.ideExtension',
-  'app.inlang.cli',
-]
+  "library.inlang.paraglideJs",
+  "app.inlang.finkLocalizationEditor",
+  "app.inlang.ideExtension",
+  "app.inlang.cli",
+];
 
 function App() {
   return (
@@ -72,7 +72,8 @@ function App() {
             </h1>
             <p className="text-lg text-slate-600 max-w-xl">
               Inlang is an open lix file format for globalizing/localizing
-              software (i18n). One file format, multiple apps, all interoperable.
+              software (i18n). One file format, multiple apps, all
+              interoperable.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -108,17 +109,17 @@ function App() {
           </h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {featuredIds.map((id) => {
-              const manifest = registry.find((item) => item.id === id)
-              if (!manifest) return null
+              const manifest = registry.find((item) => item.id === id);
+              if (!manifest) return null;
               const displayName =
-                typeof manifest.displayName === 'object'
+                typeof manifest.displayName === "object"
                   ? manifest.displayName.en
-                  : manifest.displayName
+                  : manifest.displayName;
               const description =
-                typeof manifest.description === 'object'
+                typeof manifest.description === "object"
                   ? manifest.description.en
-                  : manifest.description
-              const slug = manifest.id.replaceAll('.', '-')
+                  : manifest.description;
+              const slug = manifest.id.replaceAll(".", "-");
               return (
                 <Link
                   key={manifest.id}
@@ -149,11 +150,9 @@ function App() {
                       </div>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm text-slate-600">
-                    {description}
-                  </p>
+                  <p className="mt-4 text-sm text-slate-600">{description}</p>
                 </Link>
-              )
+              );
             })}
           </div>
         </div>
@@ -167,7 +166,7 @@ function App() {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
 const markdownComponents: Components = {
@@ -187,9 +186,7 @@ const markdownComponents: Components = {
   ul: ({ children }) => (
     <ul className="list-disc pl-6 text-slate-700 mb-4">{children}</ul>
   ),
-  li: ({ children }) => (
-    <li className="mb-2">{children}</li>
-  ),
+  li: ({ children }) => <li className="mb-2">{children}</li>,
   a: ({ children, href }) => (
     <a
       href={href}
@@ -201,8 +198,8 @@ const markdownComponents: Components = {
   img: ({ alt, src }) => (
     <img
       src={src}
-      alt={alt || ''}
+      alt={alt || ""}
       className="w-full rounded-xl border border-slate-200 my-6"
     />
   ),
-}
+};

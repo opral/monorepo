@@ -95,7 +95,7 @@ Later content.
 `);
 
     expect(description).toBe(
-      "First paragraph line one. Second line of the same paragraph."
+      "First paragraph line one. Second line of the same paragraph.",
     );
   });
 
@@ -107,9 +107,7 @@ Markdown paragraph.
 `);
     const manifestDescription = "Manifest description";
     const resolved =
-      frontmatterDescription ||
-      markdownDescription ||
-      manifestDescription;
+      frontmatterDescription || markdownDescription || manifestDescription;
 
     expect(resolved).toBe("Frontmatter description");
   });
@@ -122,9 +120,7 @@ Markdown paragraph.
 `);
     const manifestDescription = "Manifest description";
     const resolved =
-      frontmatterDescription ||
-      markdownDescription ||
-      manifestDescription;
+      frontmatterDescription || markdownDescription || manifestDescription;
 
     expect(resolved).toBe("Markdown paragraph.");
   });
@@ -137,9 +133,7 @@ Markdown paragraph.
 `);
     const manifestDescription = "Manifest description";
     const resolved =
-      frontmatterDescription ||
-      markdownDescription ||
-      manifestDescription;
+      frontmatterDescription || markdownDescription || manifestDescription;
 
     expect(resolved).toBe("Manifest description");
   });
@@ -193,7 +187,8 @@ Markdown paragraph.
   it("builds BreadcrumbList JSON-LD", () => {
     const jsonLd = buildMarketplaceBreadcrumbJsonLd({
       displayName: "Paraglide JS",
-      canonicalBaseUrl: "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
+      canonicalBaseUrl:
+        "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
       canonicalUrl:
         "https://inlang.com/m/gerre34r/library-inlang-paraglideJs/react-router",
       subpageTitle: "React Router",
@@ -213,8 +208,7 @@ Markdown paragraph.
           "@type": "ListItem",
           position: 2,
           name: "React Router",
-          item:
-            "https://inlang.com/m/gerre34r/library-inlang-paraglideJs/react-router",
+          item: "https://inlang.com/m/gerre34r/library-inlang-paraglideJs/react-router",
         },
       ],
     });

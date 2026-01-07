@@ -187,7 +187,9 @@
   color: var(--vp-c-brand-1);
   text-decoration: underline;
   text-underline-offset: 2px;
-  transition: color 0.25s, opacity 0.25s;
+  transition:
+    color 0.25s,
+    opacity 0.25s;
 }
 
 .marketplace-markdown a:hover {
@@ -247,7 +249,9 @@
   border-radius: 4px;
   padding: 2px 6px;
   font-weight: 500;
-  transition: color 0.25s, background-color 0.5s;
+  transition:
+    color 0.25s,
+    background-color 0.5s;
 }
 
 /* Ensure code inside pre doesn't have nested background */
@@ -360,7 +364,11 @@
   border: 1px solid var(--vp-c-divider);
   opacity: 0;
   cursor: pointer;
-  transition: opacity 0.2s, color 0.2s, border-color 0.2s, background-color 0.2s;
+  transition:
+    opacity 0.2s,
+    color 0.2s,
+    border-color 0.2s,
+    background-color 0.2s;
 }
 
 .marketplace-markdown pre:hover > button.mwc-copy-button {
@@ -393,7 +401,9 @@
   border-left: 2px solid var(--vp-c-divider);
   padding-left: 16px;
   color: var(--vp-c-text-2);
-  transition: border-color 0.5s, color 0.5s;
+  transition:
+    border-color 0.5s,
+    color 0.5s;
 }
 
 .marketplace-markdown blockquote > p {
@@ -619,15 +629,33 @@
 }
 
 /* Fallback for browsers that don't support attr() for height/width */
-.marketplace-markdown img[height="14"] { height: 14px; }
-.marketplace-markdown img[height="18"] { height: 18px; }
-.marketplace-markdown img[height="20"] { height: 20px; }
-.marketplace-markdown img[height="24"] { height: 24px; }
-.marketplace-markdown img[height="32"] { height: 32px; }
-.marketplace-markdown img[width="18"] { width: 18px; }
-.marketplace-markdown img[width="20"] { width: 20px; }
-.marketplace-markdown img[width="24"] { width: 24px; }
-.marketplace-markdown img[width="32"] { width: 32px; }
+.marketplace-markdown img[height="14"] {
+  height: 14px;
+}
+.marketplace-markdown img[height="18"] {
+  height: 18px;
+}
+.marketplace-markdown img[height="20"] {
+  height: 20px;
+}
+.marketplace-markdown img[height="24"] {
+  height: 24px;
+}
+.marketplace-markdown img[height="32"] {
+  height: 32px;
+}
+.marketplace-markdown img[width="18"] {
+  width: 18px;
+}
+.marketplace-markdown img[width="20"] {
+  width: 20px;
+}
+.marketplace-markdown img[width="24"] {
+  width: 24px;
+}
+.marketplace-markdown img[width="32"] {
+  width: 32px;
+}
 
 /* Images - Standalone content images */
 .marketplace-markdown p > img:only-child {
@@ -652,7 +680,8 @@
 }
 
 /* Badge-only paragraphs (no br, sub, or other block content) - flex layout */
-.marketplace-markdown p:has(a > img):not(:has(br)):not(:has(sub)):not(:has(sup)) {
+.marketplace-markdown
+  p:has(a > img):not(:has(br)):not(:has(sub)):not(:has(sup)) {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -678,7 +707,8 @@
 }
 
 /* Badge-only centered paragraphs need justify-content */
-.marketplace-markdown p[align="center"]:has(a > img):not(:has(br)):not(:has(sub)):not(:has(sup)) {
+.marketplace-markdown
+  p[align="center"]:has(a > img):not(:has(br)):not(:has(sub)):not(:has(sup)) {
   justify-content: center;
 }
 

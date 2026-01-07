@@ -16,7 +16,7 @@ const blogMarkdownFiles = import.meta.glob<string>(
   {
     query: "?raw",
     import: "default",
-  }
+  },
 );
 const blogJsonFiles = import.meta.glob<string>("../../../../../blog/*.json", {
   query: "?raw",
@@ -69,7 +69,7 @@ const loadBlogIndex = createServerFn({ method: "GET" }).handler(async () => {
         date: item.date,
         authors,
       };
-    })
+    }),
   );
 
   posts.sort((a, b) => {

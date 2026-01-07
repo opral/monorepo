@@ -1,4 +1,7 @@
-import { extractMarkdownDescription, extractMarkdownH1 } from "../marketplace/seo";
+import {
+  extractMarkdownDescription,
+  extractMarkdownH1,
+} from "../marketplace/seo";
 
 type BlogMetadataInput = {
   rawMarkdown: string;

@@ -1,51 +1,51 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { registry } from '@inlang/marketplace-registry'
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { registry } from "@inlang/marketplace-registry";
 
 const ogImage =
-  'https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg'
+  "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
-export const Route = createFileRoute('/c/plugins')({
+export const Route = createFileRoute("/c/plugins")({
   head: () => ({
     meta: [
-      { title: 'Global Plugins | inlang' },
+      { title: "Global Plugins | inlang" },
       {
-        name: 'description',
+        name: "description",
         content:
-          'Find everything globalization (i18n) related to plugins - inlang',
+          "Find everything globalization (i18n) related to plugins - inlang",
       },
-      { name: 'og:image', content: ogImage },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:image', content: ogImage },
+      { name: "og:image", content: ogImage },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ogImage },
       {
-        name: 'twitter:image:alt',
+        name: "twitter:image:alt",
         content: "inlang's ecosystem helps organizations to go global.",
       },
-      { name: 'twitter:title', content: 'Global Plugins | inlang' },
+      { name: "twitter:title", content: "Global Plugins | inlang" },
       {
-        name: 'twitter:description',
+        name: "twitter:description",
         content:
-          'Find everything globalization (i18n) related to plugins - inlang',
+          "Find everything globalization (i18n) related to plugins - inlang",
       },
-      { name: 'twitter:site', content: '@inlanghq' },
-      { name: 'twitter:creator', content: '@inlanghq' },
+      { name: "twitter:site", content: "@inlanghq" },
+      { name: "twitter:creator", content: "@inlanghq" },
     ],
   }),
   component: PluginsPage,
-})
+});
 
 // Filter plugins from the registry
 const plugins = registry
   .filter((item) => {
-    const itemType = item.id.split('.')[0]
-    return itemType === 'plugin' && !item.deprecated
+    const itemType = item.id.split(".")[0];
+    return itemType === "plugin" && !item.deprecated;
   })
   .sort((a, b) => {
     const aName =
-      typeof a.displayName === 'object' ? a.displayName.en : a.displayName
+      typeof a.displayName === "object" ? a.displayName.en : a.displayName;
     const bName =
-      typeof b.displayName === 'object' ? b.displayName.en : b.displayName
-    return aName.localeCompare(bName)
-  })
+      typeof b.displayName === "object" ? b.displayName.en : b.displayName;
+    return aName.localeCompare(bName);
+  });
 
 function PluginsPage() {
   return (
@@ -99,19 +99,19 @@ function PluginsPage() {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
 function PluginCard({ item }: { item: (typeof registry)[number] }) {
   const displayName =
-    typeof item.displayName === 'object'
+    typeof item.displayName === "object"
       ? item.displayName.en
-      : item.displayName
+      : item.displayName;
   const description =
-    typeof item.description === 'object'
+    typeof item.description === "object"
       ? item.description.en
-      : item.description
-  const slug = item.id.replaceAll('.', '-')
+      : item.description;
+  const slug = item.id.replaceAll(".", "-");
 
   return (
     <Link
@@ -154,13 +154,15 @@ function PluginCard({ item }: { item: (typeof registry)[number] }) {
           />
         ) : (
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-600">
-            {String(item.publisherName)?.[0] || '?'}
+            {String(item.publisherName)?.[0] || "?"}
           </div>
         )}
-        <span className="text-sm text-slate-500">{String(item.publisherName)}</span>
+        <span className="text-sm text-slate-500">
+          {String(item.publisherName)}
+        </span>
       </div>
     </Link>
-  )
+  );
 }
 
 function BuildYourOwnCard() {
@@ -195,5 +197,5 @@ function BuildYourOwnCard() {
         </p>
       </div>
     </a>
-  )
+  );
 }

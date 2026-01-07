@@ -59,7 +59,10 @@ const resourceLinks = [{ name: "Documentation", href: "/documentation" }];
 const categoriesLinks = [
   { name: "Apps", href: "/c/apps" },
   { name: "Plugins", href: "/c/plugins" },
-  { name: "Validation Rules", href: "https://github.com/opral/lix-sdk/issues/239" },
+  {
+    name: "Validation Rules",
+    href: "https://github.com/opral/lix-sdk/issues/239",
+  },
 ];
 
 const contactLinks = [

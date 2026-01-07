@@ -1,51 +1,51 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { registry } from '@inlang/marketplace-registry'
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { registry } from "@inlang/marketplace-registry";
 
 const ogImage =
-  'https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg'
+  "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
-export const Route = createFileRoute('/c/apps')({
+export const Route = createFileRoute("/c/apps")({
   head: () => ({
     meta: [
-      { title: 'Global Apps | inlang' },
+      { title: "Global Apps | inlang" },
       {
-        name: 'description',
+        name: "description",
         content:
-          'Find everything globalization (i18n) related to apps - inlang',
+          "Find everything globalization (i18n) related to apps - inlang",
       },
-      { name: 'og:image', content: ogImage },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:image', content: ogImage },
+      { name: "og:image", content: ogImage },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ogImage },
       {
-        name: 'twitter:image:alt',
+        name: "twitter:image:alt",
         content: "inlang's ecosystem helps organizations to go global.",
       },
-      { name: 'twitter:title', content: 'Global Apps | inlang' },
+      { name: "twitter:title", content: "Global Apps | inlang" },
       {
-        name: 'twitter:description',
+        name: "twitter:description",
         content:
-          'Find everything globalization (i18n) related to apps - inlang',
+          "Find everything globalization (i18n) related to apps - inlang",
       },
-      { name: 'twitter:site', content: '@inlanghq' },
-      { name: 'twitter:creator', content: '@inlanghq' },
+      { name: "twitter:site", content: "@inlanghq" },
+      { name: "twitter:creator", content: "@inlanghq" },
     ],
   }),
   component: AppsPage,
-})
+});
 
 // Filter apps and libraries from the registry
 const apps = registry
   .filter((item) => {
-    const itemType = item.id.split('.')[0]
-    return (itemType === 'app' || itemType === 'library') && !item.deprecated
+    const itemType = item.id.split(".")[0];
+    return (itemType === "app" || itemType === "library") && !item.deprecated;
   })
   .sort((a, b) => {
     const aName =
-      typeof a.displayName === 'object' ? a.displayName.en : a.displayName
+      typeof a.displayName === "object" ? a.displayName.en : a.displayName;
     const bName =
-      typeof b.displayName === 'object' ? b.displayName.en : b.displayName
-    return aName.localeCompare(bName)
-  })
+      typeof b.displayName === "object" ? b.displayName.en : b.displayName;
+    return aName.localeCompare(bName);
+  });
 
 function AppsPage() {
   return (
@@ -98,22 +98,22 @@ function AppsPage() {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
 function AppCard({ item }: { item: (typeof registry)[number] }) {
   const displayName =
-    typeof item.displayName === 'object'
+    typeof item.displayName === "object"
       ? item.displayName.en
-      : item.displayName
+      : item.displayName;
   const description =
-    typeof item.description === 'object'
+    typeof item.description === "object"
       ? item.description.en
-      : item.description
-  const slug = item.id.replaceAll('.', '-')
+      : item.description;
+  const slug = item.id.replaceAll(".", "-");
   const isExternal = item.keywords
     ?.map((k) => k.toLowerCase())
-    .includes('external')
+    .includes("external");
 
   return (
     <Link
@@ -163,13 +163,15 @@ function AppCard({ item }: { item: (typeof registry)[number] }) {
           />
         ) : (
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-600">
-            {String(item.publisherName)?.[0] || '?'}
+            {String(item.publisherName)?.[0] || "?"}
           </div>
         )}
-        <span className="text-sm text-slate-500">{String(item.publisherName)}</span>
+        <span className="text-sm text-slate-500">
+          {String(item.publisherName)}
+        </span>
       </div>
     </Link>
-  )
+  );
 }
 
 function BuildYourOwnCard() {
@@ -204,5 +206,5 @@ function BuildYourOwnCard() {
         </p>
       </div>
     </a>
-  )
+  );
 }
