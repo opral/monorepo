@@ -184,7 +184,7 @@ test("normalizes variants when messages is a JSON string", async () => {
 			variants: JSON.stringify([
 				{
 					matches: "[]",
-					pattern: '[{\"type\":\"text\",\"value\":\"x\"}]',
+					pattern: '[{"type":"text","value":"x"}]',
 				},
 			]),
 		},
