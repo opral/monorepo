@@ -1390,6 +1390,9 @@ importers:
       vitest:
         specifier: ^4.0.6
         version: 4.0.16(@types/node@22.15.33)(happy-dom@18.0.1)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)(msw@2.10.2(@types/node@22.15.33)(typescript@5.7.3))(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.5)(yaml@2.8.1)
+      wrangler:
+        specifier: ^4.54.0
+        version: 4.54.0
 
 packages:
 
