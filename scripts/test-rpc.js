@@ -1,4 +1,4 @@
-const baseUrl = process.env.RPC_URL ?? "rpc.inlang.com";
+const baseUrl = process.env.RPC_URL ?? "https://rpc.inlang.com";
 
 async function assertOk(response, label) {
   if (!response.ok) {
