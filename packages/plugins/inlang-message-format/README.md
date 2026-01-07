@@ -109,6 +109,19 @@ The merged result for locale `en` will be:
 
 This lets you modularize and override translations while keeping a shared base.
 
+### `sort`
+
+Optionally sort keys when writing files to keep git diffs consistent.
+
+```json
+{
+  "plugin.inlang.messageFormat": {
+    "pathPattern": "./messages/{locale}.json",
+    "sort": "asc"
+  }
+}
+```
+
 
 ## Messages
 

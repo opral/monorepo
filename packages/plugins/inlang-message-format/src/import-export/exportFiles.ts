@@ -14,11 +14,13 @@ import type {
 	SimpleMessage,
 } from "../fileSchema.js";
 import { unflatten } from "flat";
+import { sortMessageKeys } from "../utils/sortKeys.js";
 
 export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 	bundles,
 	messages,
 	variants,
+	settings,
 }) => {
 	const files: Record<string, FileSchema> = {};
 
@@ -41,16 +43,22 @@ export const exportFiles: NonNullable<(typeof plugin)["exportFiles"]> = async ({
 	const result: ExportFile[] = [];
 
 	for (const locale in files) {
+		const sortDirection =
+			settings?.["plugin.inlang.messageFormat"]?.sort ?? undefined;
+		const unflattened = unflatten(files[locale]) as Record<string, unknown>;
+		const sortedMessages: Record<string, unknown> = sortDirection
+			? sortMessageKeys(unflattened, sortDirection)
+			: unflattened;
 		result.push({
 			locale,
 			// beautify the json
 			content: new TextEncoder().encode(
 				JSON.stringify(
-					unflatten({
+					{
 						// increase DX by providing auto complete in IDEs
 						$schema: "https://inlang.com/schema/inlang-message-format",
-						...files[locale],
-					}),
+						...sortedMessages,
+					},
 					undefined,
 					"\t"
 				)
