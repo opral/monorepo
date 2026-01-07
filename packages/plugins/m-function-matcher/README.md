@@ -1,33 +1,49 @@
-### Introduction
+---
+title: m Function Matcher - Paraglide JS Integration for Sherlock
+description: Enable inline translation previews and linting for Paraglide JS m.message() function calls in VS Code with Sherlock.
+og:image: https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/assets/sherlock-preview.svg
+---
 
-This plugin provides the integration for [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)` into the inlang Visual Studio Code extension (Sherlock). It allows you to extract messages from your code, view them inline in the text editor, and get lints for your messages.
+# m Function Matcher for Sherlock
 
-Match examples:
-```ts
-m.myMessage()
-```
-```ts
-m.another_message()
-```
+This plugin enables [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) (VS Code extension) to recognize `m.message()` function calls used by [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
 
+![Sherlock inline preview](https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/assets/sherlock-preview.svg)
 
-### Usage
+## What it does
 
-The plugin will automatically extract messages from your code and show them inline in the editor. You can then click on the message to open the web editor and translate the message.
+- **Inline previews**: See translations directly in your code editor
+- **Message extraction**: Extract hardcoded strings into messages
+- **Linting**: Get warnings for missing or invalid message references
 
-1. Install the [Visual Studio Code extension (Sherlock)](https://inlang.com/m/r7kp499g)
-2. Install this plugin
-3. ✨ See your messages appear inline in the editor
+## Supported file types
 
-> There might be a delay before the messages appear in the editor. This is because the plugin needs to be downloaded first. If you want to make sure that everything is setup correctly, reload your workspace.
+- TypeScript (`.ts`, `.tsx`)
+- JavaScript (`.js`, `.jsx`)
+- Svelte (`.svelte`)
+- Vue (`.vue`)
+- Astro (`.astro`)
 
-### Manual installation
+## Installation
 
-```diff
-// project.inlang/settings.json
+Add the plugin to your `project.inlang/settings.json`:
+
+```json
 {
-  "modules" : [
-+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
-  ]
+	"modules": [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
+	]
 }
 ```
+
+Then install [Sherlock](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension) from the VS Code marketplace.
+
+## Matched patterns
+
+The plugin recognizes these patterns:
+
+| Pattern        | Example                         |
+| -------------- | ------------------------------- |
+| Simple call    | `m.welcome()`                   |
+| With variables | `m.greeting({ name: "World" })` |
+| In JSX         | `{m.button_label()}`            |
