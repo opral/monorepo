@@ -5,6 +5,10 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang"
+	},
 	"description": "",
 	"types": "./dist/index.d.ts",
 	"exports": {

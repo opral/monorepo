@@ -13,6 +13,10 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang"
+	},
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "NODE_ENV=production node ./build.js",

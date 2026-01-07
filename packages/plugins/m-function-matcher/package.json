@@ -12,6 +12,10 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang"
+	},
 	"recommends": [
 		"m/tdozzpa",
 		"m/2qj2w8pu",

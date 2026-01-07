@@ -7,6 +7,10 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang"
+	},
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"
