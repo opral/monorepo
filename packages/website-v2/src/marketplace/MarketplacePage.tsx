@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import type { MarketplacePageData } from "./marketplaceData";
-import "../components/markdown-interactive";
+import { initMarkdownInteractive } from "../components/markdown-interactive";
 import { getGithubStars } from "../github-stars-cache";
 
 type Heading = { id: string; text: string; level: number };
@@ -37,6 +37,10 @@ export default function MarketplacePage({
       });
     });
   }, [data.imports]);
+
+  useEffect(() => {
+    initMarkdownInteractive();
+  }, []);
 
   useEffect(() => {
     const container = articleRef.current;
