@@ -39,7 +39,7 @@
       "cache": true
     },
     "lint": {
-      "dependsOn": ["format"],
+      "dependsOn": ["format", "^build"],
       "cache": true
     },
     "format": {
