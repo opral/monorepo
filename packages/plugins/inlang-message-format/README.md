@@ -5,6 +5,8 @@ imports:
 
 # Inlang Message Format Plugin
 
+![inlang message format](https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/assets/banner.svg)
+
 The Inlang Message Format is a storage plugin for inlang. It stores messages in a JSON file per language.
 It is designed after inlang's data models, which enables all features of inlang.
 

@@ -1,11 +1,14 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.messageFormat",
+	"gallery": [
+		"./assets/banner.svg"
+	],
 	"displayName": {
 		"en": "inlang message format"
 	},
 	"description": {
-		"en": "The simplest storage plugin for inlang."
+		"en": "Store translations in JSON files with support for variables, pluralization, and variants. The recommended storage plugin for inlang projects."
 	},
 	"pages": {
 		"/": "./README.md",

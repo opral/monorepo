@@ -2,6 +2,9 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.i18next",
 	"icon": "./assets/icon.png",
+	"gallery": [
+		"./assets/banner.svg"
+	],
 	"displayName": {
 		"en": "i18next"
 	},

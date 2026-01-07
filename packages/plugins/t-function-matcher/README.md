@@ -1,9 +1,3 @@
----
-title: t Function Matcher - i18n Integration for Sherlock
-description: Enable inline translation previews and linting for t() function calls in VS Code with Sherlock. Works with i18next, react-i18next, and most i18n libraries.
-og:image: https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/assets/sherlock-preview.svg
----
-
 # t Function Matcher for Sherlock
 
 This plugin enables [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) (VS Code extension) to recognize `t("key")` function calls used by most i18n libraries.

@@ -1,9 +1,3 @@
----
-title: i18next Plugin for Inlang - Translation Management
-description: Connect your i18next JSON translation files to your inlang project. Use Fink for translation management, Sherlock for inline previews, and CLI for linting.
-og:image: https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/assets/banner.svg
----
-
 # i18next Plugin for Inlang
 
 This plugin enables your inlang project to read and write [i18next](https://inlang.com/m/kl95463j) translation files.
