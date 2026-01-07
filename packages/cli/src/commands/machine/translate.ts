@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Command } from "commander";
 import { rpc } from "@inlang/rpc";
-import { getInlangProject } from "../../utilities/getInlangProject.js";
+import {
+  getInlangProject,
+  settleLastUsedProjectFileQueue,
+} from "../../utilities/getInlangProject.js";
 import { log, logError } from "../../utilities/log.js";
 import {
   saveProjectToDirectory,
@@ -29,14 +32,17 @@ export const translate = new Command()
   .option("-n, --nobar", "disable progress bar", false)
   .description("Machine translate bundles.")
   .action(async (args: { force: boolean; project: string }) => {
+    let exitCode = 0;
     try {
       const project = await getInlangProject({ projectPath: args.project });
       await translateCommandAction({ project });
       await saveProjectToDirectory({ fs, path: args.project, project });
-      process.exit(0);
     } catch (error) {
       logError(error);
-      process.exit(1);
+      exitCode = 1;
+    } finally {
+      await settleLastUsedProjectFileQueue();
+      process.exit(exitCode);
     }
   });
 

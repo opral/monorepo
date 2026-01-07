@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { loadProjectFromDirectory, type InlangProject } from "@inlang/sdk";
+import { fileQueueSettled } from "@inlang/sdk/lix";
 import { resolve } from "node:path";
 
 /**
@@ -28,5 +29,16 @@ export async function getInlangProject(args: {
   } catch (err) {
     console.error(`Error opening inlang project at ${args.projectPath}`, err);
     process.exit(1);
+  }
+}
+
+export async function settleLastUsedProjectFileQueue(): Promise<void> {
+  if (!lastUsedProject) {
+    return;
+  }
+  try {
+    await fileQueueSettled({ lix: lastUsedProject.lix });
+  } catch {
+    // Best-effort: ignore queue settle failures during shutdown.
   }
 }
