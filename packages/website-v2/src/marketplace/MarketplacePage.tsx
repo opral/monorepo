@@ -1,11 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
-import type { MarketplacePageData } from "./marketplaceData";
+import type { MarketplacePageData, MarketplaceHeading } from "./marketplaceData";
 import { initMarkdownInteractive } from "../components/markdown-interactive";
 import { getGithubStars } from "../github-stars-cache";
-
-type Heading = { id: string; text: string; level: number };
 
 export default function MarketplacePage({
   data,
@@ -13,7 +11,7 @@ export default function MarketplacePage({
   data: MarketplacePageData;
 }) {
   const articleRef = useRef<HTMLDivElement>(null);
-  const [headings, setHeadings] = useState<Heading[]>([]);
+  const headings = data.headings ?? [];
   const [activeId, setActiveId] = useState<string>("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileOnThisPageOpen, setMobileOnThisPageOpen] = useState(false);
@@ -41,24 +39,6 @@ export default function MarketplacePage({
   useEffect(() => {
     initMarkdownInteractive();
   }, []);
-
-  useEffect(() => {
-    const container = articleRef.current;
-    if (!container) return;
-    const elements = Array.from(
-      container.querySelectorAll("h1, h2"),
-    ) as HTMLElement[];
-    const newHeadings = elements.map((element) => {
-      const id = slugifyHeading(element.textContent || "");
-      element.id = id;
-      return {
-        id,
-        text: element.textContent || "",
-        level: Number.parseInt(element.tagName.replace("H", ""), 10),
-      };
-    });
-    setHeadings(newHeadings);
-  }, [data.markdown]);
 
   // Scroll spy: track which heading is currently visible
   useEffect(() => {
@@ -594,7 +574,7 @@ function DocMeta({
   activeId,
 }: {
   manifest: MarketplaceManifest & { uniqueID: string };
-  headings: Heading[];
+  headings: MarketplaceHeading[];
   activeId: string;
 }) {
   const displayName =
@@ -773,7 +753,7 @@ function MobileOnThisPage({
   activeId,
   onClose,
 }: {
-  headings: Heading[];
+  headings: MarketplaceHeading[];
   activeId: string;
   onClose: () => void;
 }) {
@@ -850,26 +830,6 @@ function RecommendationCard({
       </div>
     </Link>
   );
-}
-
-function slugifyHeading(value: string) {
-  return value
-    .toLowerCase()
-    .replaceAll(" ", "-")
-    .replaceAll("/", "")
-    .replace("#", "")
-    .replaceAll("(", "")
-    .replaceAll(")", "")
-    .replaceAll("?", "")
-    .replaceAll(".", "")
-    .replaceAll("@", "")
-    .replaceAll(
-      /([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g,
-      "",
-    )
-    .replaceAll("✂", "")
-    .replaceAll(":", "")
-    .replaceAll("'", "");
 }
 
 function scrollToAnchor(anchor: string) {
