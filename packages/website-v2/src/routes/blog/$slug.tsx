@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { parse } from "@opral/markdown-wc";
 import { useEffect, useState } from "react";
-import "../../components/markdown-interactive";
+import { initMarkdownInteractive } from "../../components/markdown-interactive";
 import markdownCss from "../../markdown.css?url";
 import { getBlogDescription, getBlogTitle } from "../../blog/blogMetadata";
 
@@ -297,6 +297,10 @@ function BlogPostPage() {
       });
     });
   }, [post.imports]);
+
+  useEffect(() => {
+    initMarkdownInteractive();
+  }, []);
 
   const copyUrl = async () => {
     try {
