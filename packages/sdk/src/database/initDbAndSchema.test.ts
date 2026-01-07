@@ -106,6 +106,54 @@ test("it should handle json serialization and parsing for bundles", async () => 
 	]);
 });
 
+// https://github.com/opral/paraglide-js/issues/571
+test("it should preserve json-like text in variant patterns", async () => {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = initDb({ sqlite });
+
+	const bundle = await db
+		.insertInto("bundle")
+		.values({ id: "json_array" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const message = await db
+		.insertInto("message")
+		.values({
+			bundleId: bundle.id,
+			locale: "en",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await db
+		.insertInto("variant")
+		.values({
+			messageId: message.id,
+			pattern: [
+				{
+					type: "text",
+					value: '["a", "b", "c"]',
+				},
+			],
+		})
+		.execute();
+
+	const variant = await db
+		.selectFrom("variant")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(variant.pattern).toStrictEqual([
+		{
+			type: "text",
+			value: '["a", "b", "c"]',
+		},
+	]);
+});
+
 // https://github.com/opral/inlang-sdk/issues/209
 test.todo("it should enable foreign key constraints", async () => {
 	const sqlite = await createInMemoryDatabase({
