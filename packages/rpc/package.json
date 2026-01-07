@@ -2,15 +2,17 @@
 	"name": "@inlang/rpc",
 	"type": "module",
 	"private": true,
+	"packageManager": "pnpm@10.23.0",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
 		"./router": "./dist/router.js",
-		"./handler": "./dist/handler.js"
+		"./server": "./dist/server.js"
 	},
 	"scripts": {
 		"build": "npm run env-variables && tsc --build",
 		"dev": "npm run env-variables && tsc --watch",
+		"start": "node dist/server.js",
 		"test": "npm run env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"env-variables": "node ./src/services/env-variables/createIndexFile.js",
 		"format": "prettier ./src --write",
@@ -21,11 +23,9 @@
 		"@types/cors": "^2.8.17",
 		"body-parser": "^1.20.2",
 		"cors": "^2.8.5",
+		"express": "^4.18.2",
 		"ts-dedent": "^2.2.0",
 		"typed-rpc": "3.0.0"
-	},
-	"peerDependencies": {
-		"express": "^4.18.2"
 	},
 	"license": "Apache-2.0",
 	"version": "0.3.51",

@@ -1,53 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { handleRpcRequest, PUBLIC_ENV_VARIABLES } from "@inlang/rpc/handler";
 
 export const Route = createFileRoute("/_rpc")({
   server: {
     handlers: {
       OPTIONS: ({ request }) => {
-        return new Response(null, {
-          status: 204,
-          headers: buildCorsHeaders(request),
-        });
+        return proxyRpcRequest(request);
       },
       POST: async ({ request }) => {
-        let body: unknown;
-        try {
-          body = await request.json();
-        } catch {
-          return new Response("Invalid JSON", {
-            status: 400,
-            headers: buildCorsHeaders(request),
-          });
-        }
-
-        const result = await handleRpcRequest(body);
-        return Response.json(result, {
-          headers: buildCorsHeaders(request),
-        });
+        return proxyRpcRequest(request);
       },
     },
   },
 });
 
-function buildCorsHeaders(request: Request) {
-  const allowedOrigins = PUBLIC_ENV_VARIABLES.PUBLIC_ALLOWED_AUTH_URLS?.split(
-    ","
-  )
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-  const origin = request.headers.get("origin") ?? "";
-  const isAllowed =
-    allowedOrigins && allowedOrigins.length > 0
-      ? allowedOrigins.includes(origin)
-      : true;
-  const responseOrigin = isAllowed ? origin || "*" : "null";
+// Legacy proxy: keep /_rpc on inlang.com working while moving RPCs to rpc.inlang.com.
+const RPC_BASE_URL = "https://rpc.inlang.com";
+const RPC_PATH = "/_rpc";
 
-  return {
-    "Access-Control-Allow-Origin": responseOrigin,
-    "Access-Control-Allow-Methods": "POST,OPTIONS",
-    "Access-Control-Allow-Headers": "content-type",
-    "Access-Control-Allow-Credentials": "true",
-    Vary: "Origin",
-  };
+async function proxyRpcRequest(request: Request) {
+  const upstreamUrl = `${RPC_BASE_URL}${RPC_PATH}`;
+  const headers = new Headers(request.headers);
+
+  headers.delete("host");
+  headers.delete("content-length");
+
+  const response = await fetch(upstreamUrl, {
+    method: request.method,
+    headers,
+    body:
+      request.method === "GET" || request.method === "HEAD"
+        ? undefined
+        : request.body,
+    redirect: "manual",
+  });
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
 }
