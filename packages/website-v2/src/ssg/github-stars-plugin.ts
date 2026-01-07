@@ -8,7 +8,11 @@ type GithubStarsCache = {
 };
 
 const GITHUB_STARS_TTL_MINUTES = 60;
-const githubStarsPath = path.join(__dirname, "..", "github_repo_stars.gen.json");
+const githubStarsPath = path.join(
+  __dirname,
+  "..",
+  "github_repo_stars.gen.json",
+);
 let didLogGithubToken = false;
 
 export function githubStarsPlugin({ token }: { token?: string }) {

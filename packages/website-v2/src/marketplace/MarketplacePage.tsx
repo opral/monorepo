@@ -1,7 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
-import type { MarketplacePageData, MarketplaceHeading } from "./marketplaceData";
+import type {
+  MarketplacePageData,
+  MarketplaceHeading,
+} from "./marketplaceData";
 import { initMarkdownInteractive } from "../components/markdown-interactive";
 import { getGithubStars } from "../github-stars-cache";
 

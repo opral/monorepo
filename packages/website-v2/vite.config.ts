@@ -14,8 +14,7 @@ const config = defineConfig(({ mode }) => {
   const isTest = process.env.VITEST === "true" || mode === "test";
   const env = loadEnv(mode, process.cwd(), "");
   const githubToken =
-    process.env.INLANG_WEBSITE_GITHUB_TOKEN ??
-    env.INLANG_WEBSITE_GITHUB_TOKEN;
+    process.env.INLANG_WEBSITE_GITHUB_TOKEN ?? env.INLANG_WEBSITE_GITHUB_TOKEN;
 
   return {
     plugins: [

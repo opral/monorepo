@@ -101,8 +101,16 @@ function buildMarketplaceHead(
     frontmatter: data.frontmatter,
   });
 
+  const links = [{ rel: "canonical", href: canonicalUrl }];
+  if (data.prevPagePath) {
+    links.push({ rel: "prev", href: `https://inlang.com${data.prevPagePath}` });
+  }
+  if (data.nextPagePath) {
+    links.push({ rel: "next", href: `https://inlang.com${data.nextPagePath}` });
+  }
+
   return {
-    links: [{ rel: "canonical", href: canonicalUrl }],
+    links,
     scripts: [
       {
         type: "application/ld+json",

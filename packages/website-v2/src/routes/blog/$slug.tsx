@@ -222,12 +222,26 @@ export const Route = createFileRoute("/blog/$slug")({
       });
     }
 
+    const links = [
+      { rel: "stylesheet", href: markdownCss },
+      { rel: "canonical", href: canonicalUrl },
+    ];
+    if (loaderData?.prevPost?.slug) {
+      links.push({
+        rel: "prev",
+        href: `https://inlang.com/blog/${loaderData.prevPost.slug}`,
+      });
+    }
+    if (loaderData?.nextPost?.slug) {
+      links.push({
+        rel: "next",
+        href: `https://inlang.com/blog/${loaderData.nextPost.slug}`,
+      });
+    }
+
     return {
       meta,
-      links: [
-        { rel: "stylesheet", href: markdownCss },
-        { rel: "canonical", href: canonicalUrl },
-      ],
+      links,
       scripts: slug
         ? [
             {

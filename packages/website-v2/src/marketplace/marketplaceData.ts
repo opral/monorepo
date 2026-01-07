@@ -28,6 +28,8 @@ export type MarketplacePageData = {
   recommends?: MarketplaceManifest[];
   imports?: string[];
   headings: MarketplaceHeading[];
+  prevPagePath?: string;
+  nextPagePath?: string;
 };
 
 export async function loadMarketplacePage({
@@ -130,6 +132,8 @@ export async function loadMarketplacePage({
 
   const { html: markdownWithIds, headings } =
     extractHeadingsAndInjectIds(renderedMarkdown);
+  const { prevRoute, nextRoute } = getMarketplacePageNeighbors(item, pagePath);
+  const basePath = itemPath;
 
   const recommends = item.recommends
     ? registry.filter((entry: any) =>
@@ -149,6 +153,8 @@ export async function loadMarketplacePage({
     recommends,
     imports,
     headings,
+    prevPagePath: prevRoute ? `${basePath}${prevRoute}` : undefined,
+    nextPagePath: nextRoute ? `${basePath}${nextRoute}` : undefined,
   };
 }
 
@@ -264,4 +270,50 @@ function slugifyHeading(value: string) {
     .replaceAll("✂", "")
     .replaceAll(":", "")
     .replaceAll("'", "");
+}
+
+function getMarketplacePageNeighbors(
+  manifest: MarketplaceManifest & { uniqueID: string },
+  currentRoute: string,
+) {
+  if (!manifest.pages) {
+    return { prevRoute: undefined, nextRoute: undefined };
+  }
+
+  const allPages: Array<{ route: string; isExternal: boolean }> = [];
+  const entries = Object.entries(manifest.pages);
+
+  for (const [key, value] of entries) {
+    if (typeof value === "string") {
+      const isExternal = !value.endsWith(".md") && !value.endsWith(".html");
+      if (!isExternal) {
+        allPages.push({ route: key, isExternal });
+      }
+    } else {
+      for (const [route, path] of Object.entries(
+        value as Record<string, string>,
+      )) {
+        const isExternal = !path.endsWith(".md") && !path.endsWith(".html");
+        if (!isExternal) {
+          allPages.push({ route, isExternal });
+        }
+      }
+    }
+  }
+
+  const currentIndex = allPages.findIndex((p) => p.route === currentRoute);
+  if (currentIndex === -1 || allPages.length <= 1) {
+    return { prevRoute: undefined, nextRoute: undefined };
+  }
+
+  const prevRoute = currentIndex > 0 ? allPages[currentIndex - 1].route : null;
+  const nextRoute =
+    currentIndex < allPages.length - 1
+      ? allPages[currentIndex + 1].route
+      : null;
+
+  return {
+    prevRoute: prevRoute || undefined,
+    nextRoute: nextRoute || undefined,
+  };
 }
