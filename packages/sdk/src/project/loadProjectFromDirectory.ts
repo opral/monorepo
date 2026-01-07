@@ -1,6 +1,12 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { closeLix, openLixInMemory, toBlob, type Lix } from "@lix-js/sdk";
+import {
+	closeLix,
+	fileQueueSettled,
+	openLixInMemory,
+	toBlob,
+	type Lix,
+} from "@lix-js/sdk";
 import fs from "node:fs";
 import nodePath from "node:path";
 import type {
@@ -73,6 +79,7 @@ export async function loadProjectFromDirectory(
 		lix: tempLix,
 		syncInterval: undefined,
 	});
+	await fileQueueSettled({ lix: tempLix });
 
 	// TODO call tempProject.lix.settled() to wait for the new settings file, and remove reload of the proejct as soon as reactive settings has landed
 	// NOTE: we need to ensure two things:
