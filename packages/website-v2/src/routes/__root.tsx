@@ -3,6 +3,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import appCss from "../styles.css?url";
 
+const GA_MEASUREMENT_ID = "G-5H3SDF7TVZ";
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -56,6 +58,22 @@ export const Route = createRootRoute({
         color: "#5bbad5",
       },
     ],
+    scripts: import.meta.env.PROD
+      ? [
+          {
+            async: true,
+            src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
+          },
+          {
+            children: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_MEASUREMENT_ID}');
+`,
+          },
+        ]
+      : [],
   }),
 
   shellComponent: RootDocument,
