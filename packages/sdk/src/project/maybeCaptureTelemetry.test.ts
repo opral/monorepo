@@ -3,10 +3,8 @@ import { loadProjectInMemory } from "./loadProjectInMemory.js";
 import { newProject } from "./newProject.js";
 import { maybeCaptureLoadedProject } from "./maybeCaptureTelemetry.js";
 import { capture } from "../services/telemetry/capture.js";
-import { humanId, uuidV7 } from "@lix-js/sdk";
 
-// telemetry is disabled
-test.skip("it should capture as expected", async () => {
+test("it should capture as expected", async () => {
 	vi.mock("../services/telemetry/capture.js", async () => {
 		return {
 			capture: vi.fn(() => Promise.resolve()),
@@ -28,35 +26,26 @@ test.skip("it should capture as expected", async () => {
 
 	const account = await project.lix.db
 		.selectFrom("active_account")
-		.select("account_id")
+		.select("id")
 		.executeTakeFirstOrThrow();
 
-	const bundleId = await humanId({ lix: project.lix });
-	await project.db
+	const bundle = await project.db
 		.insertInto("bundle")
-		.values({ id: bundleId, declarations: [] })
-		.execute();
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
 
-	const messageId = await uuidV7({ lix: project.lix });
-	await project.db
+	const message = await project.db
 		.insertInto("message")
-		.values({
-			id: messageId,
-			bundleId,
-			locale: "en",
-			selectors: [],
-		})
-		.execute();
+		.values({ bundleId: bundle.id, locale: "en" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
 
 	await project.db
 		.insertInto("variant")
-		.values({
-			id: await uuidV7({ lix: project.lix }),
-			messageId,
-			matches: [],
-			pattern: [],
-		})
-		.execute();
+		.values({ messageId: message.id })
+		.returningAll()
+		.executeTakeFirst();
 
 	const settings = await project.settings.get();
 
@@ -77,7 +66,7 @@ test.skip("it should capture as expected", async () => {
 	expect(capture).toHaveBeenCalledWith("SDK loaded project", {
 		projectId: await project.id.get(),
 		settings: await project.settings.get(),
-		accountId: account.account_id,
+		accountId: account.id,
 		properties: {
 			appId: "test",
 			settings: await project.settings.get(),

@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/sdk",
-	"version": "2.4.9",
+	"version": "2.4.10",
 	"type": "module",
 	"license": "MIT",
 	"publishConfig": {
@@ -38,9 +38,11 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@lix-js/sdk": "0.5.1",
+		"@lix-js/sdk": "0.4.7",
 		"@sinclair/typebox": "^0.31.17",
-		"kysely": "^0.27.4"
+		"kysely": "^0.27.4",
+		"sqlite-wasm-kysely": "0.3.0",
+		"uuid": "^13.0.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",

@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import type { ProjectSettings } from "./json-schema/settings.js";
 import { humanId } from "./human-id/human-id.js";
 import type {
@@ -61,7 +62,7 @@ export function createMessage(args: {
 	text: string;
 	matches?: Match[];
 }): NewMessageNested {
-	const messageId = humanId();
+	const messageId = uuid();
 	return {
 		bundleId: args.bundleId,
 		id: messageId,
@@ -98,7 +99,7 @@ export function createVariant(args: {
 }): Variant {
 	return {
 		messageId: args.messageId,
-		id: args.id ?? humanId(),
+		id: args.id ? args.id : uuid(),
 		matches: args.matches ? args.matches : [],
 		pattern: args.pattern ? args.pattern : [toTextElement(args.text ?? "")],
 	};

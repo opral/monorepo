@@ -1,46 +1,43 @@
-import type { InlangProject } from "../project/api.js";
-import { uuidV7 } from "@lix-js/sdk";
-import { humanId } from "../human-id/human-id.js";
-import type { NewBundleNested } from "../database/schema.js";
+import type { Kysely } from "kysely";
+import type {
+	InlangDatabaseSchema,
+	NewBundleNested,
+} from "../database/schema.js";
 
 export const insertBundleNested = async (
-	context: Pick<InlangProject, "db" | "lix">,
+	db: Kysely<InlangDatabaseSchema>,
 	bundle: NewBundleNested
 ): Promise<void> => {
-	const db = context.db;
-	const generateUuid = async () => uuidV7({ lix: context.lix });
-
 	await db.transaction().execute(async (trx) => {
-		const bundleId = bundle.id ?? humanId();
-		await trx
+		const insertedBundle = await trx
 			.insertInto("bundle")
 			.values({
-				id: bundleId,
-				declarations: bundle.declarations ?? [],
+				id: bundle.id,
+				declarations: bundle.declarations,
 			})
-			.execute();
+			.returning("id")
+			.executeTakeFirstOrThrow();
 
 		for (const message of bundle.messages) {
-			const messageId = message.id ?? (await generateUuid());
-			await trx
+			const insertedMessage = await trx
 				.insertInto("message")
 				.values({
-					id: messageId,
-					bundleId,
+					id: message.id,
+					bundleId: insertedBundle.id,
 					locale: message.locale,
-					selectors: message.selectors ?? [],
+					selectors: message.selectors,
 				})
-				.execute();
+				.returning("id")
+				.executeTakeFirstOrThrow();
 
 			for (const variant of message.variants) {
-				const variantId = variant.id ?? (await generateUuid());
 				await trx
 					.insertInto("variant")
 					.values({
-						id: variantId,
-						messageId: messageId,
-						matches: variant.matches ?? [],
-						pattern: variant.pattern ?? [],
+						id: variant.id,
+						messageId: insertedMessage.id,
+						matches: variant.matches,
+						pattern: variant.pattern,
 					})
 					.execute();
 			}
