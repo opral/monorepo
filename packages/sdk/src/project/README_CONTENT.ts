@@ -16,6 +16,8 @@ This is an **unpacked (git-friendly)** inlang project.
 └── .gitignore       # Ignores cache by default
 \`\`\`
 
+Everything in this folder is managed by the SDK, except for \`settings.json\`, which can be edited by users.
+
 Translation files (like \`messages/en.json\`) live **outside** this folder and are referenced via plugins in \`settings.json\`.
 
 ## What is inlang?
