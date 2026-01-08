@@ -155,8 +155,11 @@ export default function Header() {
               </svg>
               GitHub
               {githubStars !== null && (
-                <span className="inline-flex items-center gap-1">
-                  <span className="relative h-3.5 w-3.5">
+                <span
+                  className="inline-flex items-center gap-1"
+                  title={`${githubStars.toLocaleString()} GitHub stars`}
+                >
+                  <span className="relative h-3.5 w-3.5" aria-hidden="true">
                     {/* Outlined star - visible by default, hidden on hover */}
                     <svg
                       className="absolute inset-0 h-3.5 w-3.5 text-slate-400 group-hover:opacity-0 transition-opacity"
@@ -178,7 +181,11 @@ export default function Header() {
                       <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
                     </svg>
                   </span>
-                  {formatStars(githubStars)}
+                  <span
+                    aria-label={`${githubStars.toLocaleString()} GitHub stars`}
+                  >
+                    {formatStars(githubStars)}
+                  </span>
                 </span>
               )}
             </a>
@@ -345,15 +352,23 @@ export default function Header() {
                 </svg>
                 GitHub
                 {githubStars !== null && (
-                  <span className="inline-flex items-center gap-0.5 pr-1 text-slate-500">
+                  <span
+                    className="inline-flex items-center gap-0.5 pr-1 text-slate-500"
+                    title={`${githubStars.toLocaleString()} GitHub stars`}
+                  >
                     <svg
                       className="h-3 w-3 text-yellow-500"
                       viewBox="0 0 16 16"
                       fill="currentColor"
+                      aria-hidden="true"
                     >
                       <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
                     </svg>
-                    {formatStars(githubStars)}
+                    <span
+                      aria-label={`${githubStars.toLocaleString()} GitHub stars`}
+                    >
+                      {formatStars(githubStars)}
+                    </span>
                   </span>
                 )}
               </a>

@@ -1,11 +1,19 @@
-import githubStarsCache from "./github_repo_stars.gen.json";
+import githubCache from "./github_repo_data.gen.json";
 
-type GithubStarsCache = {
-  generatedAt: string;
-  data: Record<string, number | null>;
+export type GithubRepoMetrics = {
+  stars: number;
+  forks: number;
+  openIssues: number;
+  closedIssues: number;
+  contributorCount: number;
 };
 
-const cache = githubStarsCache as GithubStarsCache;
+type GithubCache = {
+  generatedAt: string;
+  data: Record<string, GithubRepoMetrics | null>;
+};
+
+const cache = githubCache as GithubCache;
 
 function normalizeRepo(input: string): string | null {
   const trimmed = input.trim();
@@ -18,14 +26,20 @@ function normalizeRepo(input: string): string | null {
   return /^[^/]+\/[^/]+$/.test(normalized) ? normalized : null;
 }
 
-export function getGithubStars(repo: string): number | null {
+export function getGithubRepoMetrics(repo: string): GithubRepoMetrics | null {
   const normalized = normalizeRepo(repo);
   if (!normalized) return null;
 
   const key = normalized.toLowerCase();
   if (!(key in cache.data)) {
-    console.warn(`GitHub stars missing for ${normalized}.`);
+    console.warn(`GitHub data missing for ${normalized}.`);
     return null;
   }
   return cache.data[key] ?? null;
+}
+
+// Convenience function for backward compatibility
+export function getGithubStars(repo: string): number | null {
+  const metrics = getGithubRepoMetrics(repo);
+  return metrics?.stars ?? null;
 }
