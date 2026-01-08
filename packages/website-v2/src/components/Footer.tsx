@@ -55,7 +55,7 @@ const socialMediaLinks = [
 ];
 
 const resourceLinks = [
-  { name: "Documentation", href: "/documentation" },
+  { name: "Documentation", href: "/docs" },
   { name: "Blog", href: "https://opral.substack.com/t/inlang" },
 ];
 

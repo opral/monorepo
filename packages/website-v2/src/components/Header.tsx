@@ -88,17 +88,26 @@ export default function Header() {
 
           {/* Right side: Blog + Documentation | X Discord | GitHub Stars */}
           <nav className="hidden items-center gap-4 text-sm font-medium text-slate-600 sm:flex">
-            <Link to="/blog" className="hover:text-slate-900">
+            <Link
+              to="/blog"
+              className={`hover:text-[color:var(--vp-c-brand-2)] ${
+                location.pathname.startsWith("/blog")
+                  ? "text-[color:var(--vp-c-brand-2)]"
+                  : ""
+              }`}
+            >
               Blog
             </Link>
-            <a
-              href="https://github.com/opral/inlang"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-900"
+            <Link
+              to="/docs"
+              className={`hover:text-[color:var(--vp-c-brand-2)] ${
+                location.pathname.startsWith("/docs")
+                  ? "text-[color:var(--vp-c-brand-2)]"
+                  : ""
+              }`}
             >
               Documentation
-            </a>
+            </Link>
 
             {/* Divider */}
             <div className="h-4 w-px bg-slate-300" />

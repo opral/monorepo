@@ -21,12 +21,12 @@ The result is fragmented tooling:
 
 ## The solution
 
-Inlang is a file format designed for building i18n tools — enabling interoperability across all i18n tools.
+Inlang is an open file format designed for building localization (i18n) tooling. It provides:
 
 - **CRUD API** — Read and write translations programmatically
 - **SQL queries** — Query messages like a database, scale to millions
 - **Plugin system** — Import/export any format (JSON, XLIFF, etc.)
-- **Version control** — Built-in version control via [lix](https://lix.opral.com)
+- **Version control** — Built-in version control via [lix](https://lix.dev)
 
 ```
 ┌──────────┐        ┌───────────┐         ┌────────────┐
@@ -63,4 +63,4 @@ const project = await loadProjectFromDirectory({
 const messages = await project.db.selectFrom("message").selectAll().execute();
 ```
 
-[Read the SDK docs →](https://github.com/opral/inlang)
+[Read the SDK docs →](https://inlang.com/docs)

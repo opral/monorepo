@@ -1,0 +1,11 @@
+[
+  {
+    "title": "Introduction",
+    "pages": [
+      {
+        "path": "./intro.md",
+        "slug": "intro"
+      }
+    ]
+  }
+]
