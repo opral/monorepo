@@ -7,24 +7,24 @@ const ogImage =
 export const Route = createFileRoute("/c/apps")({
   head: () => ({
     meta: [
-      { title: "Global Apps | inlang" },
+      { title: "Localization Apps | inlang" },
       {
         name: "description",
         content:
-          "Find everything globalization (i18n) related to apps - inlang",
+          "Find everything localization (i18n) related to apps - inlang",
       },
       { name: "og:image", content: ogImage },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: ogImage },
       {
         name: "twitter:image:alt",
-        content: "inlang's ecosystem helps organizations to go global.",
+        content: "inlang's ecosystem helps organizations to localize software.",
       },
-      { name: "twitter:title", content: "Global Apps | inlang" },
+      { name: "twitter:title", content: "Localization Apps | inlang" },
       {
         name: "twitter:description",
         content:
-          "Find everything globalization (i18n) related to apps - inlang",
+          "Find everything localization (i18n) related to apps - inlang",
       },
       { name: "twitter:site", content: "@inlanghq" },
       { name: "twitter:creator", content: "@inlanghq" },
@@ -57,7 +57,7 @@ function AppsPage() {
             Apps
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-slate-600">
-            Globalization apps for translators, developers, and anyone who wants
+            Localization apps for translators, developers, and anyone who wants
             to make their software work across languages and cultures.
           </p>
           <div className="mt-6">

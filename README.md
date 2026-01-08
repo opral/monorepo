@@ -4,7 +4,7 @@
   <img src="https://github.com/opral/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="90px">
   
   <h2 align="center">
-    An ecosystem to globalize software (i18n, localize)
+    The open file format and ecosystem for software localization (i18n)
   </h2>
 
   <p align="center">
@@ -29,11 +29,13 @@
 
 ## What is inlang?
 
-Inlang is an ecosystem of interoperable [lix apps](https://lix.opral.com) to globalize software.
+Inlang is an open file format to localize software.
+
+The file format enables an ecosystem of interoperable [lix apps](https://lix.opral.com) to build a globalized product.
 
 Every app in the inlang ecosystem shares the same review, automation, and collaboration layer, making cross-team collaboration possible. No syncing, hand-offs, or automation barriers.
 
-![globalization of software is a cross team effort](./assets/inlang-problem-explainer.png)
+![localization of software is a cross team effort](./assets/inlang-problem-explainer.png)
 ![inlang pipeline](./assets/inlang-pipeline.png)
 
 #### Example apps
@@ -48,11 +50,11 @@ Every app in the inlang ecosystem shares the same review, automation, and collab
 
 ## Why inlang?
 
-Globalizing software is a cross-team effort that involves ensuring compliance, adapting the design, handling different currencies, managing translations, writing different marketing copy, etc.
+Localizing software is a cross-team effort that involves ensuring compliance, adapting the design, handling different currencies, managing translations, writing different marketing copy, etc.
 
 Existing point solutions such as apps to manage translations (Lokalise, Weglot, Smartling), apps to manage design copy (ditto, translator), or i18n libraries for developers (next-intl, i18next) don’t have interop between each other.
 
-The lack of interop of existing solutions leads every app and team to have its own collaboration layer, review system, and automation capabilities. Cross-team collaboration and automation, which are required to globalize software, are difficult to impossible.
+The lack of interop of existing solutions leads every app and team to have its own collaboration layer, review system, and automation capabilities. Cross-team collaboration and automation, which are required to localize software, are difficult to impossible.
 
 ## Contributing
 

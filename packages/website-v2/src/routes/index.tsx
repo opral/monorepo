@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Inlang is an open lix file format for globalizing/localizing software (i18n). One file format, multiple apps, all interoperable.",
+          "Inlang is an open file format for localizing software (i18n). One file format, multiple solutions, all interoperable.",
       },
       { name: "og:image", content: ogImage },
       { name: "twitter:card", content: "summary_large_image" },
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
       {
         name: "twitter:description",
         content:
-          "Inlang is an open lix file format for globalizing/localizing software (i18n). One file format, multiple apps, all interoperable.",
+          "Inlang is an open file format for localizing software (i18n). One file format, multiple solutions, all interoperable.",
       },
       { name: "twitter:site", content: "@inlanghq" },
       { name: "twitter:creator", content: "@inlanghq" },
@@ -68,19 +68,19 @@ function App() {
               </a>
             </div>
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
-              The ecosystem to localize software (i18n).
+              The open file format and ecosystem for software localization
+              (i18n).
             </h1>
             <p className="text-lg text-slate-600 max-w-xl">
-              Inlang is an open lix file format for globalizing/localizing
-              software (i18n). One file format, multiple apps, all
-              interoperable.
+              Inlang is an open file format for localizing software (i18n).
+              One file format, multiple solutions, all interoperable.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/c/apps"
                 className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors"
               >
-                Explore apps
+                Explore ecosystem
               </Link>
               <a
                 href="https://github.com/opral/inlang-sdk"
@@ -88,14 +88,14 @@ function App() {
                 rel="noreferrer"
                 className="rounded-lg bg-slate-200 text-slate-900 px-4 py-2 text-sm font-semibold hover:bg-slate-300 transition-colors"
               >
-                SDK documentation
+                Documentation
               </a>
             </div>
           </div>
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
             <img
               src="/images/go-global-mockup.png"
-              alt="Go global mockup"
+              alt="Software localization mockup"
               className="w-full max-w-xl"
             />
           </div>
@@ -105,7 +105,7 @@ function App() {
       <section className="px-6 pb-10">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-2xl font-semibold tracking-tight mb-6">
-            Popular apps
+            Popular tools
           </h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {featuredIds.map((id) => {

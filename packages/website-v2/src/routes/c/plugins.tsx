@@ -7,24 +7,24 @@ const ogImage =
 export const Route = createFileRoute("/c/plugins")({
   head: () => ({
     meta: [
-      { title: "Global Plugins | inlang" },
+      { title: "Localization Plugins | inlang" },
       {
         name: "description",
         content:
-          "Find everything globalization (i18n) related to plugins - inlang",
+          "Find everything localization (i18n) related to plugins - inlang",
       },
       { name: "og:image", content: ogImage },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: ogImage },
       {
         name: "twitter:image:alt",
-        content: "inlang's ecosystem helps organizations to go global.",
+        content: "inlang's ecosystem helps organizations to localize software.",
       },
-      { name: "twitter:title", content: "Global Plugins | inlang" },
+      { name: "twitter:title", content: "Localization Plugins | inlang" },
       {
         name: "twitter:description",
         content:
-          "Find everything globalization (i18n) related to plugins - inlang",
+          "Find everything localization (i18n) related to plugins - inlang",
       },
       { name: "twitter:site", content: "@inlanghq" },
       { name: "twitter:creator", content: "@inlanghq" },
