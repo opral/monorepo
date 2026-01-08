@@ -54,7 +54,10 @@ const socialMediaLinks = [
   },
 ];
 
-const resourceLinks = [{ name: "Documentation", href: "/documentation" }];
+const resourceLinks = [
+  { name: "Documentation", href: "/documentation" },
+  { name: "Blog", href: "https://opral.substack.com/t/inlang" },
+];
 
 const categoriesLinks = [
   { name: "Tools", href: "/c/tools" },
@@ -67,15 +70,6 @@ const categoriesLinks = [
 
 const contactLinks = [
   { name: "Get in Touch", href: "mailto:hello@inlang.com" },
-  {
-    name: "Join the Team",
-    href: "https://github.com/opral/inlang/tree/main/careers",
-  },
-  {
-    name: "Feedback",
-    href: "https://github.com/opral/inlang/discussions/categories/feedback",
-  },
-  { name: "Blog", href: "https://opral.substack.com/t/inlang" },
 ];
 
 export default function Footer() {
@@ -163,9 +157,14 @@ export default function Footer() {
 
       {/* Bottom section */}
       <div className="mx-auto flex max-w-7xl items-center justify-end px-6 pb-16">
-        <p className="text-sm text-slate-500">
+        <a
+          href="https://opral.com"
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+        >
           Copyright {new Date().getFullYear()} Opral
-        </p>
+        </a>
       </div>
     </footer>
   );
