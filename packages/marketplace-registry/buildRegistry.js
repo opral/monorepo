@@ -95,7 +95,11 @@ for (const type of Object.keys(manifestLinks)) {
 
 		try {
 			if (link.includes("http")) {
-				manifest = JSON.parse(await fetch(link).then((res) => res.text()));
+				const response = await fetch(link);
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}`);
+				}
+				manifest = JSON.parse(await response.text());
 			} else {
 				manifest = JSON.parse(
 					await fs.readFile(new URL(link, repositoryRoot), "utf-8")
@@ -145,7 +149,8 @@ for (const type of Object.keys(manifestLinks)) {
 				...manifest,
 			});
 		} catch (e) {
-			throw new Error(`Manifest '${link}' is invalid. ${e}`);
+			console.warn(`Skipping manifest '${link}'. ${e}`);
+			continue;
 		}
 	}
 }
