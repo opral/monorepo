@@ -8,6 +8,8 @@ import type {
 import { initMarkdownInteractive } from "../components/markdown-interactive";
 import { getGithubRepoMetrics } from "../github-stars-cache";
 
+const loadedImports = new Set<string>();
+
 export default function MarketplacePage({
   data,
 }: {
@@ -33,6 +35,8 @@ export default function MarketplacePage({
   useEffect(() => {
     if (!data.imports || data.imports.length === 0) return;
     data.imports.forEach((url) => {
+      if (loadedImports.has(url)) return;
+      loadedImports.add(url);
       import(/* @vite-ignore */ url).catch((err) => {
         console.error(`Failed to load web component from ${url}:`, err);
       });
@@ -183,14 +187,11 @@ export default function MarketplacePage({
 
             <section className="min-w-0 flex-1 pb-16 min-h-[calc(100vh-153px)]">
               {(() => {
-                // Check if markdown starts with an h1
-                const hasH1 = /^<h1[\s>]/i.test(data.markdown.trim());
-
                 const copyButton = (
                   <button
                     type="button"
                     onClick={copyMarkdown}
-                    className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   >
                     {copied ? (
                       <>
@@ -230,30 +231,43 @@ export default function MarketplacePage({
                   </button>
                 );
 
+                // Check if markdown starts with an h1
+                const hasH1 = /^<h1[\s>]/i.test(data.markdown.trim());
+
                 if (hasH1) {
-                  // H1 exists: use absolute positioning to align with h1
+                  // Extract h1 content and rest of markdown
+                  const h1Match = data.markdown.match(/^(<h1[^>]*>.*?<\/h1>)/is);
+                  const h1Html = h1Match ? h1Match[1] : "";
+                  const restHtml = h1Match
+                    ? data.markdown.slice(h1Match[0].length)
+                    : data.markdown;
+
                   return (
-                    <div className="relative">
-                      <div className="absolute right-0 top-4 z-10">
+                    <>
+                      {/* H1 row with button */}
+                      <div className="flex items-start justify-between gap-4 pt-4">
+                        <div
+                          className="marketplace-markdown flex-1 min-w-0 [&>h1]:!mt-0 [&>h1]:!pt-0"
+                          dangerouslySetInnerHTML={{ __html: h1Html }}
+                        />
                         {copyButton}
                       </div>
+                      {/* Rest of content */}
                       <div
                         ref={articleRef}
-                        className="marketplace-markdown pt-4 pb-2.5"
+                        className="marketplace-markdown pb-2.5"
                         onMouseDown={(event) => {
-                          const anchor = (event.target as HTMLElement).closest(
-                            "a",
-                          );
+                          const anchor = (event.target as HTMLElement).closest("a");
                           if (anchor?.getAttribute("href")?.startsWith("#")) {
                             event.preventDefault();
                           }
                         }}
-                        dangerouslySetInnerHTML={{ __html: data.markdown }}
+                        dangerouslySetInnerHTML={{ __html: restHtml }}
                       />
-                    </div>
+                    </>
                   );
                 } else {
-                  // No H1: render button in a separate row above content
+                  // No H1: button above content
                   return (
                     <>
                       <div className="flex justify-end pt-4 pb-2">
@@ -263,9 +277,7 @@ export default function MarketplacePage({
                         ref={articleRef}
                         className="marketplace-markdown pb-2.5"
                         onMouseDown={(event) => {
-                          const anchor = (event.target as HTMLElement).closest(
-                            "a",
-                          );
+                          const anchor = (event.target as HTMLElement).closest("a");
                           if (anchor?.getAttribute("href")?.startsWith("#")) {
                             event.preventDefault();
                           }

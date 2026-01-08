@@ -10,6 +10,67 @@ const manifestLinks = JSON.parse(await fs.readFile("./registry.json", "utf-8"));
 const manifests = [];
 
 /**
+ * Normalize malformed manifests so the registry build stays resilient.
+ * @param {any} manifest
+ * @param {string} link
+ * @returns {any}
+ */
+function normalizeManifest(manifest, link) {
+	const normalized = { ...manifest };
+	const deprecated = normalized.deprecated;
+
+	if (deprecated && typeof deprecated === "object") {
+		const reason =
+			typeof deprecated.reason === "string" ? deprecated.reason : undefined;
+		const replacement =
+			typeof deprecated.replacement === "string"
+				? deprecated.replacement
+				: undefined;
+		normalized.deprecated = true;
+		if (!normalized.deprecatedMessage && (reason || replacement)) {
+			const message = [
+				reason,
+				replacement ? `Replacement: ${replacement}.` : undefined,
+			]
+				.filter(Boolean)
+				.join(" ");
+			normalized.deprecatedMessage = { en: message };
+		}
+		console.warn(
+			`Normalized deprecated object for ${link}. Use boolean deprecated + deprecatedMessage.`
+		);
+	} else if (typeof deprecated === "string") {
+		normalized.deprecated = true;
+		if (!normalized.deprecatedMessage) {
+			normalized.deprecatedMessage = { en: deprecated };
+		}
+		console.warn(
+			`Normalized deprecated string for ${link}. Use boolean deprecated + deprecatedMessage.`
+		);
+	} else if (typeof deprecated !== "boolean" && deprecated !== undefined) {
+		delete normalized.deprecated;
+		console.warn(
+			`Removed invalid deprecated value for ${link}. Expected boolean.`
+		);
+	}
+
+	if (typeof normalized.deprecatedMessage === "string") {
+		normalized.deprecatedMessage = { en: normalized.deprecatedMessage };
+	}
+	if (
+		normalized.deprecatedMessage !== undefined &&
+		typeof normalized.deprecatedMessage !== "object"
+	) {
+		delete normalized.deprecatedMessage;
+		console.warn(
+			`Removed invalid deprecatedMessage value for ${link}. Expected translatable.`
+		);
+	}
+
+	return normalized;
+}
+
+/**
  * Convert relative paths to absolute paths based on the manifest link.
  * @param {string} baseUrl - The base URL of the manifest.
  * @param {string} relativePath - The relative path to convert.
@@ -40,6 +101,8 @@ for (const type of Object.keys(manifestLinks)) {
 					await fs.readFile(new URL(link, repositoryRoot), "utf-8")
 				);
 			}
+
+			manifest = normalizeManifest(manifest, link);
 
 			// Convert relative paths to absolute paths
 			if (manifest.pages) {

@@ -32,7 +32,6 @@ export function getGithubRepoMetrics(repo: string): GithubRepoMetrics | null {
 
   const key = normalized.toLowerCase();
   if (!(key in cache.data)) {
-    console.warn(`GitHub data missing for ${normalized}.`);
     return null;
   }
   return cache.data[key] ?? null;
