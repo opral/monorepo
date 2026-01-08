@@ -66,7 +66,7 @@ function App() {
       <section className="pt-10 pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 flex flex-col gap-6">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <a
                 href="https://www.npmjs.com/package/@inlang/sdk"
                 target="_blank"
@@ -75,6 +75,16 @@ function App() {
                 <img
                   src="https://img.shields.io/npm/dw/%40inlang%2Fsdk?logo=npm&logoColor=red&labelColor=white&color=gray&label=npm%20downloads"
                   alt="npm downloads"
+                />
+              </a>
+              <a
+                href="https://github.com/opral/inlang/graphs/contributors"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  src="https://img.shields.io/github/contributors/opral/inlang?style=flat&logo=github&logoColor=black&labelColor=white&color=gray"
+                  alt="Contributors"
                 />
               </a>
               <a
