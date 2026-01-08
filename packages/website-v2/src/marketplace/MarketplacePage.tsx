@@ -362,8 +362,8 @@ function ProductHeader({ manifest }: { manifest: MarketplaceManifest }) {
     if (manifest.id.includes("messageLintRule.")) {
       return "Validation Rule";
     }
-    // Libraries and apps both show as "App"
-    return "App";
+    // Libraries and apps both show as "Tool"
+    return "Tool";
   };
   const badge = getCategoryBadge();
 

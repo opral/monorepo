@@ -57,7 +57,7 @@ const socialMediaLinks = [
 const resourceLinks = [{ name: "Documentation", href: "/documentation" }];
 
 const categoriesLinks = [
-  { name: "Apps", href: "/c/apps" },
+  { name: "Tools", href: "/c/tools" },
   { name: "Plugins", href: "/c/plugins" },
   {
     name: "Validation Rules",

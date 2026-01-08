@@ -4,8 +4,8 @@ import { getGithubStars } from "../github-stars-cache";
 
 const ecosystemLinks = [
   {
-    label: "Apps",
-    to: "/c/apps",
+    label: "Tools",
+    to: "/c/tools",
     icon: (
       <svg
         className="h-4 w-4"

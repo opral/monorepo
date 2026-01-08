@@ -159,7 +159,7 @@ function App() {
             </div>
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
-                to="/c/apps"
+                to="/c/tools"
                 className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors"
               >
                 Explore tools
@@ -300,7 +300,7 @@ function App() {
             </h2>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
-                to="/c/apps"
+                to="/c/tools"
                 className="rounded-lg bg-slate-900 text-white px-6 py-3 text-sm font-semibold hover:bg-slate-800 transition-colors"
               >
                 Explore tools
