@@ -1,12 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import ReactMarkdown, { type Components } from "react-markdown";
+import { createServerFn } from "@tanstack/react-start";
+import { parse } from "@opral/markdown-wc";
+import { useEffect } from "react";
 import { registry } from "@inlang/marketplace-registry";
+import { initMarkdownInteractive } from "../components/markdown-interactive";
+import markdownCss from "../markdown.css?url";
 import landingMarkdown from "../content/landingpage.md?raw";
 
 const ogImage =
   "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
+const loadLandingContent = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const parsed = await parse(landingMarkdown);
+    return { html: parsed.html };
+  }
+);
+
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    return await loadLandingContent();
+  },
   head: () => ({
     meta: [
       { title: "inlang" },
@@ -28,6 +42,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:site", content: "@inlanghq" },
       { name: "twitter:creator", content: "@inlanghq" },
     ],
+    links: [{ rel: "stylesheet", href: markdownCss }],
   }),
   component: App,
 });
@@ -40,10 +55,16 @@ const featuredIds = [
 ];
 
 function App() {
+  const { html } = Route.useLoaderData();
+
+  useEffect(() => {
+    initMarkdownInteractive();
+  }, []);
+
   return (
     <main className="bg-white text-slate-900">
-      <section className="px-6 pt-10 pb-16">
-        <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <section className="pt-10 pb-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 flex flex-col gap-6">
             <div className="flex gap-2">
               <a
@@ -72,8 +93,8 @@ function App() {
               (i18n).
             </h1>
             <p className="text-lg text-slate-600 max-w-xl">
-              Inlang is an open file format for localizing software (i18n).
-              One file format, multiple solutions, all interoperable.
+              Inlang is an open file format for localizing software (i18n). One
+              file format, multiple solutions, all interoperable.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -102,8 +123,8 @@ function App() {
         </div>
       </section>
 
-      <section className="px-6 pb-10">
-        <div className="mx-auto max-w-6xl">
+      <section className="pb-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <h2 className="text-2xl font-semibold tracking-tight mb-6">
             Popular tools
           </h2>
@@ -158,48 +179,14 @@ function App() {
         </div>
       </section>
 
-      <section className="px-6 pb-20">
-        <div className="mx-auto max-w-4xl">
-          <ReactMarkdown components={markdownComponents}>
-            {landingMarkdown}
-          </ReactMarkdown>
+      <section className="pb-20">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <article
+            className="marketplace-markdown"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
         </div>
       </section>
     </main>
   );
 }
-
-const markdownComponents: Components = {
-  h2: ({ children }) => (
-    <h2 className="text-2xl font-semibold tracking-tight mt-10 mb-4">
-      {children}
-    </h2>
-  ),
-  h3: ({ children }) => (
-    <h3 className="text-xl font-semibold tracking-tight mt-8 mb-3">
-      {children}
-    </h3>
-  ),
-  p: ({ children }) => (
-    <p className="text-slate-700 leading-relaxed mb-4">{children}</p>
-  ),
-  ul: ({ children }) => (
-    <ul className="list-disc pl-6 text-slate-700 mb-4">{children}</ul>
-  ),
-  li: ({ children }) => <li className="mb-2">{children}</li>,
-  a: ({ children, href }) => (
-    <a
-      href={href}
-      className="text-slate-900 underline underline-offset-2 hover:text-slate-700"
-    >
-      {children}
-    </a>
-  ),
-  img: ({ alt, src }) => (
-    <img
-      src={src}
-      alt={alt || ""}
-      className="w-full rounded-xl border border-slate-200 my-6"
-    />
-  ),
-};

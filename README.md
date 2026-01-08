@@ -31,14 +31,14 @@
 
 Inlang is an open file format to localize software.
 
-The file format enables an ecosystem of interoperable [lix apps](https://lix.opral.com) to build a globalized product.
+The file format enables an ecosystem of interoperable [lix-based solutions](https://lix.opral.com) to build a localized product.
 
 Every app in the inlang ecosystem shares the same review, automation, and collaboration layer, making cross-team collaboration possible. No syncing, hand-offs, or automation barriers.
 
 ![localization of software is a cross team effort](./assets/inlang-problem-explainer.png)
 ![inlang pipeline](./assets/inlang-pipeline.png)
 
-#### Example apps
+#### Example solutions
 
 - [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
 - [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
