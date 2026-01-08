@@ -7,7 +7,7 @@
 export const README_CONTENT = `// this readme is auto generated
 ## What is this folder?
 
-This is an **unpacked (git-friendly)** inlang project.
+This is an [unpacked (git-friendly)](https://inlang.com/docs/unpacked-file-format) inlang project.
 
 \`\`\`
 *.inlang/
