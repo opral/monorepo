@@ -98,7 +98,7 @@ function App() {
                 Documentation
               </a>
             </div>
-            <div className="flex gap-8 pt-2">
+            <div className="flex gap-12 pt-4">
               <a
                 href="https://github.com/opral/inlang"
                 target="_blank"
@@ -160,13 +160,13 @@ function App() {
           </div>
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
             <pre className="text-xs sm:text-sm font-mono text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-6 overflow-x-auto">
-              {`┌──────────┐      ┌───────────┐      ┌──────────┐
-│ i18n lib │      │Translation│      │  Design  │
-│          │      │   Tool    │      │   Tool   │
-└────┬─────┘      └─────┬─────┘      └────┬─────┘
-     │                  │                 │
-     └────────┐         │        ┌────────┘
-              ▼         ▼        ▼
+              {`┌──────────┐      ┌───────────┐      ┌────────────┐
+│ i18n lib │      │Translation│      │    CI/CD   │
+│          │      │   Tool    │      │ Automation │
+└────┬─────┘      └─────┬─────┘      └─────┬──────┘
+     │                  │                  │
+     └────────┐         │         ┌────────┘
+              ▼         ▼         ▼
         ┌────────────────────────────────┐
         │         .inlang file           │
         └────────────────────────────────┘`}

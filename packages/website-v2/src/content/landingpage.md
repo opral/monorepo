@@ -12,8 +12,8 @@ The result is fragmented tooling:
 
 ```
 ┌──────────┐        ┌───────────┐         ┌──────────┐
-│ i18n lib │───✗────│Translation│────✗────│  Design  │
-│          │        │   Tool    │         │   Tool   │
+│ i18n lib │───✗────│Translation│────✗────│   CI/CD  │
+│          │        │   Tool    │         │Automation│
 └──────────┘        └───────────┘         └──────────┘
 ```
 
@@ -27,10 +27,10 @@ Inlang is a file format designed for building i18n tools — enabling interopera
 - **Version control** — Built-in version control via [lix](https://lix.opral.com)
 
 ```
-┌──────────┐        ┌───────────┐         ┌──────────┐
-│ i18n lib │        │Translation│         │  Design  │
-│          │        │   Tool    │         │   Tool   │
-└────┬─────┘        └─────┬─────┘         └─────┬────┘
+┌──────────┐        ┌───────────┐         ┌────────────┐
+│ i18n lib │        │Translation│         │   CI/CD    │
+│          │        │   Tool    │         │ Automation │
+└────┬─────┘        └─────┬─────┘         └─────┬──────┘
      │                    │                     │
      └─────────┐          │          ┌──────────┘
                ▼          ▼          ▼
