@@ -8,10 +8,7 @@
 	"description": {
 		"en": "Deprecated: Use the inlang message format plugin instead. This plugin enables using JSON files for messages."
 	},
-	"deprecated": {
-		"reason": "Use the inlang message format plugin instead.",
-		"replacement": "plugin.inlang.messageFormat"
-	},
+	"deprecated": true,
 	"pages": {
 		"/": "./README.md",
 		"/changelog": "./CHANGELOG.md"
