@@ -92,7 +92,7 @@ function App() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 flex flex-col gap-6">
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
-              One file format for all your i18n tools.
+              The open file format for localization (i18n) tools.
             </h1>
             <p className="text-lg text-slate-600 max-w-xl">
               Build i18n libraries, translation editors, and automation. All
