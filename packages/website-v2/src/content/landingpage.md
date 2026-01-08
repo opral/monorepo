@@ -1,43 +1,70 @@
-## What is Inlang?
+## The problem
 
-### Standard open file format for i18n
+i18n tools are not interoperable.
 
-Inlang is an _open file format_ for localization _(i18n)_ that provides an [SDK](https://github.com/opral/inlang-sdk) for building and integrating localization tools on top of that open file format.
+No common file format for i18n tools exists. Data formats like JSON or YAML are unsuited for complex tools that need CRUD APIs, need to scale to hundreds of thousands of messages, or require version control.
 
-`.inlang` files are designed to become the open standard for i18n and enable interoperability between i18n solutions. Such solutions include Fink, Paraglide JS, plugins, and more.
+The result is fragmented tooling:
 
-#### Core Features
+- Switching tools requires migrations and refactoring
+- Cross-team work requires manual exports and hand-offs
+- Automating workflows requires custom scripts and glue code
 
-- 📁 File-based: Interoperability without cloud integrations or lock-in.
-- 🖊️ CRUD API: Query messages with SQL.
-- 🧩 Plugin System: Extend the capabilities with plugins.
-- 📦 Import/Export: Import and export messages in different file formats.
-- 🎛️ [Lix change control](https://lix.opral.com/): Collaboration, change proposals, reviews, and automation.
+```
+┌──────────┐        ┌───────────┐         ┌──────────┐
+│ i18n lib │───✗────│Translation│────✗────│  Design  │
+│          │        │   Tool    │         │   Tool   │
+└──────────┘        └───────────┘         └──────────┘
+```
 
-![fileformat benefits](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/src/pages/index/assets/fileformatbenefits.png)
+## The solution
 
-### SDK to build i18n solutions
+Inlang is a file format designed for building i18n tools — enabling interoperability across all i18n tools.
+
+- **CRUD API** — Read and write translations programmatically
+- **SQL queries** — Query messages like a database, scale to millions
+- **Plugin system** — Import/export any format (JSON, XLIFF, etc.)
+- **Version control** — Built-in version control via [lix](https://lix.opral.com)
+
+```
+┌──────────┐        ┌───────────┐         ┌──────────┐
+│ i18n lib │        │Translation│         │  Design  │
+│          │        │   Tool    │         │   Tool   │
+└────┬─────┘        └─────┬─────┘         └─────┬────┘
+     │                    │                     │
+     └─────────┐          │          ┌──────────┘
+               ▼          ▼          ▼
+           ┌──────────────────────────────────┐
+           │          .inlang file            │
+           └──────────────────────────────────┘
+```
+
+The result:
+
+- Switch tools without migrations — they all use the same file
+- Cross-team work without hand-offs — developers, translators, and designers all edit the same source
+- Automation just works — one source of truth, no glue code
+
+## Popular tools
+
+- **[Paraglide JS 🪂](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)** – i18n library for JS/TS with full typesafety and tree-shaking
+- **[Fink 🐦](https://fink.inlang.com)** – Translation editor in the browser, invite collaborators to help
+- **[Sherlock 🕵️](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)** – VS Code extension to translate right in your editor
+
+## Build your own i18n tooling
 
 The inlang SDK is the official specification and parser for `.inlang` files.
 
-The SDK allows creating, reading, and querying inlang files programmatically. Go to the [SDK docs](https://github.com/opral/inlang-sdk) for more information.
+Build linters, editors, CLI tools, IDE extensions, or libraries — all interoperable with every other inlang tool.
 
-![Inlang SDK](https://cdn.jsdelivr.net/gh/opral/inlang/packages/sdk/assets/open-file.svg)
+```ts
+import { loadProjectFromDirectory } from "@inlang/sdk";
 
-## Stack agnostic
+const project = await loadProjectFromDirectory({
+  path: "./project.inlang",
+});
 
-Inlang is a file format with no dependency on a tech stack. Hence, it can be used with any tech stack.
+const messages = await project.db.selectFrom("message").selectAll().execute();
+```
 
-The only thing that is needed are import/export plugins for the translation file format that is used by the tech stack. For iOS for example, the [XCode strings catalog](https://inlang.com/m/neh2d6w7/plugin-hechenbros-xcstrings) can be used. For Flutter a `.arb` plugin would be the right choice.
-
-🧩 [Explore available plugins](https://inlang.com/c/plugins)
-
-![stack agnostic](https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/src/pages/index/assets/tech-stack-icon.svg)
-
-## Ecosystem
-
-Adopting the Inlang format gives you access to an ecosystem of **[apps](https://inlang.com/c/apps), [plugins](https://inlang.com/c/plugins)** that work together seamlessly. Popular tools built on Inlang include:
-
-- **[ParaglideJS 🪂](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)** – A lightweight i18n library optimized for developer experience.
-- **[Fink 🐦](https://fink2.onrender.com/)** – A powerful translation management tool for developers and translators.
-- **[Sherlock i18n 🕵️](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)** – A VS Code extension that provides real-time translation linting and suggestions.
+[Read the SDK docs →](https://github.com/opral/inlang)
