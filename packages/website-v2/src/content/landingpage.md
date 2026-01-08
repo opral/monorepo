@@ -1,3 +1,5 @@
+# How inlang works
+
 ## The problem
 
 i18n tools are not interoperable.
@@ -39,17 +41,11 @@ Inlang is a file format designed for building i18n tools — enabling interopera
            └──────────────────────────────────┘
 ```
 
-The result:
+**The result:**
 
 - Switch tools without migrations — they all use the same file
 - Cross-team work without hand-offs — developers, translators, and designers all edit the same source
 - Automation just works — one source of truth, no glue code
-
-## Popular tools
-
-- **[Paraglide JS 🪂](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)** – i18n library for JS/TS with full typesafety and tree-shaking
-- **[Fink 🐦](https://fink.inlang.com)** – Translation editor in the browser, invite collaborators to help
-- **[Sherlock 🕵️](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)** – VS Code extension to translate right in your editor
 
 ## Build your own i18n tooling
 
