@@ -82,23 +82,7 @@ function App() {
               Build i18n libraries, translation editors, and automation. All
               interoperable.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/c/apps"
-                className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors"
-              >
-                Explore tools
-              </Link>
-              <a
-                href="https://github.com/opral/inlang-sdk"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-slate-200 text-slate-900 px-4 py-2 text-sm font-semibold hover:bg-slate-300 transition-colors"
-              >
-                Documentation
-              </a>
-            </div>
-            <div className="flex gap-12 pt-4">
+            <div className="flex gap-12 pt-2">
               <a
                 href="https://github.com/opral/inlang"
                 target="_blank"
@@ -155,6 +139,22 @@ function App() {
                   105+
                 </div>
                 <div className="text-sm text-slate-500">contributors</div>
+              </a>
+            </div>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Link
+                to="/c/apps"
+                className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors"
+              >
+                Explore tools
+              </Link>
+              <a
+                href="https://github.com/opral/inlang-sdk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg bg-slate-200 text-slate-900 px-4 py-2 text-sm font-semibold hover:bg-slate-300 transition-colors"
+              >
+                Documentation
               </a>
             </div>
           </div>
