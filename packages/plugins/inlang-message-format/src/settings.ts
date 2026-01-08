@@ -15,7 +15,15 @@ const pathPatternArray = Type.Array(pathPatternString, {
 		"Specify multiple pathPatterns to locate resource files in your repository. Each must include `{locale}` and end with `.json`.",
 });
 
+const sort = Type.Optional(
+	Type.Union([Type.Literal("asc"), Type.Literal("desc")], {
+		title: "Sort keys",
+		description: "Sort message keys when writing files.",
+	})
+);
+
 export type PluginSettings = Static<typeof PluginSettings>;
 export const PluginSettings = Type.Object({
 	pathPattern: Type.Union([pathPatternString, pathPatternArray]),
+	sort,
 });

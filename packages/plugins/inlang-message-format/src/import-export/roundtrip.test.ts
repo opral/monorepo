@@ -871,7 +871,8 @@ function runImportFiles(json: Record<string, any>) {
 
 // convenience wrapper for less testing code
 async function runExportFiles(
-	imported: Awaited<ReturnType<typeof importFiles>>
+	imported: Awaited<ReturnType<typeof importFiles>>,
+	settings: Record<string, unknown> = {}
 ) {
 	// add ids which are undefined from the import
 	for (const message of imported.messages) {
@@ -898,7 +899,7 @@ async function runExportFiles(
 	}
 
 	const exported = await exportFiles({
-		settings: {} as any,
+		settings: settings as any,
 		bundles: imported.bundles as Bundle[],
 		messages: imported.messages as Message[],
 		variants: imported.variants as Variant[],
@@ -907,7 +908,50 @@ async function runExportFiles(
 }
 
 // convenience wrapper for less testing code
-async function runExportFilesParsed(imported: any) {
-	const exported = await runExportFiles(imported);
+async function runExportFilesParsed(
+	imported: any,
+	settings: Record<string, unknown> = {}
+) {
+	const exported = await runExportFiles(imported, settings);
 	return JSON.parse(new TextDecoder().decode(exported[0]?.content));
 }
+
+test("export sorts keys ascending when configured", async () => {
+	const imported = await runImportFiles({
+		b: "two",
+		a: "one",
+		nested: {
+			z: "last",
+			y: "first",
+		},
+	});
+
+	const settingsAsc = {
+		"plugin.inlang.messageFormat": {
+			sort: "asc",
+		},
+	};
+	const exportedAsc = await runExportFilesParsed(imported, settingsAsc);
+	expect(Object.keys(exportedAsc)).toEqual(["$schema", "a", "b", "nested"]);
+	expect(Object.keys(exportedAsc.nested)).toEqual(["y", "z"]);
+});
+
+test("export sorts keys descending when configured", async () => {
+	const imported = await runImportFiles({
+		b: "two",
+		a: "one",
+		nested: {
+			z: "last",
+			y: "first",
+		},
+	});
+
+	const settingsDesc = {
+		"plugin.inlang.messageFormat": {
+			sort: "desc",
+		},
+	};
+	const exportedDesc = await runExportFilesParsed(imported, settingsDesc);
+	expect(Object.keys(exportedDesc)).toEqual(["$schema", "nested", "b", "a"]);
+	expect(Object.keys(exportedDesc.nested)).toEqual(["z", "y"]);
+});
