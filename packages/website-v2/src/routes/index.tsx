@@ -15,7 +15,7 @@ const loadLandingContent = createServerFn({ method: "GET" }).handler(
   async () => {
     const parsed = await parse(landingMarkdown);
     return { html: parsed.html };
-  }
+  },
 );
 
 export const Route = createFileRoute("/")({
@@ -164,14 +164,12 @@ function App() {
               >
                 Explore tools
               </Link>
-              <a
-                href="https://github.com/opral/inlang-sdk"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/docs"
                 className="rounded-lg bg-slate-200 text-slate-900 px-4 py-2 text-sm font-semibold hover:bg-slate-300 transition-colors"
               >
                 Documentation
-              </a>
+              </Link>
             </div>
           </div>
           <div className="lg:col-span-6 flex justify-center lg:justify-end">
@@ -266,14 +264,12 @@ function App() {
             })}
           </div>
           <div className="mt-4 text-center">
-            <a
-              href="https://github.com/opral/inlang"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/docs/write-tool"
               className="text-sm font-medium text-[#3451b2] underline underline-offset-2 hover:text-[#3a5ccc] transition-colors"
             >
               Build your own tool →
-            </a>
+            </Link>
           </div>
         </div>
       </section>

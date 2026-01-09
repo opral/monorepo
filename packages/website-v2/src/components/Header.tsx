@@ -89,16 +89,6 @@ export default function Header() {
           {/* Right side: Blog + Documentation | X Discord | GitHub Stars */}
           <nav className="hidden items-center gap-4 text-sm font-medium text-slate-600 sm:flex">
             <Link
-              to="/blog"
-              className={`hover:text-[color:var(--vp-c-brand-2)] ${
-                location.pathname.startsWith("/blog")
-                  ? "text-[color:var(--vp-c-brand-2)]"
-                  : ""
-              }`}
-            >
-              Blog
-            </Link>
-            <Link
               to="/docs"
               className={`hover:text-[color:var(--vp-c-brand-2)] ${
                 location.pathname.startsWith("/docs")
@@ -107,6 +97,16 @@ export default function Header() {
               }`}
             >
               Documentation
+            </Link>
+            <Link
+              to="/blog"
+              className={`hover:text-[color:var(--vp-c-brand-2)] ${
+                location.pathname.startsWith("/blog")
+                  ? "text-[color:var(--vp-c-brand-2)]"
+                  : ""
+              }`}
+            >
+              Blog
             </Link>
 
             {/* Divider */}
@@ -325,21 +325,19 @@ export default function Header() {
             <div className="my-2 h-px bg-slate-200" />
 
             <Link
+              to="/docs"
+              className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Documentation
+            </Link>
+            <Link
               to="/blog"
               className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
               onClick={() => setMobileMenuOpen(false)}
             >
               Blog
             </Link>
-            <a
-              href="https://github.com/opral/inlang-sdk"
-              target="_blank"
-              rel="noreferrer"
-              className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Documentation
-            </a>
 
             <div className="my-2 h-px bg-slate-200" />
 

@@ -62,10 +62,8 @@ function PluginsPage() {
             need.
           </p>
           <div className="mt-6">
-            <a
-              href="https://github.com/opral/inlang-sdk"
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              to="/docs/write-plugin"
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
             >
               Build your own plugin
@@ -80,9 +78,9 @@ function PluginsPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M7 17l9.2-9.2M17 17V7H7" />
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -167,10 +165,8 @@ function PluginCard({ item }: { item: (typeof registry)[number] }) {
 
 function BuildYourOwnCard() {
   return (
-    <a
-      href="https://github.com/opral/inlang-sdk"
-      target="_blank"
-      rel="noreferrer"
+    <Link
+      to="/docs/write-plugin"
       className="group flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition-all hover:border-slate-400 hover:bg-slate-100"
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition-colors group-hover:bg-slate-300 group-hover:text-slate-700">
@@ -196,6 +192,6 @@ function BuildYourOwnCard() {
           Create and publish your plugin
         </p>
       </div>
-    </a>
+    </Link>
   );
 }
