@@ -133,7 +133,7 @@ function serializePattern(pattern: Variant["pattern"]): string {
 
 	for (const part of pattern) {
 		if (part.type === "text") {
-			result += part.value;
+			result += escapePatternText(part.value);
 		} else if (part.arg.type === "variable-reference") {
 			result += `{${part.arg.name}}`;
 		} else {
@@ -141,6 +141,10 @@ function serializePattern(pattern: Variant["pattern"]): string {
 		}
 	}
 	return result;
+}
+
+function escapePatternText(value: string): string {
+	return value.replace(/\\/g, "\\\\").replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
 
 // input: { platform: "android", userGender: "male" }
