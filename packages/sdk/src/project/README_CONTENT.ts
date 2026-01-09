@@ -4,7 +4,7 @@
  * The goal is to help coding agents understand what this folder is
  * and how to use the inlang SDK to build tooling.
  */
-export const README_CONTENT = `// this readme is auto generated
+export const README_CONTENT = `
 ## What is this folder?
 
 This is an [unpacked (git-friendly)](https://inlang.com/docs/unpacked-project) inlang project.
