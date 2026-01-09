@@ -293,6 +293,18 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
 	});
 
+	test("does not recreate project_id on disk during sync", async () => {
+		const fs = Volume.fromJSON(mockDirectory);
+
+		await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+		});
+
+		const files = await fs.promises.readdir("/project.inlang");
+		expect(files).not.toContain("project_id");
+	});
+
 	// the test doesn't work on non-windows systems
 	// mocking the node:path to use backlashes has no effect
 	test.skip("files from directory should be available via lix if the OS uses backlashes as folder separators", async () => {
@@ -968,7 +980,8 @@ test("providing multiple plugins that have legacy loadMessages and saveMessages 
 });
 
 // https://github.com/opral/inlang-sdk/issues/228
-test("the lix id should be stable between loadings of the same project", async () => {
+// Skipped: project ids are intentionally unstable for unpacked projects for now.
+test.skip("the lix id should be stable between loadings of the same project", async () => {
 	const mockRepo = {
 		"/project.inlang/settings.json": JSON.stringify({
 			baseLocale: "en",

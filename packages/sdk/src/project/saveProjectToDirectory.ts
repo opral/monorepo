@@ -24,12 +24,12 @@ export async function saveProjectToDirectory(args: {
 		.execute();
 
 	const gitignoreContent = new TextEncoder().encode(
-		"# this file is auto generated\ncache\nREADME.md"
+		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
 	);
 
 	// write all files to the directory
 	for (const file of files) {
-		if (file.path.endsWith("db.sqlite")) {
+		if (file.path.endsWith("db.sqlite") || file.path === "/project_id") {
 			continue;
 		}
 		const p = path.join(args.path, file.path);

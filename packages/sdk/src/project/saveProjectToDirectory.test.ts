@@ -59,6 +59,35 @@ test("it should overwrite all files to the directory except the db.sqlite file",
 	expect(updatedSettings.locales).toEqual(["en", "fr", "mock"]);
 });
 
+// Users were confused by project_id, and without sync a stable id is rarely needed.
+test("it should not write project_id to disk", async () => {
+	const mockFs = Volume.fromJSON({
+		"/foo/bar.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+		}),
+	}).promises as any;
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+	});
+
+	await saveProjectToDirectory({
+		fs: mockFs,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const files = await mockFs.readdir("/foo/bar.inlang");
+
+	expect(files).not.toContain("project_id");
+});
+
 test("a roundtrip should work", async () => {
 	const bundles: Bundle[] = [{ id: "mock-bundle", declarations: [] }];
 	const messages: NewMessage[] = [{ bundleId: "mock-bundle", locale: "en" }];
@@ -326,7 +355,9 @@ test("adds a gitignore file if it doesn't exist", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toBe("# this file is auto generated\ncache\nREADME.md");
+	expect(gitignore).toBe(
+		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
+	);
 });
 
 test("emits a README.md file for coding agents", async () => {
@@ -391,8 +422,11 @@ test("README.md is gitignored", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toContain("README.md");
 	expect(gitignore).toContain("# this file is auto generated");
+	expect(gitignore).toContain("# everything is ignored except settings.json");
+	expect(gitignore).toContain("*");
+	expect(gitignore).toContain("!settings.json");
+	expect(gitignore).not.toContain("!README.md");
 });
 
 test("overwrites existing .gitignore with generated entries", async () => {
@@ -414,7 +448,9 @@ test("overwrites existing .gitignore with generated entries", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toBe("# this file is auto generated\ncache\nREADME.md");
+	expect(gitignore).toBe(
+		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
+	);
 });
 
 test("uses exportFiles when both exportFiles and saveMessages are defined", async () => {

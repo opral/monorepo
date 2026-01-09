@@ -273,6 +273,10 @@ async function syncLixFsFiles(args: {
 	lix: Lix;
 	syncInterval?: number;
 }) {
+	function shouldSyncPath(filePath: string) {
+		return filePath !== "/project_id" && !filePath.endsWith("/project_id");
+	}
+
 	// NOTE this function is async - while it runs 100% sync in the naiv implementation - we may want to change to an async version to optimize
 	async function checkFsStateRecursive(
 		dirPath: string,
@@ -289,6 +293,9 @@ async function syncLixFsFiles(args: {
 				const data = args.fs.readFileSync(fullPath) as unknown as ArrayBuffer;
 
 				const relativePath = "/" + nodePath.relative(args.path, fullPath);
+				if (!shouldSyncPath(relativePath)) {
+					continue;
+				}
 
 				if (!currentState[relativePath]) {
 					currentState[relativePath] = {
@@ -316,6 +323,9 @@ async function syncLixFsFiles(args: {
 			.execute();
 
 		for (const fileInLix of filesInLix) {
+			if (!shouldSyncPath(fileInLix.path)) {
+				continue;
+			}
 			const currentStateOfFileInLix = currentLixState[fileInLix.path];
 			// NOTE we could start with comparing the mdate and skip file read completely...
 			if (!currentStateOfFileInLix) {
