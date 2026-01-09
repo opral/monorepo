@@ -13,10 +13,11 @@ This is an [unpacked (git-friendly)](https://inlang.com/docs/unpacked-project) i
 *.inlang/
 ├── settings.json    # Locales, plugins, and file patterns (source of truth)
 ├── cache/           # Plugin caches (gitignored)
-└── .gitignore       # Ignores cache by default
+└── .gitignore       # Ignores everything except settings.json
 \`\`\`
 
 Everything in this folder is managed by the SDK, except for \`settings.json\`, which can be edited by users.
+The \`.gitignore\` is auto generated and ignores everything except \`settings.json\`, so only settings show up in git.
 
 Translation files (like \`messages/en.json\`) live **outside** this folder and are referenced via plugins in \`settings.json\`.
 

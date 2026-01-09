@@ -7,6 +7,8 @@ An unpacked project is a directory representation of an `.inlang` file. Instead 
 ```
 project.inlang/
 ├── settings.json
+├── cache/
+├── README.md
 └── .gitignore
 ```
 
@@ -91,7 +93,8 @@ When `syncInterval` is set, changes to files on disk are automatically imported,
 | File | Purpose |
 |------|---------|
 | `settings.json` | Project configuration (locales, plugins, plugin settings) |
-| `.gitignore` | Auto-created, ignores `cache/` directory |
+| `.gitignore` | Auto-created, ignores everything except `settings.json` (including itself) |
+| `README.md` | Auto-created, explains the folder to coding agents (gitignored) |
 | `cache/` | Cached plugin modules (gitignored) |
 
 Translation files (like `messages/en.json`) are managed by plugins and stored relative to your project based on plugin configuration.

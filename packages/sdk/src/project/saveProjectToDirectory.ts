@@ -24,7 +24,7 @@ export async function saveProjectToDirectory(args: {
 		.execute();
 
 	const gitignoreContent = new TextEncoder().encode(
-		"# this file is auto generated\ncache\nREADME.md"
+		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
 	);
 
 	// write all files to the directory

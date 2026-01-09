@@ -355,7 +355,9 @@ test("adds a gitignore file if it doesn't exist", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toBe("# this file is auto generated\ncache\nREADME.md");
+	expect(gitignore).toBe(
+		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
+	);
 });
 
 test("emits a README.md file for coding agents", async () => {
@@ -420,8 +422,11 @@ test("README.md is gitignored", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toContain("README.md");
 	expect(gitignore).toContain("# this file is auto generated");
+	expect(gitignore).toContain("# everything is ignored except settings.json");
+	expect(gitignore).toContain("*");
+	expect(gitignore).toContain("!settings.json");
+	expect(gitignore).not.toContain("!README.md");
 });
 
 test("overwrites existing .gitignore with generated entries", async () => {
@@ -443,7 +448,9 @@ test("overwrites existing .gitignore with generated entries", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toBe("# this file is auto generated\ncache\nREADME.md");
+	expect(gitignore).toBe(
+		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
+	);
 });
 
 test("uses exportFiles when both exportFiles and saveMessages are defined", async () => {
