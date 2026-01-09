@@ -447,19 +447,12 @@ async function syncLixFsFiles(args: {
 						fsState.state = "known";
 					} else if (lixState.state === "updated") {
 						// seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?
-						console.warn(
-							"seems like we saw an update on the file " +
-								path +
-								" in fs while some changes on lix have not been reached fs? FS -> Winns?"
-						);
 						await upsertFileInLix(args, path, fsState.content);
 						lixState.content = fsState.content;
 						lixState.state = "known";
 						fsState.state = "known";
 					} else if (lixState.state === "gone") {
-						console.warn(
-							"seems like we saw an delete in lix while some changes on fs have not been reached fs? FS -> Winns?"
-						);
+						// seems like we saw an delete in lix while some changes on fs have not been reached fs? FS -> Winns?
 						// TODO update the lix state
 						lixState.content = fsState.content;
 						lixState.state = "known";
@@ -485,9 +478,6 @@ async function syncLixFsFiles(args: {
 						lixState.state = "gone";
 					} else if (lixState.state === "updated") {
 						// seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?
-						console.warn(
-							"seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?"
-						);
 						await args.lix.db
 							.deleteFrom("file")
 							.where("path", "=", path)
@@ -496,9 +486,7 @@ async function syncLixFsFiles(args: {
 						lixState.state = "gone";
 						fsState.state = "gone";
 					} else if (lixState.state === "gone") {
-						console.warn(
-							"seems like we saw an delete in lix while we have a delete in lix simultaniously?"
-						);
+						// seems like we saw an delete in lix while we have a delete in lix simultaniously?
 						lixState.state = "gone";
 						fsState.state = "gone";
 					}

@@ -8,6 +8,7 @@ import {
 } from "./loadProjectFromDirectory.js";
 import { detectJsonFormatting } from "../utilities/detectJsonFormatting.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
+import { README_CONTENT } from "./README_CONTENT.js";
 
 export async function saveProjectToDirectory(args: {
 	fs: typeof fs;
@@ -22,26 +23,30 @@ export async function saveProjectToDirectory(args: {
 		.selectAll()
 		.execute();
 
-	let hasGitignore = false;
+	const gitignoreContent = new TextEncoder().encode(
+		"# this file is auto generated\ncache\nREADME.md"
+	);
 
 	// write all files to the directory
 	for (const file of files) {
 		if (file.path.endsWith("db.sqlite")) {
 			continue;
-		} else if (file.path.endsWith(".gitignore")) {
-			hasGitignore = true;
 		}
 		const p = path.join(args.path, file.path);
 		await args.fs.mkdir(path.dirname(p), { recursive: true });
 		await args.fs.writeFile(p, new Uint8Array(file.data));
 	}
 
-	if (hasGitignore === false) {
-		await args.fs.writeFile(
-			path.join(args.path, ".gitignore"),
-			new TextEncoder().encode("cache")
-		);
-	}
+	await args.fs.writeFile(
+		path.join(args.path, ".gitignore"),
+		gitignoreContent
+	);
+
+	// Write README.md for coding agents
+	await args.fs.writeFile(
+		path.join(args.path, "README.md"),
+		new TextEncoder().encode(README_CONTENT)
+	);
 
 	// run exporters
 	const plugins = await args.project.plugins.get();
