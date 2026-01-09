@@ -28,7 +28,7 @@
 		"typed-rpc": "3.0.0"
 	},
 	"license": "Apache-2.0",
-	"version": "0.3.52",
+	"version": "0.3.53",
 	"devDependencies": {
 		"@inlang/tsconfig": "workspace:*",
 		"@types/body-parser": "1.19.2",
