@@ -7,7 +7,6 @@ An unpacked project is a directory representation of an `.inlang` file. Instead 
 ```
 project.inlang/
 ├── settings.json
-├── project_id
 └── .gitignore
 ```
 
@@ -92,7 +91,6 @@ When `syncInterval` is set, changes to files on disk are automatically imported,
 | File | Purpose |
 |------|---------|
 | `settings.json` | Project configuration (locales, plugins, plugin settings) |
-| `project_id` | Stable identifier for the project |
 | `.gitignore` | Auto-created, ignores `cache/` directory |
 | `cache/` | Cached plugin modules (gitignored) |
 
@@ -103,4 +101,3 @@ Translation files (like `messages/en.json`) are managed by plugins and stored re
 - [CRUD API](/docs/crud-api) — Query and modify translations after loading
 - [Architecture](/docs/architecture) — Understand how storage fits in the architecture
 - [Writing a Tool](/docs/write-tool) — Build a tool that loads unpacked projects
-

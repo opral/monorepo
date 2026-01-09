@@ -29,7 +29,7 @@ export async function saveProjectToDirectory(args: {
 
 	// write all files to the directory
 	for (const file of files) {
-		if (file.path.endsWith("db.sqlite")) {
+		if (file.path.endsWith("db.sqlite") || file.path === "/project_id") {
 			continue;
 		}
 		const p = path.join(args.path, file.path);

@@ -15,6 +15,10 @@ export type InlangProject = {
 	 */
 	_sqlite: SqliteWasmDatabase;
 	id: {
+		/**
+		 * Stable for packed `.inlang` files. For unpacked projects loaded from a
+		 * directory, the id is unstable because `project_id` is not persisted.
+		 */
 		get: () => Promise<string>;
 	};
 	plugins: {

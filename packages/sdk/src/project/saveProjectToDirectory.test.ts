@@ -59,6 +59,35 @@ test("it should overwrite all files to the directory except the db.sqlite file",
 	expect(updatedSettings.locales).toEqual(["en", "fr", "mock"]);
 });
 
+// Users were confused by project_id, and without sync a stable id is rarely needed.
+test("it should not write project_id to disk", async () => {
+	const mockFs = Volume.fromJSON({
+		"/foo/bar.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+		}),
+	}).promises as any;
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+	});
+
+	await saveProjectToDirectory({
+		fs: mockFs,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const files = await mockFs.readdir("/foo/bar.inlang");
+
+	expect(files).not.toContain("project_id");
+});
+
 test("a roundtrip should work", async () => {
 	const bundles: Bundle[] = [{ id: "mock-bundle", declarations: [] }];
 	const messages: NewMessage[] = [{ bundleId: "mock-bundle", locale: "en" }];
