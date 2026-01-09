@@ -205,16 +205,6 @@ function parsePattern(value: string): {
 
 			for (let cursor = index + 1; cursor < value.length; cursor += 1) {
 				const current = value[cursor];
-				if (current === "\\") {
-					const escaped = value[cursor + 1];
-					if (escaped === "{" || escaped === "}" || escaped === "\\") {
-						variableName += escaped;
-						cursor += 1;
-						continue;
-					}
-					variableName += current;
-					continue;
-				}
 				if (current === "}") {
 					closingIndex = cursor;
 					break;
