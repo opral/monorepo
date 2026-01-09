@@ -9,6 +9,15 @@ import { README_CONTENT } from "./README_CONTENT.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { compareSemver, pickHighestVersion, readProjectMeta } from "./meta.js";
 
+async function fileExists(fsModule: typeof fs, filePath: string) {
+	try {
+		await fsModule.stat(filePath);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 /**
  * Saves a project to a directory.
  *
@@ -71,6 +80,12 @@ export async function saveProjectToDirectory(args: {
 		);
 		return comparison === null || comparison <= 0;
 	})();
+	const readmePath = path.join(args.path, "README.md");
+	const gitignorePath = path.join(args.path, ".gitignore");
+	const shouldWriteReadme =
+		shouldWriteMetadata || !(await fileExists(args.fs, readmePath));
+	const shouldWriteGitignore =
+		shouldWriteMetadata || !(await fileExists(args.fs, gitignorePath));
 
 	// write all files to the directory
 	for (const file of files) {
@@ -82,18 +97,19 @@ export async function saveProjectToDirectory(args: {
 		await args.fs.writeFile(p, new Uint8Array(file.data));
 	}
 
-	if (shouldWriteMetadata) {
-		await args.fs.writeFile(
-			path.join(args.path, ".gitignore"),
-			gitignoreContent
-		);
+	if (shouldWriteGitignore) {
+		await args.fs.writeFile(gitignorePath, gitignoreContent);
+	}
 
+	if (shouldWriteReadme) {
 		// Write README.md for coding agents
 		await args.fs.writeFile(
-			path.join(args.path, "README.md"),
+			readmePath,
 			new TextEncoder().encode(README_CONTENT)
 		);
+	}
 
+	if (shouldWriteMetadata) {
 		const metaContent = JSON.stringify({ highestSdkVersion }, null, 2);
 		await args.fs.writeFile(
 			path.join(args.path, ".meta.json"),

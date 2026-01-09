@@ -753,6 +753,14 @@ async function shouldUpdateProjectMeta(args: {
 	projectPath: string;
 	currentSdkVersion: string;
 }): Promise<boolean> {
+	const readmePath = nodePath.join(args.projectPath, "README.md");
+	const gitignorePath = nodePath.join(args.projectPath, ".gitignore");
+	const shouldRepairGeneratedFiles =
+		!(await fileExists(args.fs, readmePath)) ||
+		!(await fileExists(args.fs, gitignorePath));
+	if (shouldRepairGeneratedFiles) {
+		return true;
+	}
 	const meta = await readProjectMeta({
 		fs: args.fs,
 		projectPath: args.projectPath,
@@ -766,6 +774,15 @@ async function shouldUpdateProjectMeta(args: {
 		return true;
 	}
 	return comparison < 0;
+}
+
+async function fileExists(fsModule: typeof fs.promises, filePath: string) {
+	try {
+		await fsModule.stat(filePath);
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 export class ResourceFileImportError extends Error {

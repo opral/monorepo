@@ -465,6 +465,45 @@ test("does not overwrite README.md or .gitignore when meta has a higher sdk vers
 	expect(meta.highestSdkVersion).toBe("99.0.0");
 });
 
+test("recreates missing README.md and .gitignore when meta has a higher sdk version", async () => {
+	const fs = Volume.fromJSON({
+		"/foo/bar.inlang/.meta.json": JSON.stringify({
+			highestSdkVersion: "99.0.0",
+		}),
+	});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const readme = await fs.promises.readFile(
+		"/foo/bar.inlang/README.md",
+		"utf-8"
+	);
+	const gitignore = await fs.promises.readFile(
+		"/foo/bar.inlang/.gitignore",
+		"utf-8"
+	);
+	const metaRaw = await fs.promises.readFile(
+		"/foo/bar.inlang/.meta.json",
+		"utf-8"
+	);
+	const meta = JSON.parse(
+		typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+	);
+
+	expect(readme).toContain("## What is this folder?");
+	expect(gitignore).toContain("*");
+	expect(gitignore).toContain("!settings.json");
+	expect(meta.highestSdkVersion).toBe("99.0.0");
+});
+
 test("README.md is gitignored", async () => {
 	const fs = Volume.fromJSON({});
 

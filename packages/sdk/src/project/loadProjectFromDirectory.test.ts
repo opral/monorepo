@@ -344,6 +344,41 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		expect(gitignore).toContain("!settings.json");
 	});
 
+	test("recreates README.md and .gitignore when meta version is higher but files are missing", async () => {
+		const fs = Volume.fromJSON({
+			"/project.inlang/.meta.json": JSON.stringify({
+				highestSdkVersion: "99.0.0",
+			}),
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+		});
+
+		await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+		});
+
+		const readme = await fs.promises.readFile(
+			"/project.inlang/README.md",
+			"utf-8"
+		);
+		const gitignore = await fs.promises.readFile(
+			"/project.inlang/.gitignore",
+			"utf-8"
+		);
+		const metaRaw = await fs.promises.readFile(
+			"/project.inlang/.meta.json",
+			"utf-8"
+		);
+		const meta = JSON.parse(
+			typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+		);
+
+		expect(readme).toContain("## What is this folder?");
+		expect(gitignore).toContain("*");
+		expect(gitignore).toContain("!settings.json");
+		expect(meta.highestSdkVersion).toBe("99.0.0");
+	});
+
 	test("files from directory should be available via lix after project has been loaded from directory", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
