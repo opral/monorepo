@@ -37,10 +37,7 @@ export async function saveProjectToDirectory(args: {
 		await args.fs.writeFile(p, new Uint8Array(file.data));
 	}
 
-	await args.fs.writeFile(
-		path.join(args.path, ".gitignore"),
-		gitignoreContent
-	);
+	await args.fs.writeFile(path.join(args.path, ".gitignore"), gitignoreContent);
 
 	// Write README.md for coding agents
 	await args.fs.writeFile(

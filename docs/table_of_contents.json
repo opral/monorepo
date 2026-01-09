@@ -1,0 +1,53 @@
+[
+  {
+    "title": "Start Here",
+    "pages": [
+      {
+        "path": "./introduction.md",
+        "slug": "introduction"
+      },
+      {
+        "path": "./getting-started.md",
+        "slug": "getting-started"
+      }
+    ]
+  },
+  {
+    "title": "Guide",
+    "pages": [
+      {
+        "path": "./architecture.md",
+        "slug": "architecture"
+      },
+      {
+        "path": "./data-model.md",
+        "slug": "data-model"
+      },
+      {
+        "path": "./unpacked-project.md",
+        "slug": "unpacked-project"
+      },
+      {
+        "path": "./write-plugin.md",
+        "slug": "write-plugin"
+      },
+      {
+        "path": "./write-tool.md",
+        "slug": "write-tool"
+      }
+    ]
+  },
+  {
+    "title": "Reference",
+    "pages": [
+      {
+        "path": "./crud-api.md",
+        "slug": "crud-api"
+      },
+      {
+        "path": "./plugin-api.md",
+        "slug": "plugin-api"
+      }
+    ]
+  }
+]

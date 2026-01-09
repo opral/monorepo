@@ -4,7 +4,7 @@
   <img src="https://github.com/opral/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="90px">
   
   <h2 align="center">
-    An ecosystem to globalize software (i18n, localize)
+    The open file format and ecosystem for localization (i18n)
   </h2>
 
   <p align="center">
@@ -21,38 +21,65 @@
 
 <br>
 
-<p align="center">
-<a href='https://youtu.be/E_GwxxKbkMo' target="_blank">
-	<img src="./assets/what-is-inlang.png" alt="inlang in 100 seconds">
-</a>
-</p>
+## The problem
 
-## What is inlang?
+i18n tools are not interoperable.
 
-Inlang is an ecosystem of interoperable [lix apps](https://lix.opral.com) to globalize software.
+```
+┌──────────┐        ┌───────────┐         ┌──────────┐
+│ i18n lib │───✗────│Translation│────✗────│  Design  │
+│          │        │   Tool    │         │   Tool   │
+└──────────┘        └───────────┘         └──────────┘
+```
 
-Every app in the inlang ecosystem shares the same review, automation, and collaboration layer, making cross-team collaboration possible. No syncing, hand-offs, or automation barriers.
+Every tool has its own format, its own sync, its own collaboration layer. Cross-team work? Manual exports and hand-offs.
 
-![globalization of software is a cross team effort](./assets/inlang-problem-explainer.png)
-![inlang pipeline](./assets/inlang-pipeline.png)
+## The solution
 
-#### Example apps
+An open file format. Everything interoperates.
 
-- [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
-- [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
-- [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) to translate your app in the browser & invite collaborators to help you
-- [Parrot](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin) see translations directly in Figma
-- [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
-- _build your own app / plugin / lint rule_ with the [inlang SDK](https://inlang.com/documentation)
-- ...
+```
+┌──────────┐        ┌───────────┐         ┌──────────┐
+│ Paraglide│        │   Fink    │         │ Sherlock │
+└────┬─────┘        └─────┬─────┘         └─────┬────┘
+     │                    │                     │
+     └─────────┐          │          ┌──────────┘
+               ▼          ▼          ▼
+           ┌──────────────────────────────────┐
+           │          .inlang file            │
+           └──────────────────────────────────┘
+```
 
-## Why inlang?
+One file format. Multiple tools. All interoperable. The good old Unix philosophy.
 
-Globalizing software is a cross-team effort that involves ensuring compliance, adapting the design, handling different currencies, managing translations, writing different marketing copy, etc.
+## Popular tools
 
-Existing point solutions such as apps to manage translations (Lokalise, Weglot, Smartling), apps to manage design copy (ditto, translator), or i18n libraries for developers (next-intl, i18next) don’t have interop between each other.
+- [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) — i18n library for JS/TS with fully translated, typesafe & fast apps in minutes
+- [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) — translation editor in the browser, invite collaborators to help
+- [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) — VS Code extension to translate right in your editor
+- [Parrot](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin) — see translations directly in Figma
+- [CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) — lint messages, machine translate, quality control in CI/CD
 
-The lack of interop of existing solutions leads every app and team to have its own collaboration layer, review system, and automation capabilities. Cross-team collaboration and automation, which are required to globalize software, are difficult to impossible.
+## Build your own
+
+```ts
+import { loadProjectFromDirectory } from "@inlang/sdk";
+
+const project = await loadProjectFromDirectory({
+  path: "./project.inlang",
+});
+
+const messages = await project.db.selectFrom("message").selectAll().execute();
+```
+
+The SDK gives you:
+
+- CRUD API for translations
+- SQL queries
+- Plugin system for any format
+- Version control via lix
+
+[Read the docs →](https://inlang.com/documentation)
 
 ## Contributing
 

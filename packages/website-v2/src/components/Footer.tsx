@@ -54,10 +54,13 @@ const socialMediaLinks = [
   },
 ];
 
-const resourceLinks = [{ name: "Documentation", href: "/documentation" }];
+const resourceLinks = [
+  { name: "Documentation", href: "/docs" },
+  { name: "Blog", href: "/blog" },
+];
 
 const categoriesLinks = [
-  { name: "Apps", href: "/c/apps" },
+  { name: "Tools", href: "/c/tools" },
   { name: "Plugins", href: "/c/plugins" },
   {
     name: "Validation Rules",
@@ -67,15 +70,6 @@ const categoriesLinks = [
 
 const contactLinks = [
   { name: "Get in Touch", href: "mailto:hello@inlang.com" },
-  {
-    name: "Join the Team",
-    href: "https://github.com/opral/inlang/tree/main/careers",
-  },
-  {
-    name: "Feedback",
-    href: "https://github.com/opral/inlang/discussions/categories/feedback",
-  },
-  { name: "Blog", href: "https://opral.substack.com/t/inlang" },
 ];
 
 export default function Footer() {
@@ -116,31 +110,57 @@ export default function Footer() {
         {/* Resources column */}
         <div className="flex w-full flex-col pt-2 sm:w-1/3 md:w-1/4">
           <p className="pb-3 font-semibold text-slate-900">Resources</p>
-          {resourceLinks.map((link) => (
-            <div key={link.name} className="w-fit opacity-80">
-              <Link
-                to={link.href}
-                className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
-              >
-                {link.name}
-              </Link>
-            </div>
-          ))}
+          {resourceLinks.map((link) =>
+            link.href.startsWith("/") ? (
+              <div key={link.name} className="w-fit opacity-80">
+                <Link
+                  to={link.href}
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </Link>
+              </div>
+            ) : (
+              <div key={link.name} className="w-fit opacity-80">
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </a>
+              </div>
+            ),
+          )}
         </div>
 
         {/* Ecosystem column */}
         <div className="flex w-full flex-col pt-2 sm:w-1/3 md:w-1/4">
           <p className="pb-3 font-semibold text-slate-900">Ecosystem</p>
-          {categoriesLinks.map((link) => (
-            <div key={link.name} className="w-fit opacity-80">
-              <Link
-                to={link.href}
-                className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
-              >
-                {link.name}
-              </Link>
-            </div>
-          ))}
+          {categoriesLinks.map((link) =>
+            link.href.startsWith("/") ? (
+              <div key={link.name} className="w-fit opacity-80">
+                <Link
+                  to={link.href}
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </Link>
+              </div>
+            ) : (
+              <div key={link.name} className="w-fit opacity-80">
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </a>
+              </div>
+            ),
+          )}
         </div>
 
         {/* Contact column */}
@@ -163,9 +183,14 @@ export default function Footer() {
 
       {/* Bottom section */}
       <div className="mx-auto flex max-w-7xl items-center justify-end px-6 pb-16">
-        <p className="text-sm text-slate-500">
-          Copyright {new Date().getFullYear()} Opral
-        </p>
+        <a
+          href="https://opral.com"
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          Copyright 2025 Opral
+        </a>
       </div>
     </footer>
   );

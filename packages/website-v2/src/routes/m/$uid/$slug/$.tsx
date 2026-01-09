@@ -158,7 +158,7 @@ function buildMarketplaceHead(
       { name: "twitter:image", content: image },
       {
         name: "twitter:image:alt",
-        content: "inlang's ecosystem helps organizations to go global.",
+        content: "inlang's ecosystem helps organizations to localize software.",
       },
       { name: "twitter:title", content: pageTitle },
       { name: "twitter:description", content: metaDescription },

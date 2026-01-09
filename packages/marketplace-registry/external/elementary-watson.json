@@ -1,0 +1,33 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "app.inlang.elementaryWatson",
+	"icon": "https://raw.githubusercontent.com/romerramos/elementary-watson/main/media/icon.png",
+	"displayName": {
+		"en": "Elementary Watson - Inline Translation Preview"
+	},
+	"description": {
+		"en": "VS Code extension that displays inline translation values for i18n method calls in JavaScript, TypeScript, and Svelte applications."
+	},
+	"readme": {
+		"en": "https://raw.githubusercontent.com/romerramos/elementary-watson/main/README.md"
+	},
+	"keywords": [
+		"vscode",
+		"extension",
+		"ide",
+		"i18n",
+		"translation",
+		"inline",
+		"preview",
+		"paraglide",
+		"javascript",
+		"typescript",
+		"svelte",
+		"inlang"
+	],
+	"publisherName": "romerramos",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/romerramos",
+	"license": "MIT",
+	"pricing": "free",
+	"website": "https://github.com/romerramos/elementary-watson"
+}

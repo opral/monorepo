@@ -2,69 +2,73 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { registry } from "@inlang/marketplace-registry";
 
-type GithubStarsCache = {
-  generatedAt: string;
-  data: Record<string, number | null>;
+export type GithubRepoMetrics = {
+  stars: number;
+  forks: number;
+  openIssues: number;
+  closedIssues: number;
+  contributorCount: number;
 };
 
-const GITHUB_STARS_TTL_MINUTES = 60;
-const githubStarsPath = path.join(
-  __dirname,
-  "..",
-  "github_repo_stars.gen.json",
-);
+type GithubCache = {
+  generatedAt: string;
+  data: Record<string, GithubRepoMetrics | null>;
+};
+
+const GITHUB_CACHE_TTL_MINUTES = 60;
+const githubCachePath = path.join(__dirname, "..", "github_repo_data.gen.json");
 let didLogGithubToken = false;
 
 export function githubStarsPlugin({ token }: { token?: string }) {
   return {
-    name: "inlang:github-stars",
+    name: "inlang:github-data",
     async buildStart() {
-      await ensureGithubStarsCache(token);
+      await ensureGithubCache(token);
     },
     async configureServer() {
-      await ensureGithubStarsCache(token);
+      await ensureGithubCache(token);
     },
   };
 }
 
-async function ensureGithubStarsCache(token?: string) {
+async function ensureGithubCache(token?: string) {
   if (token && !didLogGithubToken) {
     console.info("Using INLANG_WEBSITE_GITHUB_TOKEN for GitHub API requests.");
     didLogGithubToken = true;
   }
-  const cached = await readGithubStarsCache();
+  const cached = await readGithubCache();
   if (cached && !isCacheExpired(cached)) return;
 
   const repos = getGithubReposFromRegistry();
   repos.add("opral/inlang");
 
-  const data: Record<string, number | null> = {};
+  const data: Record<string, GithubRepoMetrics | null> = {};
   for (const repo of repos) {
-    const value = await fetchGithubStars(repo, token);
-    data[repo.toLowerCase()] = value;
+    const metrics = await fetchGithubRepoMetrics(repo, token);
+    data[repo.toLowerCase()] = metrics;
   }
 
-  const payload: GithubStarsCache = {
+  const payload: GithubCache = {
     generatedAt: new Date().toISOString(),
     data,
   };
 
-  await fs.writeFile(githubStarsPath, JSON.stringify(payload, null, 2) + "\n");
+  await fs.writeFile(githubCachePath, JSON.stringify(payload, null, 2) + "\n");
 }
 
-async function readGithubStarsCache(): Promise<GithubStarsCache | null> {
+async function readGithubCache(): Promise<GithubCache | null> {
   try {
-    const raw = await fs.readFile(githubStarsPath, "utf8");
-    return JSON.parse(raw) as GithubStarsCache;
+    const raw = await fs.readFile(githubCachePath, "utf8");
+    return JSON.parse(raw) as GithubCache;
   } catch {
     return null;
   }
 }
 
-function isCacheExpired(cache: GithubStarsCache) {
+function isCacheExpired(cache: GithubCache) {
   const generatedAt = Date.parse(cache.generatedAt);
   if (Number.isNaN(generatedAt)) return true;
-  const ttlMs = GITHUB_STARS_TTL_MINUTES * 60 * 1000;
+  const ttlMs = GITHUB_CACHE_TTL_MINUTES * 60 * 1000;
   return Date.now() - generatedAt > ttlMs;
 }
 
@@ -87,35 +91,92 @@ function normalizeGithubRepo(input: string): string | null {
   return /^[^/]+\/[^/]+$/.test(normalized) ? normalized : null;
 }
 
-async function fetchGithubStars(repo: string, token?: string) {
+function getHeaders(token?: string) {
+  return {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "inlang-website-v2",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+async function fetchGithubRepoMetrics(
+  repo: string,
+  token?: string,
+): Promise<GithubRepoMetrics | null> {
   try {
-    const res = await fetch(`https://api.github.com/repos/${repo}`, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        "User-Agent": "inlang-website-v2",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+    // Fetch repo info (stars, forks, open issues)
+    const repoRes = await fetch(`https://api.github.com/repos/${repo}`, {
+      headers: getHeaders(token),
     });
-    if (!res.ok) {
-      let message = "";
-      try {
-        const bodyText = await res.text();
-        const parsed = JSON.parse(bodyText) as { message?: string };
-        message = parsed?.message ?? "";
-      } catch {
-        message = "";
-      }
-      console.warn(
-        `GitHub stars fetch failed for ${repo}: ${res.status} ${res.statusText}. ${message}`,
-      );
+
+    if (!repoRes.ok) {
+      console.warn(`GitHub repo fetch failed for ${repo}: ${repoRes.status}`);
       return null;
     }
-    const body = (await res.json()) as { stargazers_count?: number };
-    return typeof body.stargazers_count === "number"
-      ? body.stargazers_count
-      : null;
+
+    const repoData = (await repoRes.json()) as {
+      stargazers_count?: number;
+      forks_count?: number;
+      open_issues_count?: number;
+    };
+
+    // Fetch issue counts via search API (issues only, no PRs)
+    const openIssuesRes = await fetch(
+      `https://api.github.com/search/issues?q=repo:${repo}+is:issue+is:open&per_page=1`,
+      { headers: getHeaders(token) },
+    );
+    const closedIssuesRes = await fetch(
+      `https://api.github.com/search/issues?q=repo:${repo}+is:issue+is:closed&per_page=1`,
+      { headers: getHeaders(token) },
+    );
+
+    let openIssues = 0;
+    if (openIssuesRes.ok) {
+      const openData = (await openIssuesRes.json()) as {
+        total_count?: number;
+      };
+      openIssues = openData.total_count ?? 0;
+    }
+
+    let closedIssues = 0;
+    if (closedIssuesRes.ok) {
+      const closedData = (await closedIssuesRes.json()) as {
+        total_count?: number;
+      };
+      closedIssues = closedData.total_count ?? 0;
+    }
+
+    // Fetch contributor count (use per_page=1 and check Link header for total, or use anon=1 to get accurate count)
+    const contributorsRes = await fetch(
+      `https://api.github.com/repos/${repo}/contributors?per_page=1&anon=1`,
+      { headers: getHeaders(token) },
+    );
+
+    let contributorCount = 0;
+    if (contributorsRes.ok) {
+      // GitHub returns the total count in the Link header's last page number
+      const linkHeader = contributorsRes.headers.get("Link");
+      if (linkHeader) {
+        const lastMatch = linkHeader.match(/page=(\d+)>; rel="last"/);
+        if (lastMatch) {
+          contributorCount = parseInt(lastMatch[1], 10);
+        }
+      } else {
+        // If no Link header, there's only one page - count the response
+        const data = (await contributorsRes.json()) as unknown[];
+        contributorCount = data.length;
+      }
+    }
+
+    return {
+      stars: repoData.stargazers_count ?? 0,
+      forks: repoData.forks_count ?? 0,
+      openIssues,
+      closedIssues,
+      contributorCount,
+    };
   } catch (error) {
-    console.warn(`GitHub stars fetch failed for ${repo}`, error);
+    console.warn(`GitHub fetch failed for ${repo}`, error);
     return null;
   }
 }

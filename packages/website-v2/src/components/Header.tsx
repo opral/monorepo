@@ -4,8 +4,8 @@ import { getGithubStars } from "../github-stars-cache";
 
 const ecosystemLinks = [
   {
-    label: "Apps",
-    to: "/c/apps",
+    label: "Tools",
+    to: "/c/tools",
     icon: (
       <svg
         className="h-4 w-4"
@@ -88,17 +88,26 @@ export default function Header() {
 
           {/* Right side: Blog + Documentation | X Discord | GitHub Stars */}
           <nav className="hidden items-center gap-4 text-sm font-medium text-slate-600 sm:flex">
-            <Link to="/blog" className="hover:text-slate-900">
-              Blog
-            </Link>
-            <a
-              href="https://github.com/opral/inlang"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-900"
+            <Link
+              to="/docs"
+              className={`hover:text-[color:var(--vp-c-brand-2)] ${
+                location.pathname.startsWith("/docs")
+                  ? "text-[color:var(--vp-c-brand-2)]"
+                  : ""
+              }`}
             >
               Documentation
-            </a>
+            </Link>
+            <Link
+              to="/blog"
+              className={`hover:text-[color:var(--vp-c-brand-2)] ${
+                location.pathname.startsWith("/blog")
+                  ? "text-[color:var(--vp-c-brand-2)]"
+                  : ""
+              }`}
+            >
+              Blog
+            </Link>
 
             {/* Divider */}
             <div className="h-4 w-px bg-slate-300" />
@@ -155,8 +164,11 @@ export default function Header() {
               </svg>
               GitHub
               {githubStars !== null && (
-                <span className="inline-flex items-center gap-1">
-                  <span className="relative h-3.5 w-3.5">
+                <span
+                  className="inline-flex items-center gap-1"
+                  title={`${githubStars.toLocaleString()} GitHub stars`}
+                >
+                  <span className="relative h-3.5 w-3.5" aria-hidden="true">
                     {/* Outlined star - visible by default, hidden on hover */}
                     <svg
                       className="absolute inset-0 h-3.5 w-3.5 text-slate-400 group-hover:opacity-0 transition-opacity"
@@ -178,7 +190,11 @@ export default function Header() {
                       <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
                     </svg>
                   </span>
-                  {formatStars(githubStars)}
+                  <span
+                    aria-label={`${githubStars.toLocaleString()} GitHub stars`}
+                  >
+                    {formatStars(githubStars)}
+                  </span>
                 </span>
               )}
             </a>
@@ -309,21 +325,19 @@ export default function Header() {
             <div className="my-2 h-px bg-slate-200" />
 
             <Link
+              to="/docs"
+              className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Documentation
+            </Link>
+            <Link
               to="/blog"
               className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
               onClick={() => setMobileMenuOpen(false)}
             >
               Blog
             </Link>
-            <a
-              href="https://github.com/opral/inlang-sdk"
-              target="_blank"
-              rel="noreferrer"
-              className="py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Documentation
-            </a>
 
             <div className="my-2 h-px bg-slate-200" />
 
@@ -345,15 +359,23 @@ export default function Header() {
                 </svg>
                 GitHub
                 {githubStars !== null && (
-                  <span className="inline-flex items-center gap-0.5 pr-1 text-slate-500">
+                  <span
+                    className="inline-flex items-center gap-0.5 pr-1 text-slate-500"
+                    title={`${githubStars.toLocaleString()} GitHub stars`}
+                  >
                     <svg
                       className="h-3 w-3 text-yellow-500"
                       viewBox="0 0 16 16"
                       fill="currentColor"
+                      aria-hidden="true"
                     >
                       <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
                     </svg>
-                    {formatStars(githubStars)}
+                    <span
+                      aria-label={`${githubStars.toLocaleString()} GitHub stars`}
+                    >
+                      {formatStars(githubStars)}
+                    </span>
                   </span>
                 )}
               </a>

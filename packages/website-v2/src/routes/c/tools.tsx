@@ -4,14 +4,14 @@ import { registry } from "@inlang/marketplace-registry";
 const ogImage =
   "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
 
-export const Route = createFileRoute("/c/plugins")({
+export const Route = createFileRoute("/c/tools")({
   head: () => ({
     meta: [
-      { title: "Localization Plugins | inlang" },
+      { title: "Localization Tools | inlang" },
       {
         name: "description",
         content:
-          "Find everything localization (i18n) related to plugins - inlang",
+          "Find everything localization (i18n) related to tools - inlang",
       },
       { name: "og:image", content: ogImage },
       { name: "twitter:card", content: "summary_large_image" },
@@ -20,24 +20,24 @@ export const Route = createFileRoute("/c/plugins")({
         name: "twitter:image:alt",
         content: "inlang's ecosystem helps organizations to localize software.",
       },
-      { name: "twitter:title", content: "Localization Plugins | inlang" },
+      { name: "twitter:title", content: "Localization Tools | inlang" },
       {
         name: "twitter:description",
         content:
-          "Find everything localization (i18n) related to plugins - inlang",
+          "Find everything localization (i18n) related to tools - inlang",
       },
       { name: "twitter:site", content: "@inlanghq" },
       { name: "twitter:creator", content: "@inlanghq" },
     ],
   }),
-  component: PluginsPage,
+  component: ToolsPage,
 });
 
-// Filter plugins from the registry
-const plugins = registry
+// Filter tools and libraries from the registry
+const tools = registry
   .filter((item) => {
     const itemType = item.id.split(".")[0];
-    return itemType === "plugin" && !item.deprecated;
+    return (itemType === "app" || itemType === "library") && !item.deprecated;
   })
   .sort((a, b) => {
     const aName =
@@ -47,27 +47,26 @@ const plugins = registry
     return aName.localeCompare(bName);
   });
 
-function PluginsPage() {
+function ToolsPage() {
   return (
     <main className="bg-white text-slate-900">
       {/* Header */}
       <section className="border-b border-slate-200 bg-slate-50 px-6 py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Plugins
+            Tools
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-slate-600">
-            Extend inlang with plugins for different file formats, frameworks,
-            and workflows. Import and export translations in the format you
-            need.
+            Localization tools for translators, developers, and anyone who wants
+            to make their software work across languages and cultures.
           </p>
           <div className="mt-6">
             <Link
               to="/docs/$slug"
-              params={{ slug: "write-plugin" }}
+              params={{ slug: "write-tool" }}
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
             >
-              Build your own plugin
+              Build your own tool
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -86,12 +85,12 @@ function PluginsPage() {
         </div>
       </section>
 
-      {/* Plugins Grid */}
+      {/* Tools Grid */}
       <section className="px-6 py-16">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {plugins.map((item) => (
-              <PluginCard key={item.id} item={item} />
+            {tools.map((item) => (
+              <ToolCard key={item.id} item={item} />
             ))}
             <BuildYourOwnCard />
           </div>
@@ -101,7 +100,7 @@ function PluginsPage() {
   );
 }
 
-function PluginCard({ item }: { item: (typeof registry)[number] }) {
+function ToolCard({ item }: { item: (typeof registry)[number] }) {
   const displayName =
     typeof item.displayName === "object"
       ? item.displayName.en
@@ -111,6 +110,9 @@ function PluginCard({ item }: { item: (typeof registry)[number] }) {
       ? item.description.en
       : item.description;
   const slug = item.id.replaceAll(".", "-");
+  const isExternal = item.keywords
+    ?.map((k) => k.toLowerCase())
+    .includes("external");
 
   return (
     <Link
@@ -135,9 +137,16 @@ function PluginCard({ item }: { item: (typeof registry)[number] }) {
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-4 pt-3">
-        <h3 className="mb-2 text-[15px] font-bold text-slate-800 group-hover:text-slate-900">
-          {displayName}
-        </h3>
+        <div className="mb-2 flex items-center gap-2">
+          <h3 className="text-[15px] font-bold text-slate-800 group-hover:text-slate-900">
+            {displayName}
+          </h3>
+          {isExternal && (
+            <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-medium text-slate-500">
+              External
+            </span>
+          )}
+        </div>
         <p className="line-clamp-2 flex-1 text-sm text-slate-500 group-hover:text-slate-600">
           {description}
         </p>
@@ -168,7 +177,7 @@ function BuildYourOwnCard() {
   return (
     <Link
       to="/docs/$slug"
-      params={{ slug: "write-plugin" }}
+      params={{ slug: "write-tool" }}
       className="group flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition-all hover:border-slate-400 hover:bg-slate-100"
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition-colors group-hover:bg-slate-300 group-hover:text-slate-700">
@@ -191,7 +200,7 @@ function BuildYourOwnCard() {
           Build your own
         </h3>
         <p className="mt-1 text-sm text-slate-500">
-          Create and publish your plugin
+          Create and publish your tool
         </p>
       </div>
     </Link>
