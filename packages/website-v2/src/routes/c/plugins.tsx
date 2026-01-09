@@ -63,7 +63,8 @@ function PluginsPage() {
           </p>
           <div className="mt-6">
             <Link
-              to="/docs/write-plugin"
+              to="/docs/$slug"
+              params={{ slug: "write-plugin" }}
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
             >
               Build your own plugin
@@ -166,7 +167,8 @@ function PluginCard({ item }: { item: (typeof registry)[number] }) {
 function BuildYourOwnCard() {
   return (
     <Link
-      to="/docs/write-plugin"
+      to="/docs/$slug"
+      params={{ slug: "write-plugin" }}
       className="group flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition-all hover:border-slate-400 hover:bg-slate-100"
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition-colors group-hover:bg-slate-300 group-hover:text-slate-700">

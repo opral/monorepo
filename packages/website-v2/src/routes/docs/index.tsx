@@ -20,12 +20,11 @@ const loadDocsIndex = createServerFn({ method: "GET" }).handler(async () => {
 
 export const Route = createFileRoute("/docs/")({
   loader: async () => {
-    // @ts-expect-error - TanStack Start server function type inference
     const { firstSlug } = await loadDocsIndex();
     if (!firstSlug) {
       throw redirect({ to: "/" });
     }
-    throw redirect({ to: `/docs/${firstSlug}` });
+    throw redirect({ to: "/docs/$slug", params: { slug: firstSlug } });
   },
   component: () => null,
 });

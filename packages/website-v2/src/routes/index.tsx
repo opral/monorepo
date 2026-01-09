@@ -265,7 +265,8 @@ function App() {
           </div>
           <div className="mt-4 text-center">
             <Link
-              to="/docs/write-tool"
+              to="/docs/$slug"
+              params={{ slug: "write-tool" }}
               className="text-sm font-medium text-[#3451b2] underline underline-offset-2 hover:text-[#3a5ccc] transition-colors"
             >
               Build your own tool →
