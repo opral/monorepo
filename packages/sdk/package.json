@@ -28,7 +28,7 @@
 		"dev": "npm run env-variables && tsc --watch",
 		"env-variables": "node ./src/services/env-variables/createIndexFile.js",
 		"typecheck": "npm run env-variables && tsc --noEmit",
-		"test": "tsc --noEmit && vitest run",
+		"test": "npm run env-variables && tsc --noEmit && vitest run",
 		"test:watch": "vitest",
 		"lint": "eslint ./src",
 		"format": "prettier ./src --write",

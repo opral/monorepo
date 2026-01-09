@@ -326,7 +326,95 @@ test("adds a gitignore file if it doesn't exist", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toBe("cache");
+	expect(gitignore).toBe("# this file is auto generated\ncache\nREADME.md");
+});
+
+test("emits a README.md file for coding agents", async () => {
+	const fs = Volume.fromJSON({});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const readme = await fs.promises.readFile(
+		"/foo/bar.inlang/README.md",
+		"utf-8"
+	);
+	expect(readme).toContain("// this readme is auto generated");
+	expect(readme).toContain("## What is this folder?");
+	expect(readme).toContain("@inlang/sdk");
+});
+
+test("updates an existing README.md file", async () => {
+	const fs = Volume.fromJSON({
+		"/foo/bar.inlang/README.md": "custom readme",
+	});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const readme = await fs.promises.readFile(
+		"/foo/bar.inlang/README.md",
+		"utf-8"
+	);
+	expect(readme).toContain("// this readme is auto generated");
+	expect(readme).not.toContain("custom readme");
+});
+
+test("README.md is gitignored", async () => {
+	const fs = Volume.fromJSON({});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const gitignore = await fs.promises.readFile(
+		"/foo/bar.inlang/.gitignore",
+		"utf-8"
+	);
+	expect(gitignore).toContain("README.md");
+	expect(gitignore).toContain("# this file is auto generated");
+});
+
+test("overwrites existing .gitignore with generated entries", async () => {
+	const fs = Volume.fromJSON({
+		"/foo/bar.inlang/.gitignore": "custom\nnode_modules",
+	});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const gitignore = await fs.promises.readFile(
+		"/foo/bar.inlang/.gitignore",
+		"utf-8"
+	);
+	expect(gitignore).toBe("# this file is auto generated\ncache\nREADME.md");
 });
 
 test("uses exportFiles when both exportFiles and saveMessages are defined", async () => {
