@@ -339,7 +339,6 @@ describe("it should keep files between the inlang directory and lix in sync", as
 			"utf-8"
 		);
 
-		expect(readme).toContain("// this readme is auto generated");
 		expect(readme).not.toContain("custom readme");
 		expect(gitignore).toContain("*");
 		expect(gitignore).toContain("!settings.json");

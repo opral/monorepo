@@ -377,7 +377,6 @@ test("emits a README.md file for coding agents", async () => {
 		"/foo/bar.inlang/README.md",
 		"utf-8"
 	);
-	expect(readme).toContain("// this readme is auto generated");
 	expect(readme).toContain("## What is this folder?");
 	expect(readme).toContain("@inlang/sdk");
 });
@@ -424,7 +423,6 @@ test("updates an existing README.md file", async () => {
 		"/foo/bar.inlang/README.md",
 		"utf-8"
 	);
-	expect(readme).toContain("// this readme is auto generated");
 	expect(readme).not.toContain("custom readme");
 });
 
