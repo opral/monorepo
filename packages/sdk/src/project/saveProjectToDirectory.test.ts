@@ -9,6 +9,7 @@ import { loadProjectFromDirectory } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { MessageV1 } from "../json-schema/old-v1-message/schemaV1.js";
+import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
 test("it should throw if the path doesn't end with .inlang", async () => {
 	await expect(() =>
@@ -355,9 +356,8 @@ test("adds a gitignore file if it doesn't exist", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toBe(
-		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
-	);
+	expect(gitignore).toContain("*");
+	expect(gitignore).toContain("!settings.json");
 });
 
 test("emits a README.md file for coding agents", async () => {
@@ -377,9 +377,31 @@ test("emits a README.md file for coding agents", async () => {
 		"/foo/bar.inlang/README.md",
 		"utf-8"
 	);
-	expect(readme).toContain("// this readme is auto generated");
 	expect(readme).toContain("## What is this folder?");
 	expect(readme).toContain("@inlang/sdk");
+});
+
+test("emits a .meta.json file with the sdk version", async () => {
+	const fs = Volume.fromJSON({});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const metaRaw = await fs.promises.readFile(
+		"/foo/bar.inlang/.meta.json",
+		"utf-8"
+	);
+	const meta = JSON.parse(
+		typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+	);
+	expect(meta.highestSdkVersion).toBe(ENV_VARIABLES.SDK_VERSION);
 });
 
 test("updates an existing README.md file", async () => {
@@ -401,8 +423,85 @@ test("updates an existing README.md file", async () => {
 		"/foo/bar.inlang/README.md",
 		"utf-8"
 	);
-	expect(readme).toContain("// this readme is auto generated");
 	expect(readme).not.toContain("custom readme");
+});
+
+test("does not overwrite README.md or .gitignore when meta has a higher sdk version", async () => {
+	const fs = Volume.fromJSON({
+		"/foo/bar.inlang/.meta.json": JSON.stringify({
+			highestSdkVersion: "99.0.0",
+		}),
+		"/foo/bar.inlang/README.md": "custom readme",
+		"/foo/bar.inlang/.gitignore": "custom gitignore",
+	});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const readme = await fs.promises.readFile(
+		"/foo/bar.inlang/README.md",
+		"utf-8"
+	);
+	const gitignore = await fs.promises.readFile(
+		"/foo/bar.inlang/.gitignore",
+		"utf-8"
+	);
+	const metaRaw = await fs.promises.readFile(
+		"/foo/bar.inlang/.meta.json",
+		"utf-8"
+	);
+	const meta = JSON.parse(
+		typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+	);
+	expect(readme).toBe("custom readme");
+	expect(gitignore).toBe("custom gitignore");
+	expect(meta.highestSdkVersion).toBe("99.0.0");
+});
+
+test("recreates missing README.md and .gitignore when meta has a higher sdk version", async () => {
+	const fs = Volume.fromJSON({
+		"/foo/bar.inlang/.meta.json": JSON.stringify({
+			highestSdkVersion: "99.0.0",
+		}),
+	});
+
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+	});
+
+	await saveProjectToDirectory({
+		fs: fs.promises as any,
+		project,
+		path: "/foo/bar.inlang",
+	});
+
+	const readme = await fs.promises.readFile(
+		"/foo/bar.inlang/README.md",
+		"utf-8"
+	);
+	const gitignore = await fs.promises.readFile(
+		"/foo/bar.inlang/.gitignore",
+		"utf-8"
+	);
+	const metaRaw = await fs.promises.readFile(
+		"/foo/bar.inlang/.meta.json",
+		"utf-8"
+	);
+	const meta = JSON.parse(
+		typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+	);
+
+	expect(readme).toContain("## What is this folder?");
+	expect(gitignore).toContain("*");
+	expect(gitignore).toContain("!settings.json");
+	expect(meta.highestSdkVersion).toBe("99.0.0");
 });
 
 test("README.md is gitignored", async () => {
@@ -422,7 +521,6 @@ test("README.md is gitignored", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toContain("# this file is auto generated");
 	expect(gitignore).toContain("# everything is ignored except settings.json");
 	expect(gitignore).toContain("*");
 	expect(gitignore).toContain("!settings.json");
@@ -448,9 +546,8 @@ test("overwrites existing .gitignore with generated entries", async () => {
 		"/foo/bar.inlang/.gitignore",
 		"utf-8"
 	);
-	expect(gitignore).toBe(
-		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
-	);
+	expect(gitignore).toContain("*");
+	expect(gitignore).toContain("!settings.json");
 });
 
 test("uses exportFiles when both exportFiles and saveMessages are defined", async () => {
@@ -472,6 +569,29 @@ test("uses exportFiles when both exportFiles and saveMessages are defined", asyn
 		project,
 	});
 	expect(exportFilesSpy).toHaveBeenCalled();
+	expect(saveMessagesSpy).not.toHaveBeenCalled();
+});
+
+test("skipExporting prevents exporters from running", async () => {
+	const exportFilesSpy = vi.fn().mockResolvedValue([]);
+	const saveMessagesSpy = vi.fn();
+	const mockPlugin: InlangPlugin = {
+		key: "mock",
+		exportFiles: exportFilesSpy,
+		saveMessages: saveMessagesSpy,
+	};
+	const volume = Volume.fromJSON({});
+	const project = await loadProjectInMemory({
+		blob: await newProject(),
+		providePlugins: [mockPlugin],
+	});
+	await saveProjectToDirectory({
+		path: "/foo/project.inlang",
+		fs: volume.promises as any,
+		project,
+		skipExporting: true,
+	});
+	expect(exportFilesSpy).not.toHaveBeenCalled();
 	expect(saveMessagesSpy).not.toHaveBeenCalled();
 });
 

@@ -18,6 +18,7 @@ import type {
 } from "../json-schema/old-v1-message/schemaV1.js";
 import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
 import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
+import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
 test("plugin.loadMessages and plugin.saveMessages must not be configured together with import export", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
@@ -259,12 +260,125 @@ const mockSettings = {
 const mockDirectory = {
 	"/project.inlang/cache/plugin/29j49j2": "cache value",
 	"/project.inlang/.gitignore": "git value",
+	"/project.inlang/.meta.json": JSON.stringify({
+		highestSdkVersion: ENV_VARIABLES.SDK_VERSION,
+	}),
 	"/project.inlang/prettierrc.json": "prettier value",
 	"/project.inlang/README.md": "readme value",
 	"/project.inlang/settings.json": JSON.stringify(mockSettings),
 };
 
 describe("it should keep files between the inlang directory and lix in sync", async () => {
+	test("updates .meta.json to the current sdk version on load", async () => {
+		const fs = Volume.fromJSON({
+			"/project.inlang/.meta.json": JSON.stringify({
+				highestSdkVersion: "1.0.0",
+			}),
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+		});
+
+		await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+		});
+
+		const metaRaw = await fs.promises.readFile(
+			"/project.inlang/.meta.json",
+			"utf-8"
+		);
+		const meta = JSON.parse(
+			typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+		);
+		expect(meta.highestSdkVersion).toBe(ENV_VARIABLES.SDK_VERSION);
+	});
+
+	test("does not downgrade .meta.json when sdk version is lower", async () => {
+		const fs = Volume.fromJSON({
+			"/project.inlang/.meta.json": JSON.stringify({
+				highestSdkVersion: "99.0.0",
+			}),
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+		});
+
+		await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+		});
+
+		const metaRaw = await fs.promises.readFile(
+			"/project.inlang/.meta.json",
+			"utf-8"
+		);
+		const meta = JSON.parse(
+			typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+		);
+		expect(meta.highestSdkVersion).toBe("99.0.0");
+	});
+
+	test("updates README.md and .gitignore when meta version is lower", async () => {
+		const fs = Volume.fromJSON({
+			"/project.inlang/.meta.json": JSON.stringify({
+				highestSdkVersion: "1.0.0",
+			}),
+			"/project.inlang/README.md": "custom readme",
+			"/project.inlang/.gitignore": "custom gitignore",
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+		});
+
+		await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+		});
+
+		const readme = await fs.promises.readFile(
+			"/project.inlang/README.md",
+			"utf-8"
+		);
+		const gitignore = await fs.promises.readFile(
+			"/project.inlang/.gitignore",
+			"utf-8"
+		);
+
+		expect(readme).not.toContain("custom readme");
+		expect(gitignore).toContain("*");
+		expect(gitignore).toContain("!settings.json");
+	});
+
+	test("recreates README.md and .gitignore when meta version is higher but files are missing", async () => {
+		const fs = Volume.fromJSON({
+			"/project.inlang/.meta.json": JSON.stringify({
+				highestSdkVersion: "99.0.0",
+			}),
+			"/project.inlang/settings.json": JSON.stringify(mockSettings),
+		});
+
+		await loadProjectFromDirectory({
+			fs: fs as any,
+			path: "/project.inlang",
+		});
+
+		const readme = await fs.promises.readFile(
+			"/project.inlang/README.md",
+			"utf-8"
+		);
+		const gitignore = await fs.promises.readFile(
+			"/project.inlang/.gitignore",
+			"utf-8"
+		);
+		const metaRaw = await fs.promises.readFile(
+			"/project.inlang/.meta.json",
+			"utf-8"
+		);
+		const meta = JSON.parse(
+			typeof metaRaw === "string" ? metaRaw : metaRaw.toString()
+		);
+
+		expect(readme).toContain("## What is this folder?");
+		expect(gitignore).toContain("*");
+		expect(gitignore).toContain("!settings.json");
+		expect(meta.highestSdkVersion).toBe("99.0.0");
+	});
+
 	test("files from directory should be available via lix after project has been loaded from directory", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
@@ -278,7 +392,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		const files = await project.lix.db.selectFrom("file").selectAll().execute();
 
 		expect(files.length).toBe(
-			5 + 1 /* the db.sqlite file */ + 1 /* project_id */
+			6 + 1 /* the db.sqlite file */ + 1 /* project_id */
 		);
 
 		const filesByPath = files.reduce((acc, file) => {
@@ -288,6 +402,9 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		expect(filesByPath["/cache/plugin/29j49j2"]).toBe("cache value");
 		expect(filesByPath["/.gitignore"]).toBe("git value");
+		expect(filesByPath["/.meta.json"]).toBe(
+			JSON.stringify({ highestSdkVersion: ENV_VARIABLES.SDK_VERSION })
+		);
 		expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
 		expect(filesByPath["/README.md"]).toBe("readme value");
 		expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
@@ -311,6 +428,9 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		const mockWindowsDirectory = {
 			"\\project.inlang\\cache\\plugin\\29j49j2": "cache value",
 			"\\project.inlang\\.gitignore": "git value",
+			"\\project.inlang\\.meta.json": JSON.stringify({
+				highestSdkVersion: ENV_VARIABLES.SDK_VERSION,
+			}),
 			"\\project.inlang\\prettierrc.json": "prettier value",
 			"\\project.inlang\\README.md": "readme value",
 			"\\project.inlang\\settings.json": JSON.stringify(mockSettings),
@@ -335,7 +455,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		const files = await project.lix.db.selectFrom("file").selectAll().execute();
 
 		expect(files.length).toBe(
-			5 + 1 /* the db.sqlite file */ + 1 /* project_id */
+			6 + 1 /* the db.sqlite file */ + 1 /* project_id */
 		);
 
 		const filesByPath = files.reduce((acc, file) => {
@@ -345,6 +465,9 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		expect(filesByPath["/cache/plugin/29j49j2"]).toBe("cache value");
 		expect(filesByPath["/.gitignore"]).toBe("git value");
+		expect(filesByPath["/.meta.json"]).toBe(
+			JSON.stringify({ highestSdkVersion: ENV_VARIABLES.SDK_VERSION })
+		);
 		expect(filesByPath["/prettierrc.json"]).toBe("prettier value");
 		expect(filesByPath["/README.md"]).toBe("readme value");
 		expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
