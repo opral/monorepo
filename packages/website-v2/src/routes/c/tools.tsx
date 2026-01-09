@@ -33,6 +33,11 @@ export const Route = createFileRoute("/c/tools")({
   component: ToolsPage,
 });
 
+const prioritizedTools = new Map([
+  ["paraglide js", 0],
+  ["inlang cli", 1],
+]);
+
 // Filter tools and libraries from the registry
 const tools = registry
   .filter((item) => {
@@ -44,6 +49,17 @@ const tools = registry
       typeof a.displayName === "object" ? a.displayName.en : a.displayName;
     const bName =
       typeof b.displayName === "object" ? b.displayName.en : b.displayName;
+    const aKey = aName.toLowerCase();
+    const bKey = bName.toLowerCase();
+    const aPriority =
+      prioritizedTools.get(aKey) ?? (aKey.startsWith("sherlock") ? 2 : 3);
+    const bPriority =
+      prioritizedTools.get(bKey) ?? (bKey.startsWith("sherlock") ? 2 : 3);
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+
     return aName.localeCompare(bName);
   });
 

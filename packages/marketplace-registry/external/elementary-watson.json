@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.elementaryWatson",
-	"icon": "https://raw.githubusercontent.com/romerramos/elementary-watson/main/media/icon.png",
+	"icon": "https://raw.githubusercontent.com/romerramos/elementary-watson/main/icon.png",
 	"displayName": {
 		"en": "Elementary Watson - Inline Translation Preview"
 	},
@@ -11,6 +11,7 @@
 	"readme": {
 		"en": "https://raw.githubusercontent.com/romerramos/elementary-watson/main/README.md"
 	},
+	"repository": "https://github.com/romerramos/elementary-watson",
 	"keywords": [
 		"vscode",
 		"extension",
@@ -26,8 +27,8 @@
 		"inlang"
 	],
 	"publisherName": "romerramos",
-	"publisherIcon": "https://avatars.githubusercontent.com/u/romerramos",
+	"publisherIcon": "https://github.com/romerramos.png",
 	"license": "MIT",
 	"pricing": "free",
-	"website": "https://github.com/romerramos/elementary-watson"
+	"website": "https://marketplace.visualstudio.com/items?itemName=romerramos.elementarywatson"
 }
