@@ -112,6 +112,7 @@ const loadDoc = createServerFn({ method: "GET" }).handler(async (ctx) => {
       title,
       description,
       imports,
+      path: relativePath,
     },
     markdown: markdownWithIds,
     rawMarkdown,
@@ -181,6 +182,8 @@ function DocumentationPage() {
   const { doc, markdown, headings, toc, rawMarkdown } = Route.useLoaderData();
   const [activeId, setActiveId] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOnThisPageOpen, setMobileOnThisPageOpen] = useState(false);
 
   const copyMarkdown = async () => {
     try {
@@ -253,6 +256,84 @@ function DocumentationPage() {
 
   return (
     <main className="bg-white text-slate-900">
+      {/* Mobile navigation bar - visible below lg breakpoint */}
+      <div className="sticky top-[62px] z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2 lg:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            setMobileMenuOpen(!mobileMenuOpen);
+            setMobileOnThisPageOpen(false);
+          }}
+          className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+          Menu
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setMobileOnThisPageOpen(!mobileOnThisPageOpen);
+            setMobileMenuOpen(false);
+          }}
+          className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
+          On this page
+          <svg
+            className={`h-4 w-4 transition-transform ${
+              mobileOnThisPageOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed left-0 right-0 bottom-0 top-[106px] z-50 bg-white lg:hidden overflow-y-auto">
+          <div className="px-4 pb-8 pt-4">
+            <DocsNav
+              sections={toc}
+              currentSlug={doc.slug}
+              onNavigate={() => setMobileMenuOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile "On this page" Drawer */}
+      {mobileOnThisPageOpen && (
+        <div className="fixed left-0 right-0 bottom-0 top-[106px] z-50 bg-white lg:hidden overflow-y-auto">
+          <div className="px-4 pb-8 pt-4">
+            <MobileOnThisPage
+              headings={headings}
+              activeId={activeId}
+              onClose={() => setMobileOnThisPageOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex gap-6">
@@ -362,6 +443,35 @@ function DocumentationPage() {
                   </>
                 );
               })()}
+
+              {/* Edit on GitHub link */}
+              {doc.path && (
+                <div className="mt-12">
+                  <a
+                    href={getDocsGithubLink(doc.path)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    Edit this page on GitHub
+                  </a>
+                </div>
+              )}
+
+              <DocsPageNavigation sections={toc} currentSlug={doc.slug} />
             </section>
 
             <aside className="sticky top-[97px] hidden h-[calc(100vh-97px)] w-56 flex-shrink-0 xl:block">
@@ -379,12 +489,14 @@ function DocumentationPage() {
 function DocsNav({
   sections,
   currentSlug,
+  onNavigate,
 }: {
   sections: Array<{
     title: string;
     pages: Array<{ slug: string; title?: string }>;
   }>;
   currentSlug: string;
+  onNavigate?: () => void;
 }) {
   return (
     <div>
@@ -407,6 +519,7 @@ function DocsNav({
                         ? "bg-slate-200 font-semibold text-slate-900"
                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
+                    onClick={onNavigate}
                   >
                     {entry.title ?? entry.slug}
                   </Link>
@@ -459,6 +572,105 @@ function OnThisPage({
   );
 }
 
+function MobileOnThisPage({
+  headings,
+  activeId,
+  onClose,
+}: {
+  headings: DocHeading[];
+  activeId: string;
+  onClose: () => void;
+}) {
+  if (headings.length === 0) return null;
+
+  return (
+    <div className="text-sm text-slate-700">
+      <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        On this page
+      </p>
+      <div className="flex flex-col">
+        {headings.map((heading) => {
+          const isActive = heading.id === activeId;
+          const indent =
+            heading.level === 3 ? "pl-3" : heading.level === 2 ? "pl-1" : "";
+          return (
+            <button
+              key={heading.id}
+              type="button"
+              className={`text-left text-sm py-2 border-l-2 pl-3 transition-colors ${indent} ${
+                isActive
+                  ? "border-blue-500 text-slate-900 font-medium"
+                  : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
+              }`}
+              onClick={() => {
+                scrollToAnchor(heading.id);
+                onClose();
+              }}
+            >
+              {heading.text}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DocsPageNavigation({
+  sections,
+  currentSlug,
+}: {
+  sections: Array<{
+    title: string;
+    pages: Array<{ slug: string; title?: string }>;
+  }>;
+  currentSlug: string;
+}) {
+  const allPages = sections.flatMap((section) => section.pages);
+  const currentIndex = allPages.findIndex((page) => page.slug === currentSlug);
+
+  if (currentIndex === -1 || allPages.length <= 1) return null;
+
+  const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
+  const nextPage =
+    currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
+
+  if (!prevPage && !nextPage) return null;
+
+  return (
+    <nav className="mt-8 grid grid-cols-2 gap-4 border-t border-slate-200 pt-8">
+      <div>
+        {prevPage && (
+          <Link
+            to="/docs/$slug"
+            params={{ slug: prevPage.slug }}
+            className="group block rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors"
+          >
+            <span className="text-sm text-slate-400">Previous</span>
+            <span className="mt-1 block font-medium text-[#3451b2] group-hover:text-[#3a5ccc]">
+              {prevPage.title ?? prevPage.slug}
+            </span>
+          </Link>
+        )}
+      </div>
+      <div>
+        {nextPage && (
+          <Link
+            to="/docs/$slug"
+            params={{ slug: nextPage.slug }}
+            className="group block rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors text-right"
+          >
+            <span className="text-sm text-slate-400">Next</span>
+            <span className="mt-1 block font-medium text-[#3451b2] group-hover:text-[#3a5ccc]">
+              {nextPage.title ?? nextPage.slug}
+            </span>
+          </Link>
+        )}
+      </div>
+    </nav>
+  );
+}
+
 function scrollToAnchor(anchor: string) {
   const element = document.getElementById(anchor);
   if (element && window) {
@@ -467,6 +679,11 @@ function scrollToAnchor(anchor: string) {
       behavior: "smooth",
     });
   }
+}
+
+function getDocsGithubLink(relativePath: string) {
+  const sanitized = relativePath.replace(/^[./]+/, "");
+  return `https://github.com/opral/monorepo/blob/main/docs/${sanitized}`;
 }
 
 function getDocsJson(filename: string): Promise<string> {

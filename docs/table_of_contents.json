@@ -28,10 +28,6 @@
         "slug": "unpacked-project"
       },
       {
-        "path": "./version-control.md",
-        "slug": "version-control"
-      },
-      {
         "path": "./write-plugin.md",
         "slug": "write-plugin"
       },

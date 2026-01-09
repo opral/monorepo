@@ -158,7 +158,11 @@ export default function MarketplacePage({
       {mobileMenuOpen && (
         <div className="fixed left-0 right-0 bottom-0 top-[162px] sm:top-[197px] z-50 bg-white lg:hidden overflow-y-auto">
           <div className="px-4 pb-8 pt-4">
-            <DocNav manifest={data.manifest} currentRoute={data.pagePath} />
+            <DocNav
+              manifest={data.manifest}
+              currentRoute={data.pagePath}
+              onNavigate={() => setMobileMenuOpen(false)}
+            />
           </div>
         </div>
       )}
@@ -428,9 +432,11 @@ function ProductHeader({ manifest }: { manifest: MarketplaceManifest }) {
 function DocNav({
   manifest,
   currentRoute,
+  onNavigate,
 }: {
   manifest: MarketplaceManifest & { uniqueID: string };
   currentRoute: string;
+  onNavigate?: () => void;
 }) {
   if (!manifest.pages) return null;
   const basePath = manifest.slug
@@ -498,6 +504,7 @@ function DocNav({
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    onClick={onNavigate}
                   >
                     {displayTitle}
                   </a>
@@ -510,6 +517,7 @@ function DocNav({
                         ? "bg-slate-200 font-semibold text-slate-900"
                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
+                    onClick={onNavigate}
                   >
                     {displayTitle}
                   </Link>
