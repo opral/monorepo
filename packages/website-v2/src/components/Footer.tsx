@@ -56,7 +56,7 @@ const socialMediaLinks = [
 
 const resourceLinks = [
   { name: "Documentation", href: "/docs" },
-  { name: "Blog", href: "https://opral.substack.com/t/inlang" },
+  { name: "Blog", href: "/blog" },
 ];
 
 const categoriesLinks = [
@@ -110,31 +110,57 @@ export default function Footer() {
         {/* Resources column */}
         <div className="flex w-full flex-col pt-2 sm:w-1/3 md:w-1/4">
           <p className="pb-3 font-semibold text-slate-900">Resources</p>
-          {resourceLinks.map((link) => (
-            <div key={link.name} className="w-fit opacity-80">
-              <Link
-                to={link.href}
-                className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
-              >
-                {link.name}
-              </Link>
-            </div>
-          ))}
+          {resourceLinks.map((link) =>
+            link.href.startsWith("/") ? (
+              <div key={link.name} className="w-fit opacity-80">
+                <Link
+                  to={link.href}
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </Link>
+              </div>
+            ) : (
+              <div key={link.name} className="w-fit opacity-80">
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </a>
+              </div>
+            ),
+          )}
         </div>
 
         {/* Ecosystem column */}
         <div className="flex w-full flex-col pt-2 sm:w-1/3 md:w-1/4">
           <p className="pb-3 font-semibold text-slate-900">Ecosystem</p>
-          {categoriesLinks.map((link) => (
-            <div key={link.name} className="w-fit opacity-80">
-              <Link
-                to={link.href}
-                className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
-              >
-                {link.name}
-              </Link>
-            </div>
-          ))}
+          {categoriesLinks.map((link) =>
+            link.href.startsWith("/") ? (
+              <div key={link.name} className="w-fit opacity-80">
+                <Link
+                  to={link.href}
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </Link>
+              </div>
+            ) : (
+              <div key={link.name} className="w-fit opacity-80">
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block py-1.5 text-sm text-slate-700 hover:text-slate-900"
+                >
+                  {link.name}
+                </a>
+              </div>
+            ),
+          )}
         </div>
 
         {/* Contact column */}
@@ -163,7 +189,7 @@ export default function Footer() {
           rel="noreferrer"
           className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
         >
-          Copyright {new Date().getFullYear()} Opral
+          Copyright 2025 Opral
         </a>
       </div>
     </footer>
