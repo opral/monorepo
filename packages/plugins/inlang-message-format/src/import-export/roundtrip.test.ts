@@ -46,6 +46,20 @@ test("it preserves json strings as plain text", async () => {
 	]);
 });
 
+test("it supports escaped braces in patterns", async () => {
+	const imported = await runImportFiles({
+		json_object: '\\{"a": "b", "c": "d"\\}',
+	});
+
+	expect(await runExportFilesParsed(imported)).toMatchObject({
+		json_object: '\\{"a": "b", "c": "d"\\}',
+	});
+
+	expect(imported.variants[0]?.pattern).toStrictEqual([
+		{ type: "text", value: '{"a": "b", "c": "d"}' },
+	]);
+});
+
 test("it handles variable expressions in patterns", async () => {
 	const imported = await runImportFiles({
 		some_happy_cat:

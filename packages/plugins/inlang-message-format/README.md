@@ -1,6 +1,6 @@
 ---
-imports:
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/doc-callout.js
+og:title: Inlang Message Format Plugin
+og:description: A storage plugin for inlang that stores messages in JSON files per language. Supports variables, pluralization, and nested structures.
 ---
 
 # Inlang Message Format Plugin
@@ -12,13 +12,14 @@ It is designed after inlang's data models, which enables all features of inlang.
 
 The syntax is inspired by the upcoming [MessageFormat 2.0](https://messageformat.unicode.org/) draft to keep migration friction low as the standard matures.
 
-The message files contain key-value pairs of the message ID and the translation. You can add variables in your message by using curly braces. Nested objects are flattened using dot notation on import and unflattened on export.
+The message files contain key-value pairs of the message ID and the translation. You can add variables in your message by using curly braces. To include literal curly braces in your text, escape them with a backslash (`\{` and `\}`). Nested objects are flattened using dot notation on import and unflattened on export.
 
 ```json
 //messages/en.json
 {
   "hello_world": "Hello World!",
-  "greeting": "Good morning {name}!"
+  "greeting": "Good morning {name}!",
+  "code_example": "Use \\{variable\\} syntax for variables"
 }
 
 //messages/de.json
@@ -50,11 +51,11 @@ Install the plugin in your Inlang Project by adding it to your `"modules"` in `p
 
 ## Version Compatibility
 
-| Plugin Version | SDK Requirement | Breaking Changes |
-|----------------|-----------------|------------------|
-| v4.x | @inlang/sdk v2+ | Complex messages must be wrapped in an array. Nesting support added. |
-| v3.x | @inlang/sdk v2 (beta) | Upgraded to SDK v2 data model. |
-| v2.x | @inlang/sdk v1 | New human-readable format. Auto-migrates from v1 on first load. |
+| Plugin Version | SDK Requirement       | Breaking Changes                                                     |
+| -------------- | --------------------- | -------------------------------------------------------------------- |
+| v4.x           | @inlang/sdk v2+       | Complex messages must be wrapped in an array. Nesting support added. |
+| v3.x           | @inlang/sdk v2 (beta) | Upgraded to SDK v2 data model.                                       |
+| v2.x           | @inlang/sdk v1        | New human-readable format. Auto-migrates from v1 on first load.      |
 
 > [!NOTE]
 > When upgrading the plugin, ensure your SDK version meets the minimum requirement. Mismatched versions may cause silent failures or import errors.
@@ -73,9 +74,9 @@ This allows for patterns like having a shared base file and extending or overrid
 
 ```json
 {
-  "plugin.inlang.messageFormat": {
-    "pathPattern": "./messages/{locale}.json"
-  }
+	"plugin.inlang.messageFormat": {
+		"pathPattern": "./messages/{locale}.json"
+	}
 }
 ```
 
@@ -83,9 +84,9 @@ This allows for patterns like having a shared base file and extending or overrid
 
 ```json
 {
-  "plugin.inlang.messageFormat": {
-    "pathPattern": ["./defaults/{locale}.json", "./clothing/{locale}.json"]
-  }
+	"plugin.inlang.messageFormat": {
+		"pathPattern": ["./defaults/{locale}.json", "./clothing/{locale}.json"]
+	}
 }
 ```
 
@@ -94,19 +95,19 @@ Given the following files:
 ```json
 // ./defaults/en.json
 {
-  "hello": "Hello!",
-  "cart": {
-    "title": "Your cart"
-  },
-  "size": "Size"
+	"hello": "Hello!",
+	"cart": {
+		"title": "Your cart"
+	},
+	"size": "Size"
 }
 ```
 
 ```json
 // ./clothing/en.json
 {
-  "size": "Clothing size",
-  "fit": "Fit"
+	"size": "Clothing size",
+	"fit": "Fit"
 }
 ```
 
@@ -114,12 +115,12 @@ The merged result for locale `en` will be:
 
 ```json
 {
-  "hello": "Hello!",
-  "cart": {
-    "title": "Your cart"
-  },
-  "size": "Clothing size", // Overridden
-  "fit": "Fit"              // Added
+	"hello": "Hello!",
+	"cart": {
+		"title": "Your cart"
+	},
+	"size": "Clothing size", // Overridden
+	"fit": "Fit" // Added
 }
 ```
 
@@ -134,13 +135,12 @@ Optionally sort keys when writing files to keep git diffs consistent.
 
 ```json
 {
-  "plugin.inlang.messageFormat": {
-    "pathPattern": "./messages/{locale}.json",
-    "sort": "asc"
-  }
+	"plugin.inlang.messageFormat": {
+		"pathPattern": "./messages/{locale}.json",
+		"sort": "asc"
+	}
 }
 ```
-
 
 ## Messages
 
@@ -174,16 +174,16 @@ For complex messages with variants, wrap the message object in an array to diffe
 ```json
 {
 	"simple": "This is a simple message",
-  "count": [
-    {
-      "declarations": ["input count", "local countPlural = count: plural"],
-      "selectors": ["countPlural"],
-      "match": {
-        "countPlural=one": "There is one item",
-        "countPlural=other": "There are {count} items"
-      }
-    }
-  ]
+	"count": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "There is one item",
+				"countPlural=other": "There are {count} items"
+			}
+		}
+	]
 }
 ```
 
@@ -191,6 +191,32 @@ When addressing nested messages, use dot notation (e.g. `navigation.items.count`
 
 > [!NOTE]
 > The array wrapper is how we distinguish between a nested object containing more messages vs. a complex message object with variants.
+
+### Escaping Special Characters
+
+Since curly braces `{` and `}` are used to denote variables, you need to escape them if you want to include literal braces in your message text. Use a backslash to escape:
+
+- `\{` → literal `{`
+- `\}` → literal `}`
+- `\\` → literal `\`
+
+This is useful when your translations contain code snippets, JSON examples, or other text with curly braces:
+
+```json
+{
+	"json_hint": "JSON objects look like \\{\"key\": \"value\"\\}",
+	"template_help": "Use \\{variable\\} to insert dynamic values",
+	"path_example": "Windows paths use \\\\ as separator"
+}
+```
+
+The above messages will render as:
+- `JSON objects look like {"key": "value"}`
+- `Use {variable} to insert dynamic values`
+- `Windows paths use \ as separator`
+
+> [!NOTE]
+> Escaping is only necessary for `{`, `}`, and `\` characters. Other special characters can be used directly.
 
 ## Variants (pluralization, gendering, A/B testing)
 
@@ -222,21 +248,21 @@ The message below will match the following conditions:
 
 ```json
 {
-  "finished_readout": [
-    {
-      "declarations": [
-        "input placeNumber",
-        "local ordinalCategory = placeNumber: plural type=ordinal"
-      ],
-      "selectors": ["ordinalCategory"],
-      "match": {
-        "ordinalCategory=one": "You finished in {placeNumber}st place",
-        "ordinalCategory=two": "You finished in {placeNumber}nd place",
-        "ordinalCategory=few": "You finished in {placeNumber}rd place",
-        "ordinalCategory=*": "You finished in {placeNumber}th place"
-      }
-    }
-  ]
+	"finished_readout": [
+		{
+			"declarations": [
+				"input placeNumber",
+				"local ordinalCategory = placeNumber: plural type=ordinal"
+			],
+			"selectors": ["ordinalCategory"],
+			"match": {
+				"ordinalCategory=one": "You finished in {placeNumber}st place",
+				"ordinalCategory=two": "You finished in {placeNumber}nd place",
+				"ordinalCategory=few": "You finished in {placeNumber}rd place",
+				"ordinalCategory=*": "You finished in {placeNumber}th place"
+			}
+		}
+	]
 }
 ```
 
@@ -286,13 +312,15 @@ Each message can only have one variant per locale within a single match conditio
 
 ```json
 {
-  "message": [{
-    "selectors": ["platform"],
-    "match": {
-      "platform=ios": "iOS version",
-      "platform=android": "Android version"
-    }
-  }]
+	"message": [
+		{
+			"selectors": ["platform"],
+			"match": {
+				"platform=ios": "iOS version",
+				"platform=android": "Android version"
+			}
+		}
+	]
 }
 ```
 
@@ -307,7 +335,7 @@ Complex messages (with variants/pluralization) must be wrapped in an array:
 
 ```json
 {
-  "wrong": { "match": { "count=one": "One" } },
-  "correct": [{ "match": { "count=one": "One" } }]
+	"wrong": { "match": { "count=one": "One" } },
+	"correct": [{ "match": { "count=one": "One" } }]
 }
 ```

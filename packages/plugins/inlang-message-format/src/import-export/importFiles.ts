@@ -175,19 +175,49 @@ function parsePattern(value: string): {
 } {
 	const pattern: Variant["pattern"] = [];
 	const declarations: Declaration[] = [];
+	let buffer = "";
 
-	// splits a pattern like "Hello {name}!" into an array of parts
-	// "hello {name}, how are you?" -> ["hello ", "{name}", ", how are you?"]
-	const parts = value.split(/(\{.*?\})/).filter((part) => part !== "");
-
-	for (const part of parts) {
-		// it's text
-		if ((part.startsWith("{") && part.endsWith("}")) === false) {
-			pattern.push({ type: "text", value: part });
+	// Collects literal text (including escaped braces/backslashes) until we hit
+	// an expression boundary or the end.
+	const flushBuffer = () => {
+		if (buffer.length > 0) {
+			pattern.push({ type: "text", value: buffer });
+			buffer = "";
 		}
-		// it's an expression (only supporting variables for now)
-		else {
-			const variableName = part.slice(1, -1);
+	};
+
+	for (let index = 0; index < value.length; index += 1) {
+		const char = value[index];
+		if (char === "\\") {
+			const next = value[index + 1];
+			if (next === "{" || next === "}" || next === "\\") {
+				buffer += next;
+				index += 1;
+				continue;
+			}
+			buffer += char;
+			continue;
+		}
+
+		if (char === "{") {
+			let variableName = "";
+			let closingIndex = -1;
+
+			for (let cursor = index + 1; cursor < value.length; cursor += 1) {
+				const current = value[cursor];
+				if (current === "}") {
+					closingIndex = cursor;
+					break;
+				}
+				variableName += current;
+			}
+
+			if (closingIndex === -1) {
+				buffer += char;
+				continue;
+			}
+
+			flushBuffer();
 			// this is a heuristic. there is no guarentee that the variable might not be
 			// a local variable. only use the returned declarations in a single variant
 			// context
@@ -199,8 +229,14 @@ function parsePattern(value: string): {
 				type: "expression",
 				arg: { type: "variable-reference", name: variableName },
 			});
+			index = closingIndex;
+			continue;
 		}
+
+		buffer += char;
 	}
+
+	flushBuffer();
 
 	return {
 		declarations,
