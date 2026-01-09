@@ -1,10 +1,7 @@
 {
   "name": "@inlang/tsconfig",
   "version": "1.1.0",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/opral/inlang"
