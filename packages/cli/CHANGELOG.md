@@ -1,5 +1,13 @@
 # @inlang/cli
 
+## 3.1.1
+
+### Patch Changes
+
+- Updated dependencies [c1d8e5a]
+  - @inlang/sdk@2.6.0
+  - @inlang/rpc@0.3.53
+
 ## 3.1.0
 
 ### Minor Changes
