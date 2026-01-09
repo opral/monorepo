@@ -28,6 +28,10 @@
         "slug": "unpacked-project"
       },
       {
+        "path": "./install-plugin.md",
+        "slug": "install-plugin"
+      },
+      {
         "path": "./write-plugin.md",
         "slug": "write-plugin"
       },
@@ -40,6 +44,10 @@
   {
     "title": "Reference",
     "pages": [
+      {
+        "path": "./settings.md",
+        "slug": "settings"
+      },
       {
         "path": "./crud-api.md",
         "slug": "crud-api"
