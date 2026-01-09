@@ -1,5 +1,13 @@
 # @inlang/plugin-message-format
 
+## 4.1.0
+
+### Minor Changes
+
+- 27ae0f1: add optional `sort` setting to sort message keys when exporting files (ascending or descending)
+
+  https://github.com/opral/paraglide-js/issues/570
+
 ## 4.0.0
 
 ### Major Changes

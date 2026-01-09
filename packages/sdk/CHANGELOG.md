@@ -1,5 +1,21 @@
 # @inlang/sdk
 
+## 2.5.0
+
+### Minor Changes
+
+- e9d7a74: Update generated `.inlang` gitignore to ignore everything except `settings.json`.
+- 65c33c2: emit a README.md in .inlang project folders to help coding agents understand the folder
+- 323295a: Stop writing `project_id` to unpacked project directories and document unstable ids for unpacked projects.
+
+### Patch Changes
+
+- 9d73b90: Await the Lix file queue before closing or exiting to avoid "DB has been closed" errors in CLI workflows.
+
+  Refs: https://github.com/opral/paraglide-js/issues/526
+
+- 2e8318b: Fix jsonb result parsing to avoid coercing JSON-looking text in patterns. References https://github.com/opral/paraglide-js/issues/571.
+
 ## 2.4.9
 
 ### Patch Changes

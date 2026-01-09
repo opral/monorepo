@@ -1,5 +1,11 @@
 # @inlang/marketplace-manifest
 
+## 1.5.0
+
+### Minor Changes
+
+- 0db4bc9: add optional repository field
+
 ## 1.4.2
 
 ### Patch Changes

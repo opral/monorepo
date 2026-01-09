@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/marketplace-manifest",
 	"type": "module",
-	"version": "1.4.2",
+	"version": "1.5.0",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"

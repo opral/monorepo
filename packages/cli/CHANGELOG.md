@@ -1,5 +1,43 @@
 # @inlang/cli
 
+## 3.1.0
+
+### Minor Changes
+
+- fea4e68: Prefer the `INLANG_GOOGLE_TRANSLATE_API_KEY` environment variable for machine translations, with an RPC fallback.
+
+  We are moving toward a Bring Your Own Key (BYOK) model while keeping an RPC fallback for now.
+
+  **Before**
+
+  ```sh
+  npx @inlang/cli machine translate --project ./project.inlang
+  ```
+
+  **After**
+
+  ```sh
+  export INLANG_GOOGLE_TRANSLATE_API_KEY="your-google-api-key"
+  npx @inlang/cli machine translate --project ./project.inlang
+  ```
+
+  If the API key is not set, the CLI will warn and fall back to the inlang RPC translation service.
+
+### Patch Changes
+
+- fea4e68: Fix CLI build banner to avoid duplicate `createRequire` declarations when bundling SQLite from [lix](https://lix.dev).
+- 9d73b90: Await the Lix file queue before closing or exiting to avoid "DB has been closed" errors in CLI workflows.
+
+  Refs: https://github.com/opral/paraglide-js/issues/526
+
+- Updated dependencies [e9d7a74]
+- Updated dependencies [65c33c2]
+- Updated dependencies [9d73b90]
+- Updated dependencies [2e8318b]
+- Updated dependencies [323295a]
+  - @inlang/sdk@2.5.0
+  - @inlang/rpc@0.3.52
+
 ## 3.0.12
 
 ### Patch Changes
