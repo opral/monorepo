@@ -22,7 +22,7 @@ jobs:
   publish:
     # Allow manual runs, otherwise require CI success on main
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     environment: production
     steps:
       - name: Checkout Repo
