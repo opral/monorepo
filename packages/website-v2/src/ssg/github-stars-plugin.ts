@@ -120,11 +120,23 @@ async function fetchGithubRepoMetrics(
       open_issues_count?: number;
     };
 
-    // Fetch closed issues count via search API
+    // Fetch issue counts via search API (issues only, no PRs)
+    const openIssuesRes = await fetch(
+      `https://api.github.com/search/issues?q=repo:${repo}+is:issue+is:open&per_page=1`,
+      { headers: getHeaders(token) },
+    );
     const closedIssuesRes = await fetch(
       `https://api.github.com/search/issues?q=repo:${repo}+is:issue+is:closed&per_page=1`,
       { headers: getHeaders(token) },
     );
+
+    let openIssues = 0;
+    if (openIssuesRes.ok) {
+      const openData = (await openIssuesRes.json()) as {
+        total_count?: number;
+      };
+      openIssues = openData.total_count ?? 0;
+    }
 
     let closedIssues = 0;
     if (closedIssuesRes.ok) {
@@ -159,7 +171,7 @@ async function fetchGithubRepoMetrics(
     return {
       stars: repoData.stargazers_count ?? 0,
       forks: repoData.forks_count ?? 0,
-      openIssues: repoData.open_issues_count ?? 0,
+      openIssues,
       closedIssues,
       contributorCount,
     };
