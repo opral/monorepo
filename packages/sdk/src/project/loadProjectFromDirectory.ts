@@ -9,28 +9,47 @@ import {
 } from "@lix-js/sdk";
 import fs from "node:fs";
 import nodePath from "node:path";
-import type {
-	InlangPlugin,
-	NodeFsPromisesSubsetLegacy,
-} from "../plugin/schema.js";
+import type { InlangPlugin } from "../plugin/schema.js";
 import { fromMessageV1 } from "../json-schema/old-v1-message/fromMessageV1.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { PreprocessPluginBeforeImportFunction } from "../plugin/importPlugins.js";
 import { PluginImportError } from "../plugin/errors.js";
 import { upsertBundleNestedMatchByProperties } from "../import-export/upsertBundleNestedMatchByProperties.js";
 import type { ImportFile } from "./api.js";
+import { absolutePathFromProject, withAbsolutePaths } from "./path-helpers.js";
+import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
+import { ENV_VARIABLES } from "../services/env-variables/index.js";
+import { compareSemver, pickHighestVersion, readProjectMeta } from "./meta.js";
 
 /**
  * Loads a project from a directory.
  *
  * Main use case are dev tools that want to load a project from a directory
  * that is stored in git.
+ *
+ * @example
+ *   const project = await loadProjectFromDirectory({
+ *     path: "./project.inlang",
+ *     fs: await import("node:fs"),
+ *   });
  */
 export async function loadProjectFromDirectory(
-	args: { path: string; fs: typeof fs; syncInterval?: number } & Omit<
-		Parameters<typeof loadProjectInMemory>[0],
-		"blob"
-	>
+	args: {
+		/**
+		 * The path to the inlang project directory.
+		 */
+		path: string;
+		/**
+		 * The file system module to use for reading and writing files.
+		 */
+		fs: typeof fs;
+		/**
+		 * The interval in milliseconds at which to sync the project with the file system.
+		 *
+		 * If not provided, syncing only happens once on load.
+		 */
+		syncInterval?: number;
+	} & Omit<Parameters<typeof loadProjectInMemory>[0], "blob">
 ) {
 	const settingsPath = nodePath.join(args.path, "settings.json");
 	const settings = JSON.parse(
@@ -168,6 +187,20 @@ export async function loadProjectFromDirectory(
 			loadMessagesFn: plugin.loadMessages!,
 			projectPath: args.path,
 			fs: args.fs,
+		});
+	}
+
+	const shouldUpdateMeta = await shouldUpdateProjectMeta({
+		fs: args.fs.promises,
+		projectPath: args.path,
+		currentSdkVersion: ENV_VARIABLES.SDK_VERSION,
+	});
+	if (shouldUpdateMeta) {
+		await saveProjectToDirectory({
+			fs: args.fs.promises,
+			project,
+			path: args.path,
+			skipExporting: true,
 		});
 	}
 
@@ -715,72 +748,24 @@ export class WarningDeprecatedLintRule extends Error {
 	}
 }
 
-/**
- * Resolving absolute paths for fs functions.
- *
- * This mapping is required for backwards compatibility.
- * Relative paths in the project.inlang/settings.json
- * file are resolved to absolute paths with `*.inlang`
- * being pruned.
- *
- * @example
- *   "/website/project.inlang"
- *   "./local-plugins/mock-plugin.js"
- *   -> "/website/local-plugins/mock-plugin.js"
- *
- */
-export function withAbsolutePaths(
-	fs: NodeFsPromisesSubsetLegacy,
-	projectPath: string
-): NodeFsPromisesSubsetLegacy {
-	return {
-		// @ts-expect-error - node type mismatch
-		readFile: (path, options) => {
-			return fs.readFile(absolutePathFromProject(projectPath, path), options);
-		},
-		writeFile: (path, data) => {
-			return fs.writeFile(absolutePathFromProject(projectPath, path), data);
-		},
-		mkdir: (path) => {
-			return fs.mkdir(absolutePathFromProject(projectPath, path));
-		},
-		readdir: (path) => {
-			return fs.readdir(absolutePathFromProject(projectPath, path));
-		},
-	};
-}
-
-/**
- * Joins a path from a project path.
- *
- * @example
- *   absolutePathFromProject("/project.inlang", "./local-plugins/mock-plugin.js") -> "/local-plugins/mock-plugin.js"
- *
- *   absolutePathFromProject("/website/project.inlang", "./mock-plugin.js") -> "/website/mock-plugin.js"
- */
-export function absolutePathFromProject(
-	projectPath: string,
-	filePath: string
-): string {
-	// Normalize paths for consistency across platforms
-	const normalizedProjectPath = nodePath
-		.normalize(projectPath)
-		.replace(/\\/g, "/");
-	const normalizedFilePath = nodePath.normalize(filePath).replace(/\\/g, "/");
-
-	// Remove the last part of the project path (file name) to get the project root
-	const projectRoot = nodePath.dirname(normalizedProjectPath);
-
-	// If filePath is already absolute, return it directly
-	if (nodePath.isAbsolute(normalizedFilePath)) {
-		return normalizedFilePath;
+async function shouldUpdateProjectMeta(args: {
+	fs: typeof fs.promises;
+	projectPath: string;
+	currentSdkVersion: string;
+}): Promise<boolean> {
+	const meta = await readProjectMeta({
+		fs: args.fs,
+		projectPath: args.projectPath,
+	});
+	const storedSdkVersion = pickHighestVersion([meta?.highestSdkVersion]);
+	if (!storedSdkVersion) {
+		return true;
 	}
-
-	// Compute absolute resolved path
-	const resolvedPath = nodePath.resolve(projectRoot, normalizedFilePath);
-
-	// Ensure final path always uses forward slashes
-	return resolvedPath.replace(/\\/g, "/");
+	const comparison = compareSemver(storedSdkVersion, args.currentSdkVersion);
+	if (comparison === null) {
+		return true;
+	}
+	return comparison < 0;
 }
 
 export class ResourceFileImportError extends Error {

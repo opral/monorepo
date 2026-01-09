@@ -2,18 +2,46 @@ import type fs from "node:fs/promises";
 import type { InlangProject } from "./api.js";
 import path from "node:path";
 import { toMessageV1 } from "../json-schema/old-v1-message/toMessageV1.js";
-import {
-	absolutePathFromProject,
-	withAbsolutePaths,
-} from "./loadProjectFromDirectory.js";
+import { absolutePathFromProject, withAbsolutePaths } from "./path-helpers.js";
 import { detectJsonFormatting } from "../utilities/detectJsonFormatting.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import { README_CONTENT } from "./README_CONTENT.js";
+import { ENV_VARIABLES } from "../services/env-variables/index.js";
+import { compareSemver, pickHighestVersion, readProjectMeta } from "./meta.js";
 
+/**
+ * Saves a project to a directory.
+ *
+ * Writes all project files to disk and runs exporters to generate
+ * resource files (e.g., JSON translation files).
+ *
+ * @example
+ *   await saveProjectToDirectory({
+ *     fs: await import("node:fs/promises"),
+ *     project,
+ *     path: "./project.inlang",
+ *   });
+ */
 export async function saveProjectToDirectory(args: {
+	/**
+	 * The file system module to use for writing files.
+	 */
 	fs: typeof fs;
+	/**
+	 * The inlang project to save.
+	 */
 	project: InlangProject;
+	/**
+	 * The path to the inlang project directory. Must end with `.inlang`.
+	 */
 	path: string;
+	/**
+	 * If `true`, skips running exporters and only writes internal project files.
+	 *
+	 * Useful when you only want to update project metadata without
+	 * regenerating resource files.
+	 */
+	skipExporting?: boolean;
 }): Promise<void> {
 	if (args.path.endsWith(".inlang") === false) {
 		throw new Error("The path must end with .inlang");
@@ -24,8 +52,25 @@ export async function saveProjectToDirectory(args: {
 		.execute();
 
 	const gitignoreContent = new TextEncoder().encode(
-		"# this file is auto generated\n# everything is ignored except settings.json\n*\n!settings.json"
+		"# IF GIT SHOWED THAT THIS FILE CHANGED\n#\n# 1. RUN THE FOLLOWING COMMAND\n#\n# ---\n# git rm --cached '**/*.inlang/.gitignore'\n# ---\n#\n# 2. COMMIT THE CHANGE\n#\n# ---\n# git commit -m \"fix: remove tracked .gitignore from inlang project\"\n# ---\n#\n# Inlang handles the gitignore itself starting with version ^2.5.\n#\n# everything is ignored except settings.json\n*\n!settings.json"
 	);
+
+	const existingMeta = await readProjectMeta({
+		fs: args.fs,
+		projectPath: args.path,
+	});
+	const highestSdkVersion =
+		pickHighestVersion([
+			existingMeta?.highestSdkVersion,
+			ENV_VARIABLES.SDK_VERSION,
+		]) ?? ENV_VARIABLES.SDK_VERSION;
+	const shouldWriteMetadata = (() => {
+		const comparison = compareSemver(
+			highestSdkVersion,
+			ENV_VARIABLES.SDK_VERSION
+		);
+		return comparison === null || comparison <= 0;
+	})();
 
 	// write all files to the directory
 	for (const file of files) {
@@ -37,13 +82,28 @@ export async function saveProjectToDirectory(args: {
 		await args.fs.writeFile(p, new Uint8Array(file.data));
 	}
 
-	await args.fs.writeFile(path.join(args.path, ".gitignore"), gitignoreContent);
+	if (shouldWriteMetadata) {
+		await args.fs.writeFile(
+			path.join(args.path, ".gitignore"),
+			gitignoreContent
+		);
 
-	// Write README.md for coding agents
-	await args.fs.writeFile(
-		path.join(args.path, "README.md"),
-		new TextEncoder().encode(README_CONTENT)
-	);
+		// Write README.md for coding agents
+		await args.fs.writeFile(
+			path.join(args.path, "README.md"),
+			new TextEncoder().encode(README_CONTENT)
+		);
+
+		const metaContent = JSON.stringify({ highestSdkVersion }, null, 2);
+		await args.fs.writeFile(
+			path.join(args.path, ".meta.json"),
+			new TextEncoder().encode(metaContent)
+		);
+	}
+
+	if (args.skipExporting) {
+		return;
+	}
 
 	// run exporters
 	const plugins = await args.project.plugins.get();
