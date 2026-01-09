@@ -100,8 +100,9 @@ const loadDoc = createServerFn({ method: "GET" }).handler(async (ctx) => {
     frontmatter: parsed.frontmatter,
   });
 
-  const { html: markdownWithIds, headings } =
-    extractHeadingsAndInjectIds(parsed.html);
+  const { html: markdownWithIds, headings } = extractHeadingsAndInjectIds(
+    parsed.html,
+  );
 
   const imports = parsed.frontmatter?.imports as string[] | undefined;
 
@@ -349,7 +350,9 @@ function DocumentationPage() {
                     <div
                       className="marketplace-markdown pb-2.5"
                       onMouseDown={(event) => {
-                        const anchor = (event.target as HTMLElement).closest("a");
+                        const anchor = (event.target as HTMLElement).closest(
+                          "a",
+                        );
                         if (anchor?.getAttribute("href")?.startsWith("#")) {
                           event.preventDefault();
                         }
@@ -377,7 +380,10 @@ function DocsNav({
   sections,
   currentSlug,
 }: {
-  sections: Array<{ title: string; pages: Array<{ slug: string; title?: string }> }>;
+  sections: Array<{
+    title: string;
+    pages: Array<{ slug: string; title?: string }>;
+  }>;
   currentSlug: string;
 }) {
   return (
@@ -394,8 +400,8 @@ function DocsNav({
                 return (
                   <Link
                     key={entry.slug}
-                  to="/docs/$slug"
-                  params={{ slug: entry.slug }}
+                    to="/docs/$slug"
+                    params={{ slug: entry.slug }}
                     className={`rounded-md px-3 py-2 text-sm transition-colors ${
                       isActive
                         ? "bg-slate-200 font-semibold text-slate-900"

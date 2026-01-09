@@ -236,7 +236,9 @@ export default function MarketplacePage({
 
                 if (hasH1) {
                   // Extract h1 content and rest of markdown
-                  const h1Match = data.markdown.match(/^(<h1[^>]*>.*?<\/h1>)/is);
+                  const h1Match = data.markdown.match(
+                    /^(<h1[^>]*>.*?<\/h1>)/is,
+                  );
                   const h1Html = h1Match ? h1Match[1] : "";
                   const restHtml = h1Match
                     ? data.markdown.slice(h1Match[0].length)
@@ -257,7 +259,9 @@ export default function MarketplacePage({
                         ref={articleRef}
                         className="marketplace-markdown pb-2.5"
                         onMouseDown={(event) => {
-                          const anchor = (event.target as HTMLElement).closest("a");
+                          const anchor = (event.target as HTMLElement).closest(
+                            "a",
+                          );
                           if (anchor?.getAttribute("href")?.startsWith("#")) {
                             event.preventDefault();
                           }
@@ -277,7 +281,9 @@ export default function MarketplacePage({
                         ref={articleRef}
                         className="marketplace-markdown pb-2.5"
                         onMouseDown={(event) => {
-                          const anchor = (event.target as HTMLElement).closest("a");
+                          const anchor = (event.target as HTMLElement).closest(
+                            "a",
+                          );
                           if (anchor?.getAttribute("href")?.startsWith("#")) {
                             event.preventDefault();
                           }
@@ -668,7 +674,7 @@ function DocMeta({
           <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Repository
           </p>
-          
+
           {/* Stats */}
           <div className="flex flex-col gap-2">
             {/* Repo link */}
@@ -679,7 +685,12 @@ function DocMeta({
               className="group flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
               title="View repository on GitHub"
             >
-              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                aria-hidden="true"
+              >
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
               </svg>
               <span className="group-hover:underline">
@@ -694,58 +705,78 @@ function DocMeta({
 
             {repoMetrics && (
               <>
-              {/* Stars */}
-              <a
-                href={`${repository}/stargazers`}
-                target="_blank"
-                rel="noreferrer"
-                className="group flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
-                title={`${repoMetrics.stars.toLocaleString()} GitHub stars`}
-              >
-                <svg className="h-4 w-4 text-yellow-500" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                  <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
-                </svg>
-                <span aria-label={`${repoMetrics.stars.toLocaleString()} stars`}>
-                  {formatNumber(repoMetrics.stars)} stars
-                </span>
-              </a>
-
-              {/* Issues */}
-              <a
-                href={`${repository}/issues`}
-                target="_blank"
-                rel="noreferrer"
-                className="group flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
-                title={`${repoMetrics.closedIssues.toLocaleString()} closed issues, ${repoMetrics.openIssues.toLocaleString()} open issues`}
-              >
-                <svg className="h-4 w-4 text-slate-400" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                  <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
-                  <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z" />
-                </svg>
-                <span>
-                  {formatNumber(repoMetrics.closedIssues)} closed / {formatNumber(repoMetrics.openIssues)} open issues
-                </span>
-              </a>
-
-              {/* Contributors */}
-              {repoMetrics.contributorCount > 0 && (
+                {/* Stars */}
                 <a
-                  href={`${repository}/graphs/contributors`}
+                  href={`${repository}/stargazers`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
-                  title={`${repoMetrics.contributorCount} contributors`}
+                  className="group flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
+                  title={`${repoMetrics.stars.toLocaleString()} GitHub stars`}
                 >
-                  <svg className="h-4 w-4 text-slate-400" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                    <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z" />
+                  <svg
+                    className="h-4 w-4 text-yellow-500"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
                   </svg>
-                  <span aria-label={`${repoMetrics.contributorCount} contributors`}>
-                    {repoMetrics.contributorCount} contributors
+                  <span
+                    aria-label={`${repoMetrics.stars.toLocaleString()} stars`}
+                  >
+                    {formatNumber(repoMetrics.stars)} stars
                   </span>
                 </a>
-              )}
-            </>
-          )}
+
+                {/* Issues */}
+                <a
+                  href={`${repository}/issues`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
+                  title={`${repoMetrics.closedIssues.toLocaleString()} closed issues, ${repoMetrics.openIssues.toLocaleString()} open issues`}
+                >
+                  <svg
+                    className="h-4 w-4 text-slate-400"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                    <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z" />
+                  </svg>
+                  <span>
+                    {formatNumber(repoMetrics.closedIssues)} closed /{" "}
+                    {formatNumber(repoMetrics.openIssues)} open issues
+                  </span>
+                </a>
+
+                {/* Contributors */}
+                {repoMetrics.contributorCount > 0 && (
+                  <a
+                    href={`${repository}/graphs/contributors`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900"
+                    title={`${repoMetrics.contributorCount} contributors`}
+                  >
+                    <svg
+                      className="h-4 w-4 text-slate-400"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z" />
+                    </svg>
+                    <span
+                      aria-label={`${repoMetrics.contributorCount} contributors`}
+                    >
+                      {repoMetrics.contributorCount} contributors
+                    </span>
+                  </a>
+                )}
+              </>
+            )}
           </div>
 
           <div className="my-4 h-px w-full bg-slate-200" />

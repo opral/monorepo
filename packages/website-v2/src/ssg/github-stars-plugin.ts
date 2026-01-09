@@ -16,11 +16,7 @@ type GithubCache = {
 };
 
 const GITHUB_CACHE_TTL_MINUTES = 60;
-const githubCachePath = path.join(
-  __dirname,
-  "..",
-  "github_repo_data.gen.json",
-);
+const githubCachePath = path.join(__dirname, "..", "github_repo_data.gen.json");
 let didLogGithubToken = false;
 
 export function githubStarsPlugin({ token }: { token?: string }) {
