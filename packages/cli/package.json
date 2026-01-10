@@ -44,7 +44,6 @@
     "clean": "rm -rf ./dist ./node_modules"
   },
   "dependencies": {
-    "@inlang/rpc": "workspace:*",
     "@inlang/sdk": "workspace:*",
     "esbuild-wasm": "^0.19.2"
   },
@@ -55,6 +54,7 @@
     "@types/node": "20.5.9",
     "@types/promptly": "^3.0.2",
     "@types/prompts": "^2.4.4",
+    "@inlang/rpc": "workspace:*",
     "@inlang/tsconfig": "workspace:*",
     "@vitest/coverage-v8": "2.1.8",
     "cli-progress": "^3.12.0",

@@ -26,9 +26,6 @@ importers:
 
   packages/cli:
     dependencies:
-      '@inlang/rpc':
-        specifier: workspace:*
-        version: link:../rpc
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -36,6 +33,9 @@ importers:
         specifier: ^0.19.2
         version: 0.19.12
     devDependencies:
+      '@inlang/rpc':
+        specifier: workspace:*
+        version: link:../rpc
       '@inlang/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
