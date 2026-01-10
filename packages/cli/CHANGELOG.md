@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 3.1.2
+
+### Patch Changes
+
+- f82adb5: Move @inlang/rpc to devDependencies to avoid npm install failures for the bundled CLI.
+
 ## 3.1.1
 
 ### Patch Changes
