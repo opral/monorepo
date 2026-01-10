@@ -48,6 +48,10 @@ async function proxyRpcRequest(request: Request) {
 
   const responseHeaders = new Headers(response.headers);
   for (const [key, value] of corsHeaders.entries()) {
+    if (key.toLowerCase() === "vary") {
+      mergeVaryHeader(responseHeaders, value);
+      continue;
+    }
     responseHeaders.set(key, value);
   }
 
@@ -62,7 +66,7 @@ function buildCorsHeaders(request: Request) {
   const headers = new Headers();
   const origin = request.headers.get("origin");
   if (!origin) {
-    return null;
+    return headers;
   }
 
   if (!isAllowedOrigin(origin)) {
@@ -78,6 +82,25 @@ function buildCorsHeaders(request: Request) {
   );
   headers.set("vary", "origin");
   return headers;
+}
+
+function mergeVaryHeader(headers: Headers, value: string) {
+  const existing = headers.get("vary");
+  if (!existing) {
+    headers.set("vary", value);
+    return;
+  }
+
+  const existingValues = existing
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  const additions = value
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  const merged = Array.from(new Set([...existingValues, ...additions]));
+  headers.set("vary", merged.join(", "));
 }
 
 function isAllowedOrigin(origin: string) {
