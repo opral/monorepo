@@ -54,8 +54,8 @@ If you tried Paraglide JS before and decided the scaffolding was weird, give it 
 _Links:_
 
 - [Paraglide JS Docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
-- [Middleware Guide](https://github.com/opral/paraglide-js/blob/main/docs/middleware-guide.md)
-- [Monorepo Setup](https://github.com/opral/paraglide-js/blob/main/docs/monorepo.md)
+- [Middleware Guide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/middleware)
+- [Monorepo Setup](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/monorepo)
 - [Pedro Martins](https://nikuscs.com/)
 - [Pedro's original post](https://nikuscs.com/blog/13-tanstackstart-i18n/)
 
