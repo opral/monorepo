@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { initMarkdownInteractive } from "../../components/markdown-interactive";
 import markdownCss from "../../markdown.css?url";
 import { getBlogDescription, getBlogTitle } from "../../blog/blogMetadata";
+import { resolveOgImageUrl } from "../../blog/og-image";
 
 const ogImage =
   "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
@@ -120,10 +121,13 @@ const loadBlogPost = createServerFn({ method: "GET" }).handler(async (ctx) => {
     rawMarkdown,
     frontmatter: parsed.frontmatter,
   });
-  const ogImageOverride =
+  const ogImageOverrideRaw =
     typeof parsed.frontmatter?.["og:image"] === "string"
       ? parsed.frontmatter["og:image"]
       : undefined;
+  const ogImageOverride = ogImageOverrideRaw
+    ? resolveOgImageUrl(ogImageOverrideRaw, slug)
+    : undefined;
   const ogImageAlt =
     typeof parsed.frontmatter?.["og:image:alt"] === "string"
       ? parsed.frontmatter["og:image:alt"]

@@ -19,7 +19,16 @@ This feedback was valuable. Here's what we changed.
 
 ## No More project_id
 
-The `project_id` was used for anonymous telemetry and a sync protocol. Both are not needed anymore. Thus, `project_id` is gone.
+The `project_id` was used for anonymous telemetry and a sync protocol. Both are not needed anymore. Thus, `project_id` is now gone for [unpackaged projects](https://inlang.com/docs/unpacked-project).
+
+```diff
+ project.inlang/
+ ├── settings.json
+ ├── cache/
+ ├── README.md
+-└── project_id
+ └── .gitignore
+```
 
 ## Middleware Documentation
 
@@ -58,4 +67,3 @@ _Links:_
 - [Monorepo Setup](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/monorepo)
 - [Pedro Martins](https://nikuscs.com/)
 - [Pedro's original post](https://nikuscs.com/blog/13-tanstackstart-i18n/)
-
