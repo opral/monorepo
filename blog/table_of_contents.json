@@ -1,5 +1,11 @@
 [
   {
+    "path": "./addressing-tanstack-feedback/index.md",
+    "slug": "addressing-tanstack-feedback",
+    "date": "2026-01-10",
+    "authors": ["samuelstroschein"]
+  },
+  {
     "path": "./new-website/index.md",
     "slug": "new-website",
     "date": "2026-01-07",

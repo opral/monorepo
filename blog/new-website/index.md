@@ -40,3 +40,7 @@ A place for updates and announcements. Previously there was no way to communicat
 GitHub stars, npm downloads, and Discord members are now visible on each tool page to help users make faster adoption decisions.
 
 ![Social proof](./after_social_proof.png)
+
+## "App" → "Tool"
+
+We renamed "app" to "tool" for better positioning. A library like Paraglide JS or a CLI isn't an app. "Tool" is more generic and fits any category.
