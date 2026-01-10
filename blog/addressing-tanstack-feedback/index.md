@@ -58,3 +58,4 @@ _Links:_
 - [Monorepo Setup](https://github.com/opral/paraglide-js/blob/main/docs/monorepo.md)
 - [Pedro Martins](https://nikuscs.com/)
 - [Pedro's original post](https://nikuscs.com/blog/13-tanstackstart-i18n/)
+
