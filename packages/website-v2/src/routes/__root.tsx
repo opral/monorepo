@@ -1,39 +1,29 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Scripts,
+  createRootRoute,
+  useRouter,
+} from "@tanstack/react-router";
+import React from "react";
+import appCss from "../styles.css?url";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import appCss from "../styles.css?url";
 
 const GA_MEASUREMENT_ID = "G-5H3SDF7TVZ";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      {
-        title: "inlang",
-      },
-      {
-        name: "theme-color",
-        content: "#ffffff",
-      },
-      {
-        name: "robots",
-        content: "index, follow",
-      },
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "inlang" },
+      { name: "theme-color", content: "#ffffff" },
+      { name: "robots", content: "index, follow" },
     ],
     links: [
       { rel: "preconnect", href: "https://rsms.me/" },
       { rel: "stylesheet", href: "https://rsms.me/inter/inter.css" },
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
       {
         rel: "apple-touch-icon",
         sizes: "180x180",
@@ -58,35 +48,68 @@ export const Route = createRootRoute({
         color: "#5bbad5",
       },
     ],
-    scripts: import.meta.env.PROD
-      ? [
-          {
-            async: true,
-            src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
-          },
-          {
-            children: `
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}');
-`,
-          },
-        ]
-      : [],
+    scripts: [],
   }),
-
   shellComponent: RootDocument,
   notFoundComponent: NotFoundPage,
 });
 
+function GoogleAnalytics() {
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!import.meta.env.PROD) return;
+    if ((window as any).__gaInitialized) return;
+    (window as any).__gaInitialized = true;
+
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    function gtag(...args: unknown[]) {
+      (window as any).dataLayer.push(args);
+    }
+    (window as any).gtag = gtag;
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    document.head.appendChild(script);
+
+    gtag("js", new Date());
+    gtag("config", GA_MEASUREMENT_ID, { send_page_view: false });
+
+    const sendPageView = (location: {
+      href: string;
+      pathname: string;
+      search: string;
+      hash: string;
+    }) => {
+      gtag("event", "page_view", {
+        page_location: location.href,
+        page_path: `${location.pathname}${location.search}${location.hash}`,
+        page_title: document.title,
+      });
+    };
+
+    sendPageView(router.history.location);
+    const unsubscribe = router.history.subscribe(({ location }) => {
+      sendPageView(location);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  return null;
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
-      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col">
+        <GoogleAnalytics />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
