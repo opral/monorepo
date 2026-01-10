@@ -1,5 +1,11 @@
 [
   {
+    "path": "./tanstack-ci/index.md",
+    "slug": "tanstack-ci",
+    "date": "2025-12-21",
+    "authors": ["samuelstroschein"]
+  },
+  {
     "path": "./inlang-v2-release/index.md",
     "slug": "inlang-v2-release",
     "date": "2025-02-15",
