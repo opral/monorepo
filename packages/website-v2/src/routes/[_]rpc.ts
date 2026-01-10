@@ -18,6 +18,18 @@ const RPC_BASE_URL = "https://rpc.inlang.com";
 const RPC_PATH = "/_rpc";
 
 async function proxyRpcRequest(request: Request) {
+  const corsHeaders = buildCorsHeaders(request);
+  if (corsHeaders === null) {
+    return new Response("CORS origin denied", { status: 403 });
+  }
+
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
   const upstreamUrl = `${RPC_BASE_URL}${RPC_PATH}`;
   const headers = new Headers(request.headers);
 
@@ -34,9 +46,74 @@ async function proxyRpcRequest(request: Request) {
     redirect: "manual",
   });
 
+  const responseHeaders = new Headers(response.headers);
+  for (const [key, value] of corsHeaders.entries()) {
+    if (key.toLowerCase() === "vary") {
+      mergeVaryHeader(responseHeaders, value);
+      continue;
+    }
+    responseHeaders.set(key, value);
+  }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers: response.headers,
+    headers: responseHeaders,
   });
+}
+
+function buildCorsHeaders(request: Request) {
+  const headers = new Headers();
+  const origin = request.headers.get("origin");
+  if (!origin) {
+    return headers;
+  }
+
+  if (!isAllowedOrigin(origin)) {
+    return null;
+  }
+
+  headers.set("access-control-allow-origin", origin);
+  headers.set("access-control-allow-credentials", "true");
+  headers.set("access-control-allow-methods", "POST,OPTIONS");
+  headers.set(
+    "access-control-allow-headers",
+    request.headers.get("access-control-request-headers") ?? "content-type"
+  );
+  headers.set("vary", "origin");
+  return headers;
+}
+
+function mergeVaryHeader(headers: Headers, value: string) {
+  const existing = headers.get("vary");
+  if (!existing) {
+    headers.set("vary", value);
+    return;
+  }
+
+  const existingValues = existing
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  const additions = value
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  const merged = Array.from(new Set([...existingValues, ...additions]));
+  headers.set("vary", merged.join(", "));
+}
+
+function isAllowedOrigin(origin: string) {
+  let hostname = "";
+  try {
+    hostname = new URL(origin).hostname;
+  } catch {
+    return false;
+  }
+
+  if (hostname === "localhost") {
+    return true;
+  }
+
+  return hostname === "inlang.com" || hostname.endsWith(".inlang.com");
 }
