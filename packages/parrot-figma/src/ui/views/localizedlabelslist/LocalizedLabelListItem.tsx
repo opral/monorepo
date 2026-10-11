@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as Sentry from "@sentry/react";
 import { useEffect, useRef, useState } from "react";
 import { Plural } from "../../../lib/message/variants/Plural";
 import { MessageLinkState } from "../../../lib/localizedlabels/LocalizedLabel";
@@ -16,7 +15,6 @@ import LocalizedLabelManagerUI from "../../../lib/localizedlabels/LocalizedLabel
 import TextField from "../../compontents/textfield/TextField";
 import MessageListView from "../messages/MessageListView";
 import { UILocalizedLabel } from "../../../lib/localizedlabels/UILocalizedLabel";
-import { track } from "../../utils/analytics";
 import Drawer from "../../compontents/drawer/Drawer";
 import { MessageParameterValues } from "../../../lib/message/MessageParameterValues";
 import TranslatorMachine, {
@@ -61,7 +59,7 @@ export default function LocalizedLabelListItem({
 
 	async function createNewVersionFromDesign() {
 		await localizedLabelManager.createNewVersionFromLabelState(localizedLabel).catch((e: Error) => {
-			Sentry.captureException(e);
+			console.error(e);
 			figmaRemote.notifyError(e.message);
 		});
 	}
@@ -70,15 +68,14 @@ export default function LocalizedLabelListItem({
 		await localizedLabelManager
 			.fixLabelLints(localizedLabel, localizedLabel.matchingLabelLints)
 			.catch((e: Error) => {
-				Sentry.captureException(e);
+				console.error(e);
 				figmaRemote.notifyError(e.message);
 			});
 	}
 
 	async function updateToLatestKeyVersion() {
-		track("updateToLatestKeyVersion");
 		await localizedLabelManager.updateToMessageHead([localizedLabel]).catch((e: Error) => {
-			Sentry.captureException(e);
+			console.error(e);
 			figmaRemote.notifyError(e.message);
 		});
 	}
@@ -149,7 +146,7 @@ export default function LocalizedLabelListItem({
 								.linkMessage(localizedLabel, messageToLink.id, localizedLabel.rootFrameLanguage!)
 								.catch((e) => {
 									figmaRemote.notifyError(`could not set message${e.message}`);
-									Sentry.captureException(e);
+									console.error(e);
 								});
 							setMessageSearch(undefined);
 						},
@@ -230,7 +227,7 @@ export default function LocalizedLabelListItem({
 						onSave={async (labelName: string) => {
 							await localizedLabelManager.updateLabelName(localizedLabel, labelName).catch((e) => {
 								figmaRemote.notifyError(`could not set message${e.message}`);
-								Sentry.captureException(e);
+								console.error(e);
 							});
 						}}
 						text={localizedLabel.name}
@@ -447,7 +444,7 @@ export default function LocalizedLabelListItem({
 											localizedLabelManager
 												.updateLabelPatternHtml(localizedLabel, patternHtml, parameters)
 												.catch((e: Error) => {
-													Sentry.captureException(e);
+													console.error(e);
 													figmaRemote.notifyError(e.message);
 													reset();
 												});
@@ -480,7 +477,7 @@ export default function LocalizedLabelListItem({
 															figmaRemote.notify(
 																`Something went wrong with translation - ${e.message}`,
 															);
-															Sentry.captureException(e);
+															console.error(e);
 														}
 													}
 												}}
@@ -546,7 +543,7 @@ export default function LocalizedLabelListItem({
                               onValueChange={(placeholderName, fillinValue) => {
                                 // TODO #18 variables - this is not used at the moment but bases on fillins instead of parameters
                                 localizedLabelManager.updateLabelFillin(localizedLabel, placeholderName, fillinValue).catch((e: Error) => {
-                                  Sentry.captureException(e);
+                                  console.error(e);
                                   figmaRemote.notifyError(e.message);
                                 });
                               }}

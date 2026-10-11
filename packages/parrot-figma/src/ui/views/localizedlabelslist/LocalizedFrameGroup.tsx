@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as Sentry from "@sentry/react";
 import { LocalizedLabel } from "../../../lib/localizedlabels/LocalizedLabel";
 import LocalizedLabelListItem from "./LocalizedLabelListItem";
 import Select, { SelectOption } from "../../compontents/select/select";
@@ -104,7 +103,7 @@ export default function LocalizedFrameGroup({
 		} catch (e: any) {
 			if (!(e instanceof NoMoreTranslationsLeftError)) {
 				figmaRemote.notify(`Something went wrong with translation - ${e.message}`);
-				Sentry.captureException(e);
+				console.error(e);
 			}
 		}
 	}

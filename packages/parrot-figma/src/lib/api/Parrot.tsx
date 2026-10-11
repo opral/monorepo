@@ -1,5 +1,3 @@
-import Monitoring from "../monitoring/MonitoringProxy";
-
 export type TranslationCreditUsage = {
 	ownerId: string;
 	time: number;
@@ -55,22 +53,13 @@ export default class ParrotApi {
 			translationsCreditUsage,
 		});
 
-		try {
-			const result = await fetch(url, { method: "POST", headers: this.baseHeaders, body: rawBody });
+		const result = await fetch(url, { method: "POST", headers: this.baseHeaders, body: rawBody });
 
-			if (!result.ok) {
-				const resultNoOkError = new Error(
-					`synchronizeCredits went wrong ${JSON.stringify(result)}`,
-				);
-				await Monitoring.instance?.sentryCaptureException(resultNoOkError, {});
-				throw resultNoOkError;
-			}
-
-			return await result.json();
-		} catch (e: any) {
-			await Monitoring.instance?.sentryCaptureException(e, {});
-			throw e;
+		if (!result.ok) {
+			throw new Error(`synchronizeCredits went wrong ${JSON.stringify(result)}`);
 		}
+
+		return await result.json();
 	}
 
 	async activateLicense(userId: string, name: string, licenseKey: string) {

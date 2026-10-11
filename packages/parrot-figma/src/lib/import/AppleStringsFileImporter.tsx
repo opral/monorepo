@@ -17,8 +17,6 @@ export default class AppleStringsFileImporter {
 			// let arg = '';
 			const parameterName = `${index++}__unnamed`;
 
-			// TODO #23 catch information in sentry on import of unsupported parameter types - to quantify usage
-
 			// TODO #19 add format function that allows to know its a float/decimal or keep empty for string
 			// if (type === 'f' && group3) {
 			//   format = ` format="${group3}"`;
