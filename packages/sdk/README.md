@@ -141,7 +141,7 @@ const myPlugin: InlangPlugin = {
 > [!NOTE]  
 > Why is a CDN requires instead of using npm to use plugins?
 >
-> Non-JS projects (Android, iOS, etc.) wouldn't be able to use inlang, and browser-based apps like [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) couldn't load plugins. 
+> Non-JS projects (Android, iOS, etc.) wouldn't be able to use inlang, and browser-based apps like [Fink](https://fink.inlang.com) couldn't load plugins. 
 
 ```bash
 npx @inlang/cli plugin build --entry ./src/plugin.js 
