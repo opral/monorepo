@@ -900,10 +900,7 @@ describe("roundTrip", () => {
 			settings,
 			nodeishFs: fs,
 		});
-		expect((await fs.readdir("./")).sort()).toStrictEqual([
-			"de.json",
-			"main.json",
-		]);
+		expect((await fs.readdir("./")).sort()).toStrictEqual(["de.json", "main.json"]);
 		expect(newMessage).toStrictEqual(messages);
 	});
 });
