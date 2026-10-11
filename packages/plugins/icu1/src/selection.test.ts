@@ -241,6 +241,50 @@ describe("a selector nested in a less specific case and ahead of it", () => {
   });
 });
 
+describe("selectors ahead from different branches", () => {
+  // `a0` to `a{m-1}` each enclose a plural whose `other` selects on each of
+  // them in another case of a select on `c`
+  const message = (m: number, k: number) => {
+    const keys = Array.from({ length: k }, (_, index) => `k${index}`);
+    const args = Array.from({ length: m }, (_, index) => `a${index}`);
+    let result = `{n, plural, one {ONE} other {{c, select, ${args
+      .map(
+        (arg, index) =>
+          `p${index} {{${arg}, select, ${keys
+            .map((key) => `${key} {${arg}${key}}`)
+            .join(" ")} other {${arg}O}}}`,
+      )
+      .join(" ")} other {CO}}}}`;
+    for (const arg of [...args].reverse()) {
+      result = `{${arg}, select, x {X} other {${result}}}`;
+    }
+    return result;
+  };
+
+  it("selects what ICU selects", () => {
+    expectSameSelection(
+      message(3, 3),
+      combinations({
+        n: [1, 2],
+        c: ["p0", "p1", "p2", "q"],
+        a0: ["x", "k0", "k1", "k2", "z"],
+        a1: ["x", "k0", "k1", "k2", "z"],
+        a2: ["x", "k0", "k1", "k2", "z"],
+      }),
+    );
+  });
+
+  it("copies a variant for the keys of each selector, not for their combinations", () => {
+    // combinations would be 6^5 copies of `ONE`
+    const parsed = parseMessage({
+      messageSource: message(5, 5),
+      bundleId: "bundle",
+      locale,
+    });
+    expect(parsed.variants.length).toBeLessThan(200);
+  });
+});
+
 /** mulberry32 */
 function seededRandom(seed: number): () => number {
   return () => {

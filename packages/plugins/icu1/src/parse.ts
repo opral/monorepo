@@ -488,18 +488,27 @@ function matchSelectorsAhead(
     const next: Branch[] = [];
     fresh = new Set();
     for (const branch of result) {
-      const fill = fills.get(branch);
-      let copies = [branch];
-      for (const [unit, keys] of fill ?? []) {
+      // Copies for the keys of each selector combined would multiply. A copy
+      // with a key of a selector wins by it against the branches that give
+      // keys of later selectors: those have no literal match on it, else it
+      // would decide. So only the copy with the catch-all match gets the keys
+      // of later selectors.
+      const units = [...(fills.get(branch) ?? [])].sort(
+        ([left], [right]) =>
+          lookup.positions.get(left)! - lookup.positions.get(right)!,
+      );
+      const copies = [branch];
+      for (const [unit, keys] of units) {
         const plural = lookup.plurals.get(unit);
-        copies = copies.flatMap((copy) =>
-          plural
-            ? matchPluralAhead(copy, {
+        const other = copies.pop()!;
+        copies.push(
+          ...(plural
+            ? matchPluralAhead(other, {
                 plural,
                 keys,
                 categoryOf: lookup.categoryOf.get(unit),
               })
-            : matchSelectAhead(copy, unit, keys.keys),
+            : matchSelectAhead(other, unit, keys.keys)),
         );
       }
       if (copies.length > 1) {
@@ -646,8 +655,17 @@ function findKeysAhead(
       }
     }
     // the keys that decide for the branches of less specific cases, for a
-    // branch with literal matches on some of the selectors
-    type Decider = { name: string; value: string; branches: Branch[] };
+    // branch with literal matches on some of the selectors. Both are only
+    // selected for the same values if their literal matches before the
+    // deciding selector are the same, by which the groups of each key are
+    // kept.
+    type Decider = {
+      name: string;
+      value: string;
+      /** The index of the selector in `mixed`. */
+      index: number;
+      groups: Map<string, Group[]>;
+    };
     const cache = new Map<string, Decider[]>();
     const decidersFor = (
       kind: "all" | "fresh",
@@ -670,10 +688,14 @@ function findKeysAhead(
           const decider = byKey.get(`${name}=${value}`) ?? {
             name,
             value,
-            branches: [],
+            index,
+            groups: new Map(),
           };
-          decider.branches.push(...group.branches);
           byKey.set(`${name}=${value}`, decider);
+          const before = JSON.stringify(group.values.slice(0, index));
+          const same = decider.groups.get(before) ?? [];
+          same.push(group);
+          decider.groups.set(before, same);
           break;
         }
       }
@@ -682,7 +704,11 @@ function findKeysAhead(
       return deciders;
     };
     for (const { branch, entry } of entries) {
-      const literals = mixed.map((name) => isLiteral(branch, name));
+      const values = mixed.map((name) => {
+        const match = lookup.matchOf(branch, name);
+        return match?.type === "literal-match" ? match.value : undefined;
+      });
+      const literals = values.map((value) => value !== undefined);
       if (literals.every(Boolean)) continue;
       const kind = fresh.has(branch) ? "all" : "fresh";
       for (const decider of decidersFor(kind, entry.specificity, literals)) {
@@ -692,7 +718,13 @@ function findKeysAhead(
         if (
           added?.has(decider.value) ||
           excludes(branch, decider, lookup) ||
-          !decider.branches.some((other) => overlaps(other, branch, lookup))
+          !(
+            decider.groups.get(
+              JSON.stringify(values.slice(0, decider.index)),
+            ) ?? []
+          ).some((group) =>
+            group.branches.some((other) => overlaps(other, branch, lookup)),
+          )
         ) {
           continue;
         }
