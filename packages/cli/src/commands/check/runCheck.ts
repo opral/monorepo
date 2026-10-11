@@ -66,9 +66,23 @@ export const CHECKS: readonly {
   },
 ];
 
-const M_FUNCTION_MATCHER = "plugin.inlang.mFunctionMatcher";
-export const MATCHER_UPDATE_HINT =
-  "Unused-message check needs @inlang/plugin-m-function-matcher ≥ 2.3.0, update the module URL in settings.json";
+/** Plugins whose usage analysis came in a later version: an older one is updated, not replaced. */
+const USAGE_PLUGINS: readonly {
+  key: string;
+  name: string;
+  version: string;
+}[] = [
+  {
+    key: "plugin.inlang.mFunctionMatcher",
+    name: "@inlang/plugin-m-function-matcher",
+    version: "2.3.0",
+  },
+  {
+    key: "plugin.inlang.nextIntl",
+    name: "@inlang/plugin-next-intl",
+    version: "2.4.0",
+  },
+];
 
 /** Invalid input, such as an unknown locale. Reported without a stack trace. */
 export class CheckUsageError extends Error {
@@ -160,20 +174,22 @@ export async function runCheck(args: {
   let usageCheck: ReportCheck | undefined;
   if (checks.includes("unused-message")) {
     const plugins = await project.plugins.get();
-    const legacyMatcher = plugins.some(
-      (plugin) => plugin.key === M_FUNCTION_MATCHER && !plugin.analyzeUsage,
+    const legacy = USAGE_PLUGINS.find((usagePlugin) =>
+      plugins.some(
+        (plugin) => plugin.key === usagePlugin.key && !plugin.analyzeUsage,
+      ),
     );
     if (!plugins.some((plugin) => plugin.analyzeUsage)) {
       usageCheck = {
         id: "unused-message",
         status: "unavailable",
-        reason: legacyMatcher
-          ? "The installed @inlang/plugin-m-function-matcher can't analyze usages."
+        reason: legacy
+          ? `The installed ${legacy.name} can't analyze usages.`
           : errors.length
             ? "Plugins failed to load, see the project errors."
             : "No installed plugin analyzes message usages.",
-        ...(legacyMatcher
-          ? { hint: matcherHint(settings.modules) }
+        ...(legacy
+          ? { hint: updateHint(legacy, settings.modules) }
           : errors.length
             ? {}
             : {
@@ -235,14 +251,11 @@ export async function runCheck(args: {
         : {}),
     };
     // A matcher without `analyzeUsage` next to another analyzer: say which plugin to update.
-    if (
-      id === "unused-message" &&
-      reported.status !== "complete" &&
-      reported.issues?.some((issue) =>
-        issue.reason.includes(M_FUNCTION_MATCHER),
-      )
-    )
-      reported.hint = matcherHint(settings.modules);
+    const outdated = USAGE_PLUGINS.find((usagePlugin) =>
+      reported.issues?.some((issue) => issue.reason.includes(usagePlugin.key)),
+    );
+    if (id === "unused-message" && reported.status !== "complete" && outdated)
+      reported.hint = updateHint(outdated, settings.modules);
     return reported;
   });
 
@@ -328,13 +341,15 @@ export function hasFindings(report: CheckReport): boolean {
   return report.summary.findings > 0 || report.errors.length > 0;
 }
 
-function matcherHint(modules: readonly string[] | undefined): string {
+function updateHint(
+  plugin: (typeof USAGE_PLUGINS)[number],
+  modules: readonly string[] | undefined,
+): string {
+  const hint = `Unused-message check needs ${plugin.name} ≥ ${plugin.version}, update the module URL in settings.json`;
   const module = modules?.find((uri) =>
-    uri.includes("plugin-m-function-matcher"),
+    uri.includes(plugin.name.replace("@inlang/", "")),
   );
-  return module
-    ? `${MATCHER_UPDATE_HINT}: ${module}`
-    : `${MATCHER_UPDATE_HINT}.`;
+  return module ? `${hint}: ${module}` : `${hint}.`;
 }
 
 /** The lines of each source file, split once on first use. */

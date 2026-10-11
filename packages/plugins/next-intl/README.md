@@ -144,6 +144,30 @@ export default async function Page() {
 
 To learn about namespaces and how to use translation functions in your code, refer to the [next-intl documentation](https://next-intl-docs.vercel.app/docs/usage/messages).
 
+# Unused messages
+
+The plugin analyzes where your code uses messages (`analyzeUsage`), so that the inlang SDK's `checkProject` and `findUsages`, [`inlang check --unused-messages`](https://inlang.com/m/2qj2w8pu/app-inlang-cli) and [Fink](https://fink.inlang.com) can find unused messages and show where each message is used. It reads `.ts`, `.tsx`, `.js`, `.jsx` (also `.mjs`, `.cjs`) and `.mdx` files.
+
+A message is used by:
+
+- `useTranslations("Home")` or `await getTranslations("Home")` (also `getTranslations({ locale, namespace: "Home" })` and `createTranslator({ messages, namespace: "Home" })`) followed by `t("title")`, `t.rich("title")` or `t.markup("title")`: `Home.title`.
+- `t("Home.title")` on a translator without a namespace, and nested namespaces such as `useTranslations("Checkout.Summary")`.
+- Keys known in the file: constants (`const key = "title"`), both sides of `open ? "close" : "open"`, templates of constants, and arrays of keys that are only iterated: ``["one", "two"].map((key) => t(`${key}.title`))``.
+- Aliases of a translator (`const tt = t`) and of the next-intl functions (`import { useTranslations as useT }`, `import * as intl from "next-intl"`).
+
+Passing all messages to `NextIntlClientProvider`, returning them from `getRequestConfig` (also merged with `deepmerge`), and typing next-intl with `Messages: typeof messages` are not usages.
+
+When a usage can't be resolved, no message is reported unused, and the analysis lists where and why. That is the case for:
+
+- dynamic keys and namespaces, such as ``t(`items.${id}`)``, `t(key)` or `useTranslations(namespace)`;
+- a translator passed to a function or component, returned from a custom hook, exported or stored, and next-intl functions imported from a wrapper module or package (`import { useTranslations } from "@repo/i18n"`);
+- `t.raw()` and `t.has()` of a key that could be a namespace (one that isn't also translated with `t()`);
+- messages read directly: `useMessages()` or `getMessages()` other than for `NextIntlClientProvider`, an imported message file, `import.meta.glob`;
+- message files nested under a key other than their namespace, e.g. `messages: { Legacy: en }`;
+- re-exports of next-intl functions, `useExtracted()` and `getExtracted()`;
+- types derived from the message keys, such as `MessageKeys`, `keyof Messages`, `keyof IntlMessages["Nav"]` or `Parameters<typeof t>`. Typing next-intl itself (`Messages: typeof messages` in `AppConfig`, `interface IntlMessages extends Messages {}`) is fine;
+- files the plugin can't parse, and formats it doesn't read, such as `.vue` or `.md`.
+
 # Expected behavior
 
 ## Structure and Ordering
@@ -182,14 +206,13 @@ Then your target language (`de.json`) will be written in the same nested structu
 
 # Limitations
 
-| Feature                      | Limitation                                                                                      |
-| ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Invalid ICU**              | A message next-intl can't parse is read as text and keeps its text unless it is edited          |
-| **Tags around a plural**     | `<b>{count, plural, …}</b>` is written as `{count, plural, one {<b>…</b>} …}` once it is edited |
-| **Self-closing tags**        | next-intl reads `<br/>` as text; markup without content is written as `<br></br>`               |
-| **Tag attributes**           | next-intl tags have none: options of markup from other formats (`{#link to=$url}`) are dropped  |
-| **Nested `t()` calls**       | References like `{t('other.key')}` are not resolved                                             |
-| **Unused message detection** | The plugin doesn't analyze `t()` usages for `checkProject`'s `unused-message` check yet         |
+| Feature                  | Limitation                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| **Invalid ICU**          | A message next-intl can't parse is read as text and keeps its text unless it is edited          |
+| **Tags around a plural** | `<b>{count, plural, …}</b>` is written as `{count, plural, one {<b>…</b>} …}` once it is edited |
+| **Self-closing tags**    | next-intl reads `<br/>` as text; markup without content is written as `<br></br>`               |
+| **Tag attributes**       | next-intl tags have none: options of markup from other formats (`{#link to=$url}`) are dropped  |
+| **Nested `t()` calls**   | References like `{t('other.key')}` are not resolved                                             |
 
 # Troubleshooting
 

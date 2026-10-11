@@ -9,6 +9,7 @@ import { importFiles } from "./import-export/importFiles.js";
 import { exportFiles } from "./import-export/exportFiles.js";
 import { toBeImportedFiles } from "./import-export/toBeImportedFiles.js";
 import { PLUGIN_KEY } from "./pluginKey.js";
+import { analyzeUsage } from "./usage/analyzeUsage.js";
 
 // global variable to store the formatting of the file
 let serializeWithFormatting: ReturnType<typeof detectJsonFormatting>;
@@ -75,6 +76,7 @@ export const plugin: NextIntlPlugin = {
 	importFiles,
 	exportFiles,
 	toBeImportedFiles,
+	analyzeUsage,
 
 	loadMessages: async ({ settings, nodeishFs }) => {
 		settings["plugin.inlang.nextIntl"].variableReferencePattern = settings[

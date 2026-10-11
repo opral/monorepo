@@ -1,0 +1,17 @@
+import { useTranslations } from "next-intl";
+
+export function Title() {
+  const t = useTranslations("About");
+  return <h1>{t("title")}</h1>;
+}
+
+export function Body() {
+  const t = useTranslations("About");
+  return <p>{t.rich("body", { b: (chunks) => <b>{chunks}</b> })}</p>;
+}
+
+<Title />
+
+We are a *small* shop.
+
+<Body />

@@ -156,7 +156,7 @@ function describeStatus(
   if (unused && located.length)
     lines.push(
       s.dim(
-        "  Unused messages are only reported when every usage can be resolved, e.g. m.some_key().",
+        '  Unused messages are only reported when every usage can be resolved, e.g. m.some_key() or t("some.key").',
       ),
     );
   if (check.hint) lines.push(`  ${check.hint}`);

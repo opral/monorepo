@@ -1,0 +1,15 @@
+{
+  "Home": {
+    "title": "Willkommen",
+    "terms": "Lies die <b>Bedingungen</b>",
+    "legacy": "Nicht mehr angezeigt"
+  },
+  "Nav": {
+    "home": "Start",
+    "about": "Über uns"
+  },
+  "Status": {
+    "open": "Offen",
+    "closed": "Geschlossen"
+  }
+}

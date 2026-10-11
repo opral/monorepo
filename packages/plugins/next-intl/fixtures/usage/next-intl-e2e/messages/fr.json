@@ -1,0 +1,10 @@
+{
+  "Home": {
+    "title": "Bienvenue sur {appName}",
+    "cart": "{count, plural, =0 {Votre panier est vide} one {Vous avez # article} other {Vous avez # articles}}",
+    "terms": "Veuillez lire les <b>conditions</b> et notre <link>politique de confidentialité</link>."
+  },
+  "Nav": {
+    "home": "Accueil"
+  }
+}

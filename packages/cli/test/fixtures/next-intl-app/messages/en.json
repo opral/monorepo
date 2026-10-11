@@ -1,0 +1,15 @@
+{
+  "Home": {
+    "title": "Welcome",
+    "terms": "Read the <b>terms</b>",
+    "legacy": "Not shown anymore"
+  },
+  "Nav": {
+    "home": "Home",
+    "about": "About"
+  },
+  "Status": {
+    "open": "Open",
+    "closed": "Closed"
+  }
+}
