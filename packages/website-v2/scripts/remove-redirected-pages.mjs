@@ -3,11 +3,21 @@ import path from "node:path";
 
 const clientDist = path.resolve(process.cwd(), "dist/client");
 
-function isRedirectedParaglidePath(pathname) {
+// Marketplace pages that redirect to a standalone website.
+// Keep in sync with `standaloneSites` in src/marketplace/legacyRedirects.ts.
+const standaloneSitePaths = [
+	"/m/gerre34r/library-inlang-paraglideJs",
+	"/m/tdozzpar/app-inlang-finkLocalizationEditor",
+];
+
+function isRedirectedPath(pathname) {
 	if (
-		pathname === "/m/gerre34r/library-inlang-paraglideJs" ||
-		pathname === "/m/gerre34r/library-inlang-paraglideJs/" ||
-		pathname.startsWith("/m/gerre34r/library-inlang-paraglideJs/")
+		standaloneSitePaths.some(
+			(basePath) =>
+				pathname === basePath ||
+				pathname === `${basePath}/` ||
+				pathname.startsWith(`${basePath}/`)
+		)
 	) {
 		return true;
 	}
@@ -32,7 +42,7 @@ const pagesPath = path.join(clientDist, "pages.json");
 if (existsSync(pagesPath)) {
 	const pagesData = JSON.parse(readFileSync(pagesPath, "utf8"));
 	pagesData.pages = pagesData.pages?.filter(
-		(page) => !isRedirectedParaglidePath(page.path)
+		(page) => !isRedirectedPath(page.path)
 	);
 	writeFileSync(pagesPath, `${JSON.stringify(pagesData, null, 2)}\n`);
 }
@@ -44,7 +54,7 @@ if (existsSync(sitemapPath)) {
 		/\s*<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/g,
 		(entry, loc) => {
 			try {
-				return isRedirectedParaglidePath(new URL(loc).pathname) ? "" : entry;
+				return isRedirectedPath(new URL(loc).pathname) ? "" : entry;
 			} catch {
 				return entry;
 			}

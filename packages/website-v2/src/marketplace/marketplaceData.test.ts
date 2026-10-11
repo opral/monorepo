@@ -19,7 +19,10 @@ import {
   resolveHtmlAssetLinks,
   resolveRelativeUrl,
 } from "./marketplaceData";
-import { getParaglideRedirectForPath } from "./legacyRedirects";
+import {
+  getStandaloneSiteRedirect,
+  getStandaloneSiteRedirectForPath,
+} from "./legacyRedirects";
 
 describe("loadMarketplacePage redirects", () => {
   beforeEach(() => {
@@ -149,16 +152,29 @@ describe("loadMarketplacePage redirects", () => {
   });
 });
 
-describe("getParaglideRedirectForPath", () => {
+describe("loadMarketplacePage standalone sites", () => {
+  it("redirects Fink pages to fink.inlang.com regardless of slug", async () => {
+    await expect(
+      loadMarketplacePage({ uid: "tdozzpar", slug: "anything" }),
+    ).rejects.toMatchObject({
+      href: "https://fink.inlang.com",
+      statusCode: 301,
+    });
+  });
+});
+
+describe("getStandaloneSiteRedirectForPath", () => {
   it("redirects Paraglide marketplace paths to the standalone site", () => {
     expect(
-      getParaglideRedirectForPath("/m/gerre34r/library-inlang-paraglideJs"),
+      getStandaloneSiteRedirectForPath(
+        "/m/gerre34r/library-inlang-paraglideJs",
+      ),
     ).toEqual({
       href: "https://paraglidejs.com",
       statusCode: 301,
     });
     expect(
-      getParaglideRedirectForPath(
+      getStandaloneSiteRedirectForPath(
         "/m/gerre34r/library-inlang-paraglideJs/comparison",
       ),
     ).toEqual({
@@ -167,9 +183,46 @@ describe("getParaglideRedirectForPath", () => {
     });
   });
 
+  it("redirects Fink marketplace paths to the Fink website root", () => {
+    expect(
+      getStandaloneSiteRedirectForPath(
+        "/m/tdozzpar/app-inlang-finkLocalizationEditor",
+      ),
+    ).toEqual({
+      href: "https://fink.inlang.com",
+      statusCode: 301,
+    });
+    expect(
+      getStandaloneSiteRedirectForPath(
+        "/m/tdozzpar/app-inlang-finkLocalizationEditor/supported-i18n-libraries",
+      ),
+    ).toEqual({
+      href: "https://fink.inlang.com",
+      statusCode: 301,
+    });
+    expect(
+      getStandaloneSiteRedirectForPath(
+        "/m/tdozzpar/app-inlang-finkLocalizationEditor/",
+      ),
+    ).toEqual({
+      href: "https://fink.inlang.com",
+      statusCode: 301,
+    });
+    expect(getStandaloneSiteRedirect("tdozzpar", "/x")).toEqual({
+      href: "https://fink.inlang.com",
+      statusCode: 301,
+    });
+  });
+
+  it("does not redirect other marketplace items", () => {
+    expect(
+      getStandaloneSiteRedirectForPath("/m/2qj2w8pu/app-inlang-cli"),
+    ).toBeUndefined();
+  });
+
   it("redirects legacy Paraglide integration paths", () => {
     expect(
-      getParaglideRedirectForPath("/m/dxnzrydw/paraglide-sveltekit-i18n"),
+      getStandaloneSiteRedirectForPath("/m/dxnzrydw/paraglide-sveltekit-i18n"),
     ).toEqual({
       href: "https://paraglidejs.com/sveltekit",
       statusCode: 301,

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",
-    "build": "vite build && node ./scripts/remove-redirected-paraglide-pages.mjs",
+    "build": "vite build && node ./scripts/remove-redirected-pages.mjs",
     "preview": "vite preview",
     "lint": "tsc --noEmit && oxlint",
     "lint:fix": "tsc --noEmit && oxlint --fix",
