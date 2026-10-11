@@ -273,12 +273,17 @@ function toJson(messages: ExportMessage[]): Record<string, unknown> {
 		}
 	}
 
-	// new messages first, like before they were nested
+	// New top-level keys first, as before. New nested keys after the keys of
+	// their object, where people add them.
 	const result: Record<string, unknown> = Object.assign(
 		Object.create(null),
 		conflicting
 	);
-	for (const message of [...fitting, ...imported]) {
+	for (const message of [
+		...fitting.filter((message) => message.path.length === 1),
+		...imported,
+		...fitting.filter((message) => message.path.length > 1),
+	]) {
 		assignPath(result, message.path, message.value);
 	}
 	return result;

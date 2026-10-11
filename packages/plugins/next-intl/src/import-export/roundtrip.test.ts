@@ -119,6 +119,8 @@ test("a new message of a bundle goes where the bundle's other messages are", asy
 	expect(parsed("de")).toStrictEqual({
 		Legacy: { "key.with.dots": "Legacy.key.with.dots (de)" },
 	});
+	// a new nested key goes after the keys of its object
+	expect(Object.keys(parsed("en").Home)).toEqual(["title", "subtitle"]);
 	expect(parsed("en")).toStrictEqual({
 		// "Home.title" is a message, so next-intl can't read "Home.title.long"
 		// either way: it stays a flat key instead of replacing "Home.title"
