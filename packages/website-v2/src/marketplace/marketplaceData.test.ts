@@ -197,7 +197,15 @@ describe("getStandaloneSiteRedirectForPath", () => {
         "/m/tdozzpar/app-inlang-finkLocalizationEditor/supported-i18n-libraries",
       ),
     ).toEqual({
-      href: "https://fink.inlang.com",
+      href: "https://fink.inlang.com/docs/formats",
+      statusCode: 301,
+    });
+    expect(
+      getStandaloneSiteRedirectForPath(
+        "/m/tdozzpar/app-inlang-finkLocalizationEditor/supported-i18n-libraries/",
+      ),
+    ).toEqual({
+      href: "https://fink.inlang.com/docs/formats",
       statusCode: 301,
     });
     expect(
@@ -209,6 +217,10 @@ describe("getStandaloneSiteRedirectForPath", () => {
       statusCode: 301,
     });
     expect(getStandaloneSiteRedirect("tdozzpar", "/x")).toEqual({
+      href: "https://fink.inlang.com/docs",
+      statusCode: 301,
+    });
+    expect(getStandaloneSiteRedirect("tdozzpar", "/")).toEqual({
       href: "https://fink.inlang.com",
       statusCode: 301,
     });

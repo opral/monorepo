@@ -35,12 +35,12 @@ type StandaloneSite = {
   slug: string;
   href: string;
   /**
-   * Whether marketplace sub pages exist on the standalone site under the same
-   * path (e.g. `/m/gerre34r/library-inlang-paraglideJs/comparison` ->
-   * `https://paraglidejs.com/comparison`). Otherwise, every page redirects to
-   * the website's root.
+   * Where marketplace sub pages go on the standalone site. `"same-path"` keeps
+   * the path (e.g. `/m/gerre34r/library-inlang-paraglideJs/comparison` ->
+   * `https://paraglidejs.com/comparison`). A map lists each sub page's new
+   * path, and `"*"` is the path for every other sub page.
    */
-  preservePath: boolean;
+  subPages: "same-path" | Record<string, string>;
 };
 
 const standaloneSites: StandaloneSite[] = [
@@ -48,22 +48,32 @@ const standaloneSites: StandaloneSite[] = [
     uid: "gerre34r",
     slug: "library-inlang-paraglideJs",
     href: "https://paraglidejs.com",
-    preservePath: true,
+    subPages: "same-path",
   },
   {
     uid: "tdozzpar",
     slug: "app-inlang-finkLocalizationEditor",
     href: "https://fink.inlang.com",
-    preservePath: false,
+    subPages: {
+      "/supported-i18n-libraries": "/docs/formats",
+      "*": "/docs",
+    },
   },
 ];
 
 export function getStandaloneSiteRedirect(uid: string, pagePath: string = "/") {
   const site = standaloneSites.find((entry) => entry.uid === uid);
   if (!site) return undefined;
-  const normalized = !site.preservePath || pagePath === "/" ? "" : pagePath;
+  const subPage = pagePath.replace(/\/+$/, "");
+  let target = "";
+  if (subPage !== "") {
+    target =
+      site.subPages === "same-path"
+        ? pagePath
+        : (site.subPages[subPage] ?? site.subPages["*"] ?? "");
+  }
   return {
-    href: `${site.href}${normalized}`,
+    href: `${site.href}${target}`,
     statusCode: 301 as const,
   };
 }
