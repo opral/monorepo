@@ -33,9 +33,31 @@ type Branch = {
    * same argument can't reach those keys in this branch.
    */
   selectOtherKeys: Map<string, Set<string>>;
+  /**
+   * For each plural selector the branch has a catch-all match on: the exact
+   * values and the categories of the plural cases it doesn't take. A
+   * category case doesn't take the exact values.
+   */
+  pluralOtherKeys: Map<string, PluralKeys>;
+  /**
+   * The case the branch took at each select or plural that split it, in
+   * order. Two branches took the same cases up to where they split.
+   */
+  path: PathEntry[];
   /** The selectors of the selects and plurals the branch is nested in. */
   enclosing: string[];
 };
+
+type PathEntry = {
+  /** Which split: the same for the branches split off one branch. */
+  split: number;
+  selector: string;
+  key: string;
+  /** 0 for the most specific cases: exact values, then categories, other. */
+  specificity: number;
+};
+
+type PluralKeys = { exact: Set<string>; categories: Set<string> };
 
 type Token = Content | PlainArg | FunctionArg | Select | Octothorpe;
 type TokenList = Token[];
@@ -77,12 +99,16 @@ type ParseContext = {
    * or plural nested elsewhere can register first, decides first.
    */
   nested: Map<string, Set<string>>;
+  /** The number of splits so far, for `PathEntry.split`. */
+  splits: number;
 };
 
 const NULL_BRANCH: Branch = {
   pattern: [],
   matches: [],
   selectOtherKeys: new Map(),
+  pluralOtherKeys: new Map(),
+  path: [],
   enclosing: [],
 };
 
@@ -103,21 +129,26 @@ export function parseMessage(args: {
     exactPluralSelectorKeys: collectExactPluralSelectorKeys(tokens),
     pluralIndexes: assignPluralIndexes(tokens),
     nested: new Map(),
+    splits: 0,
   };
 
-  const branches = expandTokens(tokens, NULL_BRANCH, context, undefined);
+  const expanded = expandTokens(tokens, NULL_BRANCH, context, undefined);
+  const order = orderSelectors(context);
+  const branches = matchSelectorsAhead(expanded, {
+    order,
+    pluralSelectors: context.pluralSelectors,
+    locale: args.locale,
+  });
 
   const declarations = [
     ...context.inputVariables.values(),
     ...context.localVariables.values(),
   ];
 
-  const selectors: VariableReference[] = orderSelectors(context).map(
-    (name) => ({
-      type: "variable-reference",
-      name,
-    }),
-  );
+  const selectors: VariableReference[] = order.map((name) => ({
+    type: "variable-reference",
+    name,
+  }));
 
   const variants: VariantImport[] = branches.map((branch) => ({
     messageBundleId: args.bundleId,
@@ -189,11 +220,18 @@ function expandTokens(
           if (selectsAgain(token, current)) {
             addNested(context, current.enclosing, token.arg);
           }
-          for (const { selectCase, branch } of selectCaseBranches(
-            token,
-            current,
-          )) {
+          const caseBranches = selectCaseBranches(token, current);
+          const split = context.splits++;
+          for (const { selectCase, branch } of caseBranches) {
             branch.enclosing = [...current.enclosing, token.arg];
+            if (caseBranches.length > 1) {
+              branch.path.push({
+                split,
+                selector: token.arg,
+                key: selectCase.key,
+                specificity: selectCase.key === "other" ? 1 : 0,
+              });
+            }
             for (const expanded of expandTokens(
               selectCase.tokens,
               branch,
@@ -243,15 +281,33 @@ function expandTokens(
           addNested(context, current.enclosing, pluralSelector.selectorName);
         }
 
+        const cases = sortSelectCases(token.cases, token.type);
+        const otherKeys = pluralKeysOf(cases);
+        const splits = branches.map(() => context.splits++);
         const nextBranches: Branch[] = [];
-        for (const selectCase of sortSelectCases(token.cases, token.type)) {
-          for (const current of branches) {
+        for (const selectCase of cases) {
+          for (const [index, current] of branches.entries()) {
             const matches = matchesForCase(pluralSelector, selectCase.key);
             const newBranch = cloneBranch({
               ...current,
               matches: [...current.matches, ...matches],
               enclosing: [...current.enclosing, pluralSelector.selectorName],
             });
+            newBranch.path.push({
+              split: splits[index]!,
+              selector: pluralSelector.selectorName,
+              key: selectCase.key,
+              specificity: selectCasePriority(selectCase.key),
+            });
+            if (!isExactPluralCaseKey(selectCase.key)) {
+              newBranch.pluralOtherKeys.set(pluralSelector.selectorName, {
+                exact: new Set(otherKeys.exact),
+                categories:
+                  selectCase.key === "other"
+                    ? new Set(otherKeys.categories)
+                    : new Set(),
+              });
+            }
             for (const expanded of expandTokens(
               selectCase.tokens,
               newBranch,
@@ -387,6 +443,477 @@ function selectCaseBranches(
     }
   }
   return result;
+}
+
+function pluralKeysOf(cases: Select["cases"]): PluralKeys {
+  const keys: PluralKeys = { exact: new Set(), categories: new Set() };
+  for (const selectCase of cases) {
+    if (isExactPluralCaseKey(selectCase.key)) {
+      keys.exact.add(selectCase.key.slice(1));
+    } else if (selectCase.key !== "other") {
+      keys.categories.add(selectCase.key);
+    }
+  }
+  return keys;
+}
+
+/**
+ * Gives branches the matches on selectors ahead of where they split off
+ * that branches of less specific cases have.
+ *
+ * MessageFormat 2 compares variants selector by selector in selector order.
+ * A selector that decides after a select or plural, e.g. `g` in
+ * `{n, plural, one {X} other {{g, select, a {A} other {O}}}}`, usually
+ * follows it. But when the select on `g` also encloses that plural, in
+ * another case or around it, it can be ahead of it. Then `g=a, n=*` beats
+ * `n=one`, which ICU selects for `n=1, g=a`. The branch of `one` therefore
+ * gets a copy for each key ahead that a branch of a less specific case
+ * matches on, here `g=a, n=one` next to `g=*, n=one`, which then wins by the
+ * plural.
+ */
+function matchSelectorsAhead(
+  branches: Branch[],
+  args: {
+    order: string[];
+    pluralSelectors: ParseContext["pluralSelectors"];
+    locale: string;
+  },
+): Branch[] {
+  const lookup = createLookup(args);
+  let result = branches;
+  // copies can be ahead of other branches in turn
+  let fresh = new Set(branches);
+  while (fresh.size > 0) {
+    const fills = findKeysAhead(result, fresh, lookup);
+    const next: Branch[] = [];
+    fresh = new Set();
+    for (const branch of result) {
+      const fill = fills.get(branch);
+      let copies = [branch];
+      for (const [unit, keys] of fill ?? []) {
+        const plural = lookup.plurals.get(unit);
+        copies = copies.flatMap((copy) =>
+          plural
+            ? matchPluralAhead(copy, {
+                plural,
+                keys,
+                categoryOf: lookup.categoryOf.get(unit),
+              })
+            : matchSelectAhead(copy, unit, keys.keys),
+        );
+      }
+      if (copies.length > 1) {
+        for (const copy of copies) fresh.add(copy);
+      }
+      next.push(...copies);
+    }
+    result = next;
+  }
+  return result;
+}
+
+type Lookup = {
+  order: string[];
+  /** The position of each selector, of a plural one its exact selector's. */
+  positions: Map<string, number>;
+  plurals: Map<string, PluralSelector>;
+  /** The plural selector of each exact selector. */
+  pluralOf: Map<string, string>;
+  /** The exact selector of each plural selector that has one. */
+  exactOf: Map<string, string>;
+  /** The plural category of an exact value, if the locale has rules. */
+  categoryOf: Map<string, ((value: string) => string) | undefined>;
+  /** The match of a branch on a selector. */
+  matchOf: (branch: Branch, name: string) => Match | undefined;
+};
+
+function createLookup(args: {
+  order: string[];
+  pluralSelectors: ParseContext["pluralSelectors"];
+  locale: string;
+}): Lookup {
+  const plurals = new Map<string, PluralSelector>();
+  const pluralOf = new Map<string, string>();
+  const exactOf = new Map<string, string>();
+  const categoryOf = new Map<string, ((value: string) => string) | undefined>();
+  for (const shared of args.pluralSelectors.values()) {
+    for (const selector of shared) {
+      if (!selector) continue;
+      plurals.set(selector.selectorName, selector);
+      categoryOf.set(
+        selector.selectorName,
+        pluralCategories(selector, args.locale),
+      );
+      if (selector.exactSelectorName) {
+        pluralOf.set(selector.exactSelectorName, selector.selectorName);
+        exactOf.set(selector.selectorName, selector.exactSelectorName);
+      }
+    }
+  }
+  const positions = new Map<string, number>();
+  for (const [index, name] of args.order.entries()) positions.set(name, index);
+  for (const [exact, plural] of pluralOf) {
+    positions.set(plural, positions.get(exact)!);
+  }
+  const matchesOf = new WeakMap<Branch, Map<string, Match>>();
+  const matchOf = (branch: Branch, name: string) => {
+    let matches = matchesOf.get(branch);
+    if (!matches) {
+      matches = new Map(branch.matches.map((match) => [match.key, match]));
+      matchesOf.set(branch, matches);
+    }
+    return matches.get(name);
+  };
+  return {
+    order: args.order,
+    positions,
+    plurals,
+    pluralOf,
+    exactOf,
+    categoryOf,
+    matchOf,
+  };
+}
+
+/**
+ * The keys of a select argument, or the categories and exact values of a
+ * plural selector.
+ */
+type KeysAhead = { keys: Set<string>; exact: Set<string> };
+
+/**
+ * For each branch, the keys of the selectors ahead that branches of less
+ * specific cases, which MessageFormat 2 can select for values ICU selects
+ * the branch for, match on, by select argument or plural selector. Only
+ * pairs with a branch of `fresh` are compared: the others were before.
+ */
+function findKeysAhead(
+  branches: Branch[],
+  fresh: Set<Branch>,
+  lookup: Lookup,
+): Map<Branch, Map<string, KeysAhead>> {
+  const isLiteral = (branch: Branch, name: string) =>
+    lookup.matchOf(branch, name)?.type === "literal-match";
+  const bySplit = new Map<number, { branch: Branch; entry: PathEntry }[]>();
+  for (const branch of branches) {
+    for (const entry of branch.path) {
+      const entries = bySplit.get(entry.split) ?? [];
+      entries.push({ branch, entry });
+      bySplit.set(entry.split, entries);
+    }
+  }
+  const result = new Map<Branch, Map<string, KeysAhead>>();
+  for (const entries of bySplit.values()) {
+    if (!entries.some(({ branch }) => fresh.has(branch))) continue;
+    const position = lookup.positions.get(entries[0]!.entry.selector)!;
+    // the selectors ahead that some of the branches have a literal match on
+    // and others don't; on the others they all match alike
+    const mixed = lookup.order.slice(0, position).filter((name) => {
+      const literals = entries.filter(({ branch }) =>
+        isLiteral(branch, name),
+      ).length;
+      return literals > 0 && literals < entries.length;
+    });
+    if (mixed.length === 0) continue;
+    // the branches with literal matches on them, grouped by those matches and
+    // the specificity of their case, of all branches and of fresh ones
+    type Group = {
+      specificity: number;
+      values: (string | undefined)[];
+      branches: Branch[];
+    };
+    const groups = {
+      all: new Map<string, Group>(),
+      fresh: new Map<string, Group>(),
+    };
+    for (const { branch, entry } of entries) {
+      if (!mixed.some((name) => isLiteral(branch, name))) continue;
+      const values = mixed.map((name) => {
+        const match = lookup.matchOf(branch, name);
+        return match?.type === "literal-match" ? match.value : undefined;
+      });
+      const key = JSON.stringify([entry.specificity, values]);
+      for (const kind of fresh.has(branch)
+        ? (["all", "fresh"] as const)
+        : (["all"] as const)) {
+        const group = groups[kind].get(key) ?? {
+          specificity: entry.specificity,
+          values,
+          branches: [],
+        };
+        group.branches.push(branch);
+        groups[kind].set(key, group);
+      }
+    }
+    // the keys that decide for the branches of less specific cases, for a
+    // branch with literal matches on some of the selectors
+    type Decider = { name: string; value: string; branches: Branch[] };
+    const cache = new Map<string, Decider[]>();
+    const decidersFor = (
+      kind: "all" | "fresh",
+      specificity: number,
+      literals: boolean[],
+    ) => {
+      const key = JSON.stringify([kind, specificity, literals]);
+      const cached = cache.get(key);
+      if (cached) return cached;
+      const byKey = new Map<string, Decider>();
+      for (const group of groups[kind].values()) {
+        if (group.specificity <= specificity) continue;
+        // the first selector only one of the branches has a literal match on
+        // decides between them; at the latest the split one, by which the
+        // more specific branch wins
+        for (const [index, name] of mixed.entries()) {
+          const value = group.values[index];
+          if (literals[index] && value === undefined) break;
+          if (literals[index] || value === undefined) continue;
+          const decider = byKey.get(`${name}=${value}`) ?? {
+            name,
+            value,
+            branches: [],
+          };
+          decider.branches.push(...group.branches);
+          byKey.set(`${name}=${value}`, decider);
+          break;
+        }
+      }
+      const deciders = [...byKey.values()];
+      cache.set(key, deciders);
+      return deciders;
+    };
+    for (const { branch, entry } of entries) {
+      const literals = mixed.map((name) => isLiteral(branch, name));
+      if (literals.every(Boolean)) continue;
+      const kind = fresh.has(branch) ? "all" : "fresh";
+      for (const decider of decidersFor(kind, entry.specificity, literals)) {
+        const unit = lookup.pluralOf.get(decider.name) ?? decider.name;
+        const keys = result.get(branch)?.get(unit);
+        const added = decider.name === unit ? keys?.keys : keys?.exact;
+        if (
+          added?.has(decider.value) ||
+          excludes(branch, decider, lookup) ||
+          !decider.branches.some((other) => overlaps(other, branch, lookup))
+        ) {
+          continue;
+        }
+        const fill = result.get(branch) ?? new Map<string, KeysAhead>();
+        result.set(branch, fill);
+        const unitKeys = fill.get(unit) ?? {
+          keys: new Set(),
+          exact: new Set(),
+        };
+        fill.set(unit, unitKeys);
+        (decider.name === unit ? unitKeys.keys : unitKeys.exact).add(
+          decider.value,
+        );
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Whether values exist that ICU selects `selected` for and for which
+ * MessageFormat 2 can select `other` too: values its literal matches match,
+ * as far as the matches of `selected`, the keys its catch-all matches
+ * exclude and the plural categories of exact values tell.
+ */
+function overlaps(other: Branch, selected: Branch, lookup: Lookup): boolean {
+  for (const match of other.matches) {
+    if (
+      match.type === "literal-match" &&
+      excludes(selected, { name: match.key, value: match.value }, lookup)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Whether ICU never selects the branch for a value of a selector: its match
+ * is another literal, its catch-all excludes the value, or the value is an
+ * exact value with another plural category than the branch's.
+ */
+function excludes(
+  branch: Branch,
+  key: { name: string; value: string },
+  lookup: Lookup,
+): boolean {
+  const matchOf = (name: string | undefined) =>
+    name === undefined ? undefined : lookup.matchOf(branch, name);
+  const match = matchOf(key.name);
+  if (match?.type === "literal-match") return match.value !== key.value;
+  const exactPlural = lookup.pluralOf.get(key.name);
+  if (exactPlural !== undefined) {
+    const keys = branch.pluralOtherKeys.get(exactPlural);
+    if (keys?.exact.has(key.value)) return true;
+    const category = lookup.categoryOf.get(exactPlural)?.(key.value);
+    if (category === undefined) return false;
+    const pluralMatch = matchOf(exactPlural);
+    return pluralMatch?.type === "literal-match"
+      ? pluralMatch.value !== category
+      : (keys?.categories.has(category) ?? false);
+  }
+  if (
+    branch.selectOtherKeys.get(key.name)?.has(key.value) ||
+    branch.pluralOtherKeys.get(key.name)?.categories.has(key.value)
+  ) {
+    return true;
+  }
+  // a category, which an exact value of the branch may not have
+  const exact = matchOf(lookup.exactOf.get(key.name));
+  if (exact?.type !== "literal-match") return false;
+  const category = lookup.categoryOf.get(key.name)?.(exact.value);
+  return category !== undefined && category !== key.value;
+}
+
+/**
+ * Copies of the branch with the keys of a select argument ahead that it
+ * has no match on yet, or a catch-all match on that doesn't exclude them.
+ * The catch-all match then excludes them.
+ */
+function matchSelectAhead(
+  branch: Branch,
+  arg: string,
+  keys: Set<string>,
+): Branch[] {
+  const index = branch.matches.findIndex((match) => match.key === arg);
+  if (branch.matches[index]?.type === "literal-match") return [branch];
+  const excluded = branch.selectOtherKeys.get(arg) ?? new Set<string>();
+  const added = [...keys].filter((key) => !excluded.has(key));
+  if (added.length === 0) return [branch];
+  const withMatch = (match: Match) => {
+    const copy = cloneBranch(branch);
+    if (index === -1) copy.matches.push(match);
+    else copy.matches[index] = match;
+    return copy;
+  };
+  const copies = added.map((value) => {
+    const copy = withMatch({ type: "literal-match", key: arg, value });
+    copy.selectOtherKeys.delete(arg);
+    return copy;
+  });
+  const other = withMatch({ type: "catchall-match", key: arg });
+  other.selectOtherKeys.set(arg, new Set([...excluded, ...added]));
+  return [...copies, other];
+}
+
+/**
+ * Copies of the branch with the exact values and categories of a plural
+ * selector ahead that its catch-all matches don't exclude. A copy for an
+ * exact value is only made if the branch takes the value: if its category
+ * is the branch's category, or one its catch-all doesn't exclude. Without
+ * plural rules for the locale, the copy keeps the category match instead,
+ * so that only the copy with the value's category wins.
+ */
+function matchPluralAhead(
+  branch: Branch,
+  args: {
+    plural: PluralSelector;
+    keys: KeysAhead;
+    categoryOf: ((value: string) => string) | undefined;
+  },
+): Branch[] {
+  const { selectorName, exactSelectorName } = args.plural;
+  const { categoryOf } = args;
+  const exactMatch = branch.matches.find(
+    (match) => match.key === exactSelectorName,
+  );
+  if (exactMatch?.type === "literal-match") return [branch];
+  const pluralMatch = branch.matches.find(
+    (match) => match.key === selectorName,
+  );
+  const excluded = branch.pluralOtherKeys.get(selectorName) ?? {
+    exact: new Set<string>(),
+    categories: new Set<string>(),
+  };
+  const addedCategories =
+    pluralMatch?.type === "literal-match"
+      ? []
+      : [...args.keys.keys].filter(
+          (category) => !excluded.categories.has(category),
+        );
+  const addedExact = [...args.keys.exact].filter(
+    (value) => !excluded.exact.has(value),
+  );
+  if (addedCategories.length === 0 && addedExact.length === 0) {
+    return [branch];
+  }
+  const withMatches = (exact: Match | undefined, plural: Match) => {
+    const copy = cloneBranch(branch);
+    copy.matches = copy.matches.filter(
+      (match) => match.key !== exactSelectorName && match.key !== selectorName,
+    );
+    if (exact) copy.matches.push(exact);
+    copy.matches.push(plural);
+    return copy;
+  };
+  const exactCatchall: Match | undefined = exactSelectorName
+    ? { type: "catchall-match", key: exactSelectorName }
+    : undefined;
+  const pluralCatchall: Match = { type: "catchall-match", key: selectorName };
+  const pluralMatches: Match[] = [
+    ...addedCategories.map(
+      (value): Match => ({ type: "literal-match", key: selectorName, value }),
+    ),
+    pluralMatch ?? pluralCatchall,
+  ];
+  const result: Branch[] = [];
+  // exact values first, like the cases of a plural
+  for (const value of addedExact) {
+    const exact: Match = {
+      type: "literal-match",
+      key: exactSelectorName!,
+      value,
+    };
+    if (categoryOf) {
+      const category = categoryOf(value);
+      const takes =
+        pluralMatch?.type === "literal-match"
+          ? pluralMatch.value === category
+          : !excluded.categories.has(category);
+      if (takes) result.push(withMatches(exact, pluralCatchall));
+    } else {
+      for (const plural of pluralMatches) {
+        result.push(withMatches(exact, plural));
+      }
+    }
+  }
+  // the branch doesn't take any of the exact values
+  if (result.length === 0 && addedCategories.length === 0) return [branch];
+  for (const copy of result) copy.pluralOtherKeys.delete(selectorName);
+  for (const plural of pluralMatches) {
+    const copy = withMatches(exactCatchall, plural);
+    copy.pluralOtherKeys.set(selectorName, {
+      exact: new Set([...excluded.exact, ...addedExact]),
+      categories:
+        plural.type === "literal-match"
+          ? new Set()
+          : new Set([...excluded.categories, ...addedCategories]),
+    });
+    result.push(copy);
+  }
+  return result;
+}
+
+/**
+ * The plural category of an exact value of the plural, or undefined if
+ * there are no plural rules for the locale.
+ */
+function pluralCategories(
+  plural: PluralSelector,
+  locale: string,
+): ((value: string) => string) | undefined {
+  let rules: Intl.PluralRules;
+  try {
+    rules = new Intl.PluralRules(locale, {
+      type: plural.type === "selectordinal" ? "ordinal" : "cardinal",
+    });
+  } catch {
+    return undefined;
+  }
+  return (value) => rules.select(Number(value) - (plural.offset ?? 0));
 }
 
 /**
@@ -847,6 +1374,13 @@ function cloneBranch(branch: Branch): Branch {
     selectOtherKeys: new Map(
       [...branch.selectOtherKeys].map(([arg, keys]) => [arg, new Set(keys)]),
     ),
+    pluralOtherKeys: new Map(
+      [...branch.pluralOtherKeys].map(([name, keys]) => [
+        name,
+        { exact: new Set(keys.exact), categories: new Set(keys.categories) },
+      ]),
+    ),
+    path: [...branch.path],
     enclosing: branch.enclosing,
   };
 }

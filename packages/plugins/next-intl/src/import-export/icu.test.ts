@@ -208,6 +208,40 @@ describe("import", () => {
 		]);
 	});
 
+	test("a select nested in a plural in `other` of a select on the same argument selects as in next-intl", async () => {
+		const items =
+			"{gender, select, female {She} other {{count, plural, one {one item} other {{gender, select, male {his items} other {their items}}}}}}";
+		const rows = await importJson({ items });
+		const message = rows.messages[0]!;
+		expect(message.selectors.map((selector) => selector.name)).toEqual([
+			"gender",
+			"countPlural",
+		]);
+		// variants match selector by selector: for `gender=male, count=1`,
+		// `male, *` would come before `*, one` by `gender`, so `male, one`
+		// selects "one item" as next-intl does
+		expect(
+			rows.variants.map((variant) => [
+				variant.matches.map((match) =>
+					match.type === "literal-match" ? match.value : "*"
+				),
+				variant.pattern,
+			])
+		).toEqual([
+			[["female"], [{ type: "text", value: "She" }]],
+			[["male", "one"], [{ type: "text", value: "one item" }]],
+			[["*", "one"], [{ type: "text", value: "one item" }]],
+			[["male", "*"], [{ type: "text", value: "his items" }]],
+			[["*", "*"], [{ type: "text", value: "their items" }]],
+		]);
+		const exported = await exportJson(rows);
+		for (const values of valueSets) {
+			expect(render(exported.items, values), exported.items).toBe(
+				render(items, values)
+			);
+		}
+	});
+
 	test("rich text tags become markup, also around and inside a plural", async () => {
 		const rows = await importJson({
 			tags: messages.tags,
