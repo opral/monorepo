@@ -1,5 +1,13 @@
 # @inlang/cli
 
+## 3.4.1
+
+### Patch Changes
+
+- Updated dependencies [1c1913c]
+- Updated dependencies [d04deba]
+  - @inlang/sdk@4.0.1
+
 ## 3.4.0
 
 ### Minor Changes

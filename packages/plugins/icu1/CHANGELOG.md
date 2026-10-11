@@ -1,5 +1,17 @@
 # @inlang/plugin-icu1
 
+## 1.3.0
+
+### Minor Changes
+
+- cbfce83: Export `parseMessage`, `serializeMessage` and `escapeIcuText`, the conversion between ICU MessageFormat 1 strings and inlang messages, for plugins of formats that store ICU messages. The next-intl plugin uses them.
+
+### Patch Changes
+
+- Updated dependencies [1c1913c]
+- Updated dependencies [d04deba]
+  - @inlang/sdk@4.0.1
+
 ## 1.2.0
 
 ### Minor Changes
