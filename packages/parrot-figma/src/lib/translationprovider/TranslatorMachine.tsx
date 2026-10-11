@@ -223,7 +223,7 @@ export default class TranslatorMachine {
 
 			this.fireCreditsUpdateEvent(false);
 		} catch (e) {
-			// ok we ignore errors here for now - only send them to sentry?
+			// ok we ignore errors here for now
 			for (const failedToSend of usageToSend) {
 				failedToSend.send = false;
 			}

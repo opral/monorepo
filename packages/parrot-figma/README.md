@@ -331,8 +331,6 @@ What we want from ui point of view:
  - [x] esc in panel - cancel
  - [x] esc key in drawer and call to action (cancel)
  - [x] enter in create key panel
- - [x] add sentry (see: https://github.com/tokens-studio/figma-plugin/tree/916a34f70d729cb3797a00bcffd78f1790695cb4)
- - [x] add mixpanel (see: https://github.com/tokens-studio/figma-plugin/tree/916a34f70d729cb3797a00bcffd78f1790695cb4)
  
  - [x] add action button to create key when no result in search
  - [ ] provide filter current frame key

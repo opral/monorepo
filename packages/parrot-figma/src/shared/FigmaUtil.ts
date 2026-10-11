@@ -1,4 +1,3 @@
-import generateGUID from "../lib/usage/generateGUID";
 import { WindowManagerSandbox, WindowMode } from "../lib/windowManager/WindowManagerSandbox";
 
 interface MigrationReport {
@@ -69,16 +68,6 @@ export default class FigmaUtil {
 		return reports;
 	}
 
-	public async getReportsAsync() {
-		return this.getReports();
-	}
-
-	async updateReport(updatedReport: MigrationReport) {
-		const reports = this.getReports();
-		reports[updatedReport.version] = updatedReport;
-		figma.root.setPluginData("migrationReport", JSON.stringify(reports));
-	}
-
 	async notify(message: string) {
 		figma.notify(message);
 	}
@@ -88,20 +77,6 @@ export default class FigmaUtil {
 			timeout: 3000,
 			error: true,
 		});
-	}
-
-	async getUserId() {
-		return figma.currentUser?.id;
-	}
-
-	async getInlangFileId() {
-		const fileId = figma.root.getPluginData("inlang-file-id");
-		if (fileId !== "") {
-			return fileId;
-		}
-		const newFileId = generateGUID();
-		figma.root.setPluginData("inlang-file-id", newFileId);
-		return newFileId;
 	}
 
 	async getImageFromFrame(nodeId: string, settings: ExportSettings) {

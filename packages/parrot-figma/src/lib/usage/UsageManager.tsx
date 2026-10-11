@@ -351,19 +351,6 @@ export default class UserManager {
 		return users;
 	}
 
-	async getUsageStatistics() {
-		const usageStatistcs = [] as FileUsage[];
-		const localStorageKeys = await figma.clientStorage.keysAsync();
-		for (const localStorageKey of localStorageKeys) {
-			if (localStorageKey.startsWith(clientStorageKeyPrefix)) {
-				const userLocalState = (await figma.clientStorage.getAsync(localStorageKey)) as FileUsage;
-				if (userLocalState) {
-					usageStatistcs.push(userLocalState);
-				}
-			}
-		}
-		return usageStatistcs;
-	}
 	/*
   async checkFeature(feature: string) {
     switch (feature) {
