@@ -10,7 +10,13 @@ import {
 	serializeMessage,
 	type ParsedMessage,
 } from "@inlang/plugin-icu1";
-import type { Bundle, Message, Pattern, Variant } from "@inlang/sdk";
+import type {
+	Bundle,
+	Expression,
+	Message,
+	Pattern,
+	Variant,
+} from "@inlang/sdk";
 
 /**
  * next-intl messages are ICU MessageFormat strings, read by `intl-messageformat`:
@@ -29,11 +35,18 @@ import type { Bundle, Message, Pattern, Variant } from "@inlang/sdk";
 
 const OPEN = "\uFDD0";
 const CLOSE = "\uFDD1";
-// Not a regex literal: esbuild writes its characters as they are, and the
+const STYLE_OPEN = "\uFDD2";
+const STYLE_CLOSE = "\uFDD3";
+// Not regex literals: esbuild writes their characters as they are, and the
 // published SDK loads plugins with `btoa`, which only takes Latin-1.
 const PLACEHOLDER = new RegExp("\\uFDD0(\\d+)\\uFDD1");
+const PLACEHOLDERS = new RegExp("\\uFDD0(\\d+)\\uFDD1", "g");
+const STYLE_PLACEHOLDERS = new RegExp("\\uFDD2(\\d+)\\uFDD3", "g");
+const NONCHARACTERS = new RegExp("[\\uFDD0-\\uFDD3]");
 
 const placeholder = (index: number) => `${OPEN}${index}${CLOSE}`;
+const stylePlaceholder = (index: number) =>
+	`${STYLE_OPEN}${index}${STYLE_CLOSE}`;
 
 type Markup = Extract<
 	Pattern[number],
@@ -48,14 +61,14 @@ export function parseNextIntlMessage(args: {
 	bundleId: string;
 	locale: string;
 }): ParsedMessage {
-	if (args.messageSource.includes(OPEN) || args.messageSource.includes(CLOSE)) {
-		throw new Error("The message contains the noncharacters U+FDD0 or U+FDD1");
+	if (NONCHARACTERS.test(args.messageSource)) {
+		throw new Error("The message contains the noncharacters U+FDD0-U+FDD3");
 	}
 	const markup: Markup[] = [];
+	const styles: string[] = [];
 	const icu1 = toIcu1(
 		parseIcu(args.messageSource, { captureLocation: true }),
-		args.messageSource,
-		markup,
+		{ source: args.messageSource, markup, styles },
 		false
 	);
 	const parsed = parseMessage({
@@ -63,12 +76,47 @@ export function parseNextIntlMessage(args: {
 		bundleId: args.bundleId,
 		locale: args.locale,
 	});
+	const restore = (value: string) =>
+		value.replace(STYLE_PLACEHOLDERS, (_, index) => styles[Number(index)]!);
 	return {
 		...parsed,
+		declarations: parsed.declarations.map((declaration) =>
+			declaration.type === "local-variable"
+				? {
+						...declaration,
+						value: withStyles(declaration.value, restore),
+					}
+				: declaration
+		),
 		variants: parsed.variants.map((variant) => ({
 			...variant,
-			pattern: withMarkup(variant.pattern ?? [], markup),
+			pattern: withMarkup(variant.pattern ?? [], markup).map((part) =>
+				part.type === "expression" ? withStyles(part, restore) : part
+			),
 		})),
+	};
+}
+
+/** The expression with `replace` applied to the `style` of its function. */
+function withStyles<T extends Expression>(
+	expression: T,
+	replace: (style: string) => string
+): T {
+	const annotation = expression.annotation;
+	if (annotation?.type !== "function-reference") return expression;
+	return {
+		...expression,
+		annotation: {
+			...annotation,
+			options: annotation.options.map((option) =>
+				option.name === "style" && option.value.type === "literal"
+					? {
+							...option,
+							value: { ...option.value, value: replace(option.value.value) },
+						}
+					: option
+			),
+		},
 	};
 }
 
@@ -82,10 +130,10 @@ export function parseNextIntlMessage(args: {
  */
 function toIcu1(
 	elements: MessageFormatElement[],
-	source: string,
-	markup: Markup[],
+	context: { source: string; markup: Markup[]; styles: string[] },
 	inPlural: boolean
 ): string {
+	const { markup, styles } = context;
 	let result = "";
 	for (const element of elements) {
 		switch (element.type) {
@@ -97,13 +145,19 @@ function toIcu1(
 				break;
 			case TYPE.number:
 			case TYPE.date:
-			case TYPE.time:
-				// the argument as written, e.g. `{price, number, ::currency/EUR}`
-				result += source.slice(
-					element.location!.start.offset,
-					element.location!.end.offset
-				);
+			case TYPE.time: {
+				// the style as written, e.g. `::currency/EUR` or `h 'o''clock'`:
+				// the ICU1 conversion would escape its apostrophes
+				const style = context.source
+					.slice(element.location!.start.offset, element.location!.end.offset)
+					.match(/^\{[^,]*,[^,]*,\s*([\s\S]*?)\s*\}$/)?.[1];
+				const type = ["number", "date", "time"][element.type - TYPE.number];
+				result +=
+					style === undefined
+						? `{${element.value}, ${type}}`
+						: `{${element.value}, ${type}, ${stylePlaceholder(styles.push(style) - 1)}}`;
 				break;
+			}
 			case TYPE.pound:
 				result += "#";
 				break;
@@ -111,7 +165,7 @@ function toIcu1(
 				result += `{${element.value}, select, ${Object.entries(element.options)
 					.map(
 						([key, option]) =>
-							`${key} {${toIcu1(option.value, source, markup, inPlural)}}`
+							`${key} {${toIcu1(option.value, context, inPlural)}}`
 					)
 					.join(" ")}}`;
 				break;
@@ -122,8 +176,7 @@ function toIcu1(
 					element.options
 				)
 					.map(
-						([key, option]) =>
-							`${key} {${toIcu1(option.value, source, markup, true)}}`
+						([key, option]) => `${key} {${toIcu1(option.value, context, true)}}`
 					)
 					.join(" ")}}`;
 				break;
@@ -131,7 +184,7 @@ function toIcu1(
 				result += placeholder(
 					markup.push({ type: "markup-start", name: element.value }) - 1
 				);
-				result += toIcu1(element.children, source, markup, inPlural);
+				result += toIcu1(element.children, context, inPlural);
 				result += placeholder(
 					markup.push({ type: "markup-end", name: element.value }) - 1
 				);
@@ -179,17 +232,16 @@ export function serializeNextIntlMessage(args: {
 	if (legacy !== undefined) {
 		return legacy;
 	}
-	// next-intl tags have no attributes: options of markup (e.g. imported
-	// from another format) aren't written.
-	// Every tag gets its own placeholder. The ICU1 serializer moves text that
-	// all variants start or end with out of the plural; a placeholder that is
-	// equal in all variants could move a start tag out while its end tag stays
-	// in the cases.
+	// Every tag gets its own placeholder, and so does the style of a format
+	// (`h 'o''clock'`), which the ICU1 serializer would escape again. next-intl
+	// tags have no attributes: options of markup (e.g. imported from another
+	// format) aren't written.
 	const tags: string[] = [];
+	const styles: string[] = [];
 	const variants = args.variants.map((variant) => ({
 		...variant,
 		matches: variant.matches ?? [],
-		pattern: (variant.pattern ?? []).map((part) => {
+		pattern: balanceMarkup(variant.pattern ?? []).map((part) => {
 			switch (part.type) {
 				case "markup-start":
 					return {
@@ -207,6 +259,13 @@ export function serializeNextIntlMessage(args: {
 						type: "text",
 						value: placeholder(tags.push(`<${part.name}></${part.name}>`) - 1),
 					} as const;
+				case "expression":
+					return part.annotation?.type === "function-reference" &&
+						part.annotation.name !== "icu:pound"
+						? withStyles(part, (style) =>
+								stylePlaceholder(styles.push(style) - 1)
+							)
+						: part;
 				default:
 					return part;
 			}
@@ -217,9 +276,52 @@ export function serializeNextIntlMessage(args: {
 		message: { ...args.message, selectors: args.message.selectors ?? [] },
 		variants,
 	});
-	const result = print(parseMf1(icu1, { strict: false }), tags, false);
+	const nodes = toNodes(parseMf1(icu1, { strict: false }), undefined);
+	const result = print(withTagsInCases(nodes, tags), {
+		tags,
+		plural: undefined,
+	}).replace(STYLE_PLACEHOLDERS, (_, index) => styles[Number(index)]!);
 	// throws if next-intl can't read it
 	parseIcu(result);
+	return result;
+}
+
+/**
+ * The pattern with markup that has no counterpart as text: next-intl can't
+ * read a tag that isn't closed (e.g. after a translator deleted its end).
+ */
+function balanceMarkup(pattern: Pattern): Pattern {
+	const result: Pattern = [...pattern];
+	const asText = (index: number) => {
+		const part = pattern[index] as Markup;
+		result[index] = {
+			type: "text",
+			value: part.type === "markup-end" ? `</${part.name}>` : `<${part.name}>`,
+		};
+	};
+	/** the indexes of the tags that are open */
+	const open: number[] = [];
+	for (const [index, part] of pattern.entries()) {
+		if (part.type === "markup-start") {
+			open.push(index);
+		} else if (part.type === "markup-end") {
+			let start = open.length - 1;
+			while (
+				start >= 0 &&
+				(pattern[open[start]!] as Markup).name !== part.name
+			) {
+				start--;
+			}
+			if (start === -1) {
+				asText(index);
+				continue;
+			}
+			// tags opened inside it that are still open aren't closed
+			for (const unclosed of open.splice(start + 1)) asText(unclosed);
+			open.pop();
+		}
+	}
+	for (const unclosed of open) asText(unclosed);
 	return result;
 }
 
@@ -267,13 +369,144 @@ function legacyMessage(args: {
 	return isLegacy ? result : undefined;
 }
 
+/** A message as `@messageformat/parser` reads it, with `#` resolved. */
+type Node =
+	| { type: "text"; value: string }
+	| { type: "argument"; arg: string }
+	| { type: "function"; arg: string; key: string; style?: string }
+	/** `arg - offset`, written as `#` directly in its plural */
+	| { type: "pound"; arg: string; offset: number }
+	| {
+			type: "select" | "plural" | "selectordinal";
+			arg: string;
+			offset: number;
+			cases: Array<{ key: string; nodes: Node[] }>;
+	  };
+
+type Plural = { arg: string; offset: number };
+
+/** `plural`: the plural or selectordinal that `#` refers to. */
+function toNodes(tokens: Token[], plural: Plural | undefined): Node[] {
+	return tokens.map((token): Node => {
+		switch (token.type) {
+			case "content":
+				return { type: "text", value: token.value };
+			case "argument":
+				return { type: "argument", arg: token.arg };
+			case "function":
+				return {
+					type: "function",
+					arg: token.arg,
+					key: token.key,
+					style: token.param
+						?.map((param) => {
+							if (param.type !== "content") {
+								throw new Error(`Unsupported style of {${token.arg}}`);
+							}
+							return param.value;
+						})
+						.join("")
+						.trim(),
+				};
+			case "octothorpe":
+				if (plural === undefined) return { type: "text", value: "#" };
+				return { type: "pound", ...plural };
+			default: {
+				const own =
+					token.type === "select"
+						? plural
+						: { arg: token.arg, offset: token.pluralOffset ?? 0 };
+				return {
+					type: token.type,
+					arg: token.arg,
+					offset: token.pluralOffset ?? 0,
+					cases: token.cases.map((selectCase) => ({
+						key: selectCase.key,
+						nodes: toNodes(selectCase.tokens, own),
+					})),
+				};
+			}
+		}
+	});
+}
+
+const isSelect = (node: Node) =>
+	node.type === "select" ||
+	node.type === "plural" ||
+	node.type === "selectordinal";
+
 /**
- * Prints the tokens of `@messageformat/parser` in next-intl's ICU dialect.
+ * The nodes with every tag in the case of a plural or select that has its
+ * counterpart.
  *
- * `inPlural`: directly in a plural or selectordinal, where `intl-messageformat`
- * reads `#` as the number.
+ * The ICU1 serializer writes the text that all variants share before and
+ * after a plural outside of it, e.g. `<b>` of
+ * `{n, plural, other {<b>#</b> of #}}`, while `</b>` stays in the case:
+ * next-intl can't read a tag that ends in another case. Where that happens,
+ * the nodes around the first plural or select go into each of its cases.
  */
-function print(tokens: Token[], tags: string[], inPlural: boolean): string {
+function withTagsInCases(nodes: Node[], tags: string[]): Node[] {
+	const index = nodes.findIndex(isSelect);
+	if (index !== -1 && !hasBalancedTags(nodes, tags)) {
+		const select = nodes[index] as Extract<Node, { cases: unknown }>;
+		return withTagsInCases(
+			[
+				{
+					...select,
+					cases: select.cases.map((selectCase) => ({
+						key: selectCase.key,
+						nodes: [
+							...nodes.slice(0, index),
+							...selectCase.nodes,
+							...nodes.slice(index + 1),
+						],
+					})),
+				},
+			],
+			tags
+		);
+	}
+	return nodes.map((node) =>
+		"cases" in node
+			? {
+					...node,
+					cases: node.cases.map((selectCase) => ({
+						key: selectCase.key,
+						nodes: withTagsInCases(selectCase.nodes, tags),
+					})),
+				}
+			: node
+	);
+}
+
+/** Whether the tags in the texts of `nodes` (not in cases) are closed. */
+function hasBalancedTags(nodes: Node[], tags: string[]): boolean {
+	const open: string[] = [];
+	for (const node of nodes) {
+		if (node.type !== "text") continue;
+		for (const [, index] of node.value.matchAll(PLACEHOLDERS)) {
+			const tag = tags[Number(index)]!;
+			if (tag.startsWith("</")) {
+				if (open.pop() !== tag.slice(2)) return false;
+			} else if (!tag.includes("</")) {
+				open.push(tag.slice(1));
+			}
+		}
+	}
+	return open.length === 0;
+}
+
+/**
+ * Prints `nodes` in next-intl's ICU dialect.
+ *
+ * `plural`: the plural or selectordinal the nodes are directly in, where
+ * `intl-messageformat` reads `#` as its number (in a select nested in it,
+ * `#` is text).
+ */
+function print(
+	nodes: Node[],
+	context: { tags: string[]; plural: Plural | undefined }
+): string {
 	let result = "";
 	let text = "";
 	const flush = () => {
@@ -281,54 +514,58 @@ function print(tokens: Token[], tags: string[], inPlural: boolean): string {
 		for (const [index, piece] of pieces.entries()) {
 			result +=
 				index % 2 === 1
-					? tags[Number(piece)]!
-					: escapeNextIntlText(piece, inPlural);
+					? context.tags[Number(piece)]!
+					: escapeNextIntlText(piece, context.plural !== undefined);
 		}
 		text = "";
 	};
-	for (const token of tokens) {
-		if (token.type === "content") {
-			text += token.value;
+	for (const node of nodes) {
+		if (node.type === "text") {
+			text += node.value;
 			continue;
 		}
 		flush();
-		switch (token.type) {
+		switch (node.type) {
 			case "argument":
-				result += `{${token.arg}}`;
+				result += `{${node.arg}}`;
 				break;
 			case "function":
-				result += `{${token.arg}, ${token.key}${
-					token.param
-						? `,${token.param
-								.map((param) => {
-									if (param.type !== "content") {
-										throw new Error(`Unsupported style of {${token.arg}}`);
-									}
-									return param.value;
-								})
-								.join("")}`
-						: ""
+				result += `{${node.arg}, ${node.key}${
+					node.style ? `, ${node.style}` : ""
 				}}`;
 				break;
-			case "octothorpe":
-				result += "#";
+			case "pound":
+				result +=
+					context.plural?.arg === node.arg &&
+					context.plural.offset === node.offset
+						? "#"
+						: node.offset === 0
+							? `{${node.arg}, number}`
+							: `{${node.arg}, plural, offset:${node.offset} other {#}}`;
 				break;
-			case "select":
-			case "plural":
-			case "selectordinal":
-				result += `{${token.arg}, ${token.type}, ${
-					token.pluralOffset ? `offset:${token.pluralOffset} ` : ""
-				}${sortCases(token.cases, token.type !== "select")
+			default: {
+				const plural =
+					node.type === "select"
+						? undefined
+						: { arg: node.arg, offset: node.offset };
+				const cases = sortCases(node.cases, node.type !== "select");
+				// intl-messageformat requires `other`
+				if (!cases.some((selectCase) => selectCase.key === "other")) {
+					cases.push({ key: "other", nodes: [] });
+				}
+				result += `{${node.arg}, ${node.type}, ${
+					node.offset ? `offset:${node.offset} ` : ""
+				}${cases
 					.map(
 						(selectCase) =>
-							`${selectCase.key} {${print(
-								selectCase.tokens,
-								tags,
-								token.type !== "select"
-							)}}`
+							`${selectCase.key} {${print(selectCase.nodes, {
+								tags: context.tags,
+								plural,
+							})}}`
 					)
 					.join(" ")}}`;
 				break;
+			}
 		}
 	}
 	flush();

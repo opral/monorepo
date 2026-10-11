@@ -128,6 +128,44 @@ test("a new message of a bundle goes where the bundle's other messages are", asy
 	});
 });
 
+test("a new translation that a message of its locale is in the way of stays a flat key", async () => {
+	// en has the namespace "a", de a message "a"
+	const imported = await importFiles({
+		settings: {} as any,
+		files: [
+			{ locale: "en", content: new TextEncoder().encode('{"a":{"b":"B"}}') },
+			{ locale: "de", content: new TextEncoder().encode('{"a":"A"}') },
+		],
+	});
+	const messages = [
+		...imported.messages,
+		{ id: "new", bundleId: "a.b", locale: "de", selectors: [] },
+	];
+	const exported = await exportFiles({
+		settings: {} as any,
+		bundles: imported.bundles,
+		messages,
+		variants: [
+			...imported.variants.map((variant, index) => ({
+				...variant,
+				id: `variant-${index}`,
+				messageId: imported.messages[index]!.id,
+			})),
+			{
+				id: "variant-new",
+				messageId: "new",
+				matches: [],
+				pattern: [{ type: "text", value: "B (de)" }],
+			},
+		],
+	} as any);
+	const de = exported.find((file) => file.locale === "de")!;
+	expect(JSON.parse(new TextDecoder().decode(de.content))).toStrictEqual({
+		"a.b": "B (de)",
+		a: "A",
+	});
+});
+
 test("skips empty objects while importing", async () => {
 	const imported = await runImportFiles({
 		a: {

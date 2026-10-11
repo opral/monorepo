@@ -110,12 +110,13 @@ const exportWholeFiles: ExportFiles = async ({
 	 * is nested at the dots of its key.
 	 */
 	const pathOf = (message: Message, bundle: Bundle, key: string) => {
-		const path =
-			getCurrentMessagePath({ messageId: message.id, currentKey: key }) ??
-			importedPaths.get(bundle.id);
-		return path === undefined
-			? { path: key.split("."), isNew: true }
-			: { path, isNew: false };
+		const own = getCurrentMessagePath({
+			messageId: message.id,
+			currentKey: key,
+		});
+		return own === undefined
+			? { path: importedPaths.get(bundle.id) ?? key.split("."), isNew: true }
+			: { path: own, isNew: false };
 	};
 
 	for (const message of messages as Message[]) {
@@ -238,7 +239,7 @@ function removeNamespaceFromBundleId(
 type ExportMessage = {
 	key: string;
 	path: string[];
-	/** The path is the key's, not one that a file had. */
+	/** The file didn't have the message: its path is from its key or another locale. */
 	isNew: boolean;
 	value: string;
 };
@@ -253,12 +254,13 @@ function toJson(messages: ExportMessage[]): Record<string, unknown> {
 	const imported = messages.filter((message) => !message.isNew);
 	const added = messages.filter((message) => message.isNew);
 	// the paths of the files first: a new message can't replace them
-	const probe: Record<string, unknown> = {};
+	// without a prototype: a key like `__proto__` is a key
+	const probe: Record<string, unknown> = Object.create(null);
 	for (const message of imported) {
 		assignPath(probe, message.path, message.value);
 	}
 	const fitting: ExportMessage[] = [];
-	const conflicting: Record<string, string> = {};
+	const conflicting: Record<string, string> = Object.create(null);
 	for (const message of added) {
 		if (assignPath(probe, message.path, message.value)) {
 			fitting.push(message);
@@ -272,7 +274,10 @@ function toJson(messages: ExportMessage[]): Record<string, unknown> {
 	}
 
 	// new messages first, like before they were nested
-	const result: Record<string, unknown> = { ...conflicting };
+	const result: Record<string, unknown> = Object.assign(
+		Object.create(null),
+		conflicting
+	);
 	for (const message of [...fitting, ...imported]) {
 		assignPath(result, message.path, message.value);
 	}
@@ -299,7 +304,7 @@ function assignPath(
 			return true;
 		}
 		if (existing === undefined) {
-			cursor[segment] = {};
+			cursor[segment] = Object.create(null);
 		} else if (typeof existing !== "object" || existing === null) {
 			return false;
 		}

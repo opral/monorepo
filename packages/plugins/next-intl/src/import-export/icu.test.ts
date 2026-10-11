@@ -112,6 +112,12 @@ const messages: Record<string, string> = {
 		"{count, plural, offset:1 =0 {nobody} =1 {just {host}} one {{host} and # other} other {{host} and # others}}",
 	hashes: "#1 {count, plural, one {'#'1 is #} other {# is not '#'1}}",
 	braces: "{count, plural, one {# '{'item'}'} other {# '{'items'}'}}",
+	// a tag between two `#` of a plural with one case
+	tagBetweenPounds: "{count, plural, other {<b>#</b>件中#件を表示}}",
+	tagAfterPound: "{count, plural, other {# <b>#</b>}}",
+	tagsAroundPlurals:
+		"{count, plural, other {<b>#</b>}} and <i>{count, plural, other {#}}</i>",
+	quotedStyle: "At {due, time, h 'o''clock'} on {due, date, ::EEEE}",
 };
 
 describe("import", () => {
@@ -344,6 +350,8 @@ describe("export", () => {
 			apostrophe: "Don't stop, it's ' fine",
 			tagAroundPlural:
 				"{count, plural, one {<b>#</b>} other {<b>many</b>}} new",
+			// the plurals on `count` share their forms
+			tagsAroundPlurals: "{count, plural, other {<b>#</b> and <i>#</i>}}",
 		});
 	});
 
@@ -419,6 +427,65 @@ describe("export", () => {
 			cart: "{count, plural, =0 {none} one {# item} other {# items}}",
 			pronoun: "{gender, select, female {she} male {he} other {they}}",
 		});
+	});
+
+	test("the style of a format is kept as written", async () => {
+		const rows = await importJson({ a: "{due, time, h 'o''clock'}" });
+		expect(rows.variants[0]!.pattern).toEqual([
+			{
+				type: "expression",
+				arg: { type: "variable-reference", name: "due" },
+				annotation: {
+					type: "function-reference",
+					name: "time",
+					options: [
+						{
+							name: "style",
+							value: { type: "literal", value: "h 'o''clock'" },
+						},
+					],
+				},
+			},
+		]);
+		expect(await exportJson(rows)).toEqual({ a: "{due, time, h 'o''clock'}" });
+	});
+
+	test("editor data next-intl can't read as it is: unclosed tags are text, a select gets `other`", async () => {
+		const rows = await importJson({
+			tags: "<b>bold</b> and <i>it</i>",
+			select: "{gender, select, female {She} other {They}}",
+		});
+		// a translator deleted </b> and <i>
+		const tags = rows.variants.find((v) => v.messageBundleId === "tags")!;
+		tags.pattern = tags.pattern.filter(
+			(part, index) => index !== 2 && index !== 4
+		);
+		// the catch-all removed
+		rows.variants = rows.variants.filter(
+			(variant) => variant.matches[0]?.type !== "catchall-match"
+		);
+		const exported = await exportJson(rows);
+		expect(exported).toEqual({
+			tags: "'<'b>bold and it'<'/i>",
+			select: "{gender, select, female {She} other {}}",
+		});
+		expect(render(exported.tags!, {})).toBe("<b>bold and it</i>");
+	});
+
+	test("a `#` that moves into a select nested in its plural is written as the number", async () => {
+		const rows = await importJson({
+			a: "{count, plural, other {<b>#</b>{gender, select, female {# she} other {# they}}}}",
+		});
+		const { a } = await exportJson(rows);
+		for (const values of valueSets) {
+			// intl-messageformat reads `#` in the select as text
+			expect(render(a, values), a).toBe(
+				render(
+					"{count, plural, other {<b>#</b>{gender, select, female {# she} other {# they}}}}",
+					values
+				)
+			);
+		}
 	});
 
 	test("text with ICU syntax is quoted, apostrophes only where next-intl needs it", async () => {
