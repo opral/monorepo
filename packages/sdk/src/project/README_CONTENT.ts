@@ -33,7 +33,7 @@ Run commands from the repo root. Replace \`./project.inlang\` with the path to t
 | Machine translate missing messages | \`npx @inlang/cli machine translate --project ./project.inlang\` (optionally \`--targetLocales de\`). Uses Google or DeepL if \`INLANG_GOOGLE_TRANSLATE_API_KEY\` or \`INLANG_DEEPL_API_KEY\` is set, otherwise a free third-party service ([bring your own key](https://inlang.com/m/2qj2w8pu/app-inlang-cli/byok)). Review the output before shipping. [Docs](https://inlang.com/m/2qj2w8pu/app-inlang-cli#machine-translate) |
 | Add a locale | Add it to \`locales\` in \`settings.json\`, then create its translation file or machine translate it. |
 | Switch the file format (JSON, i18next, ICU MessageFormat, XLIFF, ...) | Replace the format plugin in \`modules\` and its settings key ([plugins](https://inlang.com/c/plugins)). Existing files are not converted automatically. |
-| Let translators edit without touching JSON | [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor), a translation editor that works on this project |
+| Let translators edit without touching JSON | [Fink](https://fink.inlang.com), a translation editor that works on this project |
 | Use translations in Figma | [Parrot](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), a Figma plugin |
 | See translations inline and extract strings in VS Code | [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), a VS Code extension |
 | Optional hosted services: sync between designers, translators and developers; AI translation in your tone of voice | \`npx @inlang/cli cloud\` lists them. Git stays the source of truth. [Docs](https://inlang.com/m/2qj2w8pu/app-inlang-cli#cloud) |

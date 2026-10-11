@@ -8,7 +8,7 @@ This plugin enables your inlang project to read and write [next-intl](https://ne
 
 If you're using next-intl for internationalization in Next.js, this plugin lets you:
 
-- **Manage translations** with [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) – a translation editor for collaborating with translators
+- **Manage translations** with [Fink](https://fink.inlang.com) – a translation editor for collaborating with translators
 - **Get inline previews** with [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a VS Code extension that shows translations directly in your code
 - **Lint translations** with [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) – catch missing translations, unused keys, and other issues
 - **Automate workflows** with the inlang SDK – build custom tooling around your translations
