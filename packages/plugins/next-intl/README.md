@@ -160,10 +160,12 @@ Passing all messages to `NextIntlClientProvider`, returning them from `getReques
 When a usage can't be resolved, no message is reported unused, and the analysis lists where and why. That is the case for:
 
 - dynamic keys and namespaces, such as ``t(`items.${id}`)``, `t(key)` or `useTranslations(namespace)`;
-- a translator passed to a function or component, returned from a custom hook, exported or stored;
+- a translator passed to a function or component, returned from a custom hook, exported or stored, and next-intl functions imported from a wrapper module or package (`import { useTranslations } from "@repo/i18n"`);
 - `t.raw()` and `t.has()` of a key that could be a namespace (one that isn't also translated with `t()`);
 - messages read directly: `useMessages()` or `getMessages()` other than for `NextIntlClientProvider`, an imported message file, `import.meta.glob`;
-- re-exports of next-intl functions, `useExtracted()` and `getExtracted()`, types such as `MessageKeys` and `keyof typeof messages`;
+- message files nested under a key other than their namespace, e.g. `messages: { Legacy: en }`;
+- re-exports of next-intl functions, `useExtracted()` and `getExtracted()`;
+- types derived from the message keys, such as `MessageKeys`, `keyof Messages`, `keyof IntlMessages["Nav"]` or `Parameters<typeof t>`. Typing next-intl itself (`Messages: typeof messages` in `AppConfig`, `interface IntlMessages extends Messages {}`) is fine;
 - files the plugin can't parse, and formats it doesn't read, such as `.vue` or `.md`.
 
 # Expected behavior

@@ -50,7 +50,7 @@ export const analyzeUsage: AnalyzeUsage = ({ files, settings }) => {
 	// translated with `t(key)` is a message, so the issue is only kept for the others.
 	const subtreeReads: { bundleId: string; issue: UsageIssue }[] = [];
 	const leaves = new Set<string>();
-	const catalog = catalogFiles(settings);
+	const catalog = catalogFiles(settings as Record<string, unknown>);
 	for (const file of files) {
 		if (!SUPPORTED.test(file.path)) {
 			issues.push({
@@ -71,8 +71,13 @@ export const analyzeUsage: AnalyzeUsage = ({ files, settings }) => {
 		let segments: Segment[] | undefined;
 		try {
 			if (/\.mdx$/i.test(file.path)) {
-				const extracted = extractMdx(file.content);
-				segments = extracted.segments;
+				// micromark's offsets don't count a byte order mark
+				const bom = file.content.startsWith("\uFEFF") ? 1 : 0;
+				const extracted = extractMdx(file.content.slice(bom));
+				segments = extracted.segments.map((segment) => ({
+					...segment,
+					original: segment.original + bom,
+				}));
 				program = (
 					parse(extracted.code, {
 						sourceType: "module",
@@ -81,9 +86,25 @@ export const analyzeUsage: AnalyzeUsage = ({ files, settings }) => {
 				).program;
 			} else program = parseScript(file.path, file.content);
 		} catch (error) {
+			// Babel: `pos` in the parsed code; micromark: `place.offset` in the MDX file
+			const failure = error as {
+				message?: string;
+				pos?: unknown;
+				place?: { offset?: unknown };
+			};
+			const bom = file.content.startsWith("\uFEFF") ? 1 : 0;
+			const offset =
+				typeof failure.place?.offset === "number"
+					? failure.place.offset + bom
+					: typeof failure.pos === "number"
+						? toOriginal(segments, failure.pos, false)
+						: undefined;
+			const at =
+				offset === undefined ? undefined : positions(file.content)(offset);
 			issues.push({
 				path: file.path,
-				reason: `Cannot parse source: ${error instanceof Error ? error.message : String(error)}`,
+				reason: `Cannot parse source: ${(error instanceof Error ? error.message : String(error)).replace(/ \(\d+:\d+\)$/, "")}`,
+				...(at ? { start: at, end: at } : {}),
 			});
 			continue;
 		}
@@ -154,8 +175,10 @@ type ParserPlugins = NonNullable<
 function parseScript(path: string, content: string): Node {
 	const typescript = /\.(?:tsx?|mts|cts)$/i.test(path);
 	const jsx = !/\.(?:ts|mts|cts)$/i.test(path);
-	const script = /\.c[jt]s$/i.test(path);
+	const script = /\.cjs$/i.test(path);
 	const base: ParserPlugins = [
+		// `import en from "./en.json" assert { type: "json" }` of older TypeScript and Node
+		["importAttributes", { deprecatedAssertSyntax: true }],
 		...(typescript ? (["typescript"] as const) : []),
 		...(jsx ? (["jsx"] as const) : []),
 	];
@@ -185,50 +208,65 @@ function parseScript(path: string, content: string): Node {
 }
 
 /**
- * The tails of the message file paths, per locale, e.g. `en.json` for
- * `./messages/{locale}.json` or `en/common.json` for
- * `./messages/{locale}/common.json`. An import whose path ends with one of
- * them reads a message catalog. Without settings, every JSON file might be one.
+ * How to recognize the message files: the tails of their paths per locale
+ * (`en.json` for `./messages/{locale}.json`, `en/home.json` for
+ * `./messages/{locale}/home.json`) with the namespace a file of a namespaced
+ * `pathPattern` holds, what follows the locale in a pattern (`/home.json`)
+ * for paths built at runtime, and the directories that hold them
+ * (`messages`). `undefined` without the plugin's settings: then any JSON
+ * file can be a message file.
  */
-function catalogFiles(settings: Record<string, unknown>): string[] | undefined {
+type CatalogFiles = {
+	files: { tail: string; namespace?: string }[];
+	suffixes: { suffix: string; namespace?: string }[];
+	directories: string[];
+};
+function catalogFiles(
+	settings: Record<string, unknown>
+): CatalogFiles | undefined {
 	const plugin = settings[PLUGIN_KEY] as
 		| { pathPattern?: unknown; sourceLanguageFilePath?: unknown }
 		| undefined;
-	const patterns: string[] = [];
+	const patterns: { pattern: string; namespace?: string }[] = [];
 	const pathPattern = plugin?.pathPattern;
-	if (typeof pathPattern === "string") patterns.push(pathPattern);
+	if (typeof pathPattern === "string") patterns.push({ pattern: pathPattern });
 	else if (pathPattern && typeof pathPattern === "object")
-		for (const value of Object.values(pathPattern))
-			if (typeof value === "string") patterns.push(value);
+		for (const [namespace, pattern] of Object.entries(pathPattern))
+			if (typeof pattern === "string") patterns.push({ pattern, namespace });
 	if (patterns.length === 0) return undefined;
 	const locales = [
 		settings.baseLocale,
 		...(Array.isArray(settings.locales) ? settings.locales : []),
 	].filter((locale): locale is string => typeof locale === "string");
-	const tails = new Set<string>();
-	for (const pattern of patterns) {
+	const result: CatalogFiles = { files: [], suffixes: [], directories: [] };
+	const placeholder = /\{(?:locale|languageTag)\}/;
+	for (const { pattern, namespace } of patterns) {
 		const segments = pattern
 			.split("/")
 			.filter((segment) => segment && segment !== "." && segment !== "..");
-		const first = segments.findIndex((segment) =>
-			/\{(?:locale|languageTag)\}/.test(segment)
-		);
+		const first = segments.findIndex((segment) => placeholder.test(segment));
 		if (first === -1) return undefined;
 		for (const locale of locales)
-			tails.add(
-				segments
+			result.files.push({
+				tail: segments
 					.slice(first)
 					.join("/")
-					.replace(/\{(?:locale|languageTag)\}/g, locale)
-					.toLowerCase()
-			);
+					.replace(new RegExp(placeholder, "g"), locale)
+					.toLowerCase(),
+				namespace,
+			});
+		const last = pattern.split(new RegExp(placeholder)).pop()!;
+		result.suffixes.push({ suffix: last.toLowerCase(), namespace });
+		for (const directory of segments.slice(0, first))
+			if (!placeholder.test(directory))
+				result.directories.push(directory.toLowerCase());
 	}
 	const source = plugin?.sourceLanguageFilePath;
 	if (typeof source === "string") {
 		const name = source.split("/").pop();
-		if (name) tails.add(name.toLowerCase());
+		if (name) result.files.push({ tail: name.toLowerCase() });
 	}
-	return [...tails];
+	return result;
 }
 
 /** next-intl and use-intl, whose functions access messages. */
@@ -257,6 +295,12 @@ const EXTRACTED = new Set(["useExtracted", "getExtracted", "_useExtracted"]);
 /** Types whose values are message keys. */
 const KEY_TYPES = new Set(["MessageKeys", "NamespaceKeys", "NestedKeyOf"]);
 const PROVIDERS = new Set(["NextIntlClientProvider", "IntlProvider"]);
+/** The next-intl functions that read messages. */
+const MESSAGE_API = new Set([
+	...Object.keys(TRANSLATOR_FACTORIES),
+	...Object.keys(CATALOG_FACTORIES),
+	...EXTRACTED,
+]);
 const API = new Set([
 	...Object.keys(TRANSLATOR_FACTORIES),
 	...Object.keys(CATALOG_FACTORIES),
@@ -391,6 +435,7 @@ const unwrap = (node: Node): Node =>
  * - `merge` a deep merge function: merging catalogs gives a catalog
  */
 type Values = Set<string>;
+type Primitive = string | number;
 const EMPTY: Values = new Set();
 const translator = (namespace: string | null) =>
 	namespace === null ? "t:" : `t:${namespace}`;
@@ -410,6 +455,8 @@ type Binding = {
 	parameterOf?: { fn: Node; index: number };
 	/** Where it is exported. */
 	exported?: Node;
+	/** The module it is imported from. */
+	importedFrom?: string;
 };
 type Scope = {
 	parent?: Scope;
@@ -422,7 +469,7 @@ function analyzeFile(args: {
 	content: string;
 	program: Node;
 	segments: Segment[] | undefined;
-	catalog: string[] | undefined;
+	catalog: CatalogFiles | undefined;
 }) {
 	const { path, content, program, segments, catalog } = args;
 	const used = new Set<string>();
@@ -431,35 +478,9 @@ function analyzeFile(args: {
 	const subtreeReads: { bundleId: string; issue: UsageIssue }[] = [];
 	const unresolved = new Map<string, UsageIssue>();
 
-	let lineStarts: number[] | undefined;
-	const position = (offset: number) => {
-		lineStarts ??= [
-			0,
-			...[...content.matchAll(/\n/g)].map((match) => match.index! + 1),
-		];
-		let low = 0,
-			high = lineStarts.length - 1;
-		while (low < high) {
-			const middle = (low + high + 1) >> 1;
-			if (lineStarts[middle]! <= offset) low = middle;
-			else high = middle - 1;
-		}
-		return { line: low + 1, column: offset - lineStarts[low]! };
-	};
-	/** The source offset of a generated offset: MDX code maps back through its segments. */
-	const original = (offset: number, end: boolean): number => {
-		if (!segments) return offset;
-		let result: number | undefined;
-		for (const segment of segments) {
-			const from = segment.generated;
-			const to = segment.generated + segment.length;
-			if (offset >= from && offset <= to)
-				return segment.original + (offset - from);
-			if (!end && offset < from) return segment.original;
-			if (end && offset > to) result = segment.original + segment.length;
-		}
-		return result ?? segments[0]?.original ?? 0;
-	};
+	const position = positions(content);
+	const original = (offset: number, end: boolean) =>
+		toOriginal(segments, offset, end);
 	const located = (node: Node) =>
 		typeof node.start === "number" && typeof node.end === "number"
 			? {
@@ -477,14 +498,79 @@ function analyzeFile(args: {
 		const location = located(at);
 		if (location) references.push({ bundleId, path, ...location });
 	};
-	const isCatalogPath = (specifier: string): boolean => {
+	/**
+	 * The catalog a module path loads: `cat` all messages, `cat:Home` the file of
+	 * namespace `Home`, `cat?` messages of unknown place; `undefined` for no
+	 * message file. Relative paths are also resolved against this file.
+	 */
+	const catalogValue = (
+		specifier: string,
+		module = true
+	): string | undefined => {
 		const file = specifier.replace(/[?#].*$/, "").toLowerCase();
-		if (!file.endsWith(".json")) return false;
-		return (
-			catalog === undefined ||
-			catalog.some((tail) => file === tail || file.endsWith(`/${tail}`))
-		);
+		if (catalog === undefined)
+			return file.endsWith(".json") ? "cat" : undefined;
+		const candidates = [file];
+		if (/^\.\.?\//.test(file)) {
+			const resolved: string[] = [];
+			for (const segment of [
+				...path.toLowerCase().split("/").slice(0, -1),
+				...file.split("/"),
+			])
+				if (segment === "..") resolved.pop();
+				else if (segment !== ".") resolved.push(segment);
+			candidates.push(resolved.join("/"));
+		}
+		// webpack and TypeScript resolve `../messages/en` to `en.json`
+		if (!file.endsWith(".json")) {
+			if (!module) return undefined;
+			if (file.includes("/"))
+				candidates.push(...candidates.map((candidate) => `${candidate}.json`));
+			else candidates.length = 0;
+		}
+		const namespaces = new Set<string | undefined>();
+		for (const { tail, namespace } of catalog.files)
+			if (
+				candidates.some(
+					(candidate) => candidate === tail || candidate.endsWith(`/${tail}`)
+				)
+			)
+				namespaces.add(namespace);
+		if (namespaces.size === 1) {
+			const [namespace] = namespaces;
+			return namespace === undefined ? "cat" : `cat:${namespace}`;
+		}
+		if (namespaces.size > 1) return "cat?";
+		if (!module) return undefined;
+		// the directory of the message files, e.g. an alias `@messages`
+		const last = file
+			.replace(/\/+$/, "")
+			.split("/")
+			.pop()!
+			.replace(/^[@~#]+/, "");
+		return catalog.directories.includes(last.replace(/\.json$/, ""))
+			? "cat?"
+			: undefined;
 	};
+	const isCatalogPath = (specifier: string, module = true) =>
+		catalogValue(specifier, module) !== undefined;
+	/** The catalog a path built at runtime can load, e.g. `../messages/${locale}.json`. */
+	const dynamicCatalog = (last: string): string => {
+		if (catalog === undefined) return "cat";
+		const file = last.replace(/[?#].*$/, "").toLowerCase();
+		const namespaces = new Set(
+			catalog.suffixes
+				.filter(({ suffix }) => file.endsWith(suffix))
+				.map(({ namespace }) => namespace)
+		);
+		if (namespaces.size !== 1) return "cat?";
+		const [namespace] = namespaces;
+		return namespace === undefined ? "cat" : `cat:${namespace}`;
+	};
+	const asModule = (value: string) => value.replace(/^cat/, "catmod");
+
+	const wrapperReason =
+		"A next-intl function from another module (a wrapper or a workspace package) can't be resolved; its usages are unknown.";
 
 	// ---- 1. Scopes, bindings and references ----
 	const parents = new Map<Node, { parent: Node; key: string }>();
@@ -502,8 +588,16 @@ function analyzeFile(args: {
 		write: Binding["writes"][number] | undefined;
 	}[] = [];
 	const typeNodes: { node: Node; scope: Scope }[] = [];
+	const typeDeclarations: { node: Node; scope: Scope }[] = [];
+	/** Names exported with `export { … }`, also types. */
+	const exportedNames = new Set<string>();
 	const jsxNames: { node: Node; scope: Scope }[] = [];
 	const exportedDeclarations: Node[] = [];
+	/** Destructured properties, to find next-intl functions taken from other objects. */
+	const apiPatterns: {
+		property: Node;
+		write: Binding["writes"][number] | undefined;
+	}[] = [];
 	const bindingOf = new Map<Node, Binding>();
 
 	const newScope = (parent: Scope | undefined, isFunction: boolean): Scope => ({
@@ -525,6 +619,19 @@ function analyzeFile(args: {
 	): Binding => {
 		const name = identifier.name as string;
 		const target = kind === "var" ? functionScope(scope) : scope;
+		// `catch (t) { var t = x }` assigns the catch parameter `t`
+		if (kind === "var" && write)
+			for (
+				let current: Scope | undefined = scope;
+				current && current !== target;
+				current = current.parent
+			) {
+				const parameter = current.bindings.get(name);
+				if (parameter?.kind === "catch") {
+					parameter.writes.push(write);
+					parameter.reassigned = true;
+				}
+			}
 		let binding = target.bindings.get(name);
 		if (!binding) {
 			binding = {
@@ -592,6 +699,7 @@ function analyzeFile(args: {
 							nested(undefined)
 						);
 					else {
+						apiPatterns.push({ property, write });
 						if (property.computed)
 							walk(property.key as Node, property, "key", scope, false);
 						declarePattern(
@@ -695,6 +803,7 @@ function analyzeFile(args: {
 							nested(undefined)
 						);
 					else {
+						apiPatterns.push({ property, write });
 						if (property.computed)
 							walk(property.key as Node, property, "key", scope, false);
 						assignPattern(
@@ -798,6 +907,11 @@ function analyzeFile(args: {
 				node.type === "TSImportType"
 			)
 				typeNodes.push({ node, scope });
+			if (
+				node.type === "TSTypeAliasDeclaration" ||
+				node.type === "TSInterfaceDeclaration"
+			)
+				typeDeclarations.push({ node, scope });
 			// identifiers of `typeof a.b` and type names are resolved by the type checks
 			for (const { child, key: childKey } of children(node))
 				walk(child, node, childKey, scope, true);
@@ -818,6 +932,16 @@ function analyzeFile(args: {
 					const local = specifier.local as Node;
 					parents.set(local, { parent: specifier, key: "local" });
 					const binding = declare(local, scope, "import");
+					binding.importedFrom = source;
+					if (
+						!INTL_MODULE.test(source) &&
+						specifier.type === "ImportSpecifier" &&
+						MESSAGE_API.has(
+							identifierName(specifier.imported) ??
+								((specifier.imported as Node).value as string)
+						)
+					)
+						unresolve(wrapperReason, specifier);
 					const imported =
 						specifier.type === "ImportSpecifier"
 							? (identifierName(specifier.imported) ??
@@ -861,6 +985,7 @@ function analyzeFile(args: {
 					parents.set(specifier, { parent: node, key: "specifiers" });
 					scopeOf.set(specifier, scope);
 					const local = specifier.local;
+					if (identifierName(local)) exportedNames.add(identifierName(local)!);
 					if (isNode(local) && local.type === "Identifier")
 						walk(local, specifier, "local", scope, false);
 				}
@@ -1164,9 +1289,11 @@ function analyzeFile(args: {
 				return [];
 			}
 			if (type === "ImportSpecifier")
-				return imported !== undefined && API.has(imported)
-					? [`api:${imported}`]
-					: [];
+				return imported === "Messages" || imported === "AppConfig"
+					? ["cattype"]
+					: imported !== undefined && API.has(imported)
+						? [`api:${imported}`]
+						: [];
 			return INTL_TOOLING.test(source) ? [] : ["mod"];
 		}
 		if (source === "deepmerge" && type === "ImportDefaultSpecifier")
@@ -1182,8 +1309,16 @@ function analyzeFile(args: {
 			type === "ImportDefaultSpecifier"
 		)
 			return ["merge"];
-		if (isCatalogPath(source))
-			return [type === "ImportNamespaceSpecifier" ? "catmod" : "cat"];
+		const file = catalogValue(source);
+		if (file)
+			return [
+				type === "ImportNamespaceSpecifier"
+					? asModule(file)
+					: type === "ImportDefaultSpecifier"
+						? file
+						: // a named export of a JSON file is part of it
+							"cat?",
+			];
 		return [];
 	}
 	function checkReexport(source: string, name: string | undefined, at: Node) {
@@ -1212,6 +1347,7 @@ function analyzeFile(args: {
 	for (const { node, scope, write } of pendingWrites) {
 		const binding = lookup(scope, node.name as string);
 		if (!binding) continue;
+		resolved.set(node, binding);
 		binding.reassigned = true;
 		binding.writes.push(write ?? { path: [] });
 	}
@@ -1249,7 +1385,10 @@ function analyzeFile(args: {
 			if (value === "mod" && name !== undefined) {
 				if (name === "default") result.add("mod");
 				else if (API.has(name)) result.add(`api:${name}`);
-			} else if (value === "catmod") result.add("cat");
+			} else if (value.startsWith("catmod"))
+				result.add(
+					name === "default" ? value.replace(/^catmod/, "cat") : "cat?"
+				);
 			else if (value.startsWith("t") && name !== undefined && METHODS.has(name))
 				result.add(`m:${name}:${value}`);
 		}
@@ -1301,12 +1440,19 @@ function analyzeFile(args: {
 			case "MemberExpression":
 			case "OptionalMemberExpression":
 				return member(evaluate(node.object as Node), propertyName(node));
-			case "ObjectProperty":
-				return propertyName(node) === "messages"
-					? EMPTY
-					: onlyCatalog(evaluate(node.value as Node));
+			case "ObjectProperty": {
+				// `{ Home: homeMessages }` nests the file of namespace Home where it belongs
+				const name = propertyName(node);
+				return name !== undefined &&
+					name !== "messages" &&
+					evaluate(node.value as Node).has(`cat:${name}`)
+					? new Set(["cat"])
+					: EMPTY;
+			}
 			case "SpreadElement":
-				return onlyCatalog(evaluate(node.argument as Node));
+				return evaluate(node.argument as Node).has("cat")
+					? new Set(["cat"])
+					: EMPTY;
 			case "ObjectExpression": {
 				for (const property of node.properties as Node[])
 					if (property.type !== "ObjectMethod" && evaluate(property).has("cat"))
@@ -1340,11 +1486,13 @@ function analyzeFile(args: {
 							);
 					} else if (name && CATALOG_FACTORIES[name])
 						result.add(CATALOG_FACTORIES[name]!.async ? "p:cat" : "cat");
-					else if (
-						value === "merge" &&
-						callArguments.some((argument) => evaluate(argument).has("cat"))
-					)
-						result.add("cat");
+					else if (value === "merge") {
+						const catalogs = callArguments.flatMap((argument) =>
+							[...evaluate(argument)].filter((v) => v.startsWith("cat"))
+						);
+						if (catalogs.length)
+							result.add(catalogs.every((v) => v === "cat") ? "cat" : "cat?");
+					}
 				}
 				return result;
 			}
@@ -1354,8 +1502,6 @@ function analyzeFile(args: {
 				return EMPTY;
 		}
 	};
-	const onlyCatalog = (values: Values): Values =>
-		values.has("cat") ? new Set(["cat"]) : EMPTY;
 	const importValuesOf = (specifier: Node | undefined): Values => {
 		const strings = specifier ? staticStrings(specifier) : undefined;
 		if (strings)
@@ -1365,12 +1511,15 @@ function analyzeFile(args: {
 						? INTL_TOOLING.test(source)
 							? []
 							: ["p:mod"]
-						: isCatalogPath(source)
-							? ["p:catmod"]
+						: catalogValue(source)
+							? [`p:${asModule(catalogValue(source)!)}`]
 							: []
 				)
 			);
-		return dynamicJson(specifier) ? new Set(["p:catmod"]) : EMPTY;
+		const suffix = jsonSuffix(specifier);
+		return suffix === undefined
+			? EMPTY
+			: new Set([`p:${asModule(dynamicCatalog(suffix))}`]);
 	};
 	const requireValues = (specifier: Node | undefined): Values => {
 		const strings = specifier ? staticStrings(specifier) : undefined;
@@ -1381,27 +1530,31 @@ function analyzeFile(args: {
 						? INTL_TOOLING.test(source)
 							? []
 							: ["mod"]
-						: isCatalogPath(source)
-							? ["cat"]
+						: catalogValue(source)
+							? [catalogValue(source)!]
 							: []
 				)
 			);
 		return EMPTY;
 	};
-	/** A template like `../messages/${locale}.json`. */
-	const dynamicJson = (specifier: Node | undefined): boolean => {
-		if (!specifier) return false;
+	/** The static end of a path like `../messages/${locale}.json`, if it is a JSON file. */
+	const jsonSuffix = (specifier: Node | undefined): string | undefined => {
+		if (!specifier) return undefined;
 		const node = unwrap(specifier);
+		let last: string | undefined;
 		if (node.type === "TemplateLiteral") {
 			const quasis = node.quasis as Node[];
-			const last = (quasis[quasis.length - 1]?.value as { cooked?: string })
-				?.cooked;
-			return typeof last === "string" && /\.json(?:[?#].*)?$/i.test(last);
+			last = (quasis[quasis.length - 1]?.value as { cooked?: string })?.cooked;
+		} else if (node.type === "BinaryExpression" && node.operator === "+") {
+			const right = staticStrings(node.right as Node);
+			last = right?.length === 1 ? right[0] : undefined;
 		}
-		if (node.type === "BinaryExpression" && node.operator === "+")
-			return dynamicJson(node.right as Node);
-		return false;
+		return typeof last === "string" && /\.json(?:[?#].*)?$/i.test(last)
+			? last
+			: undefined;
 	};
+	const dynamicJson = (specifier: Node | undefined) =>
+		jsonSuffix(specifier) !== undefined;
 	/** A dynamic module specifier whose module can't be next-intl or a message file. */
 	const harmlessSpecifier = (specifier: Node | undefined): boolean => {
 		if (!specifier) return false;
@@ -1443,7 +1596,8 @@ function analyzeFile(args: {
 			for (const property of node.properties as Node[]) {
 				if (property.type !== "ObjectProperty") return [undefined];
 				const name = propertyName(property);
-				if (name === undefined) return [undefined];
+				// `__proto__: { namespace }` provides the namespace through the prototype
+				if (name === undefined || name === "__proto__") return [undefined];
 				if (name === "namespace") {
 					const value = unwrap(property.value as Node);
 					namespace =
@@ -1465,29 +1619,42 @@ function analyzeFile(args: {
 		node: Node,
 		seen = new Set<Binding>()
 	): string[] | undefined => {
-		const limit = (values: string[] | undefined) =>
+		const values = staticValues(node, seen);
+		return values && [...new Set(values.map(String))];
+	};
+	/**
+	 * The strings and numbers an expression can be, if they are known. `+`
+	 * and templates follow JavaScript: `${i + 1}` of 0 is "1", not "01".
+	 */
+	const staticValues = (
+		node: Node,
+		seen: Set<Binding>
+	): Primitive[] | undefined => {
+		const limit = (values: Primitive[] | undefined) =>
 			values && values.length <= 256 ? [...new Set(values)] : undefined;
 		switch (node.type) {
 			case "StringLiteral":
 				return [node.value as string];
 			case "NumericLiteral":
-				return [String(node.value)];
+				return [node.value as number];
 			case "TemplateLiteral": {
 				const quasis = node.quasis as Node[];
 				const expressions = node.expressions as Node[];
-				let result: string[] = [""];
+				let result: Primitive[] | undefined = [""];
 				for (let index = 0; index < quasis.length; index++) {
 					const cooked = (quasis[index]!.value as { cooked?: string | null })
 						.cooked;
 					if (typeof cooked !== "string") return undefined;
-					result = result.map((prefix) => prefix + cooked);
+					result = result.map((prefix) => `${prefix}${cooked}`);
 					const expression = expressions[index];
 					if (expression) {
-						const values = staticStrings(expression, seen);
+						const values = staticValues(expression, seen);
 						if (!values) return undefined;
 						result = limit(
-							result.flatMap((prefix) => values.map((value) => prefix + value))
-						)!;
+							result.flatMap((prefix) =>
+								values.map((value) => `${prefix}${value}`)
+							)
+						);
 						if (!result) return undefined;
 					}
 				}
@@ -1495,35 +1662,43 @@ function analyzeFile(args: {
 			}
 			case "BinaryExpression": {
 				if (node.operator !== "+") return undefined;
-				const left = staticStrings(node.left as Node, seen);
-				const right = left && staticStrings(node.right as Node, seen);
+				const left = staticValues(node.left as Node, seen);
+				const right = left && staticValues(node.right as Node, seen);
 				if (!left || !right) return undefined;
-				return limit(left.flatMap((a) => right.map((b) => a + b)));
+				return limit(
+					left.flatMap((a) =>
+						right.map((b) =>
+							typeof a === "number" && typeof b === "number"
+								? a + b
+								: `${a}${b}`
+						)
+					)
+				);
 			}
 			case "ConditionalExpression": {
-				const consequent = staticStrings(node.consequent as Node, seen);
+				const consequent = staticValues(node.consequent as Node, seen);
 				const alternate =
-					consequent && staticStrings(node.alternate as Node, seen);
+					consequent && staticValues(node.alternate as Node, seen);
 				return consequent && alternate
 					? limit([...consequent, ...alternate])
 					: undefined;
 			}
 			case "LogicalExpression": {
 				// `a ?? "b"` is one of them when both are known
-				const left = staticStrings(node.left as Node, seen);
-				const right = left && staticStrings(node.right as Node, seen);
+				const left = staticValues(node.left as Node, seen);
+				const right = left && staticValues(node.right as Node, seen);
 				return left && right ? limit([...left, ...right]) : undefined;
 			}
 			case "SequenceExpression": {
 				const expressions = node.expressions as Node[];
-				return staticStrings(expressions[expressions.length - 1]!, seen);
+				return staticValues(expressions[expressions.length - 1]!, seen);
 			}
 			case "ParenthesizedExpression":
 			case "TSAsExpression":
 			case "TSSatisfiesExpression":
 			case "TSNonNullExpression":
 			case "TSTypeAssertion":
-				return staticStrings(node.expression as Node, seen);
+				return staticValues(node.expression as Node, seen);
 			case "Identifier": {
 				const binding = resolved.get(node);
 				if (!binding || seen.has(binding) || binding.writes.length !== 1)
@@ -1533,24 +1708,24 @@ function analyzeFile(args: {
 				const write = binding.writes[0]!;
 				if (write.path.length) return undefined;
 				if (write.forOf) return staticArray(write.forOf, next);
-				if (write.value) return staticStrings(write.value, next);
+				if (write.value) return staticValues(write.value, next);
 				return undefined;
 			}
 			default:
 				return undefined;
 		}
 	};
-	/** The strings of an array that is never changed, e.g. `const keys = ["a", "b"] as const`. */
+	/** The values of an array that is never changed, e.g. `const keys = ["a", "b"] as const`. */
 	const staticArray = (
 		node: Node,
 		seen: Set<Binding>
-	): string[] | undefined => {
+	): Primitive[] | undefined => {
 		const target = unwrap(node);
 		if (target.type === "ArrayExpression") {
-			const result: string[] = [];
+			const result: Primitive[] = [];
 			for (const element of target.elements as (Node | null)[]) {
 				if (!element || element.type === "SpreadElement") return undefined;
-				const values = staticStrings(element, seen);
+				const values = staticValues(element, seen);
 				if (!values) return undefined;
 				result.push(...values);
 			}
@@ -1568,20 +1743,37 @@ function analyzeFile(args: {
 			binding.writes[0]!.path.length
 		)
 			return undefined;
-		// only read: never passed on, where it could be changed
+		// only read: never passed on or changed (`keys.map = …`, `keys.length = 0`)
 		for (const reference of binding.references) {
 			const context = climbWrappers(reference.node);
+			const member = context.parent;
 			if (
 				!(
-					(isMember(context.parent) &&
+					(isMember(member) &&
 						context.key === "object" &&
-						READING.has(propertyName(context.parent) ?? "")) ||
+						READING.has(propertyName(member) ?? "") &&
+						!isWritten(member)) ||
 					(context.parent?.type === "ForOfStatement" && context.key === "right")
 				)
 			)
 				return undefined;
 		}
 		return staticArray(binding.writes[0]!.value!, new Set(seen).add(binding));
+	};
+	/** Whether an expression is assigned to, updated or deleted. */
+	const isWritten = (node: Node): boolean => {
+		const { parent, key } = climbWrappers(node);
+		return (
+			(parent?.type === "AssignmentExpression" && key === "left") ||
+			parent?.type === "UpdateExpression" ||
+			(parent?.type === "UnaryExpression" && parent.operator === "delete") ||
+			((parent?.type === "ForOfStatement" ||
+				parent?.type === "ForInStatement") &&
+				key === "left") ||
+			parent?.type === "ArrayPattern" ||
+			(parent?.type === "ObjectProperty" &&
+				parents.get(parent)?.parent.type === "ObjectPattern")
+		);
 	};
 	/** The innermost non-arrow function around a node, whose `arguments` it is. */
 	const enclosingNonArrow = (node: Node): Node | undefined => {
@@ -1678,8 +1870,7 @@ function analyzeFile(args: {
 		value.startsWith("m:") ||
 		value.startsWith("p:") ||
 		value === "mod" ||
-		value === "cat" ||
-		value === "catmod" ||
+		value.startsWith("cat") ||
 		(value.startsWith("api:") &&
 			!PROVIDERS.has(value.slice(4)) &&
 			value !== "api:getRequestConfig");
@@ -1692,14 +1883,19 @@ function analyzeFile(args: {
 					? "translator"
 					: value.startsWith("api:")
 						? "api"
-						: value;
+						: value.startsWith("catmod")
+							? "catmod"
+							: value.startsWith("cat")
+								? "cat"
+								: value;
 
 	/** Whether `parent` passes the value of its child `key` on as its own value. */
 	const transparent = (
 		child: Node,
 		parent: Node,
 		key: string,
-		kind: string
+		kind: string,
+		value: string
 	): boolean => {
 		if (WRAPPERS.has(parent.type)) return true;
 		switch (parent.type) {
@@ -1713,21 +1909,25 @@ function analyzeFile(args: {
 			case "AwaitExpression":
 				return true;
 			case "AssignmentExpression":
-				// `a = t` names it; `obj.t = t` and `({ x } = t)` are checked as assignments
-				return key === "right" && (parent.left as Node).type === "Identifier";
+				// `a = t` names it; `obj.t = t`, `({ x } = t)` and a global `t = …` are checked as assignments
+				return (
+					key === "right" &&
+					(parent.left as Node).type === "Identifier" &&
+					resolved.has(parent.left as Node)
+				);
 			case "ObjectProperty":
 				return (
-					kind === "cat" &&
 					key === "value" &&
-					propertyName(parent) !== "messages"
+					propertyName(parent) !== "messages" &&
+					value === `cat:${propertyName(parent)}`
 				);
 			case "SpreadElement":
 				return (
-					kind === "cat" &&
+					value === "cat" &&
 					parents.get(parent)?.parent.type === "ObjectExpression"
 				);
 			case "ObjectExpression":
-				return kind === "cat";
+				return value === "cat";
 			case "MemberExpression":
 			case "OptionalMemberExpression":
 				return (
@@ -1811,11 +2011,15 @@ function analyzeFile(args: {
 	const hookDependencies = (array: Node): boolean => {
 		const context = climbWrappers(array);
 		if (!isCall(context.parent) || context.key !== "arguments") return false;
+		// React's hooks only: `useMemo` from "react", or `React.useMemo`
 		const callee = context.parent.callee as Node;
+		const fromReact = (node: Node) =>
+			node.type === "Identifier" &&
+			resolved.get(node)?.importedFrom === "react";
 		const name =
-			callee.type === "Identifier"
+			callee.type === "Identifier" && fromReact(callee)
 				? (callee.name as string)
-				: isMember(callee)
+				: isMember(callee) && fromReact(callee.object as Node)
 					? propertyName(callee)
 					: undefined;
 		const index = name === undefined ? undefined : DEPENDENCY_HOOKS[name];
@@ -1830,7 +2034,8 @@ function analyzeFile(args: {
 		node: Node,
 		parent: Node | undefined,
 		key: string | undefined,
-		kind: string
+		kind: string,
+		value: string
 	): boolean => {
 		if (!parent || !key) return false;
 		// a named binding or a discarded value: the binding's uses are checked
@@ -1842,7 +2047,8 @@ function analyzeFile(args: {
 		if (parent.type === "AssignmentExpression" && key === "right") {
 			const left = parent.left as Node;
 			return (
-				left.type === "Identifier" || (kind === "mod" && staticPattern(left))
+				(left.type === "Identifier" && resolved.has(left)) ||
+				(kind === "mod" && staticPattern(left))
 			);
 		}
 		if (parent.type === "ExpressionStatement") return true;
@@ -1879,6 +2085,8 @@ function analyzeFile(args: {
 					propertyName(parent) !== undefined
 				);
 			case "cat": {
+				// only all messages, as they are: a namespace file or nested messages change the keys
+				if (value !== "cat") return false;
 				if (parent.type === "JSXExpressionContainer") {
 					const attribute = parents.get(parent)?.parent;
 					const element = attribute && parents.get(attribute)?.parent;
@@ -1914,6 +2122,33 @@ function analyzeFile(args: {
 				property.type === "ObjectProperty" &&
 				propertyName(property) !== undefined
 		);
+
+	// next-intl functions of other objects, e.g. `i18n.useTranslations` of a wrapper package
+	for (const node of valueNodes) {
+		// a changed `Array.prototype.map` calls the callback of `keys.map` with other keys
+		if (
+			isMember(node) &&
+			propertyName(node) === "prototype" &&
+			identifierName(node.object) === "Array" &&
+			!resolved.has(node.object as Node)
+		)
+			unresolve(
+				"Array.prototype is used; array callbacks can't be resolved.",
+				node
+			);
+		if (
+			isMember(node) &&
+			MESSAGE_API.has(propertyName(node) ?? "") &&
+			!evaluate(node.object as Node).has("mod")
+		)
+			unresolve(wrapperReason, node);
+	}
+	for (const { property, write } of apiPatterns) {
+		if (!MESSAGE_API.has(propertyName(property) ?? "")) continue;
+		let values = write?.value ? evaluate(write.value) : EMPTY;
+		for (const part of write?.path ?? []) values = member(values, part);
+		if (!values.has("mod")) unresolve(wrapperReason, property);
+	}
 
 	const escapeReason: Record<string, string> = {
 		translator:
@@ -2079,12 +2314,30 @@ function analyzeFile(args: {
 					parent.parent.type === "ImportAttribute");
 			if (!specifier) {
 				const strings = staticStrings(node);
+				// an argument such as readdirSync("messages") or join(cwd, "messages", file)
+				const argument =
+					!!parent &&
+					parent.key === "arguments" &&
+					/^(?:Optional)?CallExpression$|^NewExpression$/.test(
+						parent.parent.type
+					);
+				const messageDirectory = (text: string) => {
+					const directory = text
+						.toLowerCase()
+						.replace(/^(?:\.\.?\/)+/, "")
+						.replace(/\/+$/, "");
+					return (catalog?.directories ?? []).some(
+						(name) => directory === name || directory.endsWith(`/${name}`)
+					);
+				};
 				if (
 					strings
 						? strings.some(
 								(text) =>
 									text.trim().toLowerCase() === ".json" ||
-									isCatalogPath(text.trim())
+									/[*?{[].*json/i.test(text.trim()) ||
+									isCatalogPath(text.trim(), false) ||
+									(argument && messageDirectory(text.trim()))
 							)
 						: dynamicJson(node)
 				)
@@ -2101,9 +2354,9 @@ function analyzeFile(args: {
 		for (const value of values) {
 			if (!interesting(value)) continue;
 			const kind = kindOf(value);
-			if (parent && transparent(node, parent.parent, parent.key, kind))
+			if (parent && transparent(node, parent.parent, parent.key, kind, value))
 				continue;
-			if (!allowed(node, parent?.parent, parent?.key, kind))
+			if (!allowed(node, parent?.parent, parent?.key, kind, value))
 				unresolve(escapeReason[kind]!, node);
 		}
 	}
@@ -2141,47 +2394,137 @@ function analyzeFile(args: {
 		if (values.length) unresolve(escapeReason[kindOf(values[0]!)]!, name);
 	}
 
-	// Types: `typeof messages` types next-intl; key types and indexed catalogs are like keyof.
-	for (const { node, scope } of typeNodes) {
-		// the type around `typeof x`, through parentheses
-		let { parent, key } = parents.get(node) ?? {};
+	// Types. A type of all messages may only type next-intl (`Messages` of `AppConfig`, a
+	// local alias, an interface such as `IntlMessages` extending it): `keyof`, indexing or
+	// passing it to a generic can turn message keys into types that break when one is deleted.
+	const keyTypeReason =
+		"A type depends on message keys (keyof, an indexed message type, MessageKeys or typeof a translator).";
+	const catalogTypes = new Set<string>();
+	const isCatalogValue = (values: Values) =>
+		[...values].some((value) => value.startsWith("cat"));
+	/** Whether a type node is the type of all messages. */
+	const isCatalogType = (type: Node, scope: Scope): boolean => {
+		if (type.type === "TSParenthesizedType")
+			return isCatalogType(type.typeAnnotation as Node, scope);
+		if (type.type === "TSTypeQuery") {
+			const name = type.exprName as Node;
+			if (name.type === "TSImportType") {
+				const source = importTypeSource(name);
+				return !name.qualifier && source !== undefined && isCatalogPath(source);
+			}
+			if (name.type !== "Identifier") return false;
+			const binding = lookup(scope, name.name as string);
+			return !!binding && isCatalogValue(valuesOf(binding));
+		}
+		if (
+			type.type === "TSTypeReference" ||
+			type.type === "TSExpressionWithTypeArguments" ||
+			type.type === "TSInterfaceHeritage"
+		)
+			return isCatalogName((type.typeName ?? type.expression) as Node, scope);
+		return false;
+	};
+	const isCatalogName = (name: Node, scope: Scope): boolean => {
+		if (name.type === "Identifier") {
+			if (catalogTypes.has(name.name as string)) return true;
+			const binding = lookup(scope, name.name as string);
+			if (binding) return valuesOf(binding).has("cattype");
+			return name.name === "IntlMessages";
+		}
+		if (name.type === "TSQualifiedName") {
+			const root = name.left as Node;
+			const binding =
+				root.type === "Identifier"
+					? lookup(scope, root.name as string)
+					: undefined;
+			return (
+				!!binding &&
+				valuesOf(binding).has("mod") &&
+				["Messages", "AppConfig"].includes(identifierName(name.right) ?? "")
+			);
+		}
+		return false;
+	};
+	const heritage = (declaration: Node): Node[] =>
+		declaration.type === "TSInterfaceDeclaration"
+			? ((declaration.extends as Node[] | undefined) ?? [])
+			: [];
+	for (let changed = true; changed; ) {
+		changed = false;
+		for (const { node, scope } of typeDeclarations) {
+			const name = identifierName(node.id);
+			if (!name || catalogTypes.has(name)) continue;
+			if (
+				node.type === "TSTypeAliasDeclaration"
+					? isCatalogType(node.typeAnnotation as Node, scope)
+					: heritage(node).some((parent) => isCatalogType(parent, scope))
+			) {
+				catalogTypes.add(name);
+				changed = true;
+			}
+		}
+	}
+	const exportedDeclaration = (declaration: Node) =>
+		parents.get(declaration)?.parent.type === "ExportNamedDeclaration" ||
+		parents.get(declaration)?.parent.type === "ExportDefaultDeclaration" ||
+		exportedNames.has(identifierName(declaration.id) ?? "");
+	/** Where a type of all messages may be. */
+	const allowedCatalogType = (type: Node): boolean => {
+		let { parent, key } = parents.get(type) ?? {};
 		while (parent?.type === "TSParenthesizedType")
 			({ parent, key } = parents.get(parent) ?? {});
+		if (!parent) return false;
+		if (parent.type === "TSTypeAliasDeclaration" && key === "typeAnnotation")
+			return !exportedDeclaration(parent);
+		if (
+			(parent.type === "TSInterfaceDeclaration" && key === "extends") ||
+			((type.type === "TSExpressionWithTypeArguments" ||
+				type.type === "TSInterfaceHeritage") &&
+				parent.type === "TSInterfaceDeclaration")
+		)
+			return !exportedDeclaration(parent);
+		// interface AppConfig { Messages: typeof messages }
+		if (parent.type === "TSTypeAnnotation") {
+			const property = parents.get(parent)?.parent;
+			const body = property && parents.get(property)?.parent;
+			const declaration = body && parents.get(body)?.parent;
+			return (
+				property?.type === "TSPropertySignature" &&
+				propertyName(property) === "Messages" &&
+				declaration?.type === "TSInterfaceDeclaration" &&
+				identifierName(declaration.id) === "AppConfig"
+			);
+		}
+		return false;
+	};
+	for (const { node, scope } of typeDeclarations)
+		for (const parent of heritage(node))
+			if (isCatalogType(parent, scope) && !allowedCatalogType(parent))
+				unresolve(keyTypeReason, parent);
+	for (const { node, scope } of typeNodes) {
 		if (node.type === "TSTypeQuery") {
-			let name = node.exprName as Node;
-			let qualified = false;
-			if (name.type === "TSImportType") {
-				const source =
-					((name.argument as Node).literal as Node | undefined)?.value ??
-					(name.argument as Node).value;
-				if (
-					typeof source === "string" &&
-					isCatalogPath(source) &&
-					(name.qualifier || !bareTypeQuery(parent, key))
-				)
-					unresolve(
-						"A type depends on message keys (keyof or an indexed message catalog).",
-						node
-					);
+			if (isCatalogType(node, scope)) {
+				if (!allowedCatalogType(node)) unresolve(keyTypeReason, node);
 				continue;
 			}
-			while (name.type === "TSQualifiedName") {
-				qualified = true;
-				name = name.left as Node;
+			let name = node.exprName as Node;
+			if (name.type === "TSImportType") {
+				const source = importTypeSource(name);
+				if (source !== undefined && isCatalogPath(source))
+					unresolve(keyTypeReason, node);
+				continue;
 			}
+			while (name.type === "TSQualifiedName") name = name.left as Node;
 			if (name.type !== "Identifier") continue;
 			const binding = lookup(scope, name.name as string);
-			if (!binding) continue;
-			const values = valuesOf(binding);
-			if (
-				(values.has("cat") || values.has("catmod")) &&
-				(qualified || !bareTypeQuery(parent, key))
-			)
-				unresolve(
-					"A type depends on message keys (keyof or an indexed message catalog).",
-					node
-				);
+			// `typeof en.Home`, `Parameters<typeof t>[0]`, `typeof useTranslations`
+			if (binding && [...valuesOf(binding)].some(interesting))
+				unresolve(keyTypeReason, node);
 		} else if (node.type === "TSTypeReference") {
+			if (isCatalogType(node, scope)) {
+				if (!allowedCatalogType(node)) unresolve(keyTypeReason, node);
+				continue;
+			}
 			let name = node.typeName as Node;
 			const path: string[] = [];
 			while (name.type === "TSQualifiedName") {
@@ -2196,26 +2539,19 @@ function analyzeFile(args: {
 				path.length === 0
 					? [...KEY_TYPES].some((type) => values.has(`api:${type}`))
 					: path.length === 1 && values.has("mod") && KEY_TYPES.has(path[0]!);
-			if (keyType)
-				unresolve(
-					"A type of message keys (MessageKeys, NamespaceKeys) can hold any key.",
-					node
-				);
+			if (keyType) unresolve(keyTypeReason, node);
 		} else if (node.type === "TSImportType") {
-			const argument = node.argument as Node;
-			const source =
-				(argument.literal as Node | undefined)?.value ?? argument.value;
-			const qualifier = node.qualifier as Node | undefined;
+			const source = importTypeSource(node);
+			const qualifier = identifierName(node.qualifier);
 			if (
-				typeof source === "string" &&
+				source !== undefined &&
 				INTL_MODULE.test(source) &&
-				qualifier &&
-				KEY_TYPES.has(identifierName(qualifier) ?? "")
+				qualifier !== undefined &&
+				(KEY_TYPES.has(qualifier) ||
+					qualifier === "Messages" ||
+					qualifier === "AppConfig")
 			)
-				unresolve(
-					"A type of message keys (MessageKeys, NamespaceKeys) can hold any key.",
-					node
-				);
+				unresolve(keyTypeReason, node);
 		}
 	}
 
@@ -2232,16 +2568,50 @@ function analyzeFile(args: {
 	};
 }
 
-/** `typeof messages` on its own, not `keyof typeof messages` or `(typeof messages)["Home"]`. */
-function bareTypeQuery(
-	parent: Node | undefined,
-	key: string | undefined
-): boolean {
-	if (!parent) return true;
-	if (parent.type === "TSTypeOperator") return false;
-	if (parent.type === "TSIndexedAccessType" && key === "objectType")
-		return false;
-	return true;
+/** 1-based line and 0-based column of an offset in `content`. */
+function positions(content: string) {
+	let lineStarts: number[] | undefined;
+	return (offset: number) => {
+		lineStarts ??= [
+			0,
+			...[...content.matchAll(/\n/g)].map((match) => match.index! + 1),
+		];
+		let low = 0,
+			high = lineStarts.length - 1;
+		while (low < high) {
+			const middle = (low + high + 1) >> 1;
+			if (lineStarts[middle]! <= offset) low = middle;
+			else high = middle - 1;
+		}
+		return { line: low + 1, column: offset - lineStarts[low]! };
+	};
+}
+
+/** The source offset of a generated offset: MDX code maps back through its segments. */
+function toOriginal(
+	segments: Segment[] | undefined,
+	offset: number,
+	end: boolean
+): number {
+	if (!segments) return offset;
+	let result: number | undefined;
+	for (const segment of segments) {
+		const from = segment.generated;
+		const to = segment.generated + segment.length;
+		if (offset >= from && offset <= to)
+			return segment.original + (offset - from);
+		if (!end && offset < from) return segment.original;
+		if (end && offset > to) result = segment.original + segment.length;
+	}
+	return result ?? segments[0]?.original ?? 0;
+}
+
+/** The module of `import("x")` in a type. */
+function importTypeSource(node: Node): string | undefined {
+	const argument = node.argument as Node;
+	const source =
+		(argument.literal as Node | undefined)?.value ?? argument.value;
+	return typeof source === "string" ? source : undefined;
 }
 
 function union(a: Values, b: Values): Values {

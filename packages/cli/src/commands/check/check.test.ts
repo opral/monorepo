@@ -57,7 +57,7 @@ function app(
   fs.mkdirSync(plugins);
   for (const name of fixture === "check-app"
     ? ["plugin-message-format", "plugin-m-function-matcher"]
-    : ["plugin-next-intl"])
+    : ["plugin-next-intl", "plugin-m-function-matcher"])
     fs.copyFileSync(
       pluginDist(`@inlang/${name}`),
       nodePath.join(plugins, `${name}.js`),
@@ -350,6 +350,34 @@ describe("inlang check", { timeout: 60_000 }, () => {
       "unused-message not checked: The installed @inlang/plugin-next-intl can't analyze usages.\n  Unused-message check needs @inlang/plugin-next-intl ≥ 2.4.0, update the module URL in settings.json: ./project.inlang/plugins/plugin-next-intl@2.3.0.js",
     );
     expect(stdout).not.toContain("Paraglide");
+  });
+
+  test("next-intl: an older plugin next to the m-function matcher withholds unused messages", async () => {
+    const legacy = "./project.inlang/plugins/plugin-next-intl@2.3.0.js";
+    const root = app({
+      fixture: "next-intl-app",
+      files: {
+        [legacy]: `export default { key: "plugin.inlang.nextIntl", toBeImportedFiles: async () => [], importFiles: async () => ({ bundles: [], messages: [], variants: [] }), addCustomApi: () => ({ "app.inlang.ideExtension": { messageReferenceMatchers: [async () => []] } }) };`,
+      },
+      settings: (settings) => {
+        settings.modules = [
+          legacy,
+          "./project.inlang/plugins/plugin-m-function-matcher.js",
+        ];
+      },
+    });
+    const { stdout } = await run(root, [
+      "check",
+      ...project,
+      "--unused-messages",
+    ]);
+    expect(stdout).toContain(
+      "Matcher plugin.inlang.nextIntl does not support usage analysis.",
+    );
+    expect(stdout).toContain(
+      "Unused-message check needs @inlang/plugin-next-intl ≥ 2.4.0, update the module URL in settings.json: ./project.inlang/plugins/plugin-next-intl@2.3.0.js",
+    );
+    expect(stdout).not.toContain("unused-message (");
   });
 
   test("a project that can't be opened is a short error", async () => {

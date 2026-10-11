@@ -33,6 +33,7 @@
 		"@inlang/sdk": "workspace:*",
 		"@sinclair/typebox": "0.31.28",
 		"micromark": "^4.0.1",
+		"micromark-extension-frontmatter": "^2.0.0",
 		"micromark-extension-mdxjs": "^3.0.0"
 	},
 	"devDependencies": {

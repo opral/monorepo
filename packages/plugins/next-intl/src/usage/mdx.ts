@@ -1,4 +1,5 @@
 import { parse, postprocess, preprocess } from "micromark";
+import { frontmatter } from "micromark-extension-frontmatter";
 import { mdxjs } from "micromark-extension-mdxjs";
 
 /** A run of generated code copied unchanged from the MDX source. */
@@ -50,7 +51,7 @@ export function extractMdx(source: string): {
 	segments: Segment[];
 } {
 	const events = postprocess(
-		parse({ extensions: [mdxjs()] })
+		parse({ extensions: [frontmatter(["yaml", "toml"]), mdxjs()] })
 			.document()
 			.write(preprocess()(source, undefined, true))
 	);

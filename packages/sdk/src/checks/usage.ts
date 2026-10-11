@@ -1,5 +1,6 @@
 import type { InlangProject } from "../project/api.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
+import type { InlangPlugin } from "../plugin/schema.js";
 import type {
 	AnalyzeUsage,
 	CheckStatus,
@@ -60,7 +61,8 @@ export async function projectUsage(
 	const unsupportedMatchers = plugins.filter(
 		(plugin) =>
 			!plugin.analyzeUsage &&
-			plugin.meta?.["app.inlang.ideExtension"]?.messageReferenceMatchers
+			(plugin.meta?.["app.inlang.ideExtension"]?.messageReferenceMatchers ||
+				customApiMatchers(plugin, settings))
 	);
 	const settingsKey = JSON.stringify(settings);
 	const previous = cache.get(project);
@@ -148,6 +150,28 @@ export async function projectUsage(
 	const resolved = await result;
 	if (failed && cache.get(project)?.result === result) cache.delete(project);
 	return resolved;
+}
+
+/**
+ * Whether a plugin finds message references through the deprecated
+ * `addCustomApi` (next-intl and i18next before their usage analysis). Its
+ * usages are unknown to the analyzers, so their result can't be complete.
+ */
+function customApiMatchers(
+	plugin: InlangPlugin,
+	settings: ProjectSettings
+): boolean {
+	if (typeof plugin.addCustomApi !== "function") return false;
+	try {
+		const api = plugin.addCustomApi({ settings }) as Record<
+			string,
+			{ messageReferenceMatchers?: unknown } | undefined
+		>;
+		return Boolean(api?.["app.inlang.ideExtension"]?.messageReferenceMatchers);
+	} catch {
+		// can't tell: assume it has matchers rather than miss its usages
+		return true;
+	}
 }
 
 /** A public copy of an issue: callers can't alter the cached analysis. */

@@ -110,6 +110,24 @@ export function List({ open }) {
 		]);
 	});
 
+	test("numbers in keys follow JavaScript: `step${i + 1}` of 0 is step1", async () => {
+		const result = await analyze(`import { useTranslations } from "next-intl";
+const N = 1;
+export function Steps() {
+	const t = useTranslations("Steps");
+	return [[0, 1, 2].map((i) => t(\`step\${i + 1}.title\`)), t("step" + (N + 1)), t("a" + 1 + 2), t(1 + 2 + "b")];
+}`);
+		expect(result.issues).toEqual([]);
+		expect(ids(result)).toEqual([
+			"Steps.3b",
+			"Steps.a12",
+			"Steps.step1.title",
+			"Steps.step2",
+			"Steps.step2.title",
+			"Steps.step3.title",
+		]);
+	});
+
 	test("arrays of keys, as the next-intl docs show for lists", async () => {
 		const result = await analyze(`import { useTranslations } from "next-intl";
 const sections = ["intro", "pricing"] as const;
@@ -193,13 +211,27 @@ export default getRequestConfig(async ({ requestLocale }) => {
 			"src/i18n/request.ts"
 		);
 		expect(request.issues).toEqual([]);
-		const arrow = await analyze(
-			`import { getRequestConfig } from "next-intl/server";
+		const namespaced = {
+			...settings,
+			"plugin.inlang.nextIntl": {
+				pathPattern: {
+					Common: "./messages/{locale}/common.json",
+					Home: "./messages/{locale}/home.json",
+				},
+			},
+		};
+		const arrow = await analyzeUsage({
+			files: [
+				{
+					path: "src/i18n.ts",
+					content: `import { getRequestConfig } from "next-intl/server";
 export default getRequestConfig(async ({ locale }) => ({
-	messages: { ...(await import(\`../messages/\${locale}/common.json\`)).default, Home: (await import(\`../messages/\${locale}/home.json\`)).default },
+	messages: { Common: (await import(\`../messages/\${locale}/common.json\`)).default, Home: (await import(\`../messages/\${locale}/home.json\`)).default },
 }));`,
-			"src/i18n.ts"
-		);
+				},
+			],
+			settings: namespaced,
+		});
 		expect(arrow.issues).toEqual([]);
 		const translator = await analyze(
 			`import { createTranslator } from "next-intl";
@@ -467,6 +499,18 @@ const incomplete = [
 		`const t = useTranslations("A"); [["a"]].map(([k]) => t(k));`,
 	],
 	[
+		"an array whose map is replaced",
+		`const t = useTranslations("A"); const keys = ["a"]; keys.map = (cb) => [cb("zzz")]; keys.map((k) => t(k));`,
+	],
+	[
+		"an array that is truncated",
+		`const t = useTranslations("A"); const keys = ["a", "b"]; keys.length = 1; keys.forEach((k) => t(k));`,
+	],
+	[
+		"Array.prototype changed",
+		`const t = useTranslations("A"); Array.prototype.map = function (cb) { return [cb("zzz")]; }; ["a"].map((k) => t(k));`,
+	],
+	[
 		"a reassigned callback parameter",
 		`const t = useTranslations("A"); ["a"].map((k) => { k = window.name; return t(k); });`,
 	],
@@ -475,6 +519,10 @@ const incomplete = [
 		`const t = useTranslations("A"); export const f = (k) => t.rich(k, {});`,
 	],
 	// namespaces
+	[
+		"a namespace from the options' prototype",
+		`const t = await getTranslations({ __proto__: { namespace: "Home" } }); t("title");`,
+	],
 	[
 		"a namespace from a variable",
 		`export const f = (ns) => useTranslations(ns)("title");`,
@@ -562,6 +610,42 @@ const incomplete = [
 	[
 		"promises collected",
 		`const [a, b] = await Promise.all([getTranslations("A"), getTranslations("B")]);`,
+	],
+	[
+		"t assigned to a global",
+		`function useSetup() { tGlobal = useTranslations("Home"); }`,
+	],
+	[
+		"t assigned to a declared global",
+		`declare global { var __t: any } __t = useTranslations("Home");`,
+	],
+	[
+		"a dependency array of a local useMemo",
+		`function useMemo(fn, deps) { return deps[0]("title"); } export function P() { const t = useTranslations("Home"); return useMemo(() => 1, [t]); }`,
+	],
+	[
+		"a dependency array of a hook from another module",
+		`import { useEffect as useEffectX } from "./my-hooks"; export function P() { const t = useTranslations("Home"); useEffectX(() => {}, [t]); }`,
+	],
+	[
+		"useTranslations of a wrapper package",
+		`import { useTranslations as useT } from "@repo/i18n"; useT("Home")("title");`,
+	],
+	[
+		"getTranslations of a wrapper package",
+		`import { getTranslations as getT } from "@/lib/i18n"; (await getT("Home"))("title");`,
+	],
+	[
+		"useTranslations of a namespace import of a wrapper",
+		`import * as i18n from "@repo/i18n"; i18n.useTranslations("Home")("title");`,
+	],
+	[
+		"useTranslations destructured from a wrapper",
+		`const { useTranslations: useT } = require("@repo/i18n"); useT("Home")("title");`,
+	],
+	[
+		"useTranslations as a parameter",
+		`export function C({ useTranslations: useT }) { return useT("Home")("title"); }`,
 	],
 	["useTranslations passed on", `export const hooks = { useTranslations };`],
 	["useTranslations re-exported", `export { useTranslations };`],
@@ -655,6 +739,27 @@ const incomplete = [
 		`export const f = (l) => readFile(\`messages/\${l}.json\`);`,
 	],
 	["next-intl/config", `import config from "next-intl/config"; use(config);`],
+	[
+		"a message file imported without extension",
+		`import en from "../../messages/en"; export const title = en.Home.title;`,
+	],
+	[
+		"the message directory by an alias",
+		`import messages from "@messages"; export const title = messages.Home.title;`,
+	],
+	[
+		"the message directory listed",
+		`import fs from "node:fs"; export const all = fs.readdirSync("messages");`,
+	],
+	[
+		"the message directory joined",
+		`import path from "node:path"; export const dir = path.join(process.cwd(), "./messages/");`,
+	],
+	["message files globbed", `export const all = globSync("messages/*.json");`],
+	[
+		"message files globbed with braces",
+		`export const all = globSync("messages/*.{json,JSON}");`,
+	],
 	// subtree reads
 	[
 		"t.raw of a key that may be a namespace",
@@ -694,6 +799,39 @@ const incomplete = [
 		`import en from "../messages/en.json"; type K = (typeof en)["Home"];`,
 	],
 	[
+		"keyof an alias of the messages",
+		`import en from "../messages/en.json"; type Messages = typeof en; export const hrefs: Record<keyof Messages["Nav"], string> = { home: "/", about: "/about" };`,
+	],
+	[
+		"an exported alias of the messages",
+		`import en from "../messages/en.json"; export type Messages = typeof en;`,
+	],
+	[
+		"the messages passed to a generic",
+		`import en from "../messages/en.json"; type K = Leaves<typeof en>;`,
+	],
+	[
+		"keyof next-intl's Messages",
+		`import type { Messages as M } from "next-intl"; type K = keyof M;`,
+	],
+	[
+		"an indexed AppConfig",
+		`import type { AppConfig as C } from "next-intl"; type K = keyof C["Messages"]["Nav"];`,
+	],
+	["keyof the global IntlMessages", `type K = keyof IntlMessages["Nav"];`],
+	[
+		"an interface extending the messages, exported",
+		`import en from "../messages/en.json"; type M = typeof en; export interface Messages extends M {}`,
+	],
+	[
+		"the parameters of a translator",
+		`const t = useTranslations("Nav"); type K = Parameters<typeof t>[0]; t("home");`,
+	],
+	[
+		"typeof useTranslations",
+		`type T = ReturnType<typeof useTranslations<"Nav">>;`,
+	],
+	[
 		"keyof an imported message type",
 		`type K = keyof typeof import("../messages/en.json");`,
 	],
@@ -724,6 +862,141 @@ ${code}`,
 		expect(issue.path).toBe("src/component.tsx");
 		expect(issue.start?.line).toBeGreaterThanOrEqual(3);
 	}
+});
+
+test("messages nested or spread where the plugin doesn't put them change the keys: incomplete", async () => {
+	const namespaced = {
+		...settings,
+		"plugin.inlang.nextIntl": {
+			pathPattern: {
+				Common: "./messages/{locale}/common.json",
+				Home: "./messages/{locale}/home.json",
+			},
+		},
+	};
+	const cases: [string, typeof settings | typeof namespaced][] = [
+		[
+			`import en from "../messages/en.json"; export const x = <NextIntlClientProvider messages={{ Legacy: en }} />;`,
+			settings,
+		],
+		[
+			`import en from "../messages/en.json"; createTranslator({ locale: "en", messages: { App: en } })("App.title");`,
+			settings,
+		],
+		[
+			`export default getRequestConfig(async () => ({ messages: { shared: (await import(\`../messages/en/common.json\`)).default } }));`,
+			namespaced,
+		],
+		[
+			`export default getRequestConfig(async ({ locale }) => ({ messages: { Home: (await import(\`../messages/\${locale}/common.json\`)).default } }));`,
+			namespaced,
+		],
+		[
+			`export default getRequestConfig(async ({ locale }) => ({ messages: { ...(await import(\`../messages/\${locale}/common.json\`)).default } }));`,
+			namespaced,
+		],
+		[
+			`export default getRequestConfig(async ({ locale }) => ({ messages: (await import(\`../messages/\${locale}/home.json\`)).default }));`,
+			namespaced,
+		],
+		[
+			`import a from "../messages/en.json"; import b from "./other.json"; export default getRequestConfig(async () => ({ messages: deepmerge(a, { X: a }) }));`,
+			settings,
+		],
+	];
+	for (const [code, projectSettings] of cases) {
+		const result = await analyzeUsage({
+			files: [
+				{
+					path: "src/i18n.tsx",
+					content: `import { NextIntlClientProvider, createTranslator } from "next-intl";
+import { getRequestConfig } from "next-intl/server";
+import deepmerge from "deepmerge";
+${code}`,
+				},
+			],
+			settings: projectSettings,
+		});
+		expect(result.status, code).toBe("incomplete");
+	}
+});
+
+test("message files are also found relative to the importing file and in CommonJS", async () => {
+	const local = {
+		...settings,
+		"plugin.inlang.nextIntl": { pathPattern: "./locales/{locale}/common.json" },
+	};
+	const relative = await analyzeUsage({
+		files: [
+			{
+				path: "src/locales/en/index.ts",
+				content: `import common from "./common.json"; export const title = common.title;`,
+			},
+		],
+		settings: local,
+	});
+	expect(relative.status).toBe("incomplete");
+	const cjs = await analyze(
+		`const en = require("../messages/en"); module.exports = en.Home.title;`,
+		"src/legacy.cjs"
+	);
+	expect(cjs.status).toBe("incomplete");
+});
+
+test("TypeScript CommonJS modules, import assertions, MDX with a byte order mark or frontmatter parse", async () => {
+	const cts = await analyze(
+		`import { useTranslations } from "next-intl"; export const f = () => useTranslations("A")("x");`,
+		"src/a.cts"
+	);
+	expect(cts.usedBundleIds).toEqual(["A.x"]);
+	expect(cts.issues).toEqual([]);
+	const assertion = await analyze(
+		`import en from "../messages/en.json" assert { type: "json" }; import config from "./config.json" with { type: "json" }; type M = typeof en; declare global { interface IntlMessages extends M {} }`,
+		"src/global.ts"
+	);
+	expect(assertion.issues).toEqual([]);
+	const bom = await analyze(
+		`\uFEFFimport { useTranslations } from "next-intl";\nexport function A() { const t = useTranslations("Docs"); return t("x"); }\n\n# Hi {1}\n`,
+		"src/a.mdx"
+	);
+	expect(bom.issues).toEqual([]);
+	expect(bom.references?.[0]?.start).toEqual({ line: 2, column: 64 });
+	const frontmatter = await analyze(
+		`---\ntitle: Hello\ntags: {a: 1}\n---\n\nimport { useTranslations } from "next-intl";\nexport function A() { return useTranslations("Docs")("x"); }\n\n<A />\n`,
+		"src/b.mdx"
+	);
+	expect(frontmatter.issues).toEqual([]);
+	expect(frontmatter.usedBundleIds).toEqual(["Docs.x"]);
+});
+
+test("parse errors are located in the source file, also for MDX", async () => {
+	const ts = await analyze(`const ok = 1;\nconst = ;`, "src/broken.ts");
+	expect(ts.issues).toEqual([
+		{
+			path: "src/broken.ts",
+			reason: "Cannot parse source: Unexpected token",
+			start: { line: 2, column: 6 },
+			end: { line: 2, column: 6 },
+		},
+	]);
+	const mdx = await analyze(`# Title\n\n{t("a"}\n`, "src/broken.mdx");
+	expect(mdx.issues?.[0]).toEqual(
+		expect.objectContaining({
+			path: "src/broken.mdx",
+			start: expect.objectContaining({ line: 3 }),
+		})
+	);
+	const jsx = await analyze(`# Title\n\n<div {x} />\n`, "src/broken2.mdx");
+	expect(jsx.issues?.[0]).toEqual(
+		expect.objectContaining({ start: expect.objectContaining({ line: 3 }) })
+	);
+});
+
+test("a var redeclaring a catch parameter assigns the parameter (Annex B)", async () => {
+	const result = await analyze(`import { useTranslations } from "next-intl";
+export function P() { try { throw 1; } catch (t) { var t = useTranslations("Home"); return t("title"); } }`);
+	expect(result.issues).toEqual([]);
+	expect(result.usedBundleIds).toEqual(["Home.title"]);
 });
 
 test("a with statement in a CommonJS file is incomplete", async () => {

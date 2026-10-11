@@ -168,6 +168,39 @@ test("missing analyzer, empty snapshot and mixed legacy matchers do not imply un
 	expect(
 		(await checkProject({ project: mixed, files: [] })).checks[1]?.status
 	).toBe("unavailable");
+	// matchers of the deprecated addCustomApi, e.g. next-intl before its usage analysis
+	const customApi = await setup([
+		{ key: "modern", analyzeUsage: analyze },
+		{
+			key: "plugin.inlang.nextIntl",
+			addCustomApi: () => ({
+				"app.inlang.ideExtension": { messageReferenceMatchers: [() => []] },
+			}),
+		},
+	]);
+	const result = await checkProject({ project: customApi, files });
+	expect(result.checks[1]).toEqual(
+		expect.objectContaining({
+			status: "incomplete",
+			issues: [
+				{
+					reason:
+						"Matcher plugin.inlang.nextIntl does not support usage analysis.",
+				},
+			],
+		})
+	);
+	expect(
+		result.diagnostics.filter((d) => d.checkId === "unused-message")
+	).toEqual([]);
+	// a custom API without matchers changes nothing
+	const other = await setup([
+		{ key: "modern", analyzeUsage: analyze },
+		{ key: "other", addCustomApi: () => ({ "app.other": {} }) },
+	]);
+	expect(
+		(await checkProject({ project: other, files })).checks[1]?.status
+	).toBe("complete");
 });
 test("applies deletion across all locales and variants; repeated fixes are skipped", async () => {
 	const project = await setup();
