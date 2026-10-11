@@ -2,7 +2,8 @@
  * End-to-end tests of the built CLI (`check`, `cloud`, `--help` and the
  * deprecated commands). Builds the CLI and runs it against a Paraglide-style
  * fixture (`test/fixtures/check-app`) with the workspace's message-format and
- * m-function-matcher plugins as local modules.
+ * m-function-matcher plugins as local modules, and against a next-intl app
+ * (`test/fixtures/next-intl-app`) with the workspace's next-intl plugin.
  */
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { spawn } from "node:child_process";
@@ -15,7 +16,7 @@ import { build } from "esbuild";
 import { buildOptions } from "../../../buildOptions.js";
 
 const cliDirectory = fileURLToPath(new URL("../../../", import.meta.url));
-const fixture = nodePath.join(cliDirectory, "test/fixtures/check-app");
+const fixtures = nodePath.join(cliDirectory, "test/fixtures");
 const outdir = nodePath.join(cliDirectory, "node_modules/.cache/check-e2e");
 const require = createRequire(import.meta.url);
 /** The built, bundled plugin (`dist/index.js`). */
@@ -43,23 +44,24 @@ afterAll(() => {
 /** A copy of the fixture app with the workspace plugins, as the current directory of a run. */
 function app(
   options: {
+    fixture?: "check-app" | "next-intl-app";
     files?: Record<string, string | null>;
     settings?: (settings: Record<string, any>) => void;
   } = {},
 ): string {
   const root = fs.mkdtempSync(nodePath.join(os.tmpdir(), "inlang-check-"));
   temporary.push(root);
-  fs.cpSync(fixture, root, { recursive: true });
+  const fixture = options.fixture ?? "check-app";
+  fs.cpSync(nodePath.join(fixtures, fixture), root, { recursive: true });
   const plugins = nodePath.join(root, "project.inlang/plugins");
   fs.mkdirSync(plugins);
-  fs.copyFileSync(
-    pluginDist("@inlang/plugin-message-format"),
-    nodePath.join(plugins, "plugin-message-format.js"),
-  );
-  fs.copyFileSync(
-    pluginDist("@inlang/plugin-m-function-matcher"),
-    nodePath.join(plugins, "plugin-m-function-matcher.js"),
-  );
+  for (const name of fixture === "check-app"
+    ? ["plugin-message-format", "plugin-m-function-matcher"]
+    : ["plugin-next-intl"])
+    fs.copyFileSync(
+      pluginDist(`@inlang/${name}`),
+      nodePath.join(plugins, `${name}.js`),
+    );
   for (const [path, content] of Object.entries(options.files ?? {})) {
     const file = nodePath.join(root, path);
     if (content === null) fs.rmSync(file);
@@ -295,6 +297,61 @@ describe("inlang check", { timeout: 60_000 }, () => {
     );
   });
 
+  test("next-intl: reports unused messages once every usage is resolved", async () => {
+    const { code, stdout } = await run(
+      app({
+        fixture: "next-intl-app",
+        files: { "src/components/Status.tsx": null },
+      }),
+      ["check", ...project, "--unused-messages"],
+    );
+    expect(code).toBe(1);
+    expect(stdout).toContain(
+      "Checked project.inlang · 7 messages · locales en, de · 3 source files in ./",
+    );
+    expect(stdout).toContain(
+      "unused-message (3)\n  Home.legacy\n  Status.closed\n  Status.open\n",
+    );
+    expect(stdout).not.toContain("Paraglide");
+    expect(stdout).not.toContain("m-function-matcher");
+  });
+
+  test("next-intl: a dynamic key withholds unused messages and is located", async () => {
+    const { code, stdout } = await run(app({ fixture: "next-intl-app" }), [
+      "check",
+      ...project,
+      "--unused-messages",
+    ]);
+    expect(code).toBe(0);
+    expect(stdout).toContain(
+      "unused-message incomplete: unused messages can't be determined because:\n  src/components/Status.tsx:6:19  state  A dynamic message key can't be resolved statically.\n  Unused messages are only reported when every usage can be resolved, e.g. m.some_key() or t(\"some.key\").",
+    );
+    expect(stdout).not.toContain("Paraglide");
+    expect(stdout).not.toContain("m-function-matcher");
+  });
+
+  test("next-intl: an older plugin without usage analysis is asked to be updated", async () => {
+    const legacy = "./project.inlang/plugins/plugin-next-intl@2.3.0.js";
+    const root = app({
+      fixture: "next-intl-app",
+      files: {
+        [legacy]: `export default { key: "plugin.inlang.nextIntl", toBeImportedFiles: async () => [], importFiles: async () => ({ bundles: [], messages: [], variants: [] }) };`,
+      },
+      settings: (settings) => {
+        settings.modules = [legacy];
+      },
+    });
+    const { stdout } = await run(root, [
+      "check",
+      ...project,
+      "--unused-messages",
+    ]);
+    expect(stdout).toContain(
+      "unused-message not checked: The installed @inlang/plugin-next-intl can't analyze usages.\n  Unused-message check needs @inlang/plugin-next-intl ≥ 2.4.0, update the module URL in settings.json: ./project.inlang/plugins/plugin-next-intl@2.3.0.js",
+    );
+    expect(stdout).not.toContain("Paraglide");
+  });
+
   test("a project that can't be opened is a short error", async () => {
     const { code, stderr } = await run(app(), [
       "check",
@@ -350,7 +407,9 @@ describe("deprecated commands", { timeout: 60_000 }, () => {
       "pt-BR",
       "--no-fail",
     ]);
-    expect(stderr).toContain("inlang lint is deprecated and does nothing. Use inlang check");
+    expect(stderr).toContain(
+      "inlang lint is deprecated and does nothing. Use inlang check",
+    );
     expect(stdout).not.toContain("welcome_back");
     expect(code).toBe(0);
   });

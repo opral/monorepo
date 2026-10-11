@@ -1,0 +1,8 @@
+{
+  "baseLocale": "en",
+  "locales": ["en", "de"],
+  "modules": [],
+  "plugin.inlang.nextIntl": {
+    "pathPattern": "./messages/{locale}.json"
+  }
+}

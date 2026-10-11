@@ -1,0 +1,33 @@
+{
+  "Home": {
+    "title": "Welcome to {appName}",
+    "description": "A tiny shop built with next-intl.",
+    "cart": "{count, plural, =0 {Your cart is empty} one {You have # item} other {You have # items}}",
+    "terms": "Please read the <b>terms</b>.",
+    "unused": "Nobody renders this"
+  },
+  "Metadata": {
+    "title": "Shop",
+    "description": "The shop"
+  },
+  "Nav": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "Checkout": {
+    "Summary": {
+      "title": "Order summary",
+      "shipping": "Shipping to {city}",
+      "removed": "Not used anymore"
+    }
+  },
+  "About": {
+    "title": "About us",
+    "body": "We sell <b>things</b>."
+  },
+  "Status": {
+    "open": "Open",
+    "closed": "Closed"
+  }
+}

@@ -29,24 +29,27 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@babel/parser": "^7.28.5",
+		"@inlang/sdk": "workspace:*",
 		"@sinclair/typebox": "0.31.28",
-		"@inlang/sdk": "workspace:*"
+		"micromark": "^4.0.1",
+		"micromark-extension-mdxjs": "^3.0.0"
 	},
 	"devDependencies": {
 		"@formatjs/icu-messageformat-parser": "3.5.18",
 		"@inlang/plugin-icu1": "workspace:*",
-		"@messageformat/parser": "^5.1.1",
 		"@inlang/tsconfig": "workspace:*",
+		"@messageformat/parser": "^5.1.1",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
 		"@types/parsimmon": "1.10.6",
+		"@vitest/coverage-v8": "3.1.1",
 		"esbuild": "^0.24.2",
 		"flat": "^5.0.2",
 		"intl-messageformat": "11.2.15",
+		"memfs": "4.6.0",
 		"parsimmon": "^1.18.1",
 		"typescript": "^5.5.2",
-		"vitest": "3.1.1",
-		"@vitest/coverage-v8": "3.1.1",
-		"memfs": "4.6.0"
+		"vitest": "3.1.1"
 	}
 }

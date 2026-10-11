@@ -205,7 +205,7 @@ The translations are performed with the configured provider (`INLANG_MACHINE_TRA
 
 ## `check`
 
-Checks the project's translations and, for Paraglide projects, finds messages the source code no longer uses.
+Checks the project's translations and, for Paraglide and next-intl projects, finds messages the source code no longer uses.
 
 ```sh
 npx @inlang/cli check --project ./project.inlang
@@ -223,7 +223,7 @@ missing-variable (2)
 
 unused-message incomplete: unused messages can't be determined because:
   src/Field.tsx:14:8  m[`${fieldName}_label`]  Dynamic message access cannot be resolved.
-  Unused messages are only reported when every usage can be resolved, e.g. m.some_key().
+  Unused messages are only reported when every usage can be resolved, e.g. m.some_key() or t("some.key").
 
 3 findings
   missing-translation  1
@@ -320,9 +320,14 @@ jq '[.diagnostics[] | select(.checkId == "missing-translation") | .locale] | gro
 
 ### Unused messages
 
-Unused messages need the source code and a plugin that analyzes message usages: [`@inlang/plugin-m-function-matcher`](https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher) 2.3.0 or later for Paraglide's `m.message_key()`. With an older version, `check` asks you to update the module URL in `settings.json`.
+Unused messages need the source code and a plugin that analyzes message usages:
 
-A message is only reported as unused when every usage in the analyzed source could be resolved. Dynamic keys such as ``m[`${fieldName}_label`]()``, `m[key]()` or `keyof typeof m` make the analysis incomplete; `check` then lists where they are instead of reporting unused messages. "Unused" means not used in the analyzed source: messages used by other repositories or code outside `--source` can still be reported.
+- [`@inlang/plugin-m-function-matcher`](https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher) 2.3.0 or later for Paraglide's `m.message_key()`.
+- [`@inlang/plugin-next-intl`](https://inlang.com/m/193hsyds/plugin-inlang-nextIntl) 2.4.0 or later for next-intl's `useTranslations("Home")` and `getTranslations("Home")` with `t("title")`, `t.rich()` and `t.markup()`, in `.ts`, `.tsx`, `.js`, `.jsx` and `.mdx` files.
+
+With an older version, `check` asks you to update the module URL in `settings.json`.
+
+A message is only reported as unused when every usage in the analyzed source could be resolved. Dynamic keys such as ``m[`${fieldName}_label`]()``, `m[key]()`, ``t(`items.${id}`)`` or `t(key)`, a translator passed to another function or component, `useMessages()` read directly, `t.raw()` of a namespace or `keyof typeof m` make the analysis incomplete; `check` then lists where they are instead of reporting unused messages. "Unused" means not used in the analyzed source: messages used by other repositories or code outside `--source` can still be reported.
 
 ### JSON output
 

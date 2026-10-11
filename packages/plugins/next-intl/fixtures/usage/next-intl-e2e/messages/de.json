@@ -1,0 +1,30 @@
+{
+  "Home": {
+    "title": "Willkommen bei {appName}",
+    "description": "Ein kleiner Shop, gebaut mit next-intl.",
+    "cart": "{count, plural, =0 {Dein Warenkorb ist leer} one {Du hast # Artikel} other {Du hast # Artikel}}",
+    "liked": "{gender, select, female {Sie} male {Er} other {Sie}} hat deinen Beitrag geliked",
+    "place": "Du bist {place}. geworden",
+    "terms": "Bitte lies die <b>AGB</b> und unsere <link>Datenschutzerklärung</link>.",
+    "unread": "{count, plural, one {<b>#</b> ungelesene Nachricht} other {<b>#</b> ungelesene Nachrichten}}",
+    "price": "Summe: {price, number, ::currency/EUR}",
+    "updated": "Aktualisiert am {date, date, medium}",
+    "escaped": "Schreibe '{name}', um einen Namen einzufügen, das ist wörtlich",
+    "apostrophe": "Vergiss deine Schlüssel nicht",
+    "invites": "{gender, select, female {{count, plural, one {Sie hat einen Gast eingeladen} other {Sie hat # Gäste eingeladen}}} other {{count, plural, one {Sie haben einen Gast eingeladen} other {Sie haben # Gäste eingeladen}}}}"
+  },
+  "Nav": {
+    "home": "Startseite",
+    "about": "Über uns",
+    "links": ["Doku", "Blog"]
+  },
+  "Checkout": {
+    "Summary": {
+      "title": "Bestellübersicht",
+      "shipping": "Versand nach {city}"
+    }
+  },
+  "Legacy": {
+    "key.with.dots": "Ein Schlüssel mit Punkten"
+  }
+}

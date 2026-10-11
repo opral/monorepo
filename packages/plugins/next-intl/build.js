@@ -19,6 +19,40 @@ const ctx = await context({
 	platform: "browser",
 	// sourcemaps are unused at the moment
 	sourcemap: false,
+	plugins: [
+		{
+			// acorn-jsx requires acorn while micromark imports it: bundle one copy, the ES module
+			name: "single-acorn",
+			setup(build) {
+				build.onResolve({ filter: /^acorn$/ }, (args) =>
+					args.kind === "require-call"
+						? build.resolve("acorn", {
+								kind: "import-statement",
+								resolveDir: args.resolveDir,
+							})
+						: undefined
+				);
+			},
+		},
+		{
+			// micromark's browser build of it needs `document`: the plugin also runs in Node (CLI)
+			name: "no-dom",
+			setup(build) {
+				build.onResolve(
+					{ filter: /^decode-named-character-reference$/ },
+					async (args) => {
+						if (args.pluginData === "no-dom") return undefined;
+						const result = await build.resolve(args.path, {
+							kind: args.kind,
+							resolveDir: args.resolveDir,
+							pluginData: "no-dom",
+						});
+						return { path: result.path.replace(/index\.dom\.js$/, "index.js") };
+					}
+				);
+			},
+		},
+	],
 });
 
 if (isProduction === false) {
