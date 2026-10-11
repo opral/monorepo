@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { Message, Variant } from "@inlang/sdk";
-import posthog from "posthog-js";
 import { Locale } from "../../../lib/message/variants/Locale";
 import "./LanguageSetup.css";
 import ReactSelect, { MultiValueRemoveProps, components } from "react-select";
@@ -195,13 +194,6 @@ export default function LanguageSetup({
 							labelManager.import(importResult!.messages!, importResult!.language);
 							setImportResult(undefined);
 							setimportKeysByState(undefined);
-							posthog.capture("PARROT import messages", {
-								importResults: {
-									format: importResult?.type,
-									language: importResult?.language,
-									numberOfMessages: importResult?.messages?.length,
-								},
-							});
 						},
 					},
 				]}

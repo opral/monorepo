@@ -22,9 +22,6 @@ await fs.writeFile(
 	dirname + "/index.ts",
 	`
 export const ENV_VARIABLES = {
-	PUBLIC_INLANG_SDK_SENTRY_DSN: ${ifDefined(
-		process.env.PUBLIC_INLANG_SDK_SENTRY_DSN
-	)},
 	SDK_VERSION: ${ifDefined(packageJson.version)},
 }
 `

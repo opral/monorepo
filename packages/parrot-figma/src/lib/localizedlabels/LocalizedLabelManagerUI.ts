@@ -1,5 +1,4 @@
 import blake from "blakejs";
-import * as Sentry from "@sentry/react";
 import { Message, createVariant, getVariant, updateVariantPattern } from "@inlang/sdk";
 import { MessageLinkState, LocalizedLabel } from "./LocalizedLabel";
 import { Plural } from "../message/variants/Plural";
@@ -16,7 +15,6 @@ import { FillinToPlaceholder, MessageExtension, Parameter } from "../message/Mes
 import { MessageParameterValues } from "../message/MessageParameterValues";
 import MessageImporter from "../import/MessageImporter";
 import TranslatorMachine from "../translationprovider/TranslatorMachine";
-import { captureLoadProjectEvent } from "../../ui/utils/analytics";
 import FigmaUtil from "../../shared/FigmaUtil";
 
 export default class LocalizedLabelManagerUI
@@ -166,7 +164,6 @@ export default class LocalizedLabelManagerUI
 				}
 				if (event.data.pluginMessage.type === "linksLoaded") {
 					this.onKeyLabelLinksLoaded(event.data.pluginMessage as LinksLoadedEvent);
-					captureLoadProjectEvent(figmaRemote);
 				}
 			}
 		});

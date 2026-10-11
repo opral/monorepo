@@ -6,13 +6,7 @@ on:
 
 env:
   ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-  SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-  SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
   FIGMA_TEXT_FILE: ${{ vars.FIGMA_TEXT_FILE }}
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-  MIXPANEL_ACCESS_TOKEN: ${{ secrets.MIXPANEL_ACCESS_TOKEN }}
-  PUBLIC_POSTHOG_TOKEN: ${{ secrets.PUBLIC_POSTHOG_TOKEN }}
   FIGMA_WEB_AUTHN_TOKEN: ${{ secrets.FIGMA_WEB_AUTHN_TOKEN }}
   FIGMA_RECENT_USER_DATA: ${{ secrets.FIGMA_RECENT_USER_DATA }}
   GH_ACTION_TRIGGER_TOKEN: ${{ secrets.GH_ACTION_TRIGGER_TOKEN }}
@@ -54,7 +48,7 @@ jobs:
       run: | 
         npx figcd prepare
       
-    - name: Build plugin and publish to Sentry (part of webpack)
+    - name: Build plugin
       run: |
         npm run build
           

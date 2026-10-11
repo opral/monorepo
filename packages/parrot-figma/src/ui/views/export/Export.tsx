@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import "../../localization/i18n";
 import { useTranslation } from "react-i18next";
 
-import posthog from "posthog-js";
 import Select, { SelectOption } from "../../compontents/select/select";
 import "./Export.css";
 import { Locale } from "../../../lib/message/variants/Locale";
@@ -235,13 +234,6 @@ export default function Export({ labelManager, userManager }: ExportProps) {
 									type="button"
 									onClick={() => {
 										doExport(selectedBaseLanguage.value as Locale, exportTarget!);
-										posthog.capture("PARROT export messages", {
-											exportResult: {
-												format: exportTarget,
-												language: selectedBaseLanguage.value,
-												numberOfMessages: keySummary.matchingNames.size,
-											},
-										});
 									}}
 								>
 									<span data-tooltip-type="text">Export</span>
@@ -279,15 +271,6 @@ export default function Export({ labelManager, userManager }: ExportProps) {
 											type="button"
 											onClick={() => {
 												doExport(languageOption.value as Locale, exportTarget!);
-												posthog.capture("PARROT export messages", {
-													exportResult: {
-														format: exportTarget,
-														language: selectedBaseLanguage.value,
-														// TODO: fix reactivity to show correct number of exported messages https://github.com/opral/inlang-parrot/issues/16
-														// numberOfMessages: keySummary.matchingNames.size - (keySummary.withMissingVariantsPerLanguage[languageOption.value as Locale]
-														//   ?.size ?? 0),
-													},
-												});
 											}}
 										>
 											<span data-tooltip-type="text">Export</span>

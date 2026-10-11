@@ -3,11 +3,6 @@ import { useEffect, useState } from "react";
 import * as ReactDOM from "react-dom";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import * as Sentry from "@sentry/react";
-import * as mixpanel from "mixpanel-figma";
-
-import { initializeSentry } from "./utils/sentry";
-import { initializeAnalytics, track, identify, identifyProject } from "./utils/analytics";
 
 import LocalizedLabelsListView from "./views/localizedlabelslist/LocalizedLabelsListView";
 import FigmaUtil from "../shared/FigmaUtil";
@@ -41,15 +36,10 @@ import { OverlayScrollbarsComponent } from "./compontents/overlayscrollbar";
 
 import TranslatorMachine from "../lib/translationprovider/TranslatorMachine";
 import MessageUpsellOverlay from "./compontents/upselloverlay/MessageUpsellOverlay";
-import Monitoring from "../lib/monitoring/MonitoringProxy";
 
 console.log(`Starting Figma UI - Version ${pjs.version}`);
 
 TimeAgo.addDefaultLocale(en);
-
-initializeSentry();
-
-initializeAnalytics();
 
 const monkeyPatchCommandExec = document.execCommand;
 
@@ -165,44 +155,11 @@ const asyncFunctionProxy = new AsyncFunctionProxy(
 	window,
 );
 
-const monitoring = new Monitoring(Sentry);
-asyncFunctionProxy.registerInstance(monitoring);
-
 const figmaRemote = new FigmaUtil();
 asyncFunctionProxy.proxyAsyncMethods(figmaRemote);
 
-(async () => {
-	// reportUnreportedMigrationReports
-	const reports = await figmaRemote.getReportsAsync();
-	for (const report of Object.values(reports)) {
-		if (!report.reportedToSentry) {
-			console.log(`reporting: Migration version: ${report.version} - ${report.message}`);
-			Sentry.captureException(
-				new Error(`Migration version: ${report.version} - ${report.message}`),
-			);
-			report.reportedToSentry = true;
-
-			await figmaRemote.updateReport(report);
-		}
-	}
-})();
-
 figmaRemote.getFeatureFlags().then((featureFlags) => {
 	// FeatureFlags.setFeatureflags(featureFlags);
-});
-
-figmaRemote.getUserId().then((userId) => {
-	identify(userId!);
-	if (userId) {
-		Sentry.setUser({ id: userId! });
-	}
-});
-
-Promise.all([figmaRemote.getInlangFileId()]).then(([fileId]) => {
-	if (fileId) {
-		track("file opened", { fileId });
-		identifyProject({ projectId: fileId, properties: { name: fileId }, figmaRemote });
-	}
 });
 
 const translationMachine = new TranslatorMachine();
@@ -237,7 +194,6 @@ function App() {
 		// asynchronous fetch the state from figma helper
 		(async () => {
 			await userStateManagerUi.loadUserState();
-			userStateManagerUi.trackFileUsageStatistics();
 
 			if (windowMode === WindowMode.DevPanel) {
 				const updatedUser = await userStateManagerUi.requestUserRole(UserFileRole.developer);
@@ -291,7 +247,6 @@ function App() {
 
 	useEffect(() => {
 		if (appScreen) {
-			track(`app_screen__${appScreen}`);
 			figmaRemote.setLocalFileConfig("lastView", appScreen);
 		}
 	}, [appScreen]);
