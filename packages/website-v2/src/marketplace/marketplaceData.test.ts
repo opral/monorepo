@@ -19,7 +19,10 @@ import {
   resolveHtmlAssetLinks,
   resolveRelativeUrl,
 } from "./marketplaceData";
-import { getStandaloneSiteRedirectForPath } from "./legacyRedirects";
+import {
+  getStandaloneSiteRedirect,
+  getStandaloneSiteRedirectForPath,
+} from "./legacyRedirects";
 
 describe("loadMarketplacePage redirects", () => {
   beforeEach(() => {
@@ -194,6 +197,18 @@ describe("getStandaloneSiteRedirectForPath", () => {
         "/m/tdozzpar/app-inlang-finkLocalizationEditor/supported-i18n-libraries",
       ),
     ).toEqual({
+      href: "https://fink.inlang.com",
+      statusCode: 301,
+    });
+    expect(
+      getStandaloneSiteRedirectForPath(
+        "/m/tdozzpar/app-inlang-finkLocalizationEditor/",
+      ),
+    ).toEqual({
+      href: "https://fink.inlang.com",
+      statusCode: 301,
+    });
+    expect(getStandaloneSiteRedirect("tdozzpar", "/x")).toEqual({
       href: "https://fink.inlang.com",
       statusCode: 301,
     });
