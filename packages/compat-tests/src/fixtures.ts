@@ -103,15 +103,10 @@ export const fixtures: Fixture[] = [
 	{
 		key: "plugin.inlang.nextIntl",
 		dir: "next-intl",
-		editorBundles: [
-			"greeting",
-			"items_count",
-			"invite",
-			"cart",
-			"pronoun",
-			"escapes",
-			"nav.home.title",
-		],
+		// The published plugin wrote one variant of the others, `{braces}`
+		// unquoted and `nav.home.title` as a flat key that next-intl can't
+		// read. See corrections.test.ts.
+		editorBundles: ["greeting"],
 		locales: ["en", "de"],
 		pluginSettings: { pathPattern: "./messages/{locale}.json" },
 		files: [

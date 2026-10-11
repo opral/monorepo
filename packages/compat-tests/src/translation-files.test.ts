@@ -82,6 +82,9 @@ function listFiles(dir: string): string[] {
 const importChanges: Record<string, string[]> = {
 	// `#` in a plural with an offset keeps the offset (`icu:pound offset=1`)
 	icu1: ["guests"],
+	// ICU plurals, selects and formats, which the published plugin read as
+	// text with variables named after the ICU syntax
+	"next-intl": ["Home.cart", "Home.liked", "Home.place", "Home.price"],
 };
 
 /**

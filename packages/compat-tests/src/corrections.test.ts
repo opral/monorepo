@@ -6,8 +6,9 @@
  * something else than the message says. Everything else must stay
  * byte-identical, see translation-files.test.ts.
  *
- * Also the one case where the current plugin imports the same file into
- * different messages (icu1: `#` with an offset).
+ * Also the cases where the current plugin imports the same file into
+ * different messages (icu1: `#` with an offset; next-intl: ICU plurals,
+ * selects and tags, which the published plugin read as text).
  *
  * Every case is checked for both upgrade paths: the current SDK with the
  * current plugin, and the published SDK loading the current plugin.
@@ -963,6 +964,149 @@ describe("i18next", () => {
 			await expect(current.exportFiles({ pluginKey: f.key })).rejects.toThrow(
 				'i18next export cannot represent two different texts for "item_zero" of bundle "item" (lv)'
 			);
+			await current.close();
+		}
+	});
+});
+
+describe("next-intl", () => {
+	const f = fixture("next-intl");
+
+	/** The exported entries of a locale, after inserting `specs` as an editor. */
+	async function editorBeforeAndAfter(ids: string[], locale = "en") {
+		const rows = rowsFromSpecs(editorSpecs.filter((s) => ids.includes(s.id)));
+		const published = await open(f, "published", "published");
+		await insertRows(published, rows);
+		const before = JSON.parse(await exportLocale(published, f, locale));
+		const blob = await published.toBlob();
+		await published.close();
+		const afters = [];
+		for (const { sdk, plugin } of upgrades) {
+			const current = await open(f, sdk, plugin, blob);
+			afters.push({
+				label: `${sdk} SDK with the ${plugin} plugin`,
+				after: JSON.parse(await exportLocale(current, f, locale)),
+			});
+			await current.close();
+		}
+		return { before, afters };
+	}
+
+	test("import: ICU plurals, selects and rich text tags are selectors, variants and markup; the published plugin read their syntax as variable names, which every check reported as missing or unknown (no file change)", async () => {
+		const source = {
+			cart: "{count, plural, =0 {Your cart is empty} one {You have # item} other {You have # items}}",
+			terms: "Read the <b>terms</b>.",
+		};
+		const imported = async (sdk: Version, plugin: Version) => {
+			const project = await open(f, sdk, plugin);
+			await project.importFiles({
+				pluginKey: f.key,
+				files: [{ locale: "en", content: encode(JSON.stringify(source)) }],
+			});
+			const content = contentOf(await selectRows(project));
+			const exported = JSON.parse(await exportLocale(project, f));
+			await project.close();
+			return { content, exported };
+		};
+		const published = await imported("published", "published");
+		expect(
+			published.content.bundles.find((b) => b.id === "cart")!.declarations
+		).toContainEqual({
+			type: "input-variable",
+			name: "count, plural, =0 {Your cart is empty",
+		});
+		expect(published.exported).toEqual(source);
+
+		for (const { sdk, plugin } of upgrades) {
+			const label = `${sdk} SDK with the ${plugin} plugin`;
+			const { content, exported } = await imported(sdk, plugin);
+			expect(
+				content.messages.find((m) => m.key === "cart/en")!.selectors,
+				label
+			).toEqual([
+				{ type: "variable-reference", name: "countPluralExact" },
+				{ type: "variable-reference", name: "countPlural" },
+			]);
+			expect(
+				content.variants.filter((v) => v.message === "cart/en"),
+				label
+			).toHaveLength(3);
+			expect(
+				content.variants.find((v) => v.message === "terms/en")!.pattern,
+				label
+			).toEqual([
+				{ type: "text", value: "Read the " },
+				{ type: "markup-start", name: "b" },
+				{ type: "text", value: "terms" },
+				{ type: "markup-end", name: "b" },
+				{ type: "text", value: "." },
+			]);
+			// the files stay as they are
+			expect(exported, label).toEqual(source);
+		}
+	});
+
+	test("plurals, selects and `=0` that editors add: the published plugin wrote one of their variants and lost the others; they are written as ICU plurals and selects", async () => {
+		const { before, afters } = await editorBeforeAndAfter([
+			"items_count",
+			"cart",
+			"pronoun",
+			"invite",
+		]);
+		for (const id of ["items_count", "cart", "pronoun", "invite"]) {
+			expect(before[id]).not.toMatch(/plural|select/);
+		}
+		for (const { label, after } of afters) {
+			expect(after, label).toEqual({
+				items_count: "{count, plural, one {One item} other {{count} items}}",
+				cart: "{count, plural, =0 {Your cart is empty} one {One item in your cart} other {{count} items in your cart}}",
+				pronoun: "{gender, select, female {she} male {he} other {they}}",
+				invite:
+					"{gender, select, female {{count, plural, one {She invited one guest} other {She invited {count} guests}}} other {{count, plural, one {They invited one guest} other {They invited {count} guests}}}}",
+			});
+		}
+	});
+
+	test("a message with dots in its id: the published plugin wrote the flat key `nav.home.title`, which next-intl can't read (`t('nav.home.title')` reads nested keys); it is nested", async () => {
+		const { before, afters } = await editorBeforeAndAfter(["nav.home.title"]);
+		expect(before).toEqual({ "nav.home.title": "Home" });
+		for (const { label, after } of afters) {
+			expect(after, label).toEqual({ nav: { home: { title: "Home" } } });
+		}
+	});
+
+	test("text with braces: the published plugin wrote `{braces}`, which next-intl reads as an argument; they are quoted", async () => {
+		const { before, afters } = await editorBeforeAndAfter(["escapes"]);
+		expect(before.escapes).toBe('Use {braces}, a backslash \\ and "quotes"');
+		for (const { label, after } of afters) {
+			expect(after.escapes, label).toBe(
+				"Use '{'braces'}', a backslash \\ and \"quotes\""
+			);
+		}
+	});
+
+	test("a database the published plugin wrote keeps ICU arguments, plurals and selects as it wrote them, but tags it stored as text are written as text (quoted)", async () => {
+		const source = {
+			cart: "{count,plural,one{# item}other{# items}}",
+			terms: "Read the <b>terms</b>.",
+		};
+		const published = await open(f, "published", "published");
+		await published.importFiles({
+			pluginKey: f.key,
+			files: [{ locale: "en", content: encode(JSON.stringify(source)) }],
+		});
+		const blob = await published.toBlob();
+		await published.close();
+		for (const { sdk, plugin } of upgrades) {
+			const current = await open(f, sdk, plugin, blob);
+			expect(
+				JSON.parse(await exportLocale(current, f)),
+				`${sdk} SDK with the ${plugin} plugin`
+			).toEqual({
+				cart: source.cart,
+				// the published plugin's import doesn't tell tags from text
+				terms: "Read the '<'b>terms'<'/b>.",
+			});
 			await current.close();
 		}
 	});

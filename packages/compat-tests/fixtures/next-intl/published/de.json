@@ -1,4 +1,8 @@
 {
+	"Home": {
+		"cart": "{count, plural, =0 {Dein Warenkorb ist leer} one {Du hast # Artikel} other {Du hast # Artikel}}",
+		"liked": "{gender, select, female {Sie} male {Er} other {Sie}} hat deinen Beitrag geliked"
+	},
 	"Index": {
 		"title": "Hallo {name}!"
 	}

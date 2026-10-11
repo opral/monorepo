@@ -357,6 +357,25 @@ const legacy: Array<{ dir: string; texts: Texts; edit?: string }> = [
 		},
 	},
 	{
+		// ICU as people write it: no spaces, quotes, tags around a plural
+		dir: "next-intl",
+		texts: {
+			en: [
+				"{",
+				'  "plain": "Plain text",',
+				'  "Home": {',
+				'    "items": "{count,plural,=0{none} one{# item}other{# items}}",',
+				"    \"quoted\": \"Write '{name}' or '<b>', it''s fine\",",
+				'    "rich": "<b>{count, plural, one {#} other {many}}</b> new",',
+				'    "links": ["Docs", "Blog"]',
+				"  }",
+				"}",
+				"",
+			].join("\n"),
+			de: '{"Home":{"items":"{count, plural,\\n  one {# Ding}\\n  other {# Dinge}\\n}"},"plain":"Text"}',
+		},
+	},
+	{
 		dir: "icu1",
 		texts: {
 			en: '{\n  "plain":  "Plain text",\n  "items": "{count,plural,one{# item}other{# items}}",\n  "apos": "Don\'t",\n  "a":"{ n , number }"\n}\n',
