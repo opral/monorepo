@@ -118,6 +118,9 @@ const messages: Record<string, string> = {
 	tagsAroundPlurals:
 		"{count, plural, other {<b>#</b>}} and <i>{count, plural, other {#}}</i>",
 	quotedStyle: "At {due, time, h 'o''clock'} on {due, date, ::EEEE}",
+	sameTagTwice: "{count, plural, other {<b>#</b> of <b>#</b>}}",
+	sameTagTwiceOrdinal:
+		"{place, selectordinal, other {<b>#</b><b>#</b>{place}}} x",
 };
 
 describe("import", () => {
@@ -352,6 +355,8 @@ describe("export", () => {
 				"{count, plural, one {<b>#</b>} other {<b>many</b>}} new",
 			// the plurals on `count` share their forms
 			tagsAroundPlurals: "{count, plural, other {<b>#</b> and <i>#</i>}}",
+			sameTagTwiceOrdinal:
+				"{place, selectordinal, other {<b>#</b><b>#</b>{place} x}}",
 		});
 	});
 

@@ -237,47 +237,57 @@ export function serializeNextIntlMessage(args: {
 	// tags have no attributes: options of markup (e.g. imported from another
 	// format) aren't written.
 	const tags: string[] = [];
+	/** the placeholder of the end of each start tag, and the other way round */
+	const partners: number[] = [];
 	const styles: string[] = [];
-	const variants = args.variants.map((variant) => ({
-		...variant,
-		matches: variant.matches ?? [],
-		pattern: balanceMarkup(variant.pattern ?? []).map((part) => {
-			switch (part.type) {
-				case "markup-start":
-					return {
-						type: "text",
-						value: placeholder(tags.push(`<${part.name}>`) - 1),
-					} as const;
-				case "markup-end":
-					return {
-						type: "text",
-						value: placeholder(tags.push(`</${part.name}>`) - 1),
-					} as const;
-				case "markup-standalone":
-					// intl-messageformat reads `<br/>` as text
-					return {
-						type: "text",
-						value: placeholder(tags.push(`<${part.name}></${part.name}>`) - 1),
-					} as const;
-				case "expression":
-					return part.annotation?.type === "function-reference" &&
-						part.annotation.name !== "icu:pound"
-						? withStyles(part, (style) =>
-								stylePlaceholder(styles.push(style) - 1)
-							)
-						: part;
-				default:
-					return part;
-			}
-		}),
-	}));
+	const variants = args.variants.map((variant) => {
+		const open: number[] = [];
+		return {
+			...variant,
+			matches: variant.matches ?? [],
+			pattern: balanceMarkup(variant.pattern ?? []).map((part) => {
+				switch (part.type) {
+					case "markup-start": {
+						const index = tags.push(`<${part.name}>`) - 1;
+						open.push(index);
+						return { type: "text", value: placeholder(index) } as const;
+					}
+					case "markup-end": {
+						const index = tags.push(`</${part.name}>`) - 1;
+						// balanceMarkup closes every tag in order
+						const start = open.pop()!;
+						partners[start] = index;
+						partners[index] = start;
+						return { type: "text", value: placeholder(index) } as const;
+					}
+					case "markup-standalone":
+						// intl-messageformat reads `<br/>` as text
+						return {
+							type: "text",
+							value: placeholder(
+								tags.push(`<${part.name}></${part.name}>`) - 1
+							),
+						} as const;
+					case "expression":
+						return part.annotation?.type === "function-reference" &&
+							part.annotation.name !== "icu:pound"
+							? withStyles(part, (style) =>
+									stylePlaceholder(styles.push(style) - 1)
+								)
+							: part;
+					default:
+						return part;
+				}
+			}),
+		};
+	});
 	const icu1 = serializeMessage({
 		bundle: { ...args.bundle, declarations: args.bundle.declarations ?? [] },
 		message: { ...args.message, selectors: args.message.selectors ?? [] },
 		variants,
 	});
 	const nodes = toNodes(parseMf1(icu1, { strict: false }), undefined);
-	const result = print(withTagsInCases(nodes, tags), {
+	const result = print(withTagsInCases(nodes, partners), {
 		tags,
 		plural: undefined,
 	}).replace(STYLE_PLACEHOLDERS, (_, index) => styles[Number(index)]!);
@@ -445,9 +455,9 @@ const isSelect = (node: Node) =>
  * next-intl can't read a tag that ends in another case. Where that happens,
  * the nodes around the first plural or select go into each of its cases.
  */
-function withTagsInCases(nodes: Node[], tags: string[]): Node[] {
+function withTagsInCases(nodes: Node[], partners: number[]): Node[] {
 	const index = nodes.findIndex(isSelect);
-	if (index !== -1 && !hasBalancedTags(nodes, tags)) {
+	if (index !== -1 && !hasBalancedTags(nodes, partners)) {
 		const select = nodes[index] as Extract<Node, { cases: unknown }>;
 		return withTagsInCases(
 			[
@@ -463,7 +473,7 @@ function withTagsInCases(nodes: Node[], tags: string[]): Node[] {
 					})),
 				},
 			],
-			tags
+			partners
 		);
 	}
 	return nodes.map((node) =>
@@ -472,28 +482,28 @@ function withTagsInCases(nodes: Node[], tags: string[]): Node[] {
 					...node,
 					cases: node.cases.map((selectCase) => ({
 						key: selectCase.key,
-						nodes: withTagsInCases(selectCase.nodes, tags),
+						nodes: withTagsInCases(selectCase.nodes, partners),
 					})),
 				}
 			: node
 	);
 }
 
-/** Whether the tags in the texts of `nodes` (not in cases) are closed. */
-function hasBalancedTags(nodes: Node[], tags: string[]): boolean {
-	const open: string[] = [];
+/**
+ * Whether every tag in the texts of `nodes` (not in cases) has its
+ * counterpart there too.
+ */
+function hasBalancedTags(nodes: Node[], partners: number[]): boolean {
+	const here = new Set<number>();
 	for (const node of nodes) {
 		if (node.type !== "text") continue;
 		for (const [, index] of node.value.matchAll(PLACEHOLDERS)) {
-			const tag = tags[Number(index)]!;
-			if (tag.startsWith("</")) {
-				if (open.pop() !== tag.slice(2)) return false;
-			} else if (!tag.includes("</")) {
-				open.push(tag.slice(1));
-			}
+			here.add(Number(index));
 		}
 	}
-	return open.length === 0;
+	return [...here].every(
+		(index) => partners[index] === undefined || here.has(partners[index]!)
+	);
 }
 
 /**
