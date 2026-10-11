@@ -1,5 +1,12 @@
 # @inlang/sdk
 
+## 4.0.1
+
+### Patch Changes
+
+- 1c1913c: Remove the unused `PUBLIC_INLANG_SDK_SENTRY_DSN` entry from the SDK's build-time env variables. Nothing read it since Sentry was removed from the SDK.
+- d04deba: The generated `project.inlang/README.md` links Fink at https://fink.inlang.com.
+
 ## 4.0.0
 
 ### Major Changes
