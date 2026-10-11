@@ -5,5 +5,12 @@
   },
   "About": {
     "heading": "About us"
+  },
+  "Home": {
+    "cart": "{count, plural, =0 {Your cart is empty} one {You have # item} other {You have # items}}",
+    "liked": "{gender, select, female {She} male {He} other {They}} liked your post",
+    "place": "You finished {place, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+    "price": "Total: {price, number, ::currency/EUR}",
+    "apostrophe": "Don't forget your keys"
   }
 }

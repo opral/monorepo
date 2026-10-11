@@ -40,10 +40,12 @@ test("imports and exports flat dotted keys without nesting them", async () => {
 	});
 });
 
-test("exports newly-created flat dotted keys without nesting them", async () => {
+test("nests newly-created keys at their dots, as next-intl reads them", async () => {
+	// next-intl reads t("test.test") from { test: { test } }, never from a
+	// "test.test" key (keys can't contain dots)
 	const exported = await exportFiles({
 		settings: {} as any,
-		bundles: [{ id: "test.test" }] as any,
+		bundles: [{ id: "test.test", declarations: [] }] as any,
 		messages: [
 			{
 				id: "message-1",
@@ -56,13 +58,73 @@ test("exports newly-created flat dotted keys without nesting them", async () => 
 			{
 				id: "variant-1",
 				messageId: "message-1",
-				pattern: [{ type: "text", value: "Flat dotted key" }],
+				matches: [],
+				pattern: [{ type: "text", value: "Nested key" }],
 			},
 		] as any,
 	});
 
 	expect(JSON.parse(new TextDecoder().decode(exported[0]?.content))).toEqual({
-		"test.test": "Flat dotted key",
+		test: { test: "Nested key" },
+	});
+});
+
+test("a new message of a bundle goes where the bundle's other messages are", async () => {
+	const imported = await runImportFiles({
+		Legacy: { "key.with.dots": "A key with dots" },
+		Home: { title: "Home" },
+	});
+	const added = [
+		["Legacy.key.with.dots", "de"],
+		["Home.subtitle", "en"],
+		["Home.title.long", "en"],
+	] as const;
+	const exported = await exportFiles({
+		settings: {} as any,
+		bundles: [
+			...imported.bundles,
+			{ id: "Home.subtitle", declarations: [] },
+			{ id: "Home.title.long", declarations: [] },
+		],
+		messages: [
+			...imported.messages,
+			...added.map(([bundleId, locale]) => ({
+				id: `new-${bundleId}`,
+				bundleId,
+				locale,
+				selectors: [],
+			})),
+		],
+		variants: [
+			...imported.variants.map((variant, index) => ({
+				...variant,
+				id: `variant-${index}`,
+				messageId: imported.messages[index]!.id,
+			})),
+			...added.map(([bundleId, locale]) => ({
+				id: `variant-new-${bundleId}`,
+				messageId: `new-${bundleId}`,
+				matches: [],
+				pattern: [{ type: "text", value: `${bundleId} (${locale})` }],
+			})),
+		],
+	} as any);
+	const parsed = (locale: string) =>
+		JSON.parse(
+			new TextDecoder().decode(
+				exported.find((file) => file.locale === locale)!.content
+			)
+		);
+
+	expect(parsed("de")).toStrictEqual({
+		Legacy: { "key.with.dots": "Legacy.key.with.dots (de)" },
+	});
+	expect(parsed("en")).toStrictEqual({
+		// "Home.title" is a message, so next-intl can't read "Home.title.long"
+		// either way: it stays a flat key instead of replacing "Home.title"
+		"Home.title.long": "Home.title.long (en)",
+		Legacy: { "key.with.dots": "A key with dots" },
+		Home: { title: "Home", subtitle: "Home.subtitle (en)" },
 	});
 });
 

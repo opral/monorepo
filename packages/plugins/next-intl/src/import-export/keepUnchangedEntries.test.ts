@@ -75,7 +75,7 @@ async function importRows(settings: Settings, files: Files): Promise<Rows> {
 				message.bundleId === variant.messageBundleId &&
 				message.locale === variant.messageLocale
 		)!.id,
-		matches: [],
+		matches: variant.matches ?? [],
 		pattern: variant.pattern ?? [],
 	}));
 	return { bundles: imported.bundles as Bundle[], messages, variants };
@@ -307,10 +307,11 @@ describe("data changes are detected", () => {
 			"{count,plural,=0{none} =1{# item}other{# items}}"
 		);
 		expect((await exportTexts(settings, rows, files))["en.json"]).toBe(
+			// an edited message is written in the plugin's ICU style
 			replaceOnce(
 				en,
 				'"{count,plural,=0{none} one{# item}other{# items}}"',
-				'"{count,plural,=0{none} =1{# item}other{# items}}"'
+				'"{count, plural, =0 {none} =1 {# item} other {# items}}"'
 			)
 		);
 	});
@@ -345,15 +346,27 @@ describe("data changes are detected", () => {
 			files,
 			"./messages/en.json",
 			["count"],
-			"{count, plural,=0{none} one{# item}other{# items}}"
+			"{count,plural,=0{none} one{# item }other{# items}}"
 		);
 		expect((await exportTexts(settings, pluralRows, files))["en.json"]).toBe(
 			replaceOnce(
 				en,
 				'"{count,plural,=0{none} one{# item}other{# items}}"',
-				'"{count, plural,=0{none} one{# item}other{# items}}"'
+				'"{count, plural, =0 {none} one {# item } other {# items}}"'
 			)
 		);
+	});
+
+	test("whitespace of the ICU syntax is not an edit", async () => {
+		// next-intl reads both the same, so the entry keeps its text
+		const rows = await edit(
+			settings,
+			files,
+			"./messages/en.json",
+			["count"],
+			"{count, plural, =0 {none} one {# item} other {# items}}"
+		);
+		expect((await exportTexts(settings, rows, files))["en.json"]).toBe(en);
 	});
 
 	test("only a variable name changed", async () => {

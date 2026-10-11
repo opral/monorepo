@@ -1,7 +1,14 @@
-import type { InlangPlugin } from "@inlang/sdk";
+import type {
+	Declaration as SdkDeclaration,
+	InlangPlugin,
+	Match,
+	Pattern as SdkPattern,
+	VariableReference,
+} from "@inlang/sdk";
 import type { PluginSettings } from "../settings.js";
 import { PLUGIN_KEY } from "../pluginKey.js";
 import { createMessageId } from "./messageId.js";
+import { parseNextIntlMessage } from "./icu.js";
 
 type Pattern = Array<
 	| { type: "text"; value: string }
@@ -11,22 +18,21 @@ type Pattern = Array<
 			annotation?: undefined;
 	  }
 >;
-type BundleImport = { id: string; declarations: Declaration[] };
+type BundleImport = { id: string; declarations: SdkDeclaration[] };
 type MessageImport = {
 	id?: string;
 	bundleId: string;
 	locale: string;
-	selectors: [];
+	selectors: VariableReference[];
 };
 type VariantImport = {
 	id?: undefined;
 	messageId?: undefined;
 	messageBundleId: string;
 	messageLocale: string;
-	matches: [];
-	pattern: Pattern;
+	matches: Match[];
+	pattern: SdkPattern;
 };
-type Declaration = { type: "input-variable"; name: string };
 
 export const importFiles: NonNullable<
 	InlangPlugin<{ [PLUGIN_KEY]: PluginSettings }>["importFiles"]
@@ -52,29 +58,20 @@ export const importFiles: NonNullable<
 
 		for (const { key, path, value } of resource) {
 			const bundleId = namespace ? `${namespace}.${key}` : key;
-			const parsedPattern = parsePattern(value, variableReferencePattern);
-			const declarations = uniqueDeclarations(
-				parsedPattern
-					.filter(
-						(part): part is Extract<Pattern[number], { type: "expression" }> =>
-							part.type === "expression"
-					)
-					.map((part) => ({
-						type: "input-variable" as const,
-						name: part.arg.name,
-					}))
-			);
+			const parsed = isIcu(variableReferencePattern)
+				? parseMessage({ value, bundleId, locale: file.locale })
+				: parseLegacyMessage(value, variableReferencePattern);
 			const existingBundle = bundles.get(bundleId);
 
 			if (existingBundle === undefined) {
 				bundles.set(bundleId, {
 					id: bundleId,
-					declarations,
+					declarations: uniqueDeclarations(parsed.declarations),
 				});
 			} else {
 				existingBundle.declarations = uniqueDeclarations([
 					...existingBundle.declarations,
-					...declarations,
+					...parsed.declarations,
 				]);
 			}
 
@@ -86,14 +83,16 @@ export const importFiles: NonNullable<
 				}),
 				bundleId,
 				locale: file.locale,
-				selectors: [],
+				selectors: parsed.selectors,
 			});
-			variants.push({
-				messageBundleId: bundleId,
-				messageLocale: file.locale,
-				matches: [],
-				pattern: parsedPattern,
-			});
+			for (const variant of parsed.variants) {
+				variants.push({
+					messageBundleId: bundleId,
+					messageLocale: file.locale,
+					matches: variant.matches,
+					pattern: variant.pattern,
+				});
+			}
 		}
 	}
 
@@ -103,6 +102,78 @@ export const importFiles: NonNullable<
 		variants,
 	};
 };
+
+/**
+ * next-intl messages are ICU MessageFormat. A custom `variableReferencePattern`
+ * (e.g. `{{` `}}`) predates that: such projects keep reading messages as text
+ * with variable references.
+ */
+export function isIcu(variableReferencePattern: string[]): boolean {
+	return (
+		variableReferencePattern.length === 2 &&
+		variableReferencePattern[0] === "{" &&
+		variableReferencePattern[1] === "}"
+	);
+}
+
+type ParsedMessage = {
+	declarations: SdkDeclaration[];
+	selectors: VariableReference[];
+	variants: Array<{ matches: Match[]; pattern: SdkPattern }>;
+};
+
+function parseMessage(args: {
+	value: string;
+	bundleId: string;
+	locale: string;
+}): ParsedMessage {
+	try {
+		const parsed = parseNextIntlMessage({
+			messageSource: args.value,
+			bundleId: args.bundleId,
+			locale: args.locale,
+		});
+		return {
+			declarations: parsed.declarations,
+			selectors: parsed.selectors,
+			variants: parsed.variants.map((variant) => ({
+				matches: variant.matches ?? [],
+				pattern: variant.pattern ?? [],
+			})),
+		};
+	} catch {
+		// Not valid ICU, next-intl can't render it either (it shows the key):
+		// the message is its text, so that loading the project doesn't fail.
+		// An unchanged message keeps its text on export.
+		return {
+			declarations: [],
+			selectors: [],
+			variants: [
+				{ matches: [], pattern: [{ type: "text", value: args.value }] },
+			],
+		};
+	}
+}
+
+function parseLegacyMessage(
+	value: string,
+	variableReferencePattern: string[]
+): ParsedMessage {
+	const pattern = parsePattern(value, variableReferencePattern);
+	return {
+		declarations: pattern
+			.filter(
+				(part): part is Extract<Pattern[number], { type: "expression" }> =>
+					part.type === "expression"
+			)
+			.map((part) => ({
+				type: "input-variable" as const,
+				name: part.arg.name,
+			})),
+		selectors: [],
+		variants: [{ matches: [], pattern }],
+	};
+}
 
 function flattenMessages(json: unknown): Array<{
 	key: string;
@@ -192,7 +263,8 @@ function uniqueDeclarations(
 ): BundleImport["declarations"] {
 	const result = new Map<string, BundleImport["declarations"][number]>();
 	for (const declaration of declarations) {
-		result.set(`${declaration.type}:${declaration.name}`, declaration);
+		const key = JSON.stringify(declaration);
+		if (!result.has(key)) result.set(key, declaration);
 	}
 	return Array.from(result.values());
 }

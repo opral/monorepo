@@ -33,7 +33,7 @@ export const PluginSettings = Type.Object({
 		Type.Array(Type.String(), {
 			title: "Variable reference pattern",
 			description:
-				"The pattern to match content in the messages. You can define an opening and closing pattern. The closing pattern is not required. The default is '{{' and '}}'.",
+				"Leave this out: next-intl messages are ICU MessageFormat (plurals, selects, rich text tags), which the plugin reads with the default '{' and '}'. Another pattern reads messages as text with variables between the opening and (optional) closing pattern, without ICU, for projects that set it before.",
 			examples: ["{ and }", "{{ and }}", "< and >", "@:"],
 		})
 	),

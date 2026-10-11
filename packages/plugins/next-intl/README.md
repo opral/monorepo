@@ -15,21 +15,25 @@ If you're using next-intl for internationalization in Next.js, this plugin lets 
 
 ## How it works
 
-The plugin reads and writes next-intl JSON files, preserving your existing file structure (nested or flat keys). It also tells Sherlock how to detect `t()`, `useTranslations()`, and `getTranslations()` calls in your code.
+The plugin reads and writes next-intl JSON files and keeps your file structure: saving a project only changes the entries that were edited. Messages are read as ICU MessageFormat, with the same parser next-intl uses, so plurals, selects and rich text tags are editable as variants and markup. It also tells Sherlock how to detect `t()`, `useTranslations()`, and `getTranslations()` calls in your code.
 
 # Supported next-intl Features
 
-| Feature                | Status           | Notes                                   |
-| ---------------------- | ---------------- | --------------------------------------- |
-| Basic key-value pairs  | ✅ Supported     | Fully working                           |
-| Nested keys            | ✅ Supported     | Auto-detects flat vs nested structure   |
-| Variable interpolation | ✅ Supported     | `{variable}` with customizable patterns |
-| Rich text              | ⚠️ Partial       | Tags are treated as text                |
-| Plurals (ICU)          | ❌ Not supported | ICU message format not parsed           |
-| Select (ICU)           | ❌ Not supported | ICU message format not parsed           |
+| Feature                            | Status       | Notes                                                                     |
+| ---------------------------------- | ------------ | ------------------------------------------------------------------------- |
+| Basic key-value pairs              | ✅ Supported |                                                                           |
+| Nested keys and namespaces         | ✅ Supported | `t("Home.title")`, `useTranslations("Home")`, files per namespace         |
+| Arguments                          | ✅ Supported | `{name}`                                                                  |
+| Plurals                            | ✅ Supported | `{count, plural, =0 {…} one {# item} other {# items}}`, `offset`          |
+| Select and selectordinal           | ✅ Supported | `{gender, select, …}`, `{place, selectordinal, one {#st} …}`, also nested |
+| Rich text                          | ✅ Supported | `<b>…</b>`, `<link>…</link>` for `t.rich()` and `t.markup()`, as markup   |
+| Number, date and time formats      | ✅ Supported | `{price, number, ::currency/EUR}`, `{date, date, short}`, custom formats  |
+| Escaping                           | ✅ Supported | `'{name}'`, `'<b>'`, `''`                                                 |
+| Arrays and other non-string values | ⚠️ Kept      | Not editable, but kept in the files (read them with `t.raw()`)            |
 
 ## Version Compatibility
 
+- **next-intl v4.x**: Full support
 - **next-intl v3.x**: Full support
 - **next-intl v2.x**: Full support
 
@@ -100,11 +104,7 @@ t("title");
 
 ## `variableReferencePattern`
 
-Defines the pattern for variable references. The default matches next-intl's format.
-
-```json
-"variableReferencePattern": ["{", "}"]
-```
+Leave this setting out. next-intl messages are ICU MessageFormat, which the plugin reads with the default `["{", "}"]`. Projects that set another pattern (e.g. `["{{", "}}"]`) keep reading messages as plain text with variables between the opening and closing pattern, without plurals, selects or markup.
 
 ## `sourceLanguageFilePath`
 
@@ -153,6 +153,8 @@ The **source language file determines the structure** for all other locale files
 - **Key ordering**: Messages are sorted in the order they appear in the source language file
 - **Nesting vs flat**: Detected per-file from the source language. If your `en.json` uses nested keys, all other locales will use nested keys too
 - **New keys**: When you add translations for other locales, they follow the source file's structure
+- **New messages**: A new message is nested at the dots of its key (`Checkout.Summary.total` goes to `"Checkout": { "Summary": { "total": … } }`), because next-intl reads `t("Checkout.Summary.total")` from there. A new translation of an existing message goes where the message's other translations are.
+- **Edited messages**: An edited message is written as ICU MessageFormat, e.g. `{count, plural, =0 {No items} one {# item} other {# items}}`. Literal `{`, `}` and tags are quoted (`'{'`, `'<'b>`), apostrophes only where next-intl needs it, so `Don't` stays as it is.
 
 ### Example
 
@@ -180,13 +182,14 @@ Then your target language (`de.json`) will be written in the same nested structu
 
 # Limitations
 
-The following next-intl features are **not supported** by this plugin:
-
-| Feature                  | Limitation                                              |
-| ------------------------ | ------------------------------------------------------- |
-| **ICU message format**   | Plurals, select, and other ICU syntax are not parsed    |
-| **Rich text formatting** | Tags like `<bold>text</bold>` are treated as plain text |
-| **Nested `t()` calls**   | References like `{t('other.key')}` are not resolved     |
+| Feature                      | Limitation                                                                                      |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Invalid ICU**              | A message next-intl can't parse is read as text and keeps its text unless it is edited          |
+| **Tags around a plural**     | `<b>{count, plural, …}</b>` is written as `{count, plural, one {<b>…</b>} …}` once it is edited |
+| **Self-closing tags**        | next-intl reads `<br/>` as text; markup without content is written as `<br></br>`               |
+| **Tag attributes**           | next-intl tags have none: options of markup from other formats (`{#link to=$url}`) are dropped  |
+| **Nested `t()` calls**       | References like `{t('other.key')}` are not resolved                                             |
+| **Unused message detection** | The plugin doesn't analyze `t()` usages for `checkProject`'s `unused-message` check yet         |
 
 # Troubleshooting
 

@@ -33,12 +33,16 @@
 		"@inlang/sdk": "workspace:*"
 	},
 	"devDependencies": {
+		"@formatjs/icu-messageformat-parser": "3.5.18",
+		"@inlang/plugin-icu1": "workspace:*",
+		"@messageformat/parser": "^5.1.1",
 		"@inlang/tsconfig": "workspace:*",
 		"@types/flat": "^5.0.2",
 		"@types/lodash.merge": "^4.6.7",
 		"@types/parsimmon": "1.10.6",
 		"esbuild": "^0.24.2",
 		"flat": "^5.0.2",
+		"intl-messageformat": "11.2.15",
 		"parsimmon": "^1.18.1",
 		"typescript": "^5.5.2",
 		"vitest": "3.1.1",
