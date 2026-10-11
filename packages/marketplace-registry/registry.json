@@ -1,7 +1,7 @@
 {
 	"m": {
 		"2qj2w8pu": "https://raw.githubusercontent.com/opral/inlang/refs/heads/main/packages/cli/marketplace-manifest.json",
-		"tdozzpar": "https://raw.githubusercontent.com/opral/inlang/refs/heads/main/packages/fink/marketplace-manifest.json",
+		"tdozzpar": "https://raw.githubusercontent.com/opral/inlang-fink/refs/heads/main/marketplace-manifest.json",
 		"dxnzrydw": "https://raw.githubusercontent.com/opral/inlang/refs/heads/inlang-v1/inlang/source-code/paraglide/paraglide-sveltekit/marketplace-manifest.json",
 		"osslbuzt": "https://raw.githubusercontent.com/opral/inlang/refs/heads/inlang-v1/inlang/source-code/paraglide/paraglide-next/marketplace-manifest.json",
 		"iljlwzfs": "https://raw.githubusercontent.com/opral/inlang/refs/heads/inlang-v1/inlang/source-code/paraglide/paraglide-astro/marketplace-manifest.json",

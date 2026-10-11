@@ -3,7 +3,7 @@ import { registry } from "@inlang/marketplace-registry";
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import {
   getLegacyRedirect,
-  getParaglideStandaloneRedirect,
+  getStandaloneSiteRedirect,
 } from "../../../marketplace/legacyRedirects";
 
 export const Route = createFileRoute("/m/$uid/")({
@@ -15,11 +15,11 @@ export const Route = createFileRoute("/m/$uid/")({
         statusCode: legacyRedirect.statusCode,
       });
     }
-    const paraglideRedirect = getParaglideStandaloneRedirect(params.uid);
-    if (paraglideRedirect) {
+    const standaloneRedirect = getStandaloneSiteRedirect(params.uid);
+    if (standaloneRedirect) {
       throw redirect({
-        href: paraglideRedirect.href,
-        statusCode: paraglideRedirect.statusCode,
+        href: standaloneRedirect.href,
+        statusCode: standaloneRedirect.statusCode,
       });
     }
     const item = registry.find(

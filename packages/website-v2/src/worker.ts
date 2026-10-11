@@ -3,7 +3,7 @@ import {
   defaultStreamHandler,
 } from "@tanstack/react-start/server";
 import { getParaglideBlogRedirectForPath } from "./blog/paraglideBlogRedirects";
-import { getParaglideRedirectForPath } from "./marketplace/legacyRedirects";
+import { getStandaloneSiteRedirectForPath } from "./marketplace/legacyRedirects";
 import { isPosthogProxyRequest, proxyPosthog } from "./posthogProxy";
 
 const handler = createStartHandler(defaultStreamHandler);
@@ -15,16 +15,13 @@ export default {
     if (isPosthogProxyRequest(url)) {
       return proxyPosthog(request);
     }
-    const paraglideRedirect =
-      getParaglideRedirectForPath(url.pathname) ??
+    const redirect =
+      getStandaloneSiteRedirectForPath(url.pathname) ??
       getParaglideBlogRedirectForPath(url.pathname);
-    if (paraglideRedirect) {
-      const location = new URL(paraglideRedirect.href);
+    if (redirect) {
+      const location = new URL(redirect.href);
       location.search = url.search;
-      return Response.redirect(
-        location.toString(),
-        paraglideRedirect.statusCode,
-      );
+      return Response.redirect(location.toString(), redirect.statusCode);
     }
 
     return handler(request);

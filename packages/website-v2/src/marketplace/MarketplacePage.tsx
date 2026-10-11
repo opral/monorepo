@@ -6,7 +6,7 @@ import type {
   MarketplacePageData,
   MarketplaceHeading,
 } from "./marketplaceData";
-import { getParaglideRedirectForPath } from "./legacyRedirects";
+import { getStandaloneSiteRedirectForPath } from "./legacyRedirects";
 import { initMarkdownInteractive } from "../components/markdown-interactive";
 import { getGithubRepoMetrics } from "../github-stars-cache";
 
@@ -927,7 +927,7 @@ function RecommendationCard({
       : item.description;
   const slug = item.id.replaceAll(".", "-");
   const href = `/m/${(item as any).uniqueID}/${slug}`;
-  const redirect = getParaglideRedirectForPath(href);
+  const redirect = getStandaloneSiteRedirectForPath(href);
   const className =
     "rounded-xl border border-slate-200 bg-white p-4 hover:border-slate-300 hover:shadow-sm";
   const content = (

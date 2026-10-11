@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { registry } from "@inlang/marketplace-registry";
+import { getStandaloneSiteRedirect } from "../../marketplace/legacyRedirects";
 
 const ogImage =
   "https://cdn.jsdelivr.net/gh/opral/inlang@latest/packages/website/public/opengraph/inlang-social-image.jpg";
@@ -38,9 +39,6 @@ const prioritizedTools = new Map([
   ["paraglide js", 0],
   ["inlang cli", 1],
 ]);
-
-const PARAGLIDE_JS_ID = "library.inlang.paraglideJs";
-const PARAGLIDE_JS_URL = "https://paraglidejs.com";
 
 // Filter tools and libraries from the registry
 const tools = registry
@@ -133,7 +131,8 @@ function ToolCard({ item }: { item: (typeof registry)[number] }) {
   const isExternal = item.keywords
     ?.map((k) => k.toLowerCase())
     .includes("external");
-  const isParaglideJs = item.id === PARAGLIDE_JS_ID;
+  // Items with their own website link there directly (inlang.com redirects).
+  const standaloneSite = getStandaloneSiteRedirect(item.uniqueID);
   const cardClassName =
     "group flex flex-col rounded-xl border border-slate-200 bg-white transition-all hover:border-slate-300 hover:shadow-md";
   const cardContent = (
@@ -159,7 +158,7 @@ function ToolCard({ item }: { item: (typeof registry)[number] }) {
           <h3 className="text-[15px] font-bold text-slate-800 group-hover:text-slate-900">
             {displayName}
           </h3>
-          {(isExternal || isParaglideJs) && (
+          {(isExternal || standaloneSite) && (
             <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-medium text-slate-500">
               External
             </span>
@@ -190,10 +189,10 @@ function ToolCard({ item }: { item: (typeof registry)[number] }) {
     </>
   );
 
-  if (isParaglideJs) {
+  if (standaloneSite) {
     return (
       <a
-        href={PARAGLIDE_JS_URL}
+        href={standaloneSite.href}
         target="_blank"
         rel="noreferrer"
         className={cardClassName}

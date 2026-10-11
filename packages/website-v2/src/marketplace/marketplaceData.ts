@@ -4,7 +4,7 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest";
 import { redirect } from "@tanstack/react-router";
 import {
   getLegacyRedirect,
-  getParaglideStandaloneRedirect,
+  getStandaloneSiteRedirect,
 } from "./legacyRedirects";
 
 const localMarketplaceFiles = import.meta.glob<string>(
@@ -130,11 +130,11 @@ export async function loadMarketplacePage({
     });
   }
   const pagePath = splat ? `/${splat}` : "/";
-  const paraglideRedirect = getParaglideStandaloneRedirect(uid, pagePath);
-  if (paraglideRedirect) {
+  const standaloneRedirect = getStandaloneSiteRedirect(uid, pagePath);
+  if (standaloneRedirect) {
     throw redirect({
-      href: paraglideRedirect.href,
-      statusCode: paraglideRedirect.statusCode,
+      href: standaloneRedirect.href,
+      statusCode: standaloneRedirect.statusCode,
     });
   }
   const item = registry.find((entry: any) => entry.uniqueID === uid) as
