@@ -3,8 +3,6 @@ packages:
   - lix/packages/**/*
   - '!inlang/packages/paraglide/paraglide-js'
   - '!inlang/packages/paraglide/paraglide-js/**'
-  - '!inlang/packages/parrot-figma'
-  - '!inlang/packages/fink'
   - '!packages/csv-app'
   - '!packages/lix/file-manager'
   - '!packages/lix/host'
