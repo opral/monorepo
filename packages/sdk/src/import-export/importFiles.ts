@@ -6,6 +6,8 @@ import {
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type {
 	InlangDatabaseSchema,
+	NewBundleRow,
+	NewMessageRow,
 	NewVariantRow,
 } from "../database/schema.js";
 import {
@@ -27,6 +29,103 @@ const variantReferenceKey = (
 ) => JSON.stringify([bundleId, locale, matches]);
 
 const INSERT_BATCH_SIZE = 500;
+
+/**
+ * Upper bound on message and variant rows written by one commit of a fresh
+ * project import. Lix validates and indexes every staged row when the
+ * transaction commits, and its worker treats a commit that runs past its
+ * operation deadline as lost. Projects with hundreds of thousands of
+ * translations therefore commit in bundle-aligned groups below this size;
+ * smaller projects still import in a single transaction.
+ */
+export const IMPORT_ROWS_PER_COMMIT = 100_000;
+
+type FreshImportCommit = {
+	bundles: NewBundleRow[];
+	messages: (NewMessageRow & { id: string })[];
+	variants: NewVariantRow[];
+};
+
+/**
+ * Splits a fresh import into groups of whole bundles, so every group
+ * satisfies its own foreign keys (variants → messages → bundles).
+ */
+function groupFreshImportCommits(
+	bundles: readonly NewBundleRow[],
+	messages: readonly (NewMessageRow & { id: string })[],
+	variants: readonly NewVariantRow[],
+	rowsPerCommit: number
+): FreshImportCommit[] {
+	const messagesByBundle = new Map<
+		string,
+		(NewMessageRow & { id: string })[]
+	>();
+	for (const message of messages) {
+		const list = messagesByBundle.get(message.bundle_id);
+		if (list) list.push(message);
+		else messagesByBundle.set(message.bundle_id, [message]);
+	}
+	const variantsByMessage = new Map<string, NewVariantRow[]>();
+	for (const variant of variants) {
+		const list = variantsByMessage.get(variant.message_id);
+		if (list) list.push(variant);
+		else variantsByMessage.set(variant.message_id, [variant]);
+	}
+	const commits: FreshImportCommit[] = [];
+	let current: FreshImportCommit = { bundles: [], messages: [], variants: [] };
+	for (const bundle of bundles) {
+		const bundleMessages = messagesByBundle.get(bundle.id!) ?? [];
+		const bundleVariants = bundleMessages.flatMap(
+			(message) => variantsByMessage.get(message.id) ?? []
+		);
+		const rows = bundleMessages.length + bundleVariants.length;
+		if (
+			current.bundles.length > 0 &&
+			current.messages.length + current.variants.length + rows > rowsPerCommit
+		) {
+			commits.push(current);
+			current = { bundles: [], messages: [], variants: [] };
+		}
+		current.bundles.push(bundle);
+		current.messages.push(...bundleMessages);
+		current.variants.push(...bundleVariants);
+	}
+	commits.push(current);
+	return commits;
+}
+
+/**
+ * Writes one commit group with multi-row INSERTs inside its transaction.
+ * This is faster here than Lix `executeMany` (one statement per row): for
+ * 40k variants with their messages and bundles, 2.8 s against 3.6 s through
+ * `tx.executeMany` and 7.8 s through auto-commit `executeMany`.
+ */
+async function insertFreshImportCommit(
+	trx: Kysely<InlangDatabaseSchema>,
+	commit: FreshImportCommit
+) {
+	await insertInBatchesByShape({
+		rows: commit.bundles,
+		optionalColumns: ["declarations"],
+		insert: async (rows) => {
+			await trx.insertInto("inlang_bundle").values(rows).execute();
+		},
+	});
+	await insertInBatchesByShape({
+		rows: commit.messages,
+		optionalColumns: ["selectors"],
+		insert: async (rows) => {
+			await trx.insertInto("inlang_message").values(rows).execute();
+		},
+	});
+	await insertInBatchesByShape({
+		rows: commit.variants,
+		optionalColumns: ["matches", "pattern"],
+		insert: async (rows) => {
+			await trx.insertInto("inlang_variant").values(rows).execute();
+		},
+	});
+}
 
 /**
  * Kysely uses one column list for every row in a multi-row insert. Keep rows
@@ -70,6 +169,8 @@ export async function importFiles(args: {
 	readonly settings: ProjectSettings;
 	readonly plugins: readonly InlangPlugin[];
 	readonly db: Kysely<InlangDatabaseSchema>;
+	/** Testing hook; defaults to {@link IMPORT_ROWS_PER_COMMIT}. */
+	readonly rowsPerCommit?: number;
 }) {
 	const plugin = args.plugins.find((p) => p.key === args.pluginKey);
 
@@ -92,6 +193,8 @@ export async function importFiles(args: {
 		variants: pluginResult.variants.map(variantFromPlugin),
 	};
 
+	// Groups of a large fresh import that commit after the first one.
+	let remainingFreshCommits: FreshImportCommit[] = [];
 	await args.db.transaction().execute(async (trx) => {
 		const hasExistingBundles = await trx
 			.selectFrom("inlang_bundle")
@@ -159,25 +262,10 @@ export async function importFiles(args: {
 			);
 
 		if (canBatchImportFreshProject) {
-			await insertInBatchesByShape({
-				rows: imported.bundles,
-				optionalColumns: ["declarations"],
-				insert: async (rows) => {
-					await trx.insertInto("inlang_bundle").values(rows).execute();
-				},
-			});
-
 			const messagesWithIds = imported.messages.map((message) => ({
 				...message,
 				id: v7(),
 			}));
-			await insertInBatchesByShape({
-				rows: messagesWithIds,
-				optionalColumns: ["selectors"],
-				insert: async (rows) => {
-					await trx.insertInto("inlang_message").values(rows).execute();
-				},
-			});
 
 			const messageIds = new Map(
 				messagesWithIds.map((message) => [
@@ -203,13 +291,14 @@ export async function importFiles(args: {
 					};
 				}
 			);
-			await insertInBatchesByShape({
-				rows: variantsWithMessageIds,
-				optionalColumns: ["matches", "pattern"],
-				insert: async (rows) => {
-					await trx.insertInto("inlang_variant").values(rows).execute();
-				},
-			});
+			const [first, ...rest] = groupFreshImportCommits(
+				imported.bundles,
+				messagesWithIds,
+				variantsWithMessageIds,
+				args.rowsPerCommit ?? IMPORT_ROWS_PER_COMMIT
+			);
+			await insertFreshImportCommit(trx, first!);
+			remainingFreshCommits = rest;
 			return;
 		}
 
@@ -315,4 +404,9 @@ export async function importFiles(args: {
 				.execute();
 		}
 	});
+	for (const commit of remainingFreshCommits) {
+		await args.db
+			.transaction()
+			.execute((trx) => insertFreshImportCommit(trx, commit));
+	}
 }

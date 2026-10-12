@@ -140,20 +140,20 @@ export async function loadProject(args: {
 }
 
 async function readLixId(lix: Lix): Promise<string> {
-	const result = await lix.execute(
+	const row = await lix.queryOne(
 		"SELECT value FROM lix_key_value WHERE key = 'lix_id'"
 	);
-	const id = result.rows[0]?.value;
+	const id = row?.value;
 	if (typeof id !== "string") throw new Error("Missing Lix id");
 	return id;
 }
 
 async function readLixFile(lix: Lix, path: string): Promise<Uint8Array> {
-	const result = await lix.execute<{ content: Uint8Array }>(
+	const row = await lix.queryOne<{ content: Uint8Array }>(
 		"SELECT content FROM lix_file WHERE path = $1",
 		[path]
 	);
-	const data = result.rows[0]?.content;
+	const data = row?.content;
 	if (!data) throw new Error(`Missing project file: ${path}`);
 	return data;
 }

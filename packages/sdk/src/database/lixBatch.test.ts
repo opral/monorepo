@@ -34,7 +34,6 @@ test("executeLixBatch publishes atomically and rolls back on a later failure", a
 	]);
 	expect(results).toHaveLength(2);
 	expect(results[1]?.rows).toEqual([{ id: "batch-atomicity" }]);
-	expect(results[1]?.statementIndex).toBe(1);
 	await expect(
 		db.selectFrom("inlang_bundle").select("id").execute()
 	).resolves.toEqual([{ id: "batch-atomicity" }]);

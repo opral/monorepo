@@ -38,11 +38,11 @@ async function initializeSettingsIfMissing(args: {
 	lix: Lix;
 	settings?: ProjectSettings;
 }): Promise<void> {
-	const result = await args.lix.execute(
+	const existing = await args.lix.queryOne(
 		"SELECT path FROM lix_file WHERE path = $1",
 		["/settings.json"]
 	);
-	if (result.rows.length > 0) return;
+	if (existing) return;
 
 	await args.lix.execute(
 		"INSERT INTO lix_file (path, content) VALUES ($1, $2)",

@@ -1,6 +1,6 @@
-import type { Lix, LixBatchStatement, ExecuteResult } from "@lix-js/sdk";
+import type { Lix } from "@lix-js/sdk";
 import { compileBundleNestedBatch } from "../query-utilities/compileBundleNestedBatch.js";
-import { compileLixQuery } from "../database/lixDialect.js";
+import { compileLixQuery, type LixStatement } from "../database/lixDialect.js";
 import { initDb } from "../database/initDb.js";
 import type {
 	Bundle,
@@ -38,27 +38,33 @@ type LegacySnapshot = {
 
 export async function projectToBlob(lix: Lix): Promise<Blob> {
 	const db = initDb({ lix });
-	let lixIdResult: ExecuteResult;
-	let files: ExecuteResult<{ path: string; content: Uint8Array | null }>;
+	let lixIdRow: Record<string, unknown> | undefined;
+	let files: { path: string; content: Uint8Array | null }[];
 	let bundles: BundleNested[];
 	try {
-		[lixIdResult, files, bundles] = await Promise.all([
-			lix.execute("SELECT value FROM lix_key_value WHERE key = 'lix_id'"),
-			lix.execute<{ path: string; content: Uint8Array | null }>(
-				"SELECT path, content FROM lix_file ORDER BY path"
+		[[lixIdRow, files], bundles] = await Promise.all([
+			lix.read((snapshot) =>
+				Promise.all([
+					snapshot.queryOne(
+						"SELECT value FROM lix_key_value WHERE key = 'lix_id'"
+					),
+					snapshot.query<{ path: string; content: Uint8Array | null }>(
+						"SELECT path, content FROM lix_file ORDER BY path"
+					),
+				])
 			),
 			selectBundleNested(db).execute(),
 		]);
 	} finally {
 		await db.destroy();
 	}
-	const lixId = lixIdResult.rows[0]?.value;
+	const lixId = lixIdRow?.value;
 	if (typeof lixId !== "string") throw new Error("Missing Lix id");
 
 	const snapshot: Snapshot = {
 		format: FORMAT,
 		lixId,
-		files: files.rows
+		files: files
 			.filter((row) => row.path !== "/project_id")
 			.map((row) => ({
 				path: row.path,
@@ -95,7 +101,7 @@ export async function restoreProjectBlob(lix: Lix, blob: Blob): Promise<void> {
 	}
 	const snapshot = parsed as Snapshot | PreviousSnapshot | LegacySnapshot;
 
-	const statements: LixBatchStatement[] = [];
+	const statements: LixStatement[] = [];
 	const lixId = snapshotLixId(snapshot);
 	if (lixId) {
 		statements.push({
@@ -126,7 +132,13 @@ export async function restoreProjectBlob(lix: Lix, blob: Blob): Promise<void> {
 		await db.destroy();
 	}
 
-	if (statements.length > 0) await lix.executeBatch(statements);
+	if (statements.length > 0) {
+		await lix.transaction(async (tx) => {
+			for (const statement of statements) {
+				await tx.execute(statement.sql, statement.params);
+			}
+		});
+	}
 }
 
 function snapshotLixId(
