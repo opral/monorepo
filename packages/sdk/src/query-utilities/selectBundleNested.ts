@@ -9,8 +9,8 @@ import type {
 /**
  * Select bundles with nested messages and variants.
  *
- * One streamed left join reads a consistent state without buffering the full
- * SQL result. Reconstruction preserves the established SDK result shape.
+ * One streamed left join reads a consistent state without the buffered-query
+ * result cap. Reconstruction preserves the established SDK result shape.
  */
 export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 	let bundleId: string | undefined;
