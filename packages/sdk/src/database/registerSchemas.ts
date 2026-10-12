@@ -12,11 +12,11 @@ const schemas = [
 ] as const;
 
 export async function registerInlangSchemas(lix: Lix): Promise<void> {
-	const registered = await lix.execute(
+	const registered = await lix.query(
 		"SELECT value ->> 'key' AS schema_key FROM lix_registered_schema"
 	);
 	const registeredKeys = new Set(
-		registered.rows
+		registered
 			.map((row) => row.schema_key)
 			.filter((key): key is string => typeof key === "string")
 	);

@@ -9,12 +9,18 @@ import {
 	type Kysely,
 	type QueryResult,
 } from "kysely";
-import type {
-	Lix,
-	LixBatchStatement,
-	LixTransaction,
-	SqlParam,
+import {
+	json,
+	Value,
+	type JsonValue,
+	type Lix,
+	type LixTransaction,
+	type Reader,
+	type SqlParam,
 } from "@lix-js/sdk";
+
+/** One Lix statement: SQL text and its positional parameters. */
+export type LixStatement = { sql: string; params: SqlParam[] };
 
 /** Kysely bridge for Lix's DataFusion SQL interface. */
 export class LixDialect implements Dialect {
@@ -156,7 +162,10 @@ class LixConnection implements DatabaseConnection {
 		}
 	}
 
-	async executeQuery<R>(compiledQuery: CompiledQuery): Promise<QueryResult<R>> {
+	#prepare(compiledQuery: CompiledQuery): {
+		sql: string;
+		parameters: SqlParam[];
+	} {
 		if (
 			this.#released ||
 			(this.#state.kind !== "idle" && this.#state.kind !== "active")
@@ -166,29 +175,70 @@ class LixConnection implements DatabaseConnection {
 			);
 		let prepared = this.preparedQueries.get(compiledQuery.sql);
 		if (!prepared) {
-			const nextPrepared = prepareLixQuery(compiledQuery.sql);
-			prepared = nextPrepared;
+			prepared = prepareLixQuery(compiledQuery.sql);
 			this.preparedQueries.set(compiledQuery.sql, prepared);
 		}
 		const parameters = prepared.parameterPositions.map(
 			(position) => compiledQuery.parameters[position - 1]
 		);
 		encodeIdentityParameters(parameters, prepared.identityParameterPositions);
-		const result =
-			this.#state.kind === "active"
-				? await this.#state.transaction.execute(
-						prepared.sql,
-						parameters as SqlParam[]
-					)
-				: await this.lix.execute(prepared.sql, parameters as SqlParam[]);
+		return { sql: prepared.sql, parameters: parameters.map(toLixParam) };
+	}
+
+	/** The transaction while one is active, otherwise the latest state. */
+	#target(): Lix | LixTransaction {
+		return this.#state.kind === "active" ? this.#state.transaction : this.lix;
+	}
+
+	/**
+	 * Kysely `SELECT`s run through `query()`, which can never write; every
+	 * other statement (writes, DDL, raw SQL) runs through `execute()`.
+	 */
+	async executeQuery<R>(compiledQuery: CompiledQuery): Promise<QueryResult<R>> {
+		const { sql, parameters } = this.#prepare(compiledQuery);
+		const target = this.#target();
+		if (isSelect(compiledQuery)) {
+			const rows = await target.query(sql, parameters);
+			return { rows: rows.map((row) => publicRow(row)) as R[] };
+		}
+		const result = await target.execute(sql, parameters);
 		return {
 			rows: result.rows.map((row) => publicRow(row)) as R[],
 			numAffectedRows: BigInt(result.rowsAffected),
 		};
 	}
 
-	async *streamQuery<R>(compiledQuery: CompiledQuery) {
-		yield await this.executeQuery<R>(compiledQuery);
+	/**
+	 * Streams a read page by page (`stream()`), so `query.stream()` is not
+	 * bound by Lix's buffered read cap. Inside a transaction the stream sees
+	 * the transaction's staged writes.
+	 */
+	async *streamQuery<R>(
+		compiledQuery: CompiledQuery
+	): AsyncIterableIterator<QueryResult<R>> {
+		const { sql, parameters } = this.#prepare(compiledQuery);
+		for await (const rows of streamPages(this.#target(), sql, parameters)) {
+			yield { rows: rows as R[] };
+		}
+	}
+}
+
+function isSelect(compiledQuery: CompiledQuery): boolean {
+	return compiledQuery.query.kind === "SelectQueryNode";
+}
+
+async function* streamPages(
+	reader: Pick<Reader, "stream">,
+	sql: string,
+	parameters: readonly SqlParam[]
+): AsyncIterableIterator<Record<string, unknown>[]> {
+	const rows = await reader.stream(sql, parameters);
+	try {
+		for await (const page of rows.pages()) {
+			yield page.map((row) => publicRow(row));
+		}
+	} finally {
+		await rows.close();
 	}
 }
 
@@ -199,9 +249,7 @@ type PreparedLixQuery = {
 };
 
 /** Convert Kysely's compiled query to the one Lix SQL/parameter contract. */
-export function compileLixQuery(
-	compiledQuery: CompiledQuery
-): LixBatchStatement {
+export function compileLixQuery(compiledQuery: CompiledQuery): LixStatement {
 	const prepared = prepareLixQuery(compiledQuery.sql);
 	const parameters = prepared.parameterPositions.map(
 		(position) => compiledQuery.parameters[position - 1]
@@ -209,8 +257,26 @@ export function compileLixQuery(
 	encodeIdentityParameters(parameters, prepared.identityParameterPositions);
 	return {
 		sql: prepared.sql,
-		params: parameters as SqlParam[],
+		params: parameters.map(toLixParam),
 	};
+}
+
+/**
+ * Kysely passes the inlang JSON columns (declarations, selectors, matches,
+ * pattern) as plain objects and arrays. Lix binds JSON only when it is
+ * explicit, so those become `json(value)`; every other value passes through.
+ */
+function toLixParam(value: unknown): SqlParam {
+	if (
+		value !== null &&
+		typeof value === "object" &&
+		!(value instanceof Uint8Array) &&
+		!(value instanceof Value) &&
+		!(value instanceof Date)
+	) {
+		return json(value as JsonValue);
+	}
+	return value as SqlParam;
 }
 
 function prepareLixQuery(compiledSql: string): PreparedLixQuery {

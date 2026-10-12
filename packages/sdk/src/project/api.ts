@@ -28,6 +28,8 @@ export type InlangProject = {
 	importFiles: (args: {
 		pluginKey: InlangPlugin["key"];
 		files: ImportFile[];
+		/** Split fresh imports into commits. On failure, earlier groups remain imported. */
+		allowPartialImport?: boolean;
 	}) => Promise<void>;
 	exportFiles: (args: {
 		pluginKey: InlangPlugin["key"];

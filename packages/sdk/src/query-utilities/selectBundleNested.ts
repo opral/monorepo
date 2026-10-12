@@ -9,8 +9,8 @@ import type {
 /**
  * Select bundles with nested messages and variants.
  *
- * A flat left join keeps this to one Lix engine round-trip and the small
- * reconstruction below preserves the established SDK result shape.
+ * One streamed left join reads a consistent state without buffering the full
+ * SQL result. Reconstruction preserves the established SDK result shape.
  */
 export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 	let bundleId: string | undefined;
@@ -57,11 +57,11 @@ export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 			if (bundleId !== undefined) {
 				flatQuery = flatQuery.where("inlang_bundle.id", "=", bundleId);
 			}
-			const rows = await flatQuery.execute();
+			const rows = flatQuery.stream();
 			const bundles = new Map<string, BundleNested>();
 			const messages = new Map<string, MessageNested>();
 
-			for (const row of rows) {
+			for await (const row of rows) {
 				let bundle = bundles.get(row.bundle_id);
 				if (!bundle) {
 					bundle = {

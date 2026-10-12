@@ -21,11 +21,10 @@ async function readModuleFromCache(
 	const moduleHash = escape(moduleURI);
 	const filePath = `/cache/plugins/${moduleHash}`;
 
-	const result = await lix.execute<{ content: Uint8Array }>(
+	const file = await lix.queryOne<{ content: Uint8Array }>(
 		"SELECT content FROM lix_file WHERE path = $1",
 		[filePath]
 	);
-	const file = result.rows[0];
 
 	if (file) {
 		return new TextDecoder().decode(file.content);

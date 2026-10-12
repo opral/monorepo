@@ -878,6 +878,120 @@ test("it should create a message for a variant if the message does not exist to 
 	expect(variants[0]?.message_id).toBe(messages[0]?.id);
 });
 
+test("splits a large fresh import into bundle-aligned commits", async () => {
+	const bundleCount = 7;
+	const locales = ["en", "de", "fr"];
+	const mockPlugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: Array.from({ length: bundleCount }, (_, i) => ({
+				id: `bundle-${i}`,
+			})),
+			messages: Array.from({ length: bundleCount }, (_, i) =>
+				locales.map((locale) => ({ bundleId: `bundle-${i}`, locale }))
+			).flat(),
+			variants: Array.from({ length: bundleCount }, (_, i) =>
+				locales.map((locale) => ({
+					messageBundleId: `bundle-${i}`,
+					messageLocale: locale,
+					pattern: [{ type: "text" as const, value: `${locale} ${i}` }],
+				}))
+			).flat(),
+		}),
+	};
+	const importInto = async (rowsPerCommit?: number) => {
+		const project = await loadProjectInMemory({ blob: await newProject() });
+		const commitsBefore = await project.lix.execute(
+			"SELECT count(*) AS n FROM lix_commit"
+		);
+		await importFiles({
+			db: project.db,
+			files: [{ content: new Uint8Array(), locale: "mock" }],
+			pluginKey: "mock",
+			plugins: [mockPlugin],
+			settings: {} as any,
+			rowsPerCommit,
+			allowPartialImport: true,
+		});
+		const commitsAfter = await project.lix.execute(
+			"SELECT count(*) AS n FROM lix_commit"
+		);
+		const commits =
+			Number(commitsAfter.rows[0]!.n) - Number(commitsBefore.rows[0]!.n);
+		const variants = await project.db
+			.selectFrom("inlang_variant")
+			.innerJoin(
+				"inlang_message",
+				"inlang_message.id",
+				"inlang_variant.message_id"
+			)
+			.select([
+				"inlang_message.bundle_id",
+				"inlang_message.locale",
+				"inlang_variant.pattern",
+			])
+			.orderBy("inlang_message.bundle_id")
+			.orderBy("inlang_message.locale")
+			.execute();
+		await project.close();
+		return { commits, variants };
+	};
+
+	const single = await importInto();
+	// Each bundle carries 1 bundle + 3 messages + 3 variants; 14 rows fit two bundles.
+	const split = await importInto(14);
+
+	expect(single.commits).toBe(1);
+	expect(split.commits).toBe(Math.ceil(bundleCount / 2));
+	expect(split.variants).toEqual(single.variants);
+	expect(split.variants).toHaveLength(bundleCount * locales.length);
+});
+
+test.each([false, true])(
+	"failed fresh imports preserve atomicity unless partial imports are enabled (%s)",
+	async (allowPartialImport) => {
+		const project = await loadProjectInMemory({ blob: await newProject() });
+		try {
+			const plugin: InlangPlugin = {
+				key: "mock",
+				importFiles: async () => ({
+					bundles: [{ id: "first" }, { id: "second" }],
+					messages: [
+						{ bundleId: "first", locale: "en" },
+						{ bundleId: "second", locale: "en" },
+					],
+					variants: [
+						{ messageBundleId: "first", messageLocale: "en", pattern: [] },
+						{
+							messageBundleId: "second",
+							messageLocale: "en",
+							pattern: [{ type: "text", value: 1n }] as any,
+						},
+					],
+				}),
+			};
+			await expect(
+				importFiles({
+					db: project.db,
+					files: [],
+					pluginKey: "mock",
+					plugins: [plugin],
+					settings: {} as any,
+					rowsPerCommit: 3,
+					allowPartialImport,
+				})
+			).rejects.toThrow();
+			const bundles = await project.db
+				.selectFrom("inlang_bundle")
+				.select("id")
+				.execute();
+			expect(bundles).toEqual(allowPartialImport ? [{ id: "first" }] : []);
+		} finally {
+			await project.close();
+		}
+	}
+);
+
 /**
  * Matches the way plugins create them: `{ type, key, value }`. The database
  * returns them with sorted keys (`{ key, type, value }`).

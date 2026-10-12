@@ -1,49 +1,42 @@
 import type { CompiledQuery, Kysely } from "kysely";
-import type {
-	ExecuteBatchStatementResult,
-	Lix,
-	LixBatchStatement,
-} from "@lix-js/sdk";
+import type { Lix, StatementResult } from "@lix-js/sdk";
 import type { InlangDatabaseSchema } from "./schema.js";
 import { compileLixQuery } from "./lixDialect.js";
 
-type BatchExecutor = (
-	queries: readonly CompiledQuery[]
-) => Promise<readonly ExecuteBatchStatementResult[]>;
-
-const batchExecutors = new WeakMap<object, BatchExecutor>();
+const lixByDatabase = new WeakMap<object, Lix>();
 
 /**
- * Installs the one atomic batch boundary owned by an Lix-backed database.
- * The executor is deliberately not exposed as a second query dialect: callers
- * provide ordinary Kysely compiled queries and Lix remains responsible for
- * normalization, execution, and atomic publication.
+ * Records the Lix behind an Lix-backed database, for operations Kysely has
+ * no word for: atomic statement groups.
  */
-export function attachLixBatchExecutor(
-	db: Kysely<InlangDatabaseSchema>,
-	lix: Lix
-): void {
-	batchExecutors.set(db, async (queries) => {
-		const statements: LixBatchStatement[] = queries.map(compileLixQuery);
-		return (await lix.executeBatch(statements)).results;
-	});
+export function attachLix(db: Kysely<InlangDatabaseSchema>, lix: Lix): void {
+	lixByDatabase.set(db, lix);
 }
 
 /**
- * Executes already-compiled Kysely statements as one authenticated Lix batch.
- * A database without the Lix batch capability is rejected explicitly; there
- * is no sequential or compatibility route hidden behind this API.
+ * Executes already-compiled Kysely statements atomically in one Lix
+ * transaction. A conflicting concurrent commit reruns the whole group on a
+ * fresh transaction. A database without an attached Lix is rejected
+ * explicitly; there is no sequential route hidden behind this API.
  */
 export async function executeLixBatch(
 	db: Kysely<InlangDatabaseSchema>,
 	queries: readonly CompiledQuery[]
-): Promise<readonly ExecuteBatchStatementResult[]> {
+): Promise<readonly StatementResult[]> {
 	if (queries.length === 0) {
 		throw new Error("executeLixBatch requires at least one query");
 	}
-	const execute = batchExecutors.get(db);
-	if (!execute) {
+	const lix = lixByDatabase.get(db);
+	if (!lix) {
 		throw new Error("The database is not an Lix-backed batch database");
 	}
-	return execute(queries);
+	const statements = queries.map(compileLixQuery);
+	const { value } = await lix.transaction(async (tx) => {
+		const results: StatementResult[] = [];
+		for (const statement of statements) {
+			results.push(await tx.execute(statement.sql, statement.params));
+		}
+		return results;
+	});
+	return value;
 }

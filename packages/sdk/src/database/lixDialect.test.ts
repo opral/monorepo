@@ -458,3 +458,73 @@ test("returns the Lix columns of entity rows", async () => {
 		await db.destroy();
 	}
 });
+
+test("query.stream() pages through lix.stream() and matches execute()", async () => {
+	const lix = await openLix();
+	await registerInlangSchemas(lix);
+	const db = initDb({ lix });
+	await db
+		.insertInto("inlang_bundle")
+		.values(
+			Array.from({ length: 250 }, (_, i) => ({
+				id: `bundle-${String(i).padStart(3, "0")}`,
+				declarations: [{ type: "input-variable", name: `v${i}` }],
+			}))
+		)
+		.execute();
+	const streamSpy = vi.spyOn(lix, "stream");
+
+	const query = db
+		.selectFrom("inlang_bundle")
+		.select(["id", "declarations"])
+		.orderBy("id");
+	const streamed = [];
+	for await (const row of query.stream()) streamed.push(row);
+
+	expect(streamSpy).toHaveBeenCalledTimes(1);
+	expect(streamed).toEqual(await query.execute());
+	expect(streamed).toHaveLength(250);
+
+	// Inside a transaction the stream is the transaction's: it sees the
+	// staged write.
+	await db.transaction().execute(async (trx) => {
+		await trx.insertInto("inlang_bundle").values({ id: "staged" }).execute();
+		const ids = [];
+		for await (const row of trx
+			.selectFrom("inlang_bundle")
+			.select("id")
+			.where("id", "=", "staged")
+			.stream())
+			ids.push(row.id);
+		expect(ids).toEqual(["staged"]);
+	});
+	expect(streamSpy).toHaveBeenCalledTimes(1);
+
+	await db.destroy();
+	await lix.close();
+});
+
+test("selects run through lix.query(), writes through lix.execute()", async () => {
+	const lix = await openLix();
+	await registerInlangSchemas(lix);
+	const db = initDb({ lix });
+	const querySpy = vi.spyOn(lix, "query");
+	const executeSpy = vi.spyOn(lix, "execute");
+
+	await db.insertInto("inlang_bundle").values({ id: "routed" }).execute();
+	expect(executeSpy).toHaveBeenCalledTimes(1);
+	expect(querySpy).not.toHaveBeenCalled();
+
+	expect(
+		await db
+			.selectFrom("inlang_bundle")
+			.select("id")
+			.where("id", "=", "routed")
+			.execute()
+	).toEqual([{ id: "routed" }]);
+	expect(querySpy).toHaveBeenCalledTimes(1);
+	expect(executeSpy).toHaveBeenCalledTimes(1);
+
+	await db.destroy();
+	await lix.close();
+});
