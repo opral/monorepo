@@ -23,13 +23,7 @@ import {
 } from "./variantMatches.js";
 
 const messageReferenceKey = (bundleId: string, locale: string) =>
-	JSON.stringify([bundleId, locale]);
-
-const variantReferenceKey = (
-	bundleId: string,
-	locale: string,
-	matches: unknown
-) => JSON.stringify([bundleId, locale, variantMatchesKey(matches)]);
+	JSON.stringify(["reference", bundleId, locale]);
 
 const INSERT_BATCH_SIZE = 500;
 
@@ -112,33 +106,79 @@ export async function importFiles(args: {
 			}
 			bundleIds.add(bundle.id);
 		}
-		const messageKeys = new Set<string>();
-		let messagesHaveUniqueKeys = true;
+		// Older plugins can emit one ID-less message for every plural/context
+		// variant. Sequential upserts retain the last defined selectors; fold
+		// only those duplicates, leaving explicit identities to the fallback.
+		const messagesByKey = new Map<string, (typeof imported.messages)[number]>();
+		const explicitMessageIds = new Set<string>();
+		let messagesHaveUnambiguousKeys = true;
 		for (const message of imported.messages) {
 			const key = messageReferenceKey(message.bundle_id, message.locale);
-			if (messageKeys.has(key)) {
-				messagesHaveUniqueKeys = false;
-				break;
+			const previous = messagesByKey.get(key);
+			if (previous) {
+				if (previous.id !== undefined || message.id !== undefined) {
+					messagesHaveUnambiguousKeys = false;
+					break;
+				}
+				if (message.selectors !== undefined) {
+					previous.selectors = message.selectors;
+				}
+			} else {
+				messagesByKey.set(key, { ...message });
 			}
-			messageKeys.add(key);
+			if (message.id !== undefined) {
+				if (explicitMessageIds.has(message.id)) {
+					messagesHaveUnambiguousKeys = false;
+					break;
+				}
+				explicitMessageIds.add(message.id);
+			}
 		}
 		const variantKeys = new Set<string>();
-		let variantsHaveUniqueKeys = true;
+		const explicitVariantIds = new Set<string>();
+		let variantsHaveUnambiguousKeys = true;
 		for (const variant of imported.variants) {
-			if (
-				variant.messageBundleId === undefined ||
-				variant.messageLocale === undefined
-			) {
-				variantsHaveUniqueKeys = false;
-				break;
+			let messageKey: string;
+			if (variant.id !== undefined) {
+				if (
+					!explicitMessageIds.has(variant.message_id) ||
+					explicitVariantIds.has(variant.id)
+				) {
+					variantsHaveUnambiguousKeys = false;
+					break;
+				}
+				explicitVariantIds.add(variant.id);
+				messageKey = JSON.stringify(["id", variant.message_id]);
+			} else {
+				if (
+					variant.messageBundleId === undefined ||
+					variant.messageLocale === undefined ||
+					variant.message_id !== undefined
+				) {
+					variantsHaveUnambiguousKeys = false;
+					break;
+				}
+				messageKey = messageReferenceKey(
+					variant.messageBundleId,
+					variant.messageLocale
+				);
+				if (!messagesByKey.has(messageKey)) {
+					variantsHaveUnambiguousKeys = false;
+					break;
+				}
+				// Use the explicit identity for both reference forms so a mixed
+				// import cannot accidentally bypass duplicate-match detection.
+				const messageId = messagesByKey.get(messageKey)!.id;
+				if (messageId !== undefined) {
+					messageKey = JSON.stringify(["id", messageId]);
+				}
 			}
-			const key = variantReferenceKey(
-				variant.messageBundleId,
-				variant.messageLocale,
-				variant.matches
-			);
+			const key = JSON.stringify([
+				messageKey,
+				variantMatchesKey(variant.matches),
+			]);
 			if (variantKeys.has(key)) {
-				variantsHaveUniqueKeys = false;
+				variantsHaveUnambiguousKeys = false;
 				break;
 			}
 			variantKeys.add(key);
@@ -146,22 +186,9 @@ export async function importFiles(args: {
 		const canBatchImportFreshProject =
 			hasExistingBundles === undefined &&
 			bundlesHaveUniqueIds &&
-			messagesHaveUniqueKeys &&
-			variantsHaveUniqueKeys &&
-			imported.messages.every((message) => message.id === undefined) &&
-			imported.variants.every(
-				(variant) =>
-					variant.id === undefined &&
-					variant.message_id === undefined &&
-					variant.messageBundleId !== undefined &&
-					variant.messageLocale !== undefined
-			) &&
-			imported.messages.every((message) => bundleIds.has(message.bundle_id)) &&
-			imported.variants.every((variant) =>
-				messageKeys.has(
-					messageReferenceKey(variant.messageBundleId!, variant.messageLocale!)
-				)
-			);
+			messagesHaveUnambiguousKeys &&
+			variantsHaveUnambiguousKeys &&
+			imported.messages.every((message) => bundleIds.has(message.bundle_id));
 
 		if (canBatchImportFreshProject) {
 			await insertInBatchesByShape({
@@ -172,9 +199,9 @@ export async function importFiles(args: {
 				},
 			});
 
-			const messagesWithIds = imported.messages.map((message) => ({
+			const messagesWithIds = [...messagesByKey.values()].map((message) => ({
 				...message,
-				id: v7(),
+				id: message.id ?? v7(),
 			}));
 			await insertInBatchesByShape({
 				rows: messagesWithIds,
@@ -192,16 +219,21 @@ export async function importFiles(args: {
 			);
 			const variantsWithMessageIds: NewVariantRow[] = imported.variants.map(
 				(variant) => {
-					const messageId = messageIds.get(
-						messageReferenceKey(
-							variant.messageBundleId!,
-							variant.messageLocale!
-						)
-					);
+					const messageId =
+						variant.message_id ??
+						messageIds.get(
+							messageReferenceKey(
+								variant.messageBundleId!,
+								variant.messageLocale!
+							)
+						);
 					if (messageId === undefined) {
 						throw new Error("Imported variant does not reference a message");
 					}
 					return {
+						// Generate IDs in import order before batching by shape: IDs
+						// determine variant precedence when selecting/exporting.
+						id: variant.id ?? v7(),
 						message_id: messageId,
 						matches: variant.matches,
 						pattern: variant.pattern,
@@ -218,6 +250,85 @@ export async function importFiles(args: {
 			return;
 		}
 
+		// Cache only imports matched by properties. Explicit IDs can move rows
+		// between references; they retain the original sequential lookup path.
+		let useLookupCache =
+			bundlesHaveUniqueIds &&
+			imported.messages.every((message) => message.id === undefined) &&
+			imported.variants.every(
+				(variant) =>
+					variant.id === undefined &&
+					variant.message_id === undefined &&
+					variant.messageBundleId !== undefined &&
+					variant.messageLocale !== undefined
+			);
+		const knownBundles = new Set<string>();
+		const knownMessages = new Map<string, { id: string }>();
+		const knownVariants = new Map<
+			string,
+			Array<{ id: string; matches: unknown }>
+		>();
+		if (useLookupCache) {
+			const requestedMessages = new Set([
+				...imported.messages.map((message) =>
+					messageReferenceKey(message.bundle_id, message.locale)
+				),
+				...imported.variants.map((variant) =>
+					messageReferenceKey(variant.messageBundleId!, variant.messageLocale!)
+				),
+			]);
+			const referencedBundles = [
+				...new Set([
+					...imported.messages.map((message) => message.bundle_id),
+					...imported.variants.map((variant) => variant.messageBundleId!),
+				]),
+			];
+			for (
+				let offset = 0;
+				offset < referencedBundles.length;
+				offset += INSERT_BATCH_SIZE
+			) {
+				const ids = referencedBundles.slice(offset, offset + INSERT_BATCH_SIZE);
+				for (const bundle of await trx
+					.selectFrom("inlang_bundle")
+					.select("id")
+					.where("id", "in", ids)
+					.execute()) {
+					knownBundles.add(bundle.id);
+				}
+				for (const message of await trx
+					.selectFrom("inlang_message")
+					.select(["id", "bundle_id", "locale"])
+					.where("bundle_id", "in", ids)
+					.execute()) {
+					const key = messageReferenceKey(message.bundle_id, message.locale);
+					if (!requestedMessages.has(key)) continue;
+					// The schema permits explicit-ID messages sharing a reference.
+					// Retain the sequential SELECT choice for these ambiguous rows.
+					if (knownMessages.has(key)) useLookupCache = false;
+					knownMessages.set(key, { id: message.id });
+				}
+			}
+			const messageIds = useLookupCache
+				? [...knownMessages.values()].map((message) => message.id)
+				: [];
+			for (
+				let offset = 0;
+				offset < messageIds.length;
+				offset += INSERT_BATCH_SIZE
+			) {
+				const ids = messageIds.slice(offset, offset + INSERT_BATCH_SIZE);
+				for (const variant of await trx
+					.selectFrom("inlang_variant")
+					.select(["id", "message_id", "matches"])
+					.where("message_id", "in", ids)
+					.execute()) {
+					const variants = knownVariants.get(variant.message_id) ?? [];
+					variants.push(variant);
+					knownVariants.set(variant.message_id, variants);
+				}
+			}
+		}
 		// upsert every bundle
 		for (const bundle of imported.bundles) {
 			await trx
@@ -225,36 +336,54 @@ export async function importFiles(args: {
 				.values(bundle)
 				.onConflict((oc) => oc.column("id").doUpdateSet(bundle))
 				.execute();
+			if (useLookupCache) knownBundles.add(bundle.id!);
 		}
 		// upsert every message
 		for (const message of imported.messages) {
 			// match the message by bundle id and locale if
 			// no id is provided by the importer
 			if (message.id === undefined) {
-				const exisingMessage = await trx
-					.selectFrom("inlang_message")
-					.where("bundle_id", "=", message.bundle_id)
-					.where("locale", "=", message.locale)
-					.select("id")
-					.executeTakeFirst();
+				const exisingMessage = useLookupCache
+					? knownMessages.get(
+							messageReferenceKey(message.bundle_id, message.locale)
+						)
+					: await trx
+							.selectFrom("inlang_message")
+							.where("bundle_id", "=", message.bundle_id)
+							.where("locale", "=", message.locale)
+							.select("id")
+							.executeTakeFirst();
 				message.id = exisingMessage?.id;
 			}
-			const referencedBundle = await trx
-				.selectFrom("inlang_bundle")
-				.select("id")
-				.where("id", "=", message.bundle_id)
-				.executeTakeFirst();
+			const referencedBundle = useLookupCache
+				? knownBundles.has(message.bundle_id)
+				: await trx
+						.selectFrom("inlang_bundle")
+						.select("id")
+						.where("id", "=", message.bundle_id)
+						.executeTakeFirst();
 			if (!referencedBundle) {
 				await trx
 					.insertInto("inlang_bundle")
 					.values({ id: message.bundle_id })
 					.execute();
+				if (useLookupCache) knownBundles.add(message.bundle_id);
 			}
-			await trx
+			const upsertMessage = trx
 				.insertInto("inlang_message")
 				.values(message)
-				.onConflict((oc) => oc.column("id").doUpdateSet(message))
-				.execute();
+				.onConflict((oc) => oc.column("id").doUpdateSet(message));
+			if (useLookupCache && message.id === undefined) {
+				const inserted = await upsertMessage
+					.returning("id")
+					.executeTakeFirstOrThrow();
+				knownMessages.set(
+					messageReferenceKey(message.bundle_id, message.locale),
+					inserted
+				);
+			} else {
+				await upsertMessage.execute();
+			}
 		}
 		// the variants of each message in the order of the import, to keep that
 		// order for variants that already existed (see `orderVariantsLikeImport`)
@@ -268,26 +397,36 @@ export async function importFiles(args: {
 			// match the variant by message id and matches if
 			// no id is provided by the importer
 			if (variant.id === undefined) {
-				let existingMessage = await trx
-					.selectFrom("inlang_message")
-					.where("bundle_id", "=", variant.messageBundleId)
-					.where("locale", "=", variant.messageLocale)
-					.select("id")
-					.executeTakeFirst();
+				let existingMessage = useLookupCache
+					? knownMessages.get(
+							messageReferenceKey(
+								variant.messageBundleId!,
+								variant.messageLocale!
+							)
+						)
+					: await trx
+							.selectFrom("inlang_message")
+							.where("bundle_id", "=", variant.messageBundleId)
+							.where("locale", "=", variant.messageLocale)
+							.select("id")
+							.executeTakeFirst();
 
 				// if the message does not exist, create it
 				if (existingMessage === undefined) {
-					const existingBundle = await trx
-						.selectFrom("inlang_bundle")
-						.where("id", "=", variant.messageBundleId)
-						.select("id")
-						.executeTakeFirst();
+					const existingBundle = useLookupCache
+						? knownBundles.has(variant.messageBundleId!)
+						: await trx
+								.selectFrom("inlang_bundle")
+								.where("id", "=", variant.messageBundleId)
+								.select("id")
+								.executeTakeFirst();
 					// if the bundle does not exist, create it
-					if (existingBundle === undefined) {
+					if (existingBundle === undefined || existingBundle === false) {
 						await trx
 							.insertInto("inlang_bundle")
 							.values({ id: variant.messageBundleId })
 							.execute();
+						if (useLookupCache) knownBundles.add(variant.messageBundleId!);
 					}
 					// insert the message
 					existingMessage = await trx
@@ -298,13 +437,23 @@ export async function importFiles(args: {
 						})
 						.returningAll()
 						.executeTakeFirstOrThrow();
+					if (useLookupCache)
+						knownMessages.set(
+							messageReferenceKey(
+								variant.messageBundleId!,
+								variant.messageLocale!
+							),
+							existingMessage
+						);
 				}
 
-				const existingVariants = await trx
-					.selectFrom("inlang_variant")
-					.where("message_id", "=", existingMessage.id)
-					.selectAll()
-					.execute();
+				const existingVariants = useLookupCache
+					? (knownVariants.get(existingMessage.id) ?? [])
+					: await trx
+							.selectFrom("inlang_variant")
+							.where("message_id", "=", existingMessage.id)
+							.selectAll()
+							.execute();
 
 				const { existing: existingVariant, duplicates } = findExistingVariant(
 					existingVariants,
@@ -319,6 +468,11 @@ export async function importFiles(args: {
 							duplicates.map((duplicate) => duplicate.id)
 						)
 						.execute();
+					if (useLookupCache)
+						knownVariants.set(
+							existingMessage.id,
+							existingVariants.filter((row) => !duplicates.includes(row))
+						);
 				}
 
 				// need to reset typescript's type narrowing
@@ -348,6 +502,16 @@ export async function importFiles(args: {
 					id: toBeInsertedVariant.id,
 					message_id: toBeInsertedVariant.message_id,
 				};
+			}
+			if (useLookupCache) {
+				const variants = knownVariants.get(upserted.message_id) ?? [];
+				const existing = variants.find((row) => row.id === upserted.id);
+				if (existing) {
+					if (variant.matches !== undefined) existing.matches = variant.matches;
+				} else {
+					variants.push({ id: upserted.id, matches: variant.matches ?? [] });
+				}
+				knownVariants.set(upserted.message_id, variants);
 			}
 			if (variantHadId) {
 				messagesWithPluginVariantIds.add(upserted.message_id);
