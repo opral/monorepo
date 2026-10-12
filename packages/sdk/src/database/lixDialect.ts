@@ -216,7 +216,11 @@ class LixConnection implements DatabaseConnection {
 		compiledQuery: CompiledQuery
 	): AsyncIterableIterator<QueryResult<R>> {
 		const { sql, parameters } = this.#prepare(compiledQuery);
-		const stream = await this.#target().stream(sql, parameters);
+		// Transaction streams can buffer internally; Kysely streaming must still
+		// support results above the ordinary buffered-query cap.
+		const stream = await this.#target().stream(sql, parameters, {
+			maxBytes: Infinity,
+		});
 		try {
 			for await (const page of stream.pages()) {
 				yield { rows: page.map((row) => publicRow(row)) as R[] };
