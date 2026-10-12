@@ -85,13 +85,15 @@ type ParseContext = {
   /**
    * The selectors of the plurals with the same argument, type and offset.
    * Usually one, shared by plurals in different branches. A plural nested in
-   * or following another one gets the next one: sharing a selector would
-   * merge their cases.
+   * or following another one in a branch gets the next one in that branch:
+   * sharing a selector would merge their cases. It is the next one in the
+   * branch only, e.g. for the last plural in
+   * `{g, select, a {{n, plural, ...}} other {}}{n, plural, ...}` the second
+   * one for `g = a` and the first one otherwise, as in its export
+   * `{g, select, a {{n, plural, ...}{n, plural, ...}} other {{n, plural, ...}}}`.
    */
   pluralSelectors: Map<string, PluralSelector[]>;
   exactPluralSelectorKeys: Set<string>;
-  /** Which of the selectors with its key each plural uses. */
-  pluralIndexes: Map<Token, number>;
   /**
    * For each selector, the selectors nested in it. A nested selector must
    * follow the selectors it is nested in: variants match by the selectors in
@@ -127,7 +129,6 @@ export function parseMessage(args: {
     selectors: [],
     pluralSelectors: new Map(),
     exactPluralSelectorKeys: collectExactPluralSelectorKeys(tokens),
-    pluralIndexes: assignPluralIndexes(tokens),
     nested: new Map(),
     splits: 0,
   };
@@ -265,21 +266,40 @@ function expandTokens(
         });
         const withExactSelector =
           context.exactPluralSelectorKeys.has(pluralSelectorKey);
-        const pluralSelector = ensurePluralSelector(context, {
-          arg: token.arg,
-          type,
-          offset: token.pluralOffset,
-          withExactSelector,
-          index: context.pluralIndexes.get(token) ?? 0,
-        });
-        ensureSelectorOrder(
-          context,
-          pluralSelector.selectorName,
-          pluralSelector.exactSelectorName,
-        );
-        for (const current of branches) {
+        // a plural nested in or following another one with the same key in
+        // the branch gets the next selector, see `ParseContext.pluralSelectors`
+        const byIndex = new Map<number, PluralSelector>();
+        const pluralSelectors = branches.map((current) => {
+          const shared = context.pluralSelectors.get(pluralSelectorKey) ?? [];
+          let index = 0;
+          for (const selector of shared) {
+            if (
+              current.matches.some(
+                (match) => match.key === selector.selectorName,
+              )
+            ) {
+              index++;
+            }
+          }
+          let pluralSelector = byIndex.get(index);
+          if (!pluralSelector) {
+            pluralSelector = ensurePluralSelector(context, {
+              arg: token.arg,
+              type,
+              offset: token.pluralOffset,
+              withExactSelector,
+              index,
+            });
+            ensureSelectorOrder(
+              context,
+              pluralSelector.selectorName,
+              pluralSelector.exactSelectorName,
+            );
+            byIndex.set(index, pluralSelector);
+          }
           addNested(context, current.enclosing, pluralSelector.selectorName);
-        }
+          return pluralSelector;
+        });
 
         const cases = sortSelectCases(token.cases, token.type);
         const otherKeys = pluralKeysOf(cases);
@@ -287,6 +307,7 @@ function expandTokens(
         const nextBranches: Branch[] = [];
         for (const selectCase of cases) {
           for (const [index, current] of branches.entries()) {
+            const pluralSelector = pluralSelectors[index]!;
             const matches = matchesForCase(pluralSelector, selectCase.key);
             const newBranch = cloneBranch({
               ...current,
@@ -1205,51 +1226,6 @@ function matchesForCase(pluralSelector: PluralSelector, key: string): Match[] {
   }
 
   return [{ type: "literal-match", key: selectorName, value: key }];
-}
-
-/**
- * Assigns each plural which of the selectors with its key (argument, type
- * and offset) it uses: the first one that no plural before it in the same
- * branch uses, i.e. no plural it is nested in or that precedes it, in any
- * case. Plurals in different cases of a select or plural can share one.
- */
-function assignPluralIndexes(tokens: TokenList): Map<Token, number> {
-  const indexes = new Map<Token, number>();
-  // the number of selectors with each key used before
-  const walk = (list: TokenList, used: Map<string, number>) => {
-    let current = new Map(used);
-    for (const token of list) {
-      if (
-        (token.type !== "select" &&
-          token.type !== "plural" &&
-          token.type !== "selectordinal") ||
-        isOffsetPound(token)
-      ) {
-        continue;
-      }
-      const inCases = new Map(current);
-      if (token.type !== "select") {
-        const key = createPluralSelectorKey({
-          arg: token.arg,
-          type: token.type,
-          offset: token.pluralOffset,
-        });
-        const index = current.get(key) ?? 0;
-        indexes.set(token, index);
-        inCases.set(key, index + 1);
-      }
-      const after = new Map(inCases);
-      for (const selectCase of token.cases) {
-        for (const [key, count] of walk(selectCase.tokens, inCases)) {
-          after.set(key, Math.max(after.get(key) ?? 0, count));
-        }
-      }
-      current = after;
-    }
-    return current;
-  };
-  walk(tokens, new Map());
-  return indexes;
 }
 
 function isExactPluralCaseKey(key: string): boolean {

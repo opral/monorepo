@@ -23,20 +23,42 @@ type PluralContext = {
    * The pattern sits in a select nested in the plural. ICU and
    * intl-messageformat read `#` there as a literal "#" and `'#'` as an
    * apostrophe, "#" and the start of a quote, while the import reads `#`
-   * there as the number and `'#'` as "#". So `#` is only written directly in
-   * its plural, and a literal "#" there throws `HashInSelect`.
+   * there as the number and `'#'` as "#". No quoting reads the same in both.
+   * So `#` is only written directly in its plural, and a literal "#" there
+   * throws `HashInSelect`.
    */
   inSelect: boolean;
-  /** Write a literal "#" in a select nested in the plural as `'#'`. */
-  quoteHashInSelect?: boolean;
+  /** The selects the pattern is nested in inside the plural, outermost first. */
+  selects?: string[];
+  /** The selectors of the plural, its exact selector first if it has one. */
+  selectors?: string[];
 };
+
+/** The context of the cases of a select, in the context `plural`. */
+function selectContext(
+  plural: PluralContext | undefined,
+  selector: VariableReference,
+): PluralContext | undefined {
+  return (
+    plural && {
+      ...plural,
+      inSelect: true,
+      selects: [...(plural.selects ?? []), selector.name],
+    }
+  );
+}
 
 /**
  * Thrown for a literal "#" in a select nested in a plural, which ICU and the
- * import read differently. See `serializePluralCases`.
+ * import read differently. See `serializeMessage`.
  */
 class HashInSelect extends Error {
-  constructor() {
+  constructor(
+    /** The selects the "#" is nested in inside the plural, outermost first. */
+    readonly selects: string[],
+    /** The selectors of the plural. */
+    readonly plural: string[],
+  ) {
     super('A literal "#" in a select nested in a plural');
   }
 }
@@ -47,23 +69,80 @@ export function serializeMessage(args: {
   variants: Variant[];
 }): string {
   const { bundle, message, variants } = args;
-  const pluralOffsets = collectPluralOffsets(bundle.declarations, message);
+  const env: Env = {
+    pluralOffsets: collectPluralOffsets(bundle.declarations, message),
+    locale: message.locale,
+    selectors: message.selectors.map((selector) => selector.name),
+    indexOf: new Map(
+      message.selectors.map((selector, index) => [selector.name, index]),
+    ),
+  };
   if (message.selectors.length === 0) {
     if (variants.length === 0) return "";
     return serializePattern(variants[0]!.pattern, {
       plural: undefined,
-      pluralOffsets,
+      env,
     });
   }
 
-  return serializeVariants(
-    variants,
-    message.selectors,
-    bundle.declarations,
-    undefined,
-    pluralOffsets,
+  // A literal "#" in a select nested in a plural can't be written so that
+  // ICU and the import read the same (see `PluralContext.inSelect`). The
+  // select then moves out of the plural: ahead of it in the order the cases
+  // are nested in, for all cases alike, which keeps the export of the export
+  // the same. MessageFormat 2 still selects by the selectors of the message
+  // (see `Env.selectors`).
+  const positioned = variants.map(
+    (variant, position): CaseVariant => ({ ...variant, position }),
   );
+  let order = message.selectors;
+  for (;;) {
+    try {
+      return serializeVariants(
+        positioned,
+        order,
+        bundle.declarations,
+        undefined,
+        env,
+      );
+    } catch (error) {
+      if (!(error instanceof HashInSelect)) throw error;
+      const select = order.find(
+        (selector) => selector.name === error.selects[0],
+      );
+      const pluralIndex = order.findIndex((selector) =>
+        error.plural.includes(selector.name),
+      );
+      if (
+        !select ||
+        pluralIndex === -1 ||
+        order.indexOf(select) < pluralIndex
+      ) {
+        throw error;
+      }
+      const rest = order.filter((selector) => selector !== select);
+      order = [
+        ...rest.slice(0, pluralIndex),
+        select,
+        ...rest.slice(pluralIndex),
+      ];
+    }
+  }
 }
+
+/** What serializing the variants of a message needs to know of it. */
+type Env = {
+  /** See `collectPluralOffsets`. */
+  pluralOffsets: Map<string, Set<number>>;
+  /** The locale of the message, for the plural category of exact values. */
+  locale: string;
+  /**
+   * The selectors of the message in order, by which MessageFormat 2 selects
+   * variants, whatever order the cases are written in.
+   */
+  selectors: string[];
+  /** The index of each selector in `selectors`. */
+  indexOf: Map<string, number>;
+};
 
 /**
  * The offsets of the plurals on each argument, to resolve the offset of a
@@ -73,15 +152,13 @@ export function serializeMessage(args: {
  * For an argument the message has no plural on, e.g. after an editor removed
  * the plural around a `#`, all plurals of the bundle on it count.
  */
-type PluralOffsets = Map<string, Set<number>>;
-
 function collectPluralOffsets(
   declarations: Declaration[],
   message: Message,
-): PluralOffsets {
+): Map<string, Set<number>> {
   const selected = new Set(message.selectors.map((selector) => selector.name));
-  const all: PluralOffsets = new Map();
-  const ofMessage: PluralOffsets = new Map();
+  const all = new Map<string, Set<number>>();
+  const ofMessage = new Map<string, Set<number>>();
   for (const declaration of declarations) {
     if (
       declaration.type !== "local-variable" ||
@@ -113,11 +190,14 @@ function serializeVariants(
   selectors: VariableReference[],
   declarations: Declaration[],
   plural: PluralContext | undefined,
-  pluralOffsets: PluralOffsets,
+  env: Env,
 ): string {
   if (variants.length === 0) return "";
   if (selectors.length === 0) {
-    return serializePattern(variants[0]!.pattern, { plural, pluralOffsets });
+    return serializePattern(selectedVariant(variants, env).pattern, {
+      plural,
+      env,
+    });
   }
 
   const nextSelectorIndex = selectors.findIndex((candidate) =>
@@ -126,7 +206,10 @@ function serializeVariants(
     ),
   );
   if (nextSelectorIndex === -1) {
-    return serializePattern(variants[0]!.pattern, { plural, pluralOffsets });
+    return serializePattern(selectedVariant(variants, env).pattern, {
+      plural,
+      env,
+    });
   }
 
   const selector = selectors[nextSelectorIndex]!;
@@ -141,7 +224,7 @@ function serializeVariants(
       selectors.slice(nextSelectorIndex + 2),
       declarations,
       plural,
-      pluralOffsets,
+      env,
       pluralSelectorPair,
     );
   }
@@ -161,15 +244,16 @@ function serializeVariants(
         offset: selectorConfig.offset ?? 0,
         inSelect: false,
       }
-    : plural && { ...plural, inSelect: true };
-  const below = pluralContextsOf(
-    usedSelectors(variants, [selector, ...restSelectors]),
+    : selectContext(plural, selector);
+  const below = pluralContextsBelow(
+    variants,
+    [selector, ...restSelectors],
     declarations,
   );
   // a `#` stays in the plural it is a `#` of
   const keepsPart = (part: Pattern[number]) =>
-    writesPound(part, { plural: caseContext, pluralOffsets }) ||
-    keepsPound(part, { below, outside: plural, pluralOffsets });
+    writesPound(part, { plural: caseContext, env }) ||
+    keepsPound(part, { below, outside: plural, env });
   const rawPrefix = commonPrefix(
     variants.map((variant) => variant.pattern),
     keepsPart,
@@ -177,16 +261,14 @@ function serializeVariants(
   // a shared `#` that is a `#` only around the selector, or a literal "#" in
   // a select in a plural (see `PluralContext.inSelect`), moves out even if
   // that leaves a case empty
-  const hoistHash =
-    !plural?.quoteHashInSelect &&
-    patterns.some((pattern) =>
-      pattern.some(
-        (part) =>
-          (isHashText(part) && !isPluralContext && plural !== undefined) ||
-          (writesPound(part, { plural, pluralOffsets }) &&
-            !writesPound(part, { plural: caseContext, pluralOffsets })),
-      ),
-    );
+  const hoistHash = patterns.some((pattern) =>
+    pattern.some(
+      (part) =>
+        (isHashText(part) && !isPluralContext && plural !== undefined) ||
+        (writesPound(part, { plural, env }) &&
+          !writesPound(part, { plural: caseContext, env })),
+    ),
+  );
   const prefixLength =
     rawPrefix.length >= minPatternLength && !hoistHash ? 0 : rawPrefix.length;
   const patternsWithoutPrefix = patterns.map((pattern) =>
@@ -204,7 +286,7 @@ function serializeVariants(
     pattern: stripPattern(variant.pattern, prefixLength, suffixLength),
   }));
 
-  const groups = new Map<string, Variant[]>();
+  const byKey = new Map<string, Variant[]>();
   const unmatched: Variant[] = [];
   for (const variant of strippedVariants) {
     const match = variant.matches.find(
@@ -215,12 +297,42 @@ function serializeVariants(
       continue;
     }
     const key = matchKey(match);
-    const current = groups.get(key) ?? [];
+    const current = byKey.get(key) ?? [];
     current.push(removeMatchForSelector(variant, selector.name));
-    groups.set(key, current);
+    byKey.set(key, current);
   }
-  if (!isPluralContext) addOtherVariants(groups);
-  addToAllGroups(groups, unmatched, "*");
+  // a case of a select or plural displays a variant of its key or, if none
+  // of those matches, of `other`
+  const others = [...(byKey.get("*") ?? []), ...unmatched];
+  const groups = new Map<string, Variant[]>();
+  // the cases of a plural without exact values in the order of the
+  // message's variants, which the import sorts like ICU (categories, then
+  // `other`) and an editor keeps as it wrote them. Variants of `other` added
+  // to a case don't count. A plural with exact values orders its cases in
+  // `serializePluralSelectorPair`.
+  const keys = isPluralContext
+    ? [...byKey.keys()].sort(
+        (left, right) =>
+          firstPosition(byKey.get(left)!) - firstPosition(byKey.get(right)!),
+      )
+    : [...byKey.keys()];
+  for (const key of keys) {
+    groups.set(
+      key,
+      key === "*"
+        ? caseVariants([[others, { [selector.name]: 1 }]], env)
+        : caseVariants(
+            [
+              [byKey.get(key)!, { [selector.name]: 0 }],
+              [others, { [selector.name]: 1 }],
+            ],
+            env,
+          ),
+    );
+  }
+  if (!groups.has("*")) {
+    groups.set("*", caseVariants([[others, { [selector.name]: 1 }]], env));
+  }
 
   const pluralCases = isPluralContext
     ? serializePluralCases({
@@ -228,30 +340,22 @@ function serializeVariants(
         selectors: restSelectors,
         declarations,
         config: selectorConfig as PluralConfig,
-        pluralOffsets,
+        env,
         caseKey: caseKeyFromMatch,
-        level: {
-          variants,
-          selectors: [selector, ...restSelectors],
-          plural,
-        },
+        names: [selector.name],
+        plural,
       })
     : serializeSelectCases({
         groups,
+        selector,
         selectors: restSelectors,
         declarations,
         plural,
-        pluralOffsets,
+        env,
       });
-  if ("serialized" in pluralCases) return pluralCases.serialized;
   const { cases, siblings } = pluralCases;
 
-  let header = `${selectorConfig.arg}, ${selectorConfig.type},`;
-  if (selectorConfig.offset && selectorConfig.offset !== 0) {
-    header += ` offset:${selectorConfig.offset}`;
-  }
-
-  const select = `{${header} ${cases.join(" ")}}`;
+  const select = serializeSelect(selectorConfig, cases, { plural, env });
 
   if (siblings) {
     return serializeSiblings({
@@ -262,15 +366,54 @@ function serializeVariants(
       selectors: restSelectors,
       declarations,
       plural,
-      pluralOffsets,
+      env,
     });
   }
 
   return [
-    serializePattern(prefix, { plural, pluralOffsets }),
+    serializePattern(prefix, { plural, env }),
     select,
-    serializePattern(suffix, { plural, pluralOffsets }),
+    serializePattern(suffix, { plural, env }),
   ].join("");
+}
+
+/**
+ * Writes a select or plural with its cases. A plural with an offset whose
+ * only case is `other {#}` is how a `#` with an offset is written outside of
+ * its plural (see `serializePound`), which the import reads back as that `#`.
+ * So it is written as that `#`, in the context around it.
+ */
+function serializeSelect(
+  config: { type: string; arg: string; offset?: number },
+  cases: string[],
+  options: PatternOptions,
+): string {
+  let header = `${config.arg}, ${config.type},`;
+  if (config.offset && config.offset !== 0) {
+    header += ` offset:${config.offset}`;
+  }
+  if (
+    config.type === "plural" &&
+    config.offset &&
+    cases.length === 1 &&
+    cases[0] === "other {#}"
+  ) {
+    return serializePound(
+      { type: "variable-reference", name: config.arg },
+      {
+        type: "function-reference",
+        name: POUND_FUNCTION,
+        options: [
+          {
+            name: "offset",
+            value: { type: "literal", value: String(config.offset) },
+          },
+        ],
+      },
+      options,
+    );
+  }
+  return `{${header} ${cases.join(" ")}}`;
 }
 
 type PluralConfig = {
@@ -288,32 +431,29 @@ type Siblings = { heads: Map<string, Variant[]>; tail: Variant[] };
  *
  * A literal "#" in a select nested in the plural reads differently in ICU
  * and in the import (see `PluralContext.inSelect`). If the select doesn't
- * depend on the plural, it moves out of the plural: after it, e.g. for
- * `{n, plural, one {# item} other {# items}} in {c, select, a {#a} other {#b}}`,
- * or around it, and the plural is serialized in each of its cases (returned
- * as `serialized`). Otherwise the "#" is quoted, which the import reads back.
+ * depend on the plural, it moves out of the plural after it, e.g. for
+ * `{n, plural, one {# item} other {# items}} in {c, select, a {#a} other {#b}}`.
+ * Otherwise `HashInSelect` goes up to `serializeMessage`, which nests the
+ * plural in the select instead.
  */
 function serializePluralCases(args: {
   groups: Map<string, Variant[]>;
   selectors: VariableReference[];
   declarations: Declaration[];
   config: PluralConfig;
-  pluralOffsets: PluralOffsets;
+  env: Env;
   caseKey: (key: string) => string;
-  /** The variants and selectors of the plural, and the context around it. */
-  level: {
-    variants: Variant[];
-    selectors: VariableReference[];
-    plural: PluralContext | undefined;
-  };
-}):
-  | { cases: string[]; siblings: Siblings | undefined }
-  | { serialized: string } {
+  /** The selectors of the plural, its exact selector first if it has one. */
+  names: string[];
+  /** The context around the plural. */
+  plural: PluralContext | undefined;
+}): { cases: string[]; siblings: Siblings | undefined } {
   const { groups, selectors, declarations, config } = args;
   const context: PluralContext = {
     arg: config.arg,
     offset: config.offset ?? 0,
     inSelect: false,
+    selectors: args.names,
   };
   const serializeCases = (
     caseGroups: Map<string, Variant[]>,
@@ -326,15 +466,15 @@ function serializePluralCases(args: {
           selectors,
           declarations,
           caseContext,
-          args.pluralOffsets,
+          args.env,
         )}}`,
     );
 
   const siblings = splitSiblings(groups, selectors, declarations, {
     config,
     headContext: context,
-    plural: args.level.plural,
-    pluralOffsets: args.pluralOffsets,
+    plural: args.plural,
+    env: args.env,
   });
   try {
     return {
@@ -342,47 +482,23 @@ function serializePluralCases(args: {
       siblings,
     };
   } catch (error) {
-    if (!(error instanceof HashInSelect)) throw error;
-  }
-  const independent = splitSiblings(groups, selectors, declarations, {
-    headContext: context,
-    plural: args.level.plural,
-    pluralOffsets: args.pluralOffsets,
-  });
-  if (independent) {
+    if (
+      !(error instanceof HashInSelect) ||
+      error.plural.join() !== args.names.join()
+    ) {
+      throw error;
+    }
+    const independent = splitSiblings(groups, selectors, declarations, {
+      headContext: context,
+      plural: args.plural,
+      env: args.env,
+    });
+    if (!independent) throw error;
     return {
       cases: serializeCases(independent.heads, context),
       siblings: independent,
     };
   }
-  for (const select of selectors) {
-    const moved = moveSelectOut(
-      select,
-      args.level.selectors.slice(0, args.level.selectors.indexOf(select)),
-      args.level.variants,
-      declarations,
-    );
-    if (!moved) continue;
-    return {
-      serialized: serializeVariants(
-        moved,
-        [
-          select,
-          ...args.level.selectors.filter((candidate) => candidate !== select),
-        ],
-        declarations,
-        args.level.plural,
-        args.pluralOffsets,
-      ),
-    };
-  }
-  return {
-    cases: serializeCases(siblings?.heads ?? groups, {
-      ...context,
-      quoteHashInSelect: true,
-    }),
-    siblings,
-  };
 }
 
 /**
@@ -393,10 +509,11 @@ function serializePluralCases(args: {
  */
 function serializeSelectCases(args: {
   groups: Map<string, Variant[]>;
+  selector: VariableReference;
   selectors: VariableReference[];
   declarations: Declaration[];
   plural: PluralContext | undefined;
-  pluralOffsets: PluralOffsets;
+  env: Env;
 }): { cases: string[]; siblings: Siblings | undefined } {
   const { selectors, declarations, plural } = args;
   const serializeCases = (caseGroups: Map<string, Variant[]>) =>
@@ -406,8 +523,8 @@ function serializeSelectCases(args: {
           groupVariants,
           selectors,
           declarations,
-          plural && { ...plural, inSelect: true },
-          args.pluralOffsets,
+          selectContext(plural, args.selector),
+          args.env,
         )}}`,
     );
   try {
@@ -415,107 +532,13 @@ function serializeSelectCases(args: {
   } catch (error) {
     if (!(error instanceof HashInSelect)) throw error;
     const siblings = splitSiblings(args.groups, selectors, declarations, {
-      headContext: plural && { ...plural, inSelect: true },
+      headContext: selectContext(plural, args.selector),
       plural,
-      pluralOffsets: args.pluralOffsets,
+      env: args.env,
     });
     if (!siblings) throw error;
     return { cases: serializeCases(siblings.heads), siblings };
   }
-}
-
-/**
- * The variants with the select as their outermost selector, if its cases
- * don't depend on the selectors before it (`before`): each combination of
- * their matches has variants for each key of the select or, for a key the
- * select has elsewhere only, for `other`, which that key selects there.
- * Those are added for the key. Undefined if the cases depend on the
- * selectors before it.
- */
-function moveSelectOut(
-  selector: VariableReference,
-  before: VariableReference[],
-  variants: Variant[],
-  declarations: Declaration[],
-): Variant[] | undefined {
-  const local = declarations.find(
-    (declaration) =>
-      declaration.type === "local-variable" &&
-      declaration.name === selector.name,
-  );
-  if (
-    local?.type === "local-variable" ||
-    resolveSelectorConfig(selector, declarations).type !== "select"
-  ) {
-    return undefined;
-  }
-  const beforeNames = new Set(before.map((entry) => entry.name));
-  const keys = new Set<string>();
-  const byBefore = new Map<string, Map<string, Variant[]>>();
-  // variants without a match on the select don't depend on it
-  const unmatched: Variant[] = [];
-  for (const variant of variants) {
-    const match = variant.matches.find((entry) => entry.key === selector.name);
-    if (!match) {
-      unmatched.push(variant);
-      continue;
-    }
-    const key = matchKey(match);
-    if (key !== "*") keys.add(key);
-    const combination = JSON.stringify(
-      variant.matches.filter((entry) => beforeNames.has(entry.key)),
-    );
-    const cases = byBefore.get(combination) ?? new Map<string, Variant[]>();
-    cases.set(key, [...(cases.get(key) ?? []), variant]);
-    byBefore.set(combination, cases);
-  }
-  const result: Variant[] = [];
-  for (const cases of byBefore.values()) {
-    const others = cases.get("*");
-    for (const key of keys) {
-      const keyVariants = cases.get(key);
-      if (keyVariants) {
-        result.push(...keyVariants);
-      } else if (others) {
-        result.push(
-          ...others.map((other) => ({
-            ...other,
-            matches: other.matches.map((entry) =>
-              entry.key === selector.name
-                ? {
-                    type: "literal-match" as const,
-                    key: selector.name,
-                    value: key,
-                  }
-                : entry,
-            ),
-          })),
-        );
-      } else {
-        return undefined;
-      }
-    }
-    if (others) result.push(...others);
-  }
-  for (const variant of unmatched) {
-    for (const key of keys) {
-      result.push({
-        ...variant,
-        matches: [
-          ...variant.matches,
-          { type: "literal-match", key: selector.name, value: key },
-        ],
-      });
-    }
-    result.push({
-      ...variant,
-      matches: [
-        ...variant.matches,
-        { type: "catchall-match", key: selector.name },
-      ],
-    });
-  }
-  return result;
 }
 
 /**
@@ -545,7 +568,7 @@ function splitSiblings(
     headContext: PluralContext | undefined;
     /** The context around the cases and the rest. */
     plural: PluralContext | undefined;
-    pluralOffsets: PluralOffsets;
+    env: Env;
   },
 ): Siblings | undefined {
   let tail: Variant[] | undefined;
@@ -575,14 +598,31 @@ function splitSiblings(
   );
   if (nextIndex === -1) return undefined;
   const { config } = options;
+  const nextPair = resolvePluralSelectorPair(
+    restSelectors,
+    nextIndex,
+    declarations,
+  );
   const nextConfig =
-    resolvePluralSelectorPair(restSelectors, nextIndex, declarations)?.config ??
+    nextPair?.config ??
     resolveSelectorConfig(restSelectors[nextIndex]!, declarations);
+  const nextNames = nextPair
+    ? [nextPair.exactSelector.name, nextPair.pluralSelector.name]
+    : [restSelectors[nextIndex]!.name];
   if (
     config &&
     (nextConfig.type !== config.type ||
       nextConfig.arg !== config.arg ||
-      (nextConfig.offset ?? 0) !== (config.offset ?? 0))
+      (nextConfig.offset ?? 0) !== (config.offset ?? 0) ||
+      // a plural with an offset that selects nothing is written as its `#`s
+      // where it can, see `pluralContextsBelow`
+      (nextConfig.offset &&
+        !tail.some((variant) =>
+          variant.matches.some(
+            (match) =>
+              match.type === "literal-match" && nextNames.includes(match.key),
+          ),
+        )))
   ) {
     return undefined;
   }
@@ -601,15 +641,15 @@ function splitSiblings(
     (part) =>
       writesPound(part, {
         plural: options.headContext,
-        pluralOffsets: options.pluralOffsets,
+        env: options.env,
       }) &&
       !writesPound(part, {
         plural: options.plural,
-        pluralOffsets: options.pluralOffsets,
+        env: options.env,
       }) &&
       !writesPound(part, {
         plural: restContext,
-        pluralOffsets: options.pluralOffsets,
+        env: options.env,
       }),
   );
   for (const head of heads.values()) {
@@ -640,9 +680,9 @@ function serializeSiblings(args: {
   selectors: VariableReference[];
   declarations: Declaration[];
   plural: PluralContext | undefined;
-  pluralOffsets: PluralOffsets;
+  env: Env;
 }): string {
-  const { siblings, prefix, suffix, plural, pluralOffsets } = args;
+  const { siblings, prefix, suffix, plural, env } = args;
   const isEmpty = [...siblings.heads.values()].every(
     (head) => head[0]!.pattern.length === 0,
   );
@@ -655,11 +695,11 @@ function serializeSiblings(args: {
       args.selectors,
       args.declarations,
       plural,
-      pluralOffsets,
+      env,
     );
   }
   return [
-    serializePattern(prefix, { plural, pluralOffsets }),
+    serializePattern(prefix, { plural, env }),
     args.select,
     serializeVariants(
       siblings.tail.map((variant) => ({
@@ -669,9 +709,18 @@ function serializeSiblings(args: {
       args.selectors,
       args.declarations,
       plural,
-      pluralOffsets,
+      env,
     ),
   ].join("");
+}
+
+function sameTakenValues(
+  left: Record<string, number>,
+  right: Record<string, number>,
+): boolean {
+  for (const name in left) if (left[name] !== right[name]) return false;
+  for (const name in right) if (!(name in left)) return false;
+  return true;
 }
 
 function sameVariants(left: Variant[], right: Variant[]): boolean {
@@ -681,6 +730,8 @@ function sameVariants(left: Variant[], right: Variant[]): boolean {
       (variant, index) =>
         JSON.stringify(variant.matches) ===
           JSON.stringify(right[index]!.matches) &&
+        sameTakenValues(takenOf(variant), takenOf(right[index]!)) &&
+        rankOf(variant) === rankOf(right[index]!) &&
         variant.pattern.length === right[index]!.pattern.length &&
         variant.pattern.every((part, partIndex) =>
           patternElementsEqual(part, right[index]!.pattern[partIndex]),
@@ -690,41 +741,351 @@ function sameVariants(left: Variant[], right: Variant[]): boolean {
 }
 
 /**
- * Adds the variants without a match on the selector, which don't depend on
- * it, to every case. A selector that is nested in another one in some
- * branches and encloses it in others can come first for variants without a
- * match on it.
+ * A variant in a case of a select or plural, with how it matched the
+ * selectors that the cases around it took out: 0 for a key, 1 for `other`.
+ * Those that come before all others the variants still differ on are only
+ * kept as `rank`, the order of the variants by them.
  */
-function addToAllGroups(
-  groups: Map<string, Variant[]>,
-  unmatched: Variant[],
-  otherKey: string,
-) {
-  if (unmatched.length === 0) return;
-  for (const group of groups.values()) group.push(...unmatched);
-  if (!groups.has(otherKey)) groups.set(otherKey, [...unmatched]);
+type CaseVariant = Variant & {
+  taken?: Record<string, number>;
+  rank?: number;
+  /** The index of the variant in the message. */
+  position?: number;
+};
+
+/** The first position of the variants in the message, see `CaseVariant`. */
+function firstPosition(variants: Variant[]): number {
+  return Math.min(
+    ...variants.map(
+      (variant) => (variant as CaseVariant).position ?? Number.MAX_SAFE_INTEGER,
+    ),
+  );
+}
+
+function takenOf(variant: Variant): Record<string, number> {
+  return (variant as CaseVariant).taken ?? {};
+}
+
+function rankOf(variant: Variant): number {
+  return (variant as CaseVariant).rank ?? 0;
+}
+
+/** How the variant matches the selector: 0 for a key, 1 for `other`. */
+function preference(variant: Variant, name: string): number {
+  const taken = takenOf(variant)[name];
+  if (taken !== undefined) return taken;
+  return variant.matches.find((match) => match.key === name)?.type ===
+    "literal-match"
+    ? 0
+    : 1;
 }
 
 /**
- * Adds to each case of a select the variants of `other` it lacks. A select
- * nested in or following another select on the same argument can give a key
- * variants in some branches only, e.g. `b` in
- * `{h, select, other {}}{g, select, a {{h, select, b {B} other {}}} other {}}`
- * has a variant for `g = a` only: for another `g`, `h = b` selects the
- * variant of `other`. A variant of `other` is not added if a variant of the
- * case matches whenever it does, which variants select first.
+ * Compares two variants that both match as MessageFormat 2 does: a key
+ * before `other`, by the selectors in order. Negative if `left` comes first.
  */
-function addOtherVariants(groups: Map<string, Variant[]>) {
-  const others = groups.get("*");
-  if (!others) return;
-  for (const [key, group] of groups) {
-    if (key === "*") continue;
-    for (const other of others) {
-      if (!group.some((variant) => coversMatches(variant, other))) {
-        group.push(other);
+function comparePreference(
+  left: Variant,
+  right: Variant,
+  selectors: string[],
+): number {
+  const byRank = rankOf(left) - rankOf(right);
+  if (byRank !== 0) return byRank;
+  for (const name of selectors) {
+    const difference = preference(left, name) - preference(right, name);
+    if (difference !== 0) return difference;
+  }
+  return 0;
+}
+
+/**
+ * The variant MessageFormat 2 selects among variants that all match: the
+ * first of those it prefers.
+ */
+function selectedVariant(variants: Variant[], env: Env): Variant {
+  let selected = variants[0]!;
+  for (const variant of variants) {
+    if (comparePreference(variant, selected, env.selectors) < 0) {
+      selected = variant;
+    }
+  }
+  return selected;
+}
+
+/**
+ * The variants of a case of a select or plural, from groups of variants with
+ * how they matched the selectors the case takes out, e.g. the variants of
+ * the case's key and the variants of `other`: a case displays a variant of
+ * `other` for values no variant of its key matches. Variants that another
+ * one matches whenever they do and is preferred over are left out.
+ *
+ * How the variants matched the selectors taken out is dropped if the
+ * remaining selectors select the same variants without it, which keeps cases
+ * that display the same alike, e.g. for sibling plurals.
+ */
+function caseVariants(
+  groups: [Variant[], Record<string, number>][],
+  env: Env,
+): Variant[] {
+  let nonEmpty = 0;
+  let takenBefore = false;
+  for (const [variants] of groups) {
+    if (variants.length > 0) nonEmpty++;
+    for (const variant of variants) {
+      const { taken, rank } = variant as CaseVariant;
+      if (taken || rank !== undefined) takenBefore = true;
+    }
+  }
+  // without matches taken out before, the variants of one group compare by
+  // the remaining selectors alone
+  if (nonEmpty <= 1 && !takenBefore) {
+    return groups.find(([variants]) => variants.length > 0)?.[0] ?? [];
+  }
+  const names = env.selectors;
+  const takenNames = new Set<string>();
+  const literalNames = new Set<string>();
+  const entries: CaseEntry[] = [];
+  for (const [variants, taken] of groups) {
+    for (const name in taken) takenNames.add(name);
+    for (const variant of variants) {
+      const literals = new Map<string, string>();
+      for (const match of variant.matches) {
+        if (match.type !== "literal-match") continue;
+        literals.set(match.key, match.value);
+        literalNames.add(match.key);
+      }
+      const merged = takenBefore ? { ...takenOf(variant), ...taken } : taken;
+      if (takenBefore) for (const name in merged) takenNames.add(name);
+      entries.push({
+        variant,
+        taken: merged,
+        rank: rankOf(variant),
+        literals,
+        preferences: [],
+        group: "",
+      });
+    }
+  }
+  const takenIndexes: number[] = [];
+  const remaining: number[] = [];
+  for (const [index, name] of names.entries()) {
+    (takenNames.has(name) ? takenIndexes : remaining).push(index);
+  }
+  // taken out before all selectors the variants still differ on, the
+  // matches only order the variants
+  const firstLiteral = remaining.find((index) =>
+    literalNames.has(names[index]!),
+  );
+  const ranked =
+    firstLiteral === undefined ||
+    takenIndexes.every((index) => index < firstLiteral);
+  if (ranked) {
+    const sorted = entries
+      .map((entry) => ({
+        entry,
+        key: [
+          entry.rank,
+          ...takenIndexes.map((index) => entry.taken[names[index]!] ?? 1),
+        ],
+      }))
+      .sort((left, right) => compareKeys(left.key, right.key));
+    let rank = -1;
+    let previous: number[] | undefined;
+    for (const { entry, key } of sorted) {
+      if (!previous || compareKeys(previous, key) !== 0) rank++;
+      previous = key;
+      entry.rank = rank;
+      entry.taken = {};
+      entry.group = String(rank);
+    }
+  } else {
+    for (const entry of entries) {
+      entry.group = [
+        entry.rank,
+        ...takenIndexes.map((index) => entry.taken[names[index]!]),
+      ].join();
+    }
+  }
+  if (entries.every((entry) => entry.group === entries[0]!.group)) {
+    return entries.map(withoutTaken);
+  }
+  const withPreferences = (entry: CaseEntry) => {
+    entry.preferences = names.map(
+      (name) => entry.taken[name] ?? (entry.literals.has(name) ? 0 : 1),
+    );
+  };
+
+  if (!ranked) entries.forEach(withPreferences);
+  const dominated = ranked
+    ? dominatedByRank(entries, env)
+    : dominatedByTaken(entries, names);
+  const kept = entries.filter((_, index) => !dominated[index]);
+  if (ranked) kept.forEach(withPreferences);
+  const all = names.map((_, index) => index);
+  // whether the remaining selectors select another of two variants that
+  // both match than the selectors taken out do
+  let takenMatters = false;
+  outer: for (let left = 0; left < kept.length; left++) {
+    for (let right = left + 1; right < kept.length; right++) {
+      const a = kept[left]!;
+      const b = kept[right]!;
+      if (a.group === b.group || !overlapsLiterals(a, b)) continue;
+      if (comesFirst(a, b, all, true) !== comesFirst(a, b, remaining, false)) {
+        takenMatters = true;
+        break outer;
       }
     }
   }
+  if (!takenMatters) return kept.map(withoutTaken);
+  return kept.map((entry) => ({
+    ...entry.variant,
+    taken: entry.taken,
+    rank: entry.rank,
+  }));
+}
+
+type CaseEntry = {
+  variant: Variant;
+  taken: Record<string, number>;
+  rank: number;
+  /** The keys of the variant's literal matches, by selector. */
+  literals: Map<string, string>;
+  /** Its preference by each selector of the message, see `preference`. */
+  preferences: number[];
+  /** Equal for the variants that took the same keys out. */
+  group: string;
+};
+
+function compareKeys(left: number[], right: number[]): number {
+  for (let index = 0; index < left.length; index++) {
+    const difference = left[index]! - right[index]!;
+    if (difference !== 0) return difference;
+  }
+  return 0;
+}
+
+/**
+ * Which variants another one matches whenever they do and comes first then,
+ * if all matches taken out are in `rank`: one of a lower rank whose literal
+ * matches are some of theirs. Looks those up by their keys instead of
+ * comparing all pairs, which large messages make slow.
+ */
+function dominatedByRank(entries: CaseEntry[], env: Env): boolean[] {
+  // the literal matches in selector order
+  const sorted = entries.map((entry) =>
+    [...entry.literals]
+      .map(([name, value]): [number, string] => [
+        env.indexOf.get(name) ?? -1,
+        value,
+      ])
+      .sort(([left], [right]) => left - right),
+  );
+  // the lowest rank of the variants with literal matches, by those matches
+  // in selector order
+  type Node = { rank: number; children: Map<string, Node> };
+  const root: Node = { rank: Infinity, children: new Map() };
+  for (const [index, entry] of entries.entries()) {
+    let node = root;
+    for (const literal of sorted[index]!) {
+      const key = literalKey(literal);
+      let child = node.children.get(key);
+      if (!child) {
+        child = { rank: Infinity, children: new Map() };
+        node.children.set(key, child);
+      }
+      node = child;
+    }
+    node.rank = Math.min(node.rank, entry.rank);
+  }
+  // whether a variant of a lower rank has some of the literal matches
+  const search = (
+    node: Node,
+    rank: number,
+    literals: [number, string][],
+    from: number,
+  ): boolean => {
+    if (node.rank < rank) return true;
+    for (let index = from; index < literals.length; index++) {
+      const child = node.children.get(literalKey(literals[index]!));
+      if (child && search(child, rank, literals, index + 1)) return true;
+    }
+    return false;
+  };
+  return entries.map((entry, index) =>
+    search(root, entry.rank, sorted[index]!, 0),
+  );
+}
+
+function literalKey([index, value]: [number, string]): string {
+  return `${index}:${value}`;
+}
+
+/**
+ * Which variants another one matches whenever they do and comes first then,
+ * by the matches taken out: the first selector they differ on is one taken
+ * out, where the other has the key.
+ */
+function dominatedByTaken(entries: CaseEntry[], names: string[]): boolean[] {
+  return entries.map((entry) =>
+    entries.some(
+      (other) =>
+        other.group !== entry.group &&
+        [...other.literals].every(
+          ([name, value]) => entry.literals.get(name) === value,
+        ) &&
+        (() => {
+          if (other.rank !== entry.rank) return other.rank < entry.rank;
+          for (const [index, name] of names.entries()) {
+            const difference =
+              other.preferences[index]! - entry.preferences[index]!;
+            if (difference !== 0) return difference < 0 && name in other.taken;
+          }
+          return false;
+        })(),
+    ),
+  );
+}
+
+function overlapsLiterals(left: CaseEntry, right: CaseEntry): boolean {
+  for (const [name, value] of left.literals) {
+    const other = right.literals.get(name);
+    if (other !== undefined && other !== value) return false;
+  }
+  return true;
+}
+
+/**
+ * Whether `left` comes first by the selectors at `indexes`, and by rank
+ * before them if `withRank`, or compares equal.
+ */
+function comesFirst(
+  left: CaseEntry,
+  right: CaseEntry,
+  indexes: number[],
+  withRank: boolean,
+): boolean {
+  if (withRank && left.rank !== right.rank) return left.rank < right.rank;
+  for (const index of indexes) {
+    const difference = left.preferences[index]! - right.preferences[index]!;
+    if (difference !== 0) return difference < 0;
+  }
+  return true;
+}
+
+function withoutTaken(entry: CaseEntry): Variant {
+  const variant = entry.variant as CaseVariant;
+  if (!variant.taken && variant.rank === undefined) return variant;
+  const { taken: _taken, rank: _rank, ...rest } = variant;
+  return rest;
+}
+
+/** Whether values exist that both variants match. */
+function overlapsMatches(left: Variant, right: Variant): boolean {
+  return left.matches.every((match) => {
+    if (match.type !== "literal-match") return true;
+    const other = right.matches.find((entry) => entry.key === match.key);
+    return other?.type !== "literal-match" || other.value === match.value;
+  });
 }
 
 /** Whether `variant` matches whenever `other` matches. */
@@ -812,6 +1173,12 @@ function resolveSelectorConfig(
   };
 }
 
+type PluralSelectorPair = {
+  exactSelector: VariableReference;
+  pluralSelector: VariableReference;
+  config: PluralConfig;
+};
+
 /**
  * The exact selector and plural selector at `index` of the selectors, which
  * the import puts in this order. Accepts the reverse order unless the exact
@@ -822,17 +1189,7 @@ function resolvePluralSelectorPair(
   selectors: VariableReference[],
   index: number,
   declarations: Declaration[],
-):
-  | {
-      exactSelector: VariableReference;
-      pluralSelector: VariableReference;
-      config: {
-        type: "plural" | "selectordinal";
-        arg: string;
-        offset?: number;
-      };
-    }
-  | undefined {
+): PluralSelectorPair | undefined {
   const firstSelector = selectors[index];
   const secondSelector = selectors[index + 1];
   if (!firstSelector || !secondSelector) return undefined;
@@ -860,17 +1217,7 @@ function tryResolvePluralSelectorPair(
   exactSelector: VariableReference,
   pluralSelector: VariableReference,
   declarations: Declaration[],
-):
-  | {
-      exactSelector: VariableReference;
-      pluralSelector: VariableReference;
-      config: {
-        type: "plural" | "selectordinal";
-        arg: string;
-        offset?: number;
-      };
-    }
-  | undefined {
+): PluralSelectorPair | undefined {
   const exactDeclaration = declarations.find(
     (declaration) =>
       declaration.type === "local-variable" &&
@@ -895,11 +1242,7 @@ function tryResolvePluralSelectorPair(
   return {
     exactSelector,
     pluralSelector,
-    config: pluralConfig as {
-      type: "plural" | "selectordinal";
-      arg: string;
-      offset?: number;
-    },
+    config: pluralConfig as PluralConfig,
   };
 }
 
@@ -908,16 +1251,8 @@ function serializePluralSelectorPair(
   selectors: VariableReference[],
   declarations: Declaration[],
   plural: PluralContext | undefined,
-  pluralOffsets: PluralOffsets,
-  pair: {
-    exactSelector: VariableReference;
-    pluralSelector: VariableReference;
-    config: {
-      type: "plural" | "selectordinal";
-      arg: string;
-      offset?: number;
-    };
-  },
+  env: Env,
+  pair: PluralSelectorPair,
 ): string {
   const patterns = variants.map((variant) => variant.pattern);
   const minPatternLength = Math.min(
@@ -931,12 +1266,12 @@ function serializePluralSelectorPair(
   };
   const below = [
     caseContext,
-    ...pluralContextsOf(usedSelectors(variants, selectors), declarations),
+    ...pluralContextsBelow(variants, selectors, declarations),
   ];
   // a `#` stays in the plural it is a `#` of
   const keepsPart = (part: Pattern[number]) =>
-    writesPound(part, { plural: caseContext, pluralOffsets }) ||
-    keepsPound(part, { below, outside: plural, pluralOffsets });
+    writesPound(part, { plural: caseContext, env }) ||
+    keepsPound(part, { below, outside: plural, env });
   const rawPrefix = commonPrefix(
     variants.map((variant) => variant.pattern),
     keepsPart,
@@ -946,8 +1281,8 @@ function serializePluralSelectorPair(
   const hoistHash = patterns.some((pattern) =>
     pattern.some(
       (part) =>
-        writesPound(part, { plural, pluralOffsets }) &&
-        !writesPound(part, { plural: caseContext, pluralOffsets }),
+        writesPound(part, { plural, env }) &&
+        !writesPound(part, { plural: caseContext, env }),
     ),
   );
   const prefixLength =
@@ -967,7 +1302,10 @@ function serializePluralSelectorPair(
     pattern: stripPattern(variant.pattern, prefixLength, suffixLength),
   }));
 
-  const groups = new Map<string, Variant[]>();
+  // the variants of each exact value and category, and of neither
+  const exact = new Map<string, { variant: Variant; category?: string }[]>();
+  const categories = new Map<string, Variant[]>();
+  const others: Variant[] = [];
   const unmatched: Variant[] = [];
   for (const variant of strippedVariants) {
     const exactMatch = variant.matches.find(
@@ -982,45 +1320,90 @@ function serializePluralSelectorPair(
       unmatched.push(variant);
       continue;
     }
-    const key = pluralPairCaseKey(exactMatch, pluralMatch);
-    const current = groups.get(key) ?? [];
-    current.push(
-      removeMatchesForSelectors(variant, [
-        pair.exactSelector.name,
-        pair.pluralSelector.name,
-      ]),
-    );
-    groups.set(key, current);
+    const rest = removeMatchesForSelectors(variant, [
+      pair.exactSelector.name,
+      pair.pluralSelector.name,
+    ]);
+    if (exactMatch?.type === "literal-match") {
+      const current = exact.get(exactMatch.value) ?? [];
+      current.push({
+        variant: rest,
+        category:
+          pluralMatch?.type === "literal-match" ? pluralMatch.value : undefined,
+      });
+      exact.set(exactMatch.value, current);
+    } else if (pluralMatch?.type === "literal-match") {
+      const current = categories.get(pluralMatch.value) ?? [];
+      current.push(rest);
+      categories.set(pluralMatch.value, current);
+    } else {
+      others.push(rest);
+    }
   }
-  addToAllGroups(groups, unmatched, "other");
+  others.push(...unmatched);
+
+  const taken = (exact: number, category: number) => ({
+    [pair.exactSelector.name]: exact,
+    [pair.pluralSelector.name]: category,
+  });
+  const categoryOf = pluralCategoryOf(env.locale, pair.config);
+  const groups = new Map<string, Variant[]>();
+  for (const [value, entries] of exact) {
+    const category = categoryOf(value);
+    // a variant with the exact value and another category never matches
+    const valueVariants = entries.flatMap(
+      (entry): [Variant[], Record<string, number>][] =>
+        entry.category === undefined
+          ? [[[entry.variant], taken(0, 1)]]
+          : category === undefined || entry.category === category
+            ? [[[entry.variant], taken(0, 0)]]
+            : [],
+    );
+    if (valueVariants.length === 0) continue;
+    // for the value, MessageFormat 2 also selects variants of its category
+    // and of `other`
+    groups.set(
+      `=${value}`,
+      caseVariants(
+        [
+          ...valueVariants,
+          [
+            category === undefined ? [] : (categories.get(category) ?? []),
+            taken(1, 0),
+          ],
+          [others, taken(1, 1)],
+        ],
+        env,
+      ),
+    );
+  }
+  for (const [category, categoryVariants] of categories) {
+    groups.set(
+      category,
+      caseVariants(
+        [
+          [categoryVariants, taken(1, 0)],
+          [others, taken(1, 1)],
+        ],
+        env,
+      ),
+    );
+  }
+  groups.set("other", caseVariants([[others, taken(1, 1)]], env));
 
   const pluralCases = serializePluralCases({
-    groups: new Map(
-      Array.from(groups.entries()).sort(
-        ([left], [right]) =>
-          pluralCasePriority(left) - pluralCasePriority(right),
-      ),
-    ),
+    groups,
     selectors,
     declarations,
     config: pair.config,
-    pluralOffsets,
+    env,
     caseKey: (key) => key,
-    level: {
-      variants,
-      selectors: [pair.exactSelector, pair.pluralSelector, ...selectors],
-      plural,
-    },
+    names: [pair.exactSelector.name, pair.pluralSelector.name],
+    plural,
   });
-  if ("serialized" in pluralCases) return pluralCases.serialized;
   const { cases, siblings } = pluralCases;
 
-  let header = `${pair.config.arg}, ${pair.config.type},`;
-  if (pair.config.offset && pair.config.offset !== 0) {
-    header += ` offset:${pair.config.offset}`;
-  }
-
-  const select = `{${header} ${cases.join(" ")}}`;
+  const select = serializeSelect(pair.config, cases, { plural, env });
 
   if (siblings) {
     return serializeSiblings({
@@ -1031,34 +1414,40 @@ function serializePluralSelectorPair(
       selectors,
       declarations,
       plural,
-      pluralOffsets,
+      env,
     });
   }
 
   return [
-    serializePattern(prefix, { plural, pluralOffsets }),
+    serializePattern(prefix, { plural, env }),
     select,
-    serializePattern(suffix, { plural, pluralOffsets }),
+    serializePattern(suffix, { plural, env }),
   ].join("");
 }
 
-function pluralPairCaseKey(
-  exactMatch: Variant["matches"][number] | undefined,
-  pluralMatch: Variant["matches"][number] | undefined,
-): string {
-  if (exactMatch?.type === "literal-match") {
-    return `=${exactMatch.value}`;
+/**
+ * The plural category of an exact value of the plural, by the rules of the
+ * default locale if the locale is not a valid tag, or undefined without
+ * plural rules.
+ */
+function pluralCategoryOf(
+  locale: string,
+  config: PluralConfig,
+): (value: string) => string | undefined {
+  const options: Intl.PluralRulesOptions = {
+    type: config.type === "selectordinal" ? "ordinal" : "cardinal",
+  };
+  let rules: Intl.PluralRules | undefined;
+  try {
+    rules = new Intl.PluralRules(locale, options);
+  } catch {
+    try {
+      rules = new Intl.PluralRules(undefined, options);
+    } catch {
+      rules = undefined;
+    }
   }
-  if (pluralMatch?.type === "literal-match") {
-    return pluralMatch.value;
-  }
-  return "other";
-}
-
-function pluralCasePriority(key: string): number {
-  if (key.startsWith("=")) return 0;
-  if (key === "other") return 2;
-  return 1;
+  return (value) => rules?.select(Number(value) - (config.offset ?? 0));
 }
 
 function optionValue(
@@ -1076,7 +1465,7 @@ type PatternOptions = {
   /** The plural or selectordinal the pattern sits in. */
   plural: PluralContext | undefined;
   /** To resolve the offset of a legacy `#`. */
-  pluralOffsets: PluralOffsets;
+  env: Env;
 };
 
 function serializePattern(pattern: Pattern, options: PatternOptions): string {
@@ -1170,14 +1559,14 @@ function poundOffset(
   const offsetOption = optionValue(annotation, "offset");
   if (offsetOption !== undefined) return parseOffset(offsetOption);
 
-  const pluralOffsets = options.pluralOffsets.get(argName) ?? new Set();
-  if (pluralOffsets.size === 0 || pluralOffsets.has(0)) return 0;
+  const offsets = options.env.pluralOffsets.get(argName) ?? new Set();
+  if (offsets.size === 0 || offsets.has(0)) return 0;
 
   // legacy `#`
   if (options.plural?.arg === argName) return options.plural.offset;
   // outside of its plural, the offset is only known if all plurals on the
   // argument share it
-  if (pluralOffsets.size === 1) return [...pluralOffsets][0]!;
+  if (offsets.size === 1) return [...offsets][0]!;
   return 0;
 }
 
@@ -1209,12 +1598,11 @@ function mergeTexts(pattern: Pattern): Pattern {
 }
 
 function escapeText(value: string, options: PatternOptions): string {
-  if (
-    options.plural?.inSelect &&
-    !options.plural.quoteHashInSelect &&
-    value.includes("#")
-  ) {
-    throw new HashInSelect();
+  if (options.plural?.inSelect && value.includes("#")) {
+    throw new HashInSelect(
+      options.plural.selects ?? [],
+      options.plural.selectors ?? [],
+    );
   }
   return escapeIcuText(value, options.plural !== undefined);
 }
@@ -1319,13 +1707,13 @@ function keepsPound(
   options: {
     below: PluralContext[];
     outside: PluralContext | undefined;
-    pluralOffsets: PluralOffsets;
+    env: Env;
   },
 ): boolean {
-  const { pluralOffsets } = options;
+  const { env } = options;
   return (
-    !writesPound(part, { plural: options.outside, pluralOffsets }) &&
-    options.below.some((plural) => writesPound(part, { plural, pluralOffsets }))
+    !writesPound(part, { plural: options.outside, env }) &&
+    options.below.some((plural) => writesPound(part, { plural, env }))
   );
 }
 
@@ -1341,17 +1729,44 @@ function usedSelectors(
   );
 }
 
-/** The contexts of the plurals among the selectors. */
-function pluralContextsOf(
+/**
+ * The contexts of the plurals the variants select on below, whose `#`s stay
+ * in them. Not of a plural with an offset that selects nothing, i.e. only has
+ * `other`: what its cases share moves out of it up to its `#`, which can
+ * leave `{arg, plural, offset:N other {#}}`. The import reads that back as a
+ * `#` without the plural, which doesn't stay below, and a second export
+ * would differ.
+ */
+function pluralContextsBelow(
+  variants: Variant[],
   selectors: VariableReference[],
   declarations: Declaration[],
 ): PluralContext[] {
-  return selectors.flatMap((selector) => {
-    const config = resolveSelectorConfig(selector, declarations);
-    return config.type === "select"
-      ? []
-      : [{ arg: config.arg, offset: config.offset ?? 0, inSelect: false }];
-  });
+  const used = usedSelectors(variants, selectors);
+  const contexts: PluralContext[] = [];
+  for (let index = 0; index < used.length; index++) {
+    // a plural selector, with its exact selector if it has one
+    const pair = resolvePluralSelectorPair(used, index, declarations);
+    const unit = pair
+      ? [pair.exactSelector.name, pair.pluralSelector.name]
+      : [used[index]!.name];
+    if (pair) index++;
+    const config =
+      pair?.config ?? resolveSelectorConfig(used[index]!, declarations);
+    if (config.type === "select") continue;
+    const selects = variants.some((variant) =>
+      variant.matches.some(
+        (match) => match.type === "literal-match" && unit.includes(match.key),
+      ),
+    );
+    if (config.offset && !selects) continue;
+    contexts.push({
+      arg: config.arg,
+      offset: config.offset ?? 0,
+      inSelect: false,
+    });
+  }
+  return contexts;
 }
 
 /** Whether the part is a `#` written as `#` in the context. */
