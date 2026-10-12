@@ -337,4 +337,4 @@ SDK 4.0 queries `project.db` with the table and column names Lix stores. Nothing
 
 To list your app/plugin on inlang.com, please open a pull request to the [registry.json file](https://github.com/opral/inlang/blob/main/packages/marketplace-registry/registry.json). 
 
-Make sure that the link you are contributing points to a `marketplace-manifest.json` file. An example of can be found [here](https://github.com/opral/inlang/blob/main/packages/fink/marketplace-manifest.json)
+Make sure that the link you are contributing points to a `marketplace-manifest.json` file. An example can be found [here](https://github.com/opral/inlang-fink/blob/main/marketplace-manifest.json)
