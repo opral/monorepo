@@ -73,6 +73,9 @@ export function serializeMessage(args: {
     pluralOffsets: collectPluralOffsets(bundle.declarations, message),
     locale: message.locale,
     selectors: message.selectors.map((selector) => selector.name),
+    indexOf: new Map(
+      message.selectors.map((selector, index) => [selector.name, index]),
+    ),
   };
   if (message.selectors.length === 0) {
     if (variants.length === 0) return "";
@@ -109,7 +112,13 @@ export function serializeMessage(args: {
       const pluralIndex = order.findIndex((selector) =>
         error.plural.includes(selector.name),
       );
-      if (!select || order.indexOf(select) < pluralIndex) throw error;
+      if (
+        !select ||
+        pluralIndex === -1 ||
+        order.indexOf(select) < pluralIndex
+      ) {
+        throw error;
+      }
       const rest = order.filter((selector) => selector !== select);
       order = [
         ...rest.slice(0, pluralIndex),
@@ -131,6 +140,8 @@ type Env = {
    * variants, whatever order the cases are written in.
    */
   selectors: string[];
+  /** The index of each selector in `selectors`. */
+  indexOf: Map<string, number>;
 };
 
 /**
@@ -294,9 +305,11 @@ function serializeVariants(
   // of those matches, of `other`
   const others = [...(byKey.get("*") ?? []), ...unmatched];
   const groups = new Map<string, Variant[]>();
-  // the cases of a plural in the order of the message's variants, which the
-  // import sorts like ICU (exact values, categories, `other`) and an editor
-  // keeps as it wrote them. Variants of `other` added to a case don't count.
+  // the cases of a plural without exact values in the order of the
+  // message's variants, which the import sorts like ICU (categories, then
+  // `other`) and an editor keeps as it wrote them. Variants of `other` added
+  // to a case don't count. A plural with exact values orders its cases in
+  // `serializePluralSelectorPair`.
   const keys = isPluralContext
     ? [...byKey.keys()].sort(
         (left, right) =>
@@ -701,6 +714,15 @@ function serializeSiblings(args: {
   ].join("");
 }
 
+function sameTakenValues(
+  left: Record<string, number>,
+  right: Record<string, number>,
+): boolean {
+  for (const name in left) if (left[name] !== right[name]) return false;
+  for (const name in right) if (!(name in left)) return false;
+  return true;
+}
+
 function sameVariants(left: Variant[], right: Variant[]): boolean {
   return (
     left.length === right.length &&
@@ -709,6 +731,7 @@ function sameVariants(left: Variant[], right: Variant[]): boolean {
         JSON.stringify(variant.matches) ===
           JSON.stringify(right[index]!.matches) &&
         sameTakenValues(takenOf(variant), takenOf(right[index]!)) &&
+        rankOf(variant) === rankOf(right[index]!) &&
         variant.pattern.length === right[index]!.pattern.length &&
         variant.pattern.every((part, partIndex) =>
           patternElementsEqual(part, right[index]!.pattern[partIndex]),
@@ -720,9 +743,12 @@ function sameVariants(left: Variant[], right: Variant[]): boolean {
 /**
  * A variant in a case of a select or plural, with how it matched the
  * selectors that the cases around it took out: 0 for a key, 1 for `other`.
+ * Those that come before all others the variants still differ on are only
+ * kept as `rank`, the order of the variants by them.
  */
 type CaseVariant = Variant & {
   taken?: Record<string, number>;
+  rank?: number;
   /** The index of the variant in the message. */
   position?: number;
 };
@@ -738,6 +764,10 @@ function firstPosition(variants: Variant[]): number {
 
 function takenOf(variant: Variant): Record<string, number> {
   return (variant as CaseVariant).taken ?? {};
+}
+
+function rankOf(variant: Variant): number {
+  return (variant as CaseVariant).rank ?? 0;
 }
 
 /** How the variant matches the selector: 0 for a key, 1 for `other`. */
@@ -759,6 +789,8 @@ function comparePreference(
   right: Variant,
   selectors: string[],
 ): number {
+  const byRank = rankOf(left) - rankOf(right);
+  if (byRank !== 0) return byRank;
   for (const name of selectors) {
     const difference = preference(left, name) - preference(right, name);
     if (difference !== 0) return difference;
@@ -800,7 +832,8 @@ function caseVariants(
   for (const [variants] of groups) {
     if (variants.length > 0) nonEmpty++;
     for (const variant of variants) {
-      if ((variant as CaseVariant).taken) takenBefore = true;
+      const { taken, rank } = variant as CaseVariant;
+      if (taken || rank !== undefined) takenBefore = true;
     }
   }
   // without matches taken out before, the variants of one group compare by
@@ -808,103 +841,232 @@ function caseVariants(
   if (nonEmpty <= 1 && !takenBefore) {
     return groups.find(([variants]) => variants.length > 0)?.[0] ?? [];
   }
+  const names = env.selectors;
+  const takenNames = new Set<string>();
+  const literalNames = new Set<string>();
   const entries: CaseEntry[] = [];
-  for (const [index, [variants, taken]] of groups.entries()) {
+  for (const [variants, taken] of groups) {
+    for (const name in taken) takenNames.add(name);
     for (const variant of variants) {
+      const literals = new Map<string, string>();
+      for (const match of variant.matches) {
+        if (match.type !== "literal-match") continue;
+        literals.set(match.key, match.value);
+        literalNames.add(match.key);
+      }
       const merged = takenBefore ? { ...takenOf(variant), ...taken } : taken;
-      entries.push({ variant, taken: merged, group: index });
+      if (takenBefore) for (const name in merged) takenNames.add(name);
+      entries.push({
+        variant,
+        taken: merged,
+        rank: rankOf(variant),
+        literals,
+        preferences: [],
+        group: "",
+      });
     }
   }
-  // whether two variants took different keys out
-  const differ = (left: CaseEntry, right: CaseEntry) =>
-    takenBefore
-      ? !sameTakenValues(left.taken, right.taken)
-      : left.group !== right.group;
-  if (entries.every((entry) => !differ(entry, entries[0]!))) {
+  const takenIndexes: number[] = [];
+  const remaining: number[] = [];
+  for (const [index, name] of names.entries()) {
+    (takenNames.has(name) ? takenIndexes : remaining).push(index);
+  }
+  // taken out before all selectors the variants still differ on, the
+  // matches only order the variants
+  const firstLiteral = remaining.find((index) =>
+    literalNames.has(names[index]!),
+  );
+  const ranked =
+    firstLiteral === undefined ||
+    takenIndexes.every((index) => index < firstLiteral);
+  if (ranked) {
+    const sorted = entries
+      .map((entry) => ({
+        entry,
+        key: [
+          entry.rank,
+          ...takenIndexes.map((index) => entry.taken[names[index]!] ?? 1),
+        ],
+      }))
+      .sort((left, right) => compareKeys(left.key, right.key));
+    let rank = -1;
+    let previous: number[] | undefined;
+    for (const { entry, key } of sorted) {
+      if (!previous || compareKeys(previous, key) !== 0) rank++;
+      previous = key;
+      entry.rank = rank;
+      entry.taken = {};
+      entry.group = String(rank);
+    }
+  } else {
+    for (const entry of entries) {
+      entry.group = [
+        entry.rank,
+        ...takenIndexes.map((index) => entry.taken[names[index]!]),
+      ].join();
+    }
+  }
+  if (entries.every((entry) => entry.group === entries[0]!.group)) {
     return entries.map(withoutTaken);
   }
-  const kept = entries.filter(
-    (entry) =>
-      !entries.some(
-        (other) =>
-          differ(other, entry) &&
-          coversMatches(other.variant, entry.variant) &&
-          dominates(other, entry, env.selectors),
-      ),
-  );
-  const remaining = env.selectors.filter(
-    (name) => !kept.some((entry) => name in entry.taken),
-  );
-  const takenMatters = kept.some((entry, index) => {
-    for (const later of kept.slice(index + 1)) {
-      if (
-        differ(entry, later) &&
-        overlapsMatches(entry.variant, later.variant) &&
-        comesFirst(entry, later, env.selectors) !==
-          comesFirst(entry, later, remaining)
-      ) {
-        return true;
+  const withPreferences = (entry: CaseEntry) => {
+    entry.preferences = names.map(
+      (name) => entry.taken[name] ?? (entry.literals.has(name) ? 0 : 1),
+    );
+  };
+
+  if (!ranked) entries.forEach(withPreferences);
+  const dominated = ranked
+    ? dominatedByRank(entries, env)
+    : dominatedByTaken(entries, names);
+  const kept = entries.filter((_, index) => !dominated[index]);
+  if (ranked) kept.forEach(withPreferences);
+  const all = names.map((_, index) => index);
+  // whether the remaining selectors select another of two variants that
+  // both match than the selectors taken out do
+  let takenMatters = false;
+  outer: for (let left = 0; left < kept.length; left++) {
+    for (let right = left + 1; right < kept.length; right++) {
+      const a = kept[left]!;
+      const b = kept[right]!;
+      if (a.group === b.group || !overlapsLiterals(a, b)) continue;
+      if (comesFirst(a, b, all, true) !== comesFirst(a, b, remaining, false)) {
+        takenMatters = true;
+        break outer;
       }
     }
-    return false;
-  });
+  }
   if (!takenMatters) return kept.map(withoutTaken);
-  return kept.map((entry) => ({ ...entry.variant, taken: entry.taken }));
+  return kept.map((entry) => ({
+    ...entry.variant,
+    taken: entry.taken,
+    rank: entry.rank,
+  }));
 }
 
 type CaseEntry = {
   variant: Variant;
   taken: Record<string, number>;
-  /** The index of the group the variant is from. */
-  group: number;
+  rank: number;
+  /** The keys of the variant's literal matches, by selector. */
+  literals: Map<string, string>;
+  /** Its preference by each selector of the message, see `preference`. */
+  preferences: number[];
+  /** Equal for the variants that took the same keys out. */
+  group: string;
 };
 
-function sameTakenValues(
-  left: Record<string, number>,
-  right: Record<string, number>,
-): boolean {
-  for (const name in left) if (left[name] !== right[name]) return false;
-  for (const name in right) if (!(name in left)) return false;
-  return true;
-}
-
-function entryPreference(entry: CaseEntry, name: string): number {
-  return (
-    entry.taken[name] ??
-    (entry.variant.matches.some(
-      (match) => match.key === name && match.type === "literal-match",
-    )
-      ? 0
-      : 1)
-  );
+function compareKeys(left: number[], right: number[]): number {
+  for (let index = 0; index < left.length; index++) {
+    const difference = left[index]! - right[index]!;
+    if (difference !== 0) return difference;
+  }
+  return 0;
 }
 
 /**
- * Whether `preferred` comes first whenever both match: the first selector
- * they differ on is one taken out, where `preferred` has the key.
+ * Which variants another one matches whenever they do and comes first then,
+ * if all matches taken out are in `rank`: one of a lower rank whose literal
+ * matches are some of theirs. Looks those up by their keys instead of
+ * comparing all pairs, which large messages make slow.
  */
-function dominates(
-  preferred: CaseEntry,
-  entry: CaseEntry,
-  selectors: string[],
-): boolean {
-  for (const name of selectors) {
-    const difference =
-      entryPreference(preferred, name) - entryPreference(entry, name);
-    if (difference !== 0) return difference < 0 && name in preferred.taken;
+function dominatedByRank(entries: CaseEntry[], env: Env): boolean[] {
+  // the literal matches in selector order
+  const sorted = entries.map((entry) =>
+    [...entry.literals]
+      .map(([name, value]): [number, string] => [
+        env.indexOf.get(name) ?? -1,
+        value,
+      ])
+      .sort(([left], [right]) => left - right),
+  );
+  // the lowest rank of the variants with literal matches, by those matches
+  // in selector order
+  type Node = { rank: number; children: Map<string, Node> };
+  const root: Node = { rank: Infinity, children: new Map() };
+  for (const [index, entry] of entries.entries()) {
+    let node = root;
+    for (const literal of sorted[index]!) {
+      const key = literalKey(literal);
+      let child = node.children.get(key);
+      if (!child) {
+        child = { rank: Infinity, children: new Map() };
+        node.children.set(key, child);
+      }
+      node = child;
+    }
+    node.rank = Math.min(node.rank, entry.rank);
   }
-  return false;
+  // whether a variant of a lower rank has some of the literal matches
+  const search = (
+    node: Node,
+    rank: number,
+    literals: [number, string][],
+    from: number,
+  ): boolean => {
+    if (node.rank < rank) return true;
+    for (let index = from; index < literals.length; index++) {
+      const child = node.children.get(literalKey(literals[index]!));
+      if (child && search(child, rank, literals, index + 1)) return true;
+    }
+    return false;
+  };
+  return entries.map((entry, index) =>
+    search(root, entry.rank, sorted[index]!, 0),
+  );
 }
 
-/** Whether `left` comes first by `selectors`, or compares equal. */
+function literalKey([index, value]: [number, string]): string {
+  return `${index}:${value}`;
+}
+
+/**
+ * Which variants another one matches whenever they do and comes first then,
+ * by the matches taken out: the first selector they differ on is one taken
+ * out, where the other has the key.
+ */
+function dominatedByTaken(entries: CaseEntry[], names: string[]): boolean[] {
+  return entries.map((entry) =>
+    entries.some(
+      (other) =>
+        other.group !== entry.group &&
+        [...other.literals].every(
+          ([name, value]) => entry.literals.get(name) === value,
+        ) &&
+        (() => {
+          if (other.rank !== entry.rank) return other.rank < entry.rank;
+          for (const [index, name] of names.entries()) {
+            const difference =
+              other.preferences[index]! - entry.preferences[index]!;
+            if (difference !== 0) return difference < 0 && name in other.taken;
+          }
+          return false;
+        })(),
+    ),
+  );
+}
+
+function overlapsLiterals(left: CaseEntry, right: CaseEntry): boolean {
+  for (const [name, value] of left.literals) {
+    const other = right.literals.get(name);
+    if (other !== undefined && other !== value) return false;
+  }
+  return true;
+}
+
+/**
+ * Whether `left` comes first by the selectors at `indexes`, and by rank
+ * before them if `withRank`, or compares equal.
+ */
 function comesFirst(
   left: CaseEntry,
   right: CaseEntry,
-  selectors: string[],
+  indexes: number[],
+  withRank: boolean,
 ): boolean {
-  for (const name of selectors) {
-    const difference =
-      entryPreference(left, name) - entryPreference(right, name);
+  if (withRank && left.rank !== right.rank) return left.rank < right.rank;
+  for (const index of indexes) {
+    const difference = left.preferences[index]! - right.preferences[index]!;
     if (difference !== 0) return difference < 0;
   }
   return true;
@@ -912,8 +1074,8 @@ function comesFirst(
 
 function withoutTaken(entry: CaseEntry): Variant {
   const variant = entry.variant as CaseVariant;
-  if (!variant.taken) return variant;
-  const { taken: _taken, ...rest } = variant;
+  if (!variant.taken && variant.rank === undefined) return variant;
+  const { taken: _taken, rank: _rank, ...rest } = variant;
   return rest;
 }
 
@@ -1264,20 +1426,26 @@ function serializePluralSelectorPair(
 }
 
 /**
- * The plural category of an exact value of the plural, or undefined without
- * plural rules for the locale.
+ * The plural category of an exact value of the plural, by the rules of the
+ * default locale if the locale is not a valid tag, or undefined without
+ * plural rules.
  */
 function pluralCategoryOf(
   locale: string,
   config: PluralConfig,
 ): (value: string) => string | undefined {
+  const options: Intl.PluralRulesOptions = {
+    type: config.type === "selectordinal" ? "ordinal" : "cardinal",
+  };
   let rules: Intl.PluralRules | undefined;
   try {
-    rules = new Intl.PluralRules(locale, {
-      type: config.type === "selectordinal" ? "ordinal" : "cardinal",
-    });
+    rules = new Intl.PluralRules(locale, options);
   } catch {
-    rules = undefined;
+    try {
+      rules = new Intl.PluralRules(undefined, options);
+    } catch {
+      rules = undefined;
+    }
   }
   return (value) => rules?.select(Number(value) - (config.offset ?? 0));
 }

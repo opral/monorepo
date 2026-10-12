@@ -268,25 +268,35 @@ function expandTokens(
           context.exactPluralSelectorKeys.has(pluralSelectorKey);
         // a plural nested in or following another one with the same key in
         // the branch gets the next selector, see `ParseContext.pluralSelectors`
+        const byIndex = new Map<number, PluralSelector>();
         const pluralSelectors = branches.map((current) => {
-          const pluralSelector = ensurePluralSelector(context, {
-            arg: token.arg,
-            type,
-            offset: token.pluralOffset,
-            withExactSelector,
-            index: (
-              context.pluralSelectors.get(pluralSelectorKey) ?? []
-            ).filter((selector) =>
+          const shared = context.pluralSelectors.get(pluralSelectorKey) ?? [];
+          let index = 0;
+          for (const selector of shared) {
+            if (
               current.matches.some(
                 (match) => match.key === selector.selectorName,
-              ),
-            ).length,
-          });
-          ensureSelectorOrder(
-            context,
-            pluralSelector.selectorName,
-            pluralSelector.exactSelectorName,
-          );
+              )
+            ) {
+              index++;
+            }
+          }
+          let pluralSelector = byIndex.get(index);
+          if (!pluralSelector) {
+            pluralSelector = ensurePluralSelector(context, {
+              arg: token.arg,
+              type,
+              offset: token.pluralOffset,
+              withExactSelector,
+              index,
+            });
+            ensureSelectorOrder(
+              context,
+              pluralSelector.selectorName,
+              pluralSelector.exactSelectorName,
+            );
+            byIndex.set(index, pluralSelector);
+          }
           addNested(context, current.enclosing, pluralSelector.selectorName);
           return pluralSelector;
         });
