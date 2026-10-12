@@ -1,3 +1,4 @@
+import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { Kysely } from "kysely";
 import type {
 	Bundle,
@@ -39,26 +40,24 @@ export function variantFromPlugin(variant: VariantImport): ImportedVariant {
 export async function selectPluginRows(
 	db: Kysely<InlangDatabaseSchema>
 ): Promise<{ bundles: Bundle[]; messages: Message[]; variants: Variant[] }> {
-	const [bundles, messages, variants] = await Promise.all([
-		db.selectFrom("inlang_bundle").select(["id", "declarations"]).execute(),
-		db
-			.selectFrom("inlang_message")
-			.select(["id", "bundle_id", "locale", "selectors"])
-			.execute(),
-		db
-			.selectFrom("inlang_variant")
-			.select(["id", "message_id", "matches", "pattern"])
-			.execute(),
-	]);
-	return {
-		bundles,
-		messages: messages.map(({ bundle_id, ...message }) => ({
-			...message,
-			bundleId: bundle_id,
-		})),
-		variants: variants.map(({ message_id, ...variant }) => ({
-			...variant,
-			messageId: message_id,
-		})),
-	};
+	const bundles: Bundle[] = [];
+	const messages: Message[] = [];
+	const variants: Variant[] = [];
+	for (const {
+		messages: nestedMessages,
+		...bundle
+	} of await selectBundleNested(db).execute()) {
+		bundles.push(bundle);
+		for (const {
+			bundle_id,
+			variants: nestedVariants,
+			...message
+		} of nestedMessages) {
+			messages.push({ ...message, bundleId: bundle_id });
+			for (const { message_id, ...variant } of nestedVariants) {
+				variants.push({ ...variant, messageId: message_id });
+			}
+		}
+	}
+	return { bundles, messages, variants };
 }

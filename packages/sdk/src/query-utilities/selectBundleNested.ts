@@ -57,7 +57,8 @@ export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 			if (bundleId !== undefined) {
 				flatQuery = flatQuery.where("inlang_bundle.id", "=", bundleId);
 			}
-			const rows = flatQuery.stream();
+			const rows =
+				bundleId === undefined ? flatQuery.stream() : await flatQuery.execute();
 			const bundles = new Map<string, BundleNested>();
 			const messages = new Map<string, MessageNested>();
 
