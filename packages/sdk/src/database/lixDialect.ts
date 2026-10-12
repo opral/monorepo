@@ -15,7 +15,6 @@ import {
 	type JsonValue,
 	type Lix,
 	type LixTransaction,
-	type Reader,
 	type SqlParam,
 } from "@lix-js/sdk";
 
@@ -197,7 +196,7 @@ class LixConnection implements DatabaseConnection {
 	async executeQuery<R>(compiledQuery: CompiledQuery): Promise<QueryResult<R>> {
 		const { sql, parameters } = this.#prepare(compiledQuery);
 		const target = this.#target();
-		if (isSelect(compiledQuery)) {
+		if (compiledQuery.query.kind === "SelectQueryNode") {
 			const rows = await target.query(sql, parameters);
 			return { rows: rows.map((row) => publicRow(row)) as R[] };
 		}
@@ -217,28 +216,14 @@ class LixConnection implements DatabaseConnection {
 		compiledQuery: CompiledQuery
 	): AsyncIterableIterator<QueryResult<R>> {
 		const { sql, parameters } = this.#prepare(compiledQuery);
-		for await (const rows of streamPages(this.#target(), sql, parameters)) {
-			yield { rows: rows as R[] };
+		const stream = await this.#target().stream(sql, parameters);
+		try {
+			for await (const page of stream.pages()) {
+				yield { rows: page.map((row) => publicRow(row)) as R[] };
+			}
+		} finally {
+			await stream.close();
 		}
-	}
-}
-
-function isSelect(compiledQuery: CompiledQuery): boolean {
-	return compiledQuery.query.kind === "SelectQueryNode";
-}
-
-async function* streamPages(
-	reader: Pick<Reader, "stream">,
-	sql: string,
-	parameters: readonly SqlParam[]
-): AsyncIterableIterator<Record<string, unknown>[]> {
-	const rows = await reader.stream(sql, parameters);
-	try {
-		for await (const page of rows.pages()) {
-			yield page.map((row) => publicRow(row));
-		}
-	} finally {
-		await rows.close();
 	}
 }
 
