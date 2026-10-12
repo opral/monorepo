@@ -210,9 +210,7 @@ test("keyContext", async () => {
 	});
 
 	expect(imported.bundles).lengthOf(1);
-	// one message per imported key, see
-	// "a key with a single variant should have no matches even if other keys are multi variant"
-	expect(imported.messages).lengthOf(3);
+	expect(imported.messages).lengthOf(1);
 	expect(imported.variants).lengthOf(3);
 
 	expect(imported.bundles[0]?.id).toStrictEqual("keyContext");
@@ -1027,7 +1025,7 @@ test("a key with a single variant should have no matches even if other keys are 
 	});
 
 	expect(imported.bundles).lengthOf(2);
-	expect(imported.messages).lengthOf(3);
+	expect(imported.messages).lengthOf(2);
 	expect(imported.variants).lengthOf(3);
 
 	expect(imported.bundles[0]?.id).toStrictEqual("key");

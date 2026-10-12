@@ -205,6 +205,437 @@ test("does not alias message references containing NUL characters", async () => 
 	expect(messages).toHaveLength(2);
 });
 
+// Count SQL insert statements through Kysely rather than wall time, so the
+// batching regression remains deterministic on slower CI machines.
+function countInserts(
+	project: Awaited<ReturnType<typeof loadProjectInMemory>>
+) {
+	const inserts: string[] = [];
+	const selects: string[] = [];
+	const db = project.db.withPlugin({
+		transformQuery({ node }) {
+			if (node.kind === "InsertQueryNode") {
+				inserts.push(node.into!.table.identifier.name);
+			}
+			if (node.kind === "SelectQueryNode") selects.push(node.kind);
+			return node;
+		},
+		async transformResult({ result }) {
+			return result;
+		},
+	});
+	return { db, inserts, selects };
+}
+
+test("batches duplicate ID-less messages with the last defined selectors", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const { db, inserts } = countInserts(project);
+	const selectors = [{ type: "variable-reference" as const, name: "count" }];
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [{ id: "bundle" }],
+			messages: [
+				{ bundleId: "bundle", locale: "en", selectors: [] },
+				{ bundleId: "bundle", locale: "en", selectors },
+				{ bundleId: "bundle", locale: "en", selectors: undefined },
+			],
+			variants: [
+				{
+					messageBundleId: "bundle",
+					messageLocale: "en",
+					matches: [{ type: "literal-match", key: "count", value: "one" }],
+				},
+				{
+					messageBundleId: "bundle",
+					messageLocale: "en",
+					matches: [{ type: "catchall-match", key: "count" }],
+				},
+			],
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	const messages = await project.db
+		.selectFrom("inlang_message")
+		.selectAll()
+		.execute();
+	expect(messages).toHaveLength(1);
+	expect(messages[0]!.selectors).toEqual(selectors);
+	expect(inserts.filter((table) => table === "inlang_message")).toHaveLength(1);
+	expect(inserts.filter((table) => table === "inlang_variant")).toHaveLength(1);
+	await project.close();
+});
+
+test("batches explicit plugin IDs and preserves their identities", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const { db, inserts } = countInserts(project);
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [{ id: "bundle" }],
+			messages: ["en", "de"].map((locale) => ({
+				id: `message-${locale}`,
+				bundleId: "bundle",
+				locale,
+			})),
+			variants: ["en", "de"].map((locale) => ({
+				id: `variant-${locale}`,
+				messageId: `message-${locale}`,
+				pattern: [{ type: "text" as const, value: locale }],
+			})),
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	expect(
+		(await project.db.selectFrom("inlang_message").select("id").execute())
+			.map((row) => row.id)
+			.sort()
+	).toEqual(["message-de", "message-en"]);
+	expect(
+		(
+			await project.db
+				.selectFrom("inlang_variant")
+				.select(["id", "message_id"])
+				.execute()
+		).sort((a, b) => a.id.localeCompare(b.id))
+	).toEqual([
+		{ id: "variant-de", message_id: "message-de" },
+		{ id: "variant-en", message_id: "message-en" },
+	]);
+	expect(inserts.filter((table) => table === "inlang_message")).toHaveLength(1);
+	expect(inserts.filter((table) => table === "inlang_variant")).toHaveLength(1);
+	await project.close();
+});
+
+test("batches explicit message IDs with ID-less variants using property references", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const { db, inserts } = countInserts(project);
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [{ id: "bundle" }],
+			messages: ["en", "de"].map((locale) => ({
+				id: `message-${locale}`,
+				bundleId: "bundle",
+				locale,
+			})),
+			variants: ["en", "de"].map((locale) => ({
+				messageBundleId: "bundle",
+				messageLocale: locale,
+				pattern: text(locale),
+			})),
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	const rows = await project.db
+		.selectFrom("inlang_variant")
+		.select(["message_id", "pattern"])
+		.execute();
+	expect(rows.sort((a, b) => a.message_id.localeCompare(b.message_id))).toEqual(
+		[
+			{ message_id: "message-de", pattern: text("de") },
+			{ message_id: "message-en", pattern: text("en") },
+		]
+	);
+	expect(inserts.filter((table) => table === "inlang_variant")).toHaveLength(1);
+	await project.close();
+});
+
+test("duplicate matches across explicit and property references use the fallback", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const { db, inserts } = countInserts(project);
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [{ id: "bundle" }],
+			messages: [{ id: "message", bundleId: "bundle", locale: "en" }],
+			variants: [
+				{
+					id: "variant",
+					messageId: "message",
+					matches: [],
+					pattern: text("first"),
+				},
+				{
+					messageBundleId: "bundle",
+					messageLocale: "en",
+					matches: [],
+					pattern: text("last"),
+				},
+			],
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	expect(
+		await project.db
+			.selectFrom("inlang_variant")
+			.select(["id", "message_id", "pattern"])
+			.execute()
+	).toEqual([{ id: "variant", message_id: "message", pattern: text("last") }]);
+	expect(inserts.filter((table) => table === "inlang_variant")).toHaveLength(2);
+	await project.close();
+});
+
+test("explicit identities cannot alias bundle and locale references", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const { db, inserts } = countInserts(project);
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [{ id: "bundle" }, { id: "id" }],
+			messages: [
+				{ id: "message", bundleId: "bundle", locale: "en" },
+				{ bundleId: "id", locale: "message" },
+			],
+			variants: [
+				{ id: "variant", messageId: "message", pattern: text("explicit") },
+				{
+					messageBundleId: "id",
+					messageLocale: "message",
+					pattern: text("properties"),
+				},
+			],
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	expect(
+		await project.db.selectFrom("inlang_variant").selectAll().execute()
+	).toHaveLength(2);
+	expect(inserts.filter((table) => table === "inlang_variant")).toHaveLength(1);
+	await project.close();
+});
+
+test("batching mixed optional columns preserves variant precedence", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [{ id: "bundle" }],
+			messages: [{ bundleId: "bundle", locale: "en" }],
+			variants: [
+				{
+					messageBundleId: "bundle",
+					messageLocale: "en",
+					matches: [{ type: "literal-match", key: "count", value: "one" }],
+					pattern: [{ type: "text", value: "first" }],
+				},
+				{
+					messageBundleId: "bundle",
+					messageLocale: "en",
+					pattern: [{ type: "text", value: "second" }],
+				},
+				{
+					messageBundleId: "bundle",
+					messageLocale: "en",
+					matches: [{ type: "literal-match", key: "count", value: "many" }],
+					pattern: [{ type: "text", value: "third" }],
+				},
+			],
+		}),
+	};
+	await importWith(project, plugin);
+	const variants = (await selectBundleNested(project.db).execute())[0]!
+		.messages[0]!.variants;
+	expect(variants.map((variant) => variant.pattern)).toEqual([
+		text("first"),
+		text("second"),
+		text("third"),
+	]);
+	await project.close();
+});
+
+test("repeated property imports prefetch lookups while preserving rows and IDs", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const plugin = pluginFor(shapes["multi-selector"]!);
+	await importWith(project, plugin);
+	const before = await selectBundleNested(project.db).execute();
+	const { db, selects } = countInserts(project);
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	expect(await selectBundleNested(project.db).execute()).toEqual(before);
+	// Existence guard, bundles, messages, and variants; independent of row count.
+	expect(selects).toHaveLength(4);
+	await project.close();
+});
+
+test("cached partial imports reuse synthesized references and newly inserted matches", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const { db, selects } = countInserts(project);
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [],
+			messages: [],
+			variants: [
+				{
+					messageBundleId: "partial",
+					messageLocale: "en",
+					pattern: text("first"),
+				},
+				{
+					messageBundleId: "partial",
+					messageLocale: "en",
+					matches: [],
+					pattern: text("last"),
+				},
+			],
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	const bundles = await selectBundleNested(project.db).execute();
+	expect(bundles).toHaveLength(1);
+	expect(bundles[0]!.messages).toHaveLength(1);
+	expect(bundles[0]!.messages[0]!.variants).toHaveLength(1);
+	expect(bundles[0]!.messages[0]!.variants[0]!.pattern).toEqual(text("last"));
+	expect(selects).toHaveLength(3);
+	await project.close();
+});
+
+test("ambiguous existing message references retain the original SELECT choice", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	await project.db
+		.insertInto("inlang_bundle")
+		.values({ id: "bundle" })
+		.execute();
+	await project.db
+		.insertInto("inlang_message")
+		.values([
+			{ id: "first-message", bundle_id: "bundle", locale: "en" },
+			{ id: "last-message", bundle_id: "bundle", locale: "en" },
+		])
+		.execute();
+	const selected = await project.db
+		.selectFrom("inlang_message")
+		.where("bundle_id", "=", "bundle")
+		.where("locale", "=", "en")
+		.select("id")
+		.executeTakeFirstOrThrow();
+	const { db, selects } = countInserts(project);
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [],
+			messages: [
+				{
+					bundleId: "bundle",
+					locale: "en",
+					selectors: [{ type: "variable-reference", name: "updated" }],
+				},
+			],
+			variants: [
+				{
+					messageBundleId: "bundle",
+					messageLocale: "en",
+					pattern: text("updated"),
+				},
+			],
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	expect(
+		(
+			await project.db
+				.selectFrom("inlang_variant")
+				.select("message_id")
+				.execute()
+		)[0]!.message_id
+	).toBe(selected.id);
+	expect(
+		(
+			await project.db
+				.selectFrom("inlang_message")
+				.where("id", "=", selected.id)
+				.select("selectors")
+				.executeTakeFirstOrThrow()
+		).selectors
+	).toEqual([{ type: "variable-reference", name: "updated" }]);
+	// Prefetch detects ambiguity, then the legacy row-by-row reads run.
+	expect(selects.length).toBeGreaterThan(4);
+	await project.close();
+});
+
+test("conflicting explicit identities retain sequential upsert behavior", async () => {
+	const project = await loadProjectInMemory({ blob: await newProject() });
+	const { db, inserts } = countInserts(project);
+	const plugin: InlangPlugin = {
+		key: "mock",
+		importFiles: async () => ({
+			bundles: [{ id: "bundle" }],
+			messages: [
+				{
+					id: "same-id",
+					bundleId: "bundle",
+					locale: "en",
+					selectors: [{ type: "variable-reference", name: "first" }],
+				},
+				{ id: "same-id", bundleId: "bundle", locale: "de", selectors: [] },
+			],
+			variants: [],
+		}),
+	};
+	await importFiles({
+		db,
+		files: [],
+		pluginKey: plugin.key,
+		plugins: [plugin],
+		settings: {} as any,
+	});
+	const rows = await project.db
+		.selectFrom("inlang_message")
+		.select(["id", "locale", "selectors"])
+		.execute();
+	expect(rows).toEqual([{ id: "same-id", locale: "de", selectors: [] }]);
+	expect(inserts.filter((table) => table === "inlang_message")).toHaveLength(2);
+	await project.close();
+});
+
 test("it should insert a message as is if the id is provided", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
 

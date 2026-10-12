@@ -102,7 +102,23 @@ export const importFiles: NonNullable<(typeof plugin)["importFiles"]> = async ({
 		}
 	);
 
-	return { bundles: uniqueBundles, messages, variants };
+	// A message contains the selectors shared by all forms of a bundle in a
+	// locale. Keep every form as a variant, with only one owning message.
+	// Last value wins, as in the SDK's sequential upsert, including when
+	// different namespaces happen to produce the same bundle id.
+	const messagesByKey = new Map<string, MessageImport>();
+	for (const message of messages) {
+		messagesByKey.set(
+			JSON.stringify([message.bundleId, message.locale]),
+			message
+		);
+	}
+
+	return {
+		bundles: uniqueBundles,
+		messages: [...messagesByKey.values()],
+		variants,
+	};
 };
 
 function parseFile(args: {
@@ -522,6 +538,7 @@ function parseMarkupTagAt(
 			endIndex: number;
 	  }
 	| undefined {
+	if (value[startIndex] !== "<") return undefined;
 	const rest = value.slice(startIndex);
 
 	const standalone = rest.match(/^<([A-Za-z0-9][A-Za-z0-9_.-]*)\s*\/>/);

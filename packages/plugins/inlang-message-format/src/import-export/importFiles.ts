@@ -308,6 +308,18 @@ function parsePattern(value: string): {
 	declarations: Declaration[];
 	pattern: Pattern;
 } {
+	// Most messages are plain text. Keep the original string rather than
+	// building it character by character when there is nothing to parse.
+	if (
+		typeof value === "string" &&
+		!value.includes("{") &&
+		!value.includes("\\")
+	) {
+		return {
+			declarations: [],
+			pattern: value.length === 0 ? [] : [{ type: "text", value }],
+		};
+	}
 	const pattern: Variant["pattern"] = [];
 	const declarations: Declaration[] = [];
 	let buffer = "";
