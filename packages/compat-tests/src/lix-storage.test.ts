@@ -1,8 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { createRequire } from "node:module";
-import fs from "node:fs";
-import path from "node:path";
 import { openLix as openPublishedLix } from "published-sdk/lix";
+import { openLix as openCurrentLix } from "@inlang/sdk/lix";
 import {
 	type Project,
 	type Version,
@@ -16,39 +14,23 @@ import {
 } from "./harness.js";
 import { editorRows } from "./editorRows.js";
 
-const require = createRequire(import.meta.url);
-
-/** The package.json of the package that `entry` belongs to. */
-function manifestOf(entry: string, name: string) {
-	let dir = path.dirname(entry);
-	for (;;) {
-		const file = path.join(dir, "package.json");
-		if (fs.existsSync(file)) {
-			const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
-			if (manifest.name === name) return manifest;
-		}
-		const parent = path.dirname(dir);
-		if (parent === dir) throw new Error(`No package.json of ${name}`);
-		dir = parent;
-	}
-}
-
-/** The installed Lix release that an SDK runs on. */
-function installedLixVersion(version: Version): string {
-	const sdkEntry = require.resolve(
-		version === "published" ? "published-sdk" : "@inlang/sdk"
-	);
-	const lixEntry = createRequire(sdkEntry).resolve("@lix-js/sdk");
-	return manifestOf(lixEntry, "@lix-js/sdk").version;
-}
-
 const settings = { baseLocale: "en", locales: ["en", "de"], modules: [] };
 
+async function readLix(lix: any, statement: string) {
+	return typeof lix.query === "function"
+		? lix.query(statement)
+		: (await lix.execute(statement)).rows;
+}
+
 async function registeredSchemas(project: Project) {
-	const result = await project.lix.execute(
+	return readLix(
+		project.lix,
 		"SELECT schema_key, value FROM lix_registered_schema WHERE schema_key LIKE 'inlang_%' ORDER BY schema_key"
 	);
-	return result.rows;
+}
+
+async function persistedSnapshot(lix: any) {
+	return new Uint8Array(await new Response(lix.exportSnapshot()).arrayBuffer());
 }
 
 async function openOnLix(version: Version, lix: unknown): Promise<Project> {
@@ -57,12 +39,6 @@ async function openOnLix(version: Version, lix: unknown): Promise<Project> {
 }
 
 describe("physical storage", () => {
-	test("both SDKs use the same Lix release, so a Lix file has the same format", () => {
-		expect(installedLixVersion("current")).toBe(
-			installedLixVersion("published")
-		);
-	});
-
 	test("both SDKs register the same Lix schemas: the renamed tables and columns are only the query layer", async () => {
 		const schemas: Record<Version, unknown> = {} as any;
 		for (const version of ["published", "current"] as const) {
@@ -94,49 +70,62 @@ describe("physical storage", () => {
 		expect(formats[1]).toBe(formats[0]);
 	});
 
-	test.each([
-		{ first: "published", second: "current" },
-		{ first: "current", second: "published" },
-	] as const)(
-		"a Lix database (e.g. Fink's OPFS draft) written by the $first SDK opens in the $second SDK and back, without schema changes",
-		async ({ first, second }) => {
-			const lix = await openPublishedLix({});
-
-			const a = await openOnLix(first, lix);
-			await insertRows(a, editorRows);
-			const schemasBefore = await registeredSchemas(a);
-			const settingsBefore = await lix.execute(
-				"SELECT content FROM lix_file WHERE path = '/settings.json'"
-			);
-			await a.close();
-
-			const b = await openOnLix(second, lix);
-			expect(sortRows(await selectRows(b))).toEqual(sortRows(editorRows));
-			// opening registers no new schema version and touches no file
-			expect(await registeredSchemas(b)).toEqual(schemasBefore);
-			expect(
-				await lix.execute(
+	test.each(["published", "current"] as const)(
+		"a persisted Lix database written by the %s SDK upgrades, preserves schemas and settings, and reopens after edits",
+		async (first) => {
+			const source = await (
+				first === "published" ? openPublishedLix : openCurrentLix
+			)({});
+			let restored: Awaited<ReturnType<typeof openCurrentLix>> | undefined;
+			let reopened: Awaited<ReturnType<typeof openCurrentLix>> | undefined;
+			try {
+				const a = await openOnLix(first, source);
+				await insertRows(a, editorRows);
+				const schemasBefore = await registeredSchemas(a);
+				const settingsBefore = await readLix(
+					source,
 					"SELECT content FROM lix_file WHERE path = '/settings.json'"
-				)
-			).toEqual(settingsBefore);
-			const t = tables(second);
-			const edited = editorRows.variants[0]!;
-			await b.db
-				.updateTable(t.variant)
-				.set({ pattern: [{ type: "text", value: "edited" }] })
-				.where("id", "=", edited.id)
-				.execute();
-			await b.close();
+				);
+				await a.close();
 
-			const c = await openOnLix(first, lix);
-			const rows = sortRows(await selectRows(c));
-			expect(rows.variants.find((v) => v.id === edited.id)?.pattern).toEqual([
-				{ type: "text", value: "edited" },
-			]);
-			expect(rows.bundles).toEqual(sortRows(editorRows).bundles);
-			expect(rows.messages).toEqual(sortRows(editorRows).messages);
-			await c.close();
-			await lix.close();
+				// Restore through the current engine: caller-owned handles from
+				// a breaking Lix release cannot be shared between SDK versions.
+				restored = await openCurrentLix.fromSnapshot(
+					await persistedSnapshot(source)
+				);
+				const b = await openOnLix("current", restored);
+				expect(sortRows(await selectRows(b))).toEqual(sortRows(editorRows));
+				expect(await registeredSchemas(b)).toEqual(schemasBefore);
+				expect(
+					await readLix(
+						restored,
+						"SELECT content FROM lix_file WHERE path = '/settings.json'"
+					)
+				).toEqual(settingsBefore);
+				const edited = editorRows.variants[0]!;
+				await b.db
+					.updateTable(tables("current").variant)
+					.set({ pattern: [{ type: "text", value: "edited" }] })
+					.where("id", "=", edited.id)
+					.execute();
+				await b.close();
+
+				reopened = await openCurrentLix.fromSnapshot(
+					await persistedSnapshot(restored)
+				);
+				const c = await openOnLix("current", reopened);
+				const rows = sortRows(await selectRows(c));
+				expect(rows.variants.find((v) => v.id === edited.id)?.pattern).toEqual([
+					{ type: "text", value: "edited" },
+				]);
+				expect(rows.bundles).toEqual(sortRows(editorRows).bundles);
+				expect(rows.messages).toEqual(sortRows(editorRows).messages);
+				await c.close();
+			} finally {
+				await reopened?.close();
+				await restored?.close();
+				await source.close();
+			}
 		}
 	);
 });

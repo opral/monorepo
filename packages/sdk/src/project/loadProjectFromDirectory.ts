@@ -165,6 +165,7 @@ export async function loadProjectFromDirectory(
 		}
 
 		await project.importFiles({
+			allowPartialImport: true,
 			pluginKey: plugin.key,
 			files,
 		});
@@ -342,8 +343,8 @@ async function syncLixFsFiles(args: {
 	async function checkLixState(currentLixState: FsFileState) {
 		// go through all files in lix and check there state
 		const filesInLix = (
-			await args.lix.execute("SELECT path, content FROM lix_file")
-		).rows.map((row) => ({
+			await args.lix.query("SELECT path, content FROM lix_file")
+		).map((row) => ({
 			path: row.path as string,
 			content: row.content as Uint8Array,
 		}));

@@ -321,14 +321,15 @@ test("a concurrent edit after revision validation conflicts and preserves all ro
 	const originalBegin = project.lix.beginTransaction.bind(project.lix);
 	vi.spyOn(project.lix, "beginTransaction").mockImplementation(async () => {
 		const tx = await originalBegin();
-		const execute = tx.execute.bind(tx);
-		vi.spyOn(tx, "execute").mockImplementation(async (sql, params, options) => {
-			const result = await execute(sql, params, options);
+		// The revision check reads through tx.query(); pause right after it.
+		const query = tx.query.bind(tx);
+		vi.spyOn(tx, "query").mockImplementation(async (sql, params, options) => {
+			const rows = await query(sql, params, options);
 			if (sql.includes('"bundle_change"')) {
 				ready();
 				await continueFix;
 			}
-			return result;
+			return rows as never;
 		});
 		return tx;
 	});

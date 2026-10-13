@@ -219,8 +219,8 @@ export async function saveProjectToDirectory(args: {
 	const fsModule = getPromisesFs(args.fs);
 
 	const files = (
-		await args.project.lix.execute("SELECT path, content FROM lix_file")
-	).rows.map((row) => ({
+		await args.project.lix.query("SELECT path, content FROM lix_file")
+	).map((row) => ({
 		path: row.path as string,
 		content: row.content as Uint8Array,
 	}));

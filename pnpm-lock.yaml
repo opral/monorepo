@@ -589,8 +589,8 @@ importers:
   packages/sdk:
     dependencies:
       '@lix-js/sdk':
-        specifier: 0.19.0
-        version: 0.19.0
+        specifier: 0.20.1
+        version: 0.20.1
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
@@ -3008,6 +3008,9 @@ packages:
 
   '@lix-js/sdk@0.19.0':
     resolution: {integrity: sha512-ks7hKZdJGH0APlSLWtFYCXDO3yIoleoPqzLgkZYtMbaiWRN2Ih772tNGGBZFLKbutq6DuNRwcjNkG94KqWRbBA==}
+
+  '@lix-js/sdk@0.20.1':
+    resolution: {integrity: sha512-oscOFP8Cr1My6Wh2KVYC9+aJ1mHs+d7vnD+7PPJaA4L+Y1FR37Sm99SrFGfvUizaj/XtRi2GlDF2IOFt9iXMNQ==}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -11123,6 +11126,12 @@ snapshots:
       binaryen: 130.0.0
       fflate: 0.8.3
 
+  '@lix-js/sdk@0.20.1':
+    dependencies:
+      '@bytecodealliance/jco-transpile': 0.13.0
+      binaryen: 130.0.0
+      fflate: 0.8.3
+
   '@manypkg/find-root@1.1.0':
     dependencies:
       '@babel/runtime': 7.28.4
@@ -11222,6 +11231,12 @@ snapshots:
       - typescript
       - verdaccio
 
+  '@nrwl/devkit@18.3.5(nx@18.3.5)':
+    dependencies:
+      '@nx/devkit': 18.3.5(nx@18.3.5)
+    transitivePeerDependencies:
+      - nx
+
   '@nrwl/devkit@18.3.5(nx@21.4.1)':
     dependencies:
       '@nx/devkit': 18.3.5(nx@21.4.1)
@@ -11231,6 +11246,21 @@ snapshots:
   '@nrwl/js@18.3.5(@babel/traverse@7.28.5)(@types/node@24.10.2)(nx@21.4.1)(typescript@5.4.5)':
     dependencies:
       '@nx/js': 18.3.5(@babel/traverse@7.28.5)(@types/node@24.10.2)(nx@21.4.1)(typescript@5.4.5)
+    transitivePeerDependencies:
+      - '@babel/traverse'
+      - '@swc-node/register'
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
+      - debug
+      - nx
+      - supports-color
+      - typescript
+      - verdaccio
+
+  '@nrwl/js@18.3.5(@babel/traverse@7.28.5)(@types/node@24.10.2)(nx@21.4.1)(typescript@5.7.3)':
+    dependencies:
+      '@nx/js': 18.3.5(@babel/traverse@7.28.5)(@types/node@24.10.2)(nx@21.4.1)(typescript@5.7.3)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -11348,7 +11378,7 @@ snapshots:
 
   '@nx/devkit@18.3.5(nx@18.3.5)':
     dependencies:
-      '@nrwl/devkit': 18.3.5(nx@21.4.1)
+      '@nrwl/devkit': 18.3.5(nx@18.3.5)
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.2
@@ -11443,7 +11473,7 @@ snapshots:
       '@babel/preset-env': 7.26.0(@babel/core@7.28.5)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
       '@babel/runtime': 7.28.4
-      '@nrwl/js': 18.3.5(@babel/traverse@7.28.5)(@types/node@24.10.2)(nx@21.4.1)(typescript@5.4.5)
+      '@nrwl/js': 18.3.5(@babel/traverse@7.28.5)(@types/node@24.10.2)(nx@21.4.1)(typescript@5.7.3)
       '@nx/devkit': 18.3.5(nx@21.4.1)
       '@nx/workspace': 18.3.5
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.7.3)
