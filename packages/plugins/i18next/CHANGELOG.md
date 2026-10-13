@@ -1,5 +1,28 @@
 # @inlang/plugin-i18next
 
+## 6.4.3
+
+### Patch Changes
+
+- 77e4888: Speed up imports without changing plugin identities or message behavior. The
+  i18next importer emits one message per bundle and locale, and both i18next and
+  message-format avoid unnecessary parsing work for plain text. The SDK batches
+  unambiguous fresh imports with plugin-provided IDs or duplicate ID-less messages,
+  preserves variant order across insert shapes, and caches property lookups during
+  sequential imports while retaining conflict handling and partial-import behavior.
+- e084914: Fix the i18next importer reading the name of a group as a context or plural
+  suffix. `{ "q_frame": { "a": "x", "b": "y" } }` imported as one bundle `q` with
+  the contexts `frame.a` and `frame.b`; the keys are now the bundles `q_frame.a`
+  and `q_frame.b`. Suffixes are only read from the last path segment of a key,
+  and `_one` is a key, not the plural of a key without a name (its bundle id was
+  empty). Bundle ids change only in projects with such keys, and for the keys
+  that were grouped with them (`q_male` next to `q_frame.a` was a context of `q`).
+  Keys next to the key they are a context of (`shipping` and `shipping_free`) are
+  still its context variants, as before; set `contextValues` to read them as keys
+  of their own.
+- Updated dependencies [77e4888]
+  - @inlang/sdk@4.0.3
+
 ## 6.4.2
 
 ### Patch Changes
