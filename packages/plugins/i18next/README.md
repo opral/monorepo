@@ -106,6 +106,18 @@ setting is omitted, sibling or base keys establish context roots across all loca
 of each namespace. This inference is a heuristic; use explicit values for ambiguous
 resources. The setting changes import classification, not i18next's runtime options.
 
+Suffixes (plural and context) are the end of the last path segment of a key. The name
+of a group is never read as a suffix: the keys of `{ "q_frame": { "a": "x", "b": "y" } }`
+are the messages `q_frame.a` and `q_frame.b`, not the contexts of a message `q`.
+
+A key that sits next to the key it is a suffix of is read as its context, as
+`friend_male` is of `friend`. With `{ "checkout": { "shipping": "Shipping",
+"shipping_free": "Free shipping" } }` the message `checkout.shipping` has a variant for
+the context `free` and a fallback variant: both texts are kept and the file is
+exported unchanged. If `shipping_free` is a key of its own, list the contexts of your
+project (`"contextValues": ["male", "female"]`, or `[]` for none) and it is the message
+`checkout.shipping_free`.
+
 ## Mixed cardinal and ordinal bundles
 
 When a bundle contains both cardinal and ordinal forms, its imported MF2 message
