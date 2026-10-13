@@ -602,22 +602,15 @@ type KeyClassification = {
 };
 
 /**
- * Where the last path segment of a flattened key starts: `.` separates the
- * path segments (groups) of a key, as `flatten` and `unflatten` write them.
+ * The first index at which a suffix (`_one`, `_male`) of a flattened key can
+ * start: in its last path segment, after the first character of the key.
  *
- * Suffixes (plural, context) are the end of this segment. The underscores of
- * a group's name, `q_frame` in `q_frame.a`, are not suffixes of anything.
+ * `.` separates the path segments (groups) of a key, as `flatten` and
+ * `unflatten` write them. The underscores of a group's name, `q_frame` in
+ * `q_frame.a`, are not suffixes of anything.
  */
-function lastSegmentStart(key: string): number {
-	return key.lastIndexOf(".") + 1;
-}
-
-/**
- * Whether `stem` is what is left of a key without a suffix: a name in its
- * last path segment. `_one` is a key named `_one`, not the plural of nothing.
- */
-function hasName(stem: string): boolean {
-	return stem.length > lastSegmentStart(stem);
+function suffixStart(key: string): number {
+	return Math.max(key.lastIndexOf(".") + 1, 1);
 }
 
 /**
@@ -650,7 +643,8 @@ function splitPluralSuffix(key: string): {
 
 	if (isOrdinal) {
 		const stem = keyParts.slice(0, -2).join("_");
-		if (hasName(stem)) {
+		// `_ordinal_one` has no root: it is the cardinal plural of `_ordinal`
+		if (stem !== "") {
 			return {
 				stem,
 				keyParts,
@@ -663,7 +657,8 @@ function splitPluralSuffix(key: string): {
 
 	if (hasPluralCategory && keyParts.length >= 2) {
 		const stem = keyParts.slice(0, -1).join("_");
-		if (hasName(stem)) {
+		// `_one` is a key named `_one`, not the plural of a key without a name
+		if (stem !== "") {
 			return {
 				stem,
 				keyParts,
@@ -693,15 +688,15 @@ function splitPluralSuffix(key: string): {
  * `friend_male`).
  *
  * The context is the end of the last path segment of the key (see
- * `lastSegmentStart`): `q_frame.a` and `q_frame.b` are two keys of a group,
- * they don't share the prefix `q`.
+ * `suffixStart`): `q_frame.a` and `q_frame.b` are two keys of a group, they
+ * don't share the prefix `q`.
  */
 function findContextRoots(stems: string[]): Set<string> {
 	const stemSet = new Set(stems);
 	const childrenByParent = new Map<string, Set<string>>();
 	for (const stem of stemSet) {
 		const underscore = stem.lastIndexOf("_");
-		if (underscore <= lastSegmentStart(stem)) continue;
+		if (underscore < suffixStart(stem)) continue;
 		const parent = stem.slice(0, underscore);
 		const child = stem.slice(underscore + 1);
 		const children = childrenByParent.get(parent) ?? new Set<string>();
@@ -730,9 +725,9 @@ function findContextRoots(stems: string[]): Set<string> {
  * `male`). A key that contains underscores and has no context siblings keeps
  * those underscores in the bundle id.
  *
- * Only the last path segment of the key has suffixes (see `lastSegmentStart`),
- * after a name: the bundle id is the key, or the key without the suffixes of
- * its last segment. It never changes the name of a group.
+ * Only the last path segment of the key has suffixes (see `suffixStart`): the
+ * bundle id is the key, or the key without the suffixes of its last segment.
+ * It never changes the name of a group.
  * https://www.i18next.com/translation-function/context
  */
 function classifyKey(
@@ -745,7 +740,6 @@ function classifyKey(
 
 	let rootKey = stem;
 	let context: string | undefined;
-	const segmentStart = lastSegmentStart(stem);
 	if (contextValues !== undefined) {
 		// Explicit values resolve ambiguity without truncating literal keys.
 		// Longest suffix wins when values themselves contain underscores.
@@ -753,14 +747,14 @@ function classifyKey(
 			(value) =>
 				value.length > 0 &&
 				stem.endsWith(`_${value}`) &&
-				// a name stays in the last path segment
-				stem.length - value.length - 1 > segmentStart
+				stem.length > value.length + 1
 		);
 		if (context !== undefined) rootKey = stem.slice(0, -context.length - 1);
 	} else {
+		const start = suffixStart(stem);
 		for (
 			let index = stem.lastIndexOf("_");
-			index > segmentStart;
+			index >= start;
 			index = stem.lastIndexOf("_", index - 1)
 		) {
 			const parent = stem.slice(0, index);

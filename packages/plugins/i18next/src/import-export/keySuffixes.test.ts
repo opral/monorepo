@@ -119,12 +119,65 @@ describe("a group is not a context or plural suffix of another key", () => {
 		await expectUnchangedByRoundTrip(project);
 	});
 
+	test("a group does not make a context root of the key beside it", async () => {
+		// `q_frame.a` and `q_frame.b` made `q` a context root, `q_male` its context
+		const project = await loadProject({
+			"en.json": json({ q_frame: { a: "x", b: "y" }, q_male: "m" }),
+		});
+		expect(bundleIds(project)).toStrictEqual([
+			"q_frame.a",
+			"q_frame.b",
+			"q_male",
+		]);
+		expect(project.imported.messages.map((m) => m.selectors)).toStrictEqual([
+			[],
+			[],
+			[],
+		]);
+		await expectUnchangedByRoundTrip(project);
+	});
+
+	test("a group is not a context of the key it is named after", async () => {
+		// `friend_list.title` was the context `list.title` of `friend`
+		const project = await loadProject({
+			"en.json": json({
+				friend: "f",
+				friend_male: "fm",
+				friend_list: { title: "t" },
+			}),
+		});
+		expect(bundleIds(project)).toStrictEqual(["friend", "friend_list.title"]);
+		expect(project.imported.messages.map((m) => m.selectors)).toStrictEqual([
+			[{ type: "variable-reference", name: "context" }],
+			[],
+		]);
+		expect(forms(project)).toStrictEqual([
+			["friend", "en", "context=male", "fm"],
+			["friend", "en", "context=*", "f"],
+			["friend_list.title", "en", "", "t"],
+		]);
+		await expectUnchangedByRoundTrip(project);
+	});
+
+	// not changed by the fix: the values don't end with the name of a group.
 	test("with the explicit `contextValues` of the group", async () => {
 		const project = await loadProject(
-			{ "en.json": json({ q_frame: { a: "x" }, q_free: { b: "y" } }) },
+			{
+				"en.json": json({
+					q: "q",
+					q_frame: { a: "x" },
+					q_free: { b: "y" },
+					r_frame: "r",
+				}),
+			},
 			{ contextValues: ["frame", "free"] }
 		);
-		expect(bundleIds(project)).toStrictEqual(["q_frame.a", "q_free.b"]);
+		expect(bundleIds(project)).toStrictEqual([
+			"q",
+			"q_frame.a",
+			"q_free.b",
+			"r",
+		]);
 		await expectUnchangedByRoundTrip(project);
 	});
 
@@ -194,37 +247,40 @@ describe("a group is not a context or plural suffix of another key", () => {
 	});
 });
 
-describe("a suffix needs a name before it in its own path segment", () => {
+describe("a suffix needs a key before it", () => {
 	test("keys named like a suffix", async () => {
-		// `_one` is the key `_one`, not the plural of a key without a name; its
-		// bundle id was "" and `a.` for the key `_other` of the group `a`
+		// `_one` is a key named `_one`, not the plural of a key without a name:
+		// its bundle id was ""
 		const project = await loadProject({
-			"en.json": json({ _one: "x", a: { _other: "y", _free: "w" } }),
+			"en.json": json({ _one: "x", _other: "y", _ordinal_other: "z" }),
 		});
-		expect(bundleIds(project)).toStrictEqual(["_one", "a._other", "a._free"]);
+		// `_ordinal_other` is the cardinal plural `other` of `_ordinal`, like
+		// `ordinal_other` is the one of `ordinal`
+		expect(bundleIds(project)).toStrictEqual(["_one", "_other", "_ordinal"]);
 		expect(project.imported.messages.map((m) => m.selectors)).toStrictEqual([
 			[],
 			[],
-			[],
+			[{ type: "variable-reference", name: "countPlural" }],
 		]);
 		await expectUnchangedByRoundTrip(project);
 	});
 
-	test("siblings of a key that starts with the separator of a suffix", async () => {
+	test("keys that end with a period have suffixes, as before", async () => {
+		// natural-language keys (`keySeparator: false`): `.` ends the key
 		const project = await loadProject({
-			"en.json": json({ a: { _male: "x", _female: "y" } }),
+			"en.json": json({
+				"Saved.": "Saved.",
+				"Saved._male": "He saved.",
+				"Loading..._one": "Loading one",
+				"Loading..._other": "Loading {{count}}",
+			}),
 		});
-		expect(bundleIds(project)).toStrictEqual(["a._male", "a._female"]);
-		await expectUnchangedByRoundTrip(project);
-	});
-
-	test("with the explicit `contextValues` of the key", async () => {
-		const project = await loadProject(
-			{ "en.json": json({ a: { _male: "x" }, b_male: "y" }) },
-			{ contextValues: ["male"] }
-		);
-		expect(bundleIds(project)).toStrictEqual(["a._male", "b"]);
-		await expectUnchangedByRoundTrip(project);
+		expect(bundleIds(project)).toStrictEqual(["Saved.", "Loading..."]);
+		expect(project.imported.messages.map((m) => m.selectors)).toStrictEqual([
+			[{ type: "variable-reference", name: "context" }],
+			[{ type: "variable-reference", name: "countPlural" }],
+		]);
+		await expectUnchangedByRoundTrip(project, { withoutFiles: false });
 	});
 });
 
@@ -403,12 +459,13 @@ describe("the files of a project are written back as they were", () => {
 describe("random keys with suffix-like names", () => {
 	test("every leaf is in the project and the files are written back as they were", async () => {
 		const problems: string[] = [];
-		const iterations = 600;
-		for (let seed = 1; seed <= iterations; seed++) {
+		// FUZZ_SEEDS=30000 for a longer run
+		const seeds = Number(process.env["FUZZ_SEEDS"] ?? 600);
+		for (let seed = 1; seed <= seeds; seed++) {
 			problems.push(...(await checkRandomProject(seed)));
 		}
 		expect(problems).toStrictEqual([]);
-	});
+	}, 600_000);
 });
 
 // ----------------------------------------------------------------------------
@@ -507,7 +564,6 @@ async function checkRandomProject(seed: number): Promise<string[]> {
 					!id.startsWith(prefix) ||
 					!key.startsWith(bundleKey) ||
 					bundleKey === "" ||
-					bundleKey.endsWith(".") ||
 					rest.includes(".") ||
 					!(rest === "" || rest.startsWith("_"))
 				) {
@@ -822,9 +878,13 @@ async function saveProject(
 
 /**
  * Exporting the project with its files writes them byte for byte, and
- * without them writes the same keys and texts.
+ * without them writes the same keys and texts (`withoutFiles`: not for keys
+ * with an empty path segment like `Saved.`, which `flat` unflattens to arrays).
  */
-async function expectUnchangedByRoundTrip(project: Project) {
+async function expectUnchangedByRoundTrip(
+	project: Project,
+	{ withoutFiles = true } = {}
+) {
 	const files = Object.fromEntries(
 		project.existing.map((file) => [
 			nameOf(file.locale, file.metadata?.namespace),
@@ -832,6 +892,7 @@ async function expectUnchangedByRoundTrip(project: Project) {
 		])
 	);
 	expect(await saveProject(project, true)).toStrictEqual(sorted(files));
+	if (!withoutFiles) return;
 	const whole = await saveProject(project, false);
 	expect(
 		Object.fromEntries(
