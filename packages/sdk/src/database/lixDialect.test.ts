@@ -3,6 +3,7 @@ import { openLix } from "@lix-js/sdk";
 import { initDb } from "./initDb.js";
 import { registerInlangSchemas } from "./registerSchemas.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
+import { selectPluginRows } from "../import-export/pluginRows.js";
 
 test("compiles Kysely parameters with PostgreSQL placeholders", async () => {
 	const lix = await openLix();
@@ -134,6 +135,14 @@ test("preserves encoded identities and locales in direct and nested reads", asyn
 		expect(nested.id).toBe(bundleId);
 		expect(nested.messages[0]).toMatchObject({ id: messageId, locale });
 		expect(nested.messages[0]?.variants[0]?.id).toBe(variantId);
+		const exported = await selectPluginRows(db);
+		expect(exported.bundles[0]?.id).toBe(bundleId);
+		expect(exported.messages[0]).toMatchObject({
+			id: messageId,
+			bundleId,
+			locale,
+		});
+		expect(exported.variants[0]).toMatchObject({ id: variantId, messageId });
 	} finally {
 		await db.destroy();
 		await lix.close();

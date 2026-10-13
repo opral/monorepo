@@ -46,7 +46,8 @@ export async function selectPluginRows(
 			sql<{
 				kind: "bundle" | "message" | "variant";
 				id: string;
-				parent_id: string | null;
+				bundle_id: string | null;
+				message_id: string | null;
 				locale: string | null;
 				data:
 					| Bundle["declarations"]
@@ -54,12 +55,12 @@ export async function selectPluginRows(
 					| Variant["matches"];
 				pattern: Variant["pattern"] | null;
 			}>`(
-			SELECT 'bundle' AS kind, id, NULL AS parent_id, NULL AS locale,
+			SELECT 'bundle' AS kind, id, NULL AS bundle_id, NULL AS message_id, NULL AS locale,
 				declarations AS data, NULL AS pattern FROM inlang_bundle
 			UNION ALL
-			SELECT 'message', id, bundle_id, locale, selectors, NULL FROM inlang_message
+			SELECT 'message', id, bundle_id, NULL, locale, selectors, NULL FROM inlang_message
 			UNION ALL
-			SELECT 'variant', id, message_id, NULL, matches, pattern FROM inlang_variant
+			SELECT 'variant', id, NULL, message_id, NULL, matches, pattern FROM inlang_variant
 		)`.as("plugin_rows")
 		)
 		.selectAll()
@@ -78,7 +79,7 @@ export async function selectPluginRows(
 			case "message":
 				messages.push({
 					id: row.id,
-					bundleId: row.parent_id!,
+					bundleId: row.bundle_id!,
 					locale: row.locale!,
 					selectors: row.data as Message["selectors"],
 				});
@@ -86,7 +87,7 @@ export async function selectPluginRows(
 			case "variant":
 				variants.push({
 					id: row.id,
-					messageId: row.parent_id!,
+					messageId: row.message_id!,
 					matches: row.data as Variant["matches"],
 					pattern: row.pattern!,
 				});
