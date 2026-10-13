@@ -1,5 +1,4 @@
-import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type {
 	Bundle,
 	InlangDatabaseSchema,
@@ -40,23 +39,57 @@ export function variantFromPlugin(variant: VariantImport): ImportedVariant {
 export async function selectPluginRows(
 	db: Kysely<InlangDatabaseSchema>
 ): Promise<{ bundles: Bundle[]; messages: Message[]; variants: Variant[] }> {
+	// One statement reads a consistent state, retaining each table's scan
+	// order. A join would group variants by bundle and reorder plugin output.
+	const rows = db
+		.selectFrom(
+			sql<{
+				kind: "bundle" | "message" | "variant";
+				id: string;
+				parent_id: string | null;
+				locale: string | null;
+				data:
+					| Bundle["declarations"]
+					| Message["selectors"]
+					| Variant["matches"];
+				pattern: Variant["pattern"] | null;
+			}>`(
+			SELECT 'bundle' AS kind, id, NULL AS parent_id, NULL AS locale,
+				declarations AS data, NULL AS pattern FROM inlang_bundle
+			UNION ALL
+			SELECT 'message', id, bundle_id, locale, selectors, NULL FROM inlang_message
+			UNION ALL
+			SELECT 'variant', id, message_id, NULL, matches, pattern FROM inlang_variant
+		)`.as("plugin_rows")
+		)
+		.selectAll()
+		.stream();
 	const bundles: Bundle[] = [];
 	const messages: Message[] = [];
 	const variants: Variant[] = [];
-	for (const {
-		messages: nestedMessages,
-		...bundle
-	} of await selectBundleNested(db).execute()) {
-		bundles.push(bundle);
-		for (const {
-			bundle_id,
-			variants: nestedVariants,
-			...message
-		} of nestedMessages) {
-			messages.push({ ...message, bundleId: bundle_id });
-			for (const { message_id, ...variant } of nestedVariants) {
-				variants.push({ ...variant, messageId: message_id });
-			}
+	for await (const row of rows) {
+		switch (row.kind) {
+			case "bundle":
+				bundles.push({
+					id: row.id,
+					declarations: row.data as Bundle["declarations"],
+				});
+				break;
+			case "message":
+				messages.push({
+					id: row.id,
+					bundleId: row.parent_id!,
+					locale: row.locale!,
+					selectors: row.data as Message["selectors"],
+				});
+				break;
+			case "variant":
+				variants.push({
+					id: row.id,
+					messageId: row.parent_id!,
+					matches: row.data as Variant["matches"],
+					pattern: row.pattern!,
+				});
 		}
 	}
 	return { bundles, messages, variants };
