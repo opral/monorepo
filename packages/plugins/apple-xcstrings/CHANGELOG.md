@@ -1,5 +1,12 @@
 # @inlang/plugin-apple-xcstrings
 
+## 0.2.11
+
+### Patch Changes
+
+- Updated dependencies [77e4888]
+  - @inlang/sdk@4.0.3
+
 ## 0.2.10
 
 ### Patch Changes

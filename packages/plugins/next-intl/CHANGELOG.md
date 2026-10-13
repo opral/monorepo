@@ -1,5 +1,12 @@
 # @inlang/plugin-next-intl
 
+## 2.4.2
+
+### Patch Changes
+
+- Updated dependencies [77e4888]
+  - @inlang/sdk@4.0.3
+
 ## 2.4.1
 
 ### Patch Changes
