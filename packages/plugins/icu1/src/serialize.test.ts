@@ -719,7 +719,9 @@ describe("selects on the same argument", () => {
   });
 });
 
-describe("display after export (seeded)", () => {
+// Comparing 300 generated messages across all argument combinations can
+// exceed Vitest's default five-second timeout on shared CI runners.
+describe("display after export (seeded)", { timeout: 30_000 }, () => {
   it("displays nested selects and plurals as in the source", () => {
     // mulberry32
     let seed = 4444;
