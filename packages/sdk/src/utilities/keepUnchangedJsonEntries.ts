@@ -1145,6 +1145,52 @@ export function rowsFromImport(imported: {
 	};
 }
 
+/** A repeated property in the same JSON object, compared by its decoded key. */
+export type DuplicateJsonProperty = {
+	key: string;
+	/** Zero-based UTF-16 offset of the first key's opening quote. */
+	firstOffset: number;
+	/** Zero-based UTF-16 offset of this repeated key's opening quote. */
+	duplicateOffset: number;
+};
+
+/**
+ * Finds repeated properties in strict JSON text before an import loses them.
+ *
+ * Returns one diagnostic for each occurrence after the first, in source order.
+ * Keys are compared after decoding JSON escapes, separately for each object,
+ * including objects inside arrays and values that a later property overwrites.
+ * This does not compare flattened message IDs or keys across files.
+ *
+ * Uses `JSON.parse` to validate syntax and throws its native `SyntaxError` for
+ * malformed input. It does not accept JSONC or strip a byte order mark. The
+ * scanner then reads the original text; the parsed value is not used.
+ *
+ * This helper neither changes the text nor rejects duplicate properties. Call
+ * it on each file before `importFiles` and decide whether to report or reject
+ * the diagnostics. Existing imports still use the last value by default.
+ *
+ * @example
+ *   import { findDuplicateJsonProperties } from "@inlang/sdk/json-formatting";
+ *
+ *   const diagnostics = files.flatMap((file, fileIndex) =>
+ *     findDuplicateJsonProperties(new TextDecoder().decode(file.content))
+ *       .map((diagnostic) => ({ fileIndex, ...diagnostic }))
+ *   );
+ *   // Report diagnostics here, or reject according to the caller's policy.
+ *   const imported = await plugin.importFiles({ files, settings });
+ */
+export function findDuplicateJsonProperties(
+	text: string
+): DuplicateJsonProperty[] {
+	JSON.parse(text);
+	const duplicates: DuplicateJsonProperty[] = [];
+	const scanner = new Scanner(text, (duplicate) => duplicates.push(duplicate));
+	scanner.skipWhitespace();
+	scanner.value();
+	return duplicates;
+}
+
 type ValueNode = ObjectNode | { kind: "other"; start: number; end: number };
 
 type ObjectNode = {
@@ -1172,7 +1218,10 @@ type MemberNode = {
  */
 class Scanner {
 	pos = 0;
-	constructor(private readonly text: string) {}
+	constructor(
+		private readonly text: string,
+		private readonly onDuplicate?: (duplicate: DuplicateJsonProperty) => void
+	) {}
 
 	skipWhitespace(): number {
 		const text = this.text;
@@ -1226,7 +1275,7 @@ class Scanner {
 		const start = this.pos;
 		this.expect("{");
 		const members: MemberNode[] = [];
-		const keys = new Set<string>();
+		const keys = new Map<string, number>();
 		let before = this.whitespace();
 		if (this.text[this.pos] === "}") {
 			this.pos++;
@@ -1237,8 +1286,15 @@ class Scanner {
 			this.string();
 			const keyEnd = this.pos;
 			const key = JSON.parse(this.text.slice(keyStart, keyEnd)) as string;
-			if (keys.has(key)) throw new Error(`Duplicate key ${key}`);
-			keys.add(key);
+			const firstOffset = keys.get(key);
+			if (firstOffset !== undefined) {
+				// Export must still decline preservation of ambiguous objects.
+				if (this.onDuplicate === undefined)
+					throw new Error(`Duplicate key ${key}`);
+				this.onDuplicate({ key, firstOffset, duplicateOffset: keyStart });
+			} else {
+				keys.set(key, keyStart);
+			}
 			const colonStart = this.pos;
 			this.skipWhitespace();
 			this.expect(":");
