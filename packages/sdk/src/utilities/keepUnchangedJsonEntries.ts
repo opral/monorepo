@@ -1185,9 +1185,40 @@ export function findDuplicateJsonProperties(
 ): DuplicateJsonProperty[] {
 	JSON.parse(text);
 	const duplicates: DuplicateJsonProperty[] = [];
-	const scanner = new Scanner(text, (duplicate) => duplicates.push(duplicate));
-	scanner.skipWhitespace();
-	scanner.value();
+	const scanner = new Scanner(text);
+	// Keep container scopes on the heap, not the call stack. Array frames
+	// have no keys, but must still separate the objects they contain.
+	const scopes: Array<Map<string, number> | undefined> = [];
+	while (scanner.pos < text.length) {
+		scanner.skipWhitespace();
+		const char = text[scanner.pos];
+		if (char === "{" || char === "[") {
+			scopes.push(char === "{" ? new Map() : undefined);
+			scanner.pos++;
+		} else if (char === "}" || char === "]") {
+			scopes.pop();
+			scanner.pos++;
+		} else if (char === '"') {
+			const keyStart = scanner.pos;
+			scanner.string();
+			const keyEnd = scanner.pos;
+			scanner.skipWhitespace();
+			// JSON.parse already validated the syntax: only an object's
+			// property name can be followed by a colon.
+			if (text[scanner.pos] !== ":") continue;
+			const key = JSON.parse(text.slice(keyStart, keyEnd)) as string;
+			const keys = scopes[scopes.length - 1]!;
+			const firstOffset = keys.get(key);
+			if (firstOffset === undefined) {
+				keys.set(key, keyStart);
+			} else {
+				duplicates.push({ key, firstOffset, duplicateOffset: keyStart });
+			}
+		} else {
+			// Separators and primitive values have no property names.
+			scanner.pos++;
+		}
+	}
 	return duplicates;
 }
 
@@ -1218,10 +1249,7 @@ type MemberNode = {
  */
 class Scanner {
 	pos = 0;
-	constructor(
-		private readonly text: string,
-		private readonly onDuplicate?: (duplicate: DuplicateJsonProperty) => void
-	) {}
+	constructor(private readonly text: string) {}
 
 	skipWhitespace(): number {
 		const text = this.text;
@@ -1275,7 +1303,7 @@ class Scanner {
 		const start = this.pos;
 		this.expect("{");
 		const members: MemberNode[] = [];
-		const keys = new Map<string, number>();
+		const keys = new Set<string>();
 		let before = this.whitespace();
 		if (this.text[this.pos] === "}") {
 			this.pos++;
@@ -1286,15 +1314,8 @@ class Scanner {
 			this.string();
 			const keyEnd = this.pos;
 			const key = JSON.parse(this.text.slice(keyStart, keyEnd)) as string;
-			const firstOffset = keys.get(key);
-			if (firstOffset !== undefined) {
-				// Export must still decline preservation of ambiguous objects.
-				if (this.onDuplicate === undefined)
-					throw new Error(`Duplicate key ${key}`);
-				this.onDuplicate({ key, firstOffset, duplicateOffset: keyStart });
-			} else {
-				keys.set(key, keyStart);
-			}
+			if (keys.has(key)) throw new Error(`Duplicate key ${key}`);
+			keys.add(key);
 			const colonStart = this.pos;
 			this.skipWhitespace();
 			this.expect(":");

@@ -5,6 +5,72 @@ import {
 } from "./detectJsonFormatting.js";
 
 describe("findDuplicateJsonProperties", () => {
+	test.each([
+		["arrays", "[", "]"],
+		["objects", '{"child":', "}"],
+		["mixed containers", '{"child":[', "]}"],
+	])(
+		"handles deep %s without consuming the call stack",
+		(_name, open, close) => {
+			const prefix = open.repeat(6000);
+			const suffix = close.repeat(6000);
+			const source = prefix + String.raw`{"x":1,"\u0078":2,"x":3}` + suffix;
+			expect(() => JSON.parse(source)).not.toThrow();
+			expect(findDuplicateJsonProperties(source)).toEqual([
+				{
+					key: "x",
+					firstOffset: prefix.length + 1,
+					duplicateOffset: prefix.length + 7,
+				},
+				{
+					key: "x",
+					firstOffset: prefix.length + 1,
+					duplicateOffset: prefix.length + 18,
+				},
+			]);
+		}
+	);
+
+	test("restores sibling scopes and source order after deeply nested overwritten values", () => {
+		const deep = "[".repeat(6000) + '{"x":1,"x":2}' + "]".repeat(6000);
+		const prefix = '{"😀":0,"x":';
+		const suffix = ',"x":{"x":3,"x":4},"sibling":{"x":5}}';
+		const source = prefix + deep + suffix;
+		expect(() => JSON.parse(source)).not.toThrow();
+		expect(findDuplicateJsonProperties(source)).toEqual([
+			{
+				key: "x",
+				firstOffset: prefix.length + 6001,
+				duplicateOffset: prefix.length + 6007,
+			},
+			{
+				key: "x",
+				firstOffset: 8,
+				duplicateOffset: prefix.length + deep.length + 1,
+			},
+			{
+				key: "x",
+				firstOffset: prefix.length + deep.length + 6,
+				duplicateOffset: prefix.length + deep.length + 12,
+			},
+		]);
+	});
+
+	test("validates malformed deep JSON before reporting any duplicates", () => {
+		const source = "[".repeat(6000) + '{"x":1,"x":2}' + "]".repeat(5999);
+		let nativeError: unknown;
+		try {
+			JSON.parse(source);
+		} catch (error) {
+			nativeError = error;
+		}
+		expect(nativeError).toBeInstanceOf(SyntaxError);
+		expect(() => findDuplicateJsonProperties(source)).toThrow(SyntaxError);
+		expect(() => findDuplicateJsonProperties(source)).toThrow(
+			nativeError as SyntaxError
+		);
+	});
+
 	test("reports every repeat against the first spelling before parse loses it", () => {
 		const source = String.raw`{"hello":"first","\u0068ello":"second","hello":"last"}`;
 		expect(JSON.parse(source)).toEqual({ hello: "last" });
