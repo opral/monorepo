@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 4.5.5
+
+### Patch Changes
+
+- 306e1e2: Replace every `{locale}` and legacy `{languageTag}` placeholder when resolving resource paths, so catalogs with the locale in both a directory and filename are imported correctly.
+
 ## 4.5.4
 
 ### Patch Changes
